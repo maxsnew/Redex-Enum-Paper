@@ -27,10 +27,7 @@ Enumeration! Whoo hoo!
 @section{Enumerating Redex Patterns}
 
 @section{Evaluation}
-
-@subsection{Methodology}
-
-@subsection{Results}
+@include-section{evaluation.scrbl}
 
 @section{Related Work}
 
