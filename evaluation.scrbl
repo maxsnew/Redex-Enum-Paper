@@ -5,7 +5,7 @@
 
 @section{Methodology}
 
-The benchmark is baed on six different Redex models, each
+The benchmark is based on six different Redex models, each
 of which consists of a grammar, a dynamic semantics, and some
 static well-formedness property. (The last is usually a type system.)
 Each has some predicate that relates the dynamic
