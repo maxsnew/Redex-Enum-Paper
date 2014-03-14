@@ -5,7 +5,7 @@
          racket/runtime-path
          pict)
 
-(provide res-plot-4hour)
+(provide (all-defined-out))
 
 (define-runtime-path 4-hour "4-hour/4-hour-all.rktd")
 (define-runtime-path 24-hour "24-hour")
@@ -16,7 +16,8 @@
    0.5))
 
 (define (dir->files d)
-  (for/list ([f (in-directory d)]) f))
+  (for/list ([f (in-directory d)]) 
+    (path->string (path->complete-path f))))
 
 (define (res-plot-24hour)
   (scale

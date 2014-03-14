@@ -1,7 +1,46 @@
 #lang scribble/base
 
 @(require "results/plot.rkt"
-          scriblib/figure)
+          "cite.rkt"
+          scriblib/figure
+          (only-in pict scale))
+
+Our main motivation in developing enumerations for Redex patterns
+is to improve Redex's automated testing capabilities by using
+enumerations as test generators. 
+To gain insight into the enumerator's
+utility for random testing, we compared the performance of two 
+enumeration-based strategies to Redex's preexisting random
+test generator.
+To do so, we developed a benchmark of buggy Redex models
+that evaluates test case generators based on how quickly 
+they are able to find bugs.
+
+The preexisting random generator@~cite[sfp2009-kf] takes a pattern 
+and a grammar as inputs and generates a random instance of the 
+pattern by recursively unfolding non-terminals in the grammar, 
+choosing randomly between productions.
+This straightforward strategy has been an effective approach
+based on past studies.@~cite[run-your-research]
+We used the enumerator in two new test generation strategies,
+both of which also take a pattern and a grammar as their inputs,
+which are used to construct an enumeration of the possible
+terms for that pattern.
+The first enumeration-based strategy produces random terms
+by simply choosing random indexes into the enumeration.
+We hoped this approach would be an improvement over the baseline
+Redex generator because it chooses terms uniformly, whereas the
+baseline generator clearly does not.
+For the second strategy, we used the enumerator to exhaustively
+produce terms satisfying a pattern in enumerated order starting 
+from 0.
+
+Perhaps surprisingly, we found that the random enumeration-based
+strategy had the worst performance. For easy to find bugs
+(easy in the sense that at least one of the models was able to
+find a counterexample quickly) the in-order enumeration performed
+best, while for more difficult to find bugs the baseline strategy
+of recursively unfolding non-terminals was still the most effective.
 
 @section{Methodology}
 
@@ -25,10 +64,11 @@ Our performance metric is the average interval between counterexamples
 first counterexample is found).
 
 
-@figure*["fig:benchmark"
-         @(list "Random testing performance of in-order enumeration, random indexing into an enumeration, "
-                "and recursive generation from a grammar on a benchmark of Redex models.")
-         (res-plot-4hour)]
+
+@figure["fig:benchmark-lines"
+        @(list "Random testing performance of in-order enumeration, random indexing into an enumeration, "
+               "and recursive generation from a grammar on a benchmark of Redex models.")
+        (scale (line-plot-24hour) 0.75)]
 
 @section{Results}
 
@@ -61,3 +101,9 @@ was to generate counterexamples.
 
 The most successful approach remained the baseline Redex generator.
 @; say something here about ``fair'' distributions, need some cites
+
+
+
+@figure*["fig:benchmark"
+         "Performance results by individual bug."
+         (scale (res-plot-24hour) 0.75)]

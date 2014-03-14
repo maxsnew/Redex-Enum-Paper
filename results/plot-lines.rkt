@@ -45,7 +45,7 @@
                l))))
     (lines
      (reverse (cons (list max-t (/ (length pts) 2)) pts))
-     #:width 2
+     ;#:width 2
      #:color (hash-ref type-colors type)
      #:style (list-ref line-styles n)
      #:label (hash-ref type-names type))))
