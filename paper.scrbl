@@ -23,7 +23,7 @@
 Enumeration! Whoo hoo!
 
 @section{Enumeration Combinators}
-
+@include-section{combinators.scrbl}
 @section{Enumerating Redex Patterns}
 
 @section{Evaluation}
