@@ -1,6 +1,6 @@
 #lang racket
 
-(require redex/examples/benchmark/graph-data
+(require "graph-data.rkt"
          plot)
 
 (provide plot-from-files)
