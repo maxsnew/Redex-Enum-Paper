@@ -5,23 +5,25 @@
 (define-cite ~cite citet generate-bibliography)
 
 (define fpca
-  "Proc. International Conference on Functional Programming Languages And Computer Architecture")
+  "International Conference on Functional Programming Languages And Computer Architecture")
 (define jfp
   "Journal of Functional Programming")
 (define types
-  "Proc. Workshop of the Working Group Types")
+  "Workshop of the Working Group Types")
 (define icfem
-  "Proc. International Conference on Formal Engineering Methods and Software Engineering")
+  "International Conference on Formal Engineering Methods and Software Engineering")
 (define waaapl
-  "Proc. Workshop on Algorithmic Aspects of Advanced Programming Languages")
+  "Workshop on Algorithmic Aspects of Advanced Programming Languages")
 (define esop
-  "Proc. European Symposium on Programming")
+  "European Symposium on Programming")
 (define tphols
-  "Proc. Theorem Proving in Higher Order Logics")
+  "Theorem Proving in Higher Order Logics")
 (define popl
-  "Proc. Symposium on Principles of Programming Languages")
+  "Symposium on Principles of Programming Languages")
 (define scheme-workshop 
   "Scheme and Functional Programming")
+(define jar 
+  "Journal of Automated Reasoning")
 
 (define sfp2009-kf
   (make-bib
@@ -38,5 +40,24 @@
                      "Robert Bruce Findler")
    #:title "Run Your Research: On the Effectiveness of Lightweight Mechanization"
    #:location (proceedings-location popl)
+   #:date 2012))
+
+
+(define delim-cont-cont
+  (make-bib
+   #:author (authors "Asumu Takikawa" "T. Stephen Strickland" "Sam Tobin-Hochstadt")
+   #:title "Constraining Delimited Control with Contracts"
+   #:location (proceedings-location esop
+                                    #:pages '(229 248))
+   #:date 2013))
+
+(define list-machine
+  (make-bib
+   #:author (authors "Andrew W. Appel" "Robert Dockins" "Xavier Leroy")
+   #:title "A list-machine benchmark for mechanized metatheory"
+   #:location (journal-location jar
+                       #:volume 49
+                       #:number 3
+                       #:pages '(453 491))
    #:date 2012))
 

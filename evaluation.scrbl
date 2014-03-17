@@ -7,11 +7,11 @@
 
 Our main motivation in developing enumerations for Redex patterns
 was to improve Redex's automated testing capabilities, using
-enumerators as test generators. 
+the enumerator as a test case generator. 
 To gain insight into the pattern enumerator's
-utility for random testing, we compared the performance of two 
+utility for testing, we compared the performance of two 
 enumeration-based strategies to Redex's preexisting random
-test generator.
+test case generator.
 To do so, we developed a benchmark of buggy Redex models
 that evaluates test case generators based on how quickly 
 they are able to find bugs.
@@ -24,8 +24,7 @@ This straightforward strategy has been an effective approach
 based on past studies.@~cite[run-your-research]
 We used the enumerator in two new test generation strategies,
 both of which also take a pattern and a grammar as their inputs,
-which are used to construct an enumeration of the possible
-terms for that pattern.
+and construct an enumeration of the possible terms satisfying the pattern.
 The first enumeration-based strategy produces random terms
 by simply choosing random indexes into the enumeration.
 We hoped this approach would be an improvement over the baseline
@@ -42,7 +41,7 @@ find a counterexample quickly) the in-order enumeration performed
 best, while for more difficult to find bugs the baseline strategy
 of recursively unfolding non-terminals was still the most effective.
 
-@section{Methodology}
+@section{The Benchmark}
 
 The benchmark is based on six different Redex models, each
 of which consists of a grammar, a dynamic semantics, and some
@@ -56,14 +55,53 @@ The mutations are made by manually introducing bugs into a copy
 of the model, such that each mutation is identical to the correct
 version aside from a single bug.
 
+The models used in the benchmark are:
+@itemlist[#:style 'never-indents
+ @item{@bold{stlc} A simply-typed lambda calculus with base
+        types of numbers and lists of numbers, including the constants
+        @tt{cons}, @tt{head}, @tt{tail}, and @tt{nil} (the empty list), all
+        of which operate only on lists of numbers. The property checked
+        is type soundness: the combination of subject reduction (that
+        types are preserved by the reductions) and progress (that well-typed
+        non-values always take a reduction step). 9 different mutations
+        (bugs) of this system are included.}
+ @item{@bold{poly-stlc} This is a polymorphic version of @bold{stlc}, with
+        a single numeric base type, polymorphic lists, and polymorphic 
+        versions of the same constants. Again, the property checked is
+        type soundness. 9 mutations are included.}
+ @item{@bold{stlc-sub} The same language and type system as @bold{stlc},
+        except that in this case all of the errors are in the substitution
+        function. Type soundness is checked. 9 mutations are included.}
+ @item{@bold{list-machine} An implementation of the 
+        @italic{list-machine benchmark} described in @citet[list-machine],
+        this is a reduction semantics (as a pointer machine operating over
+        an instruction pointer and a store) and a type system for a
+        seven-instruction first-order assembly language that manipulates
+        @tt{cons} and @tt{nil} values. The property checked is type soundness
+        as specified in @citet[list-machine], namely that well-typed programs
+        always step or halt (``do not get stuck''). 3 mutations are included.
+        This was a pre-existing implementation of this system in Redex
+        that we adapted for the benchmark.}
+ @item{@bold{rbtrees} A model implementing red-black trees via a judgment
+        that a tree has the red-black property and a metafunction defining
+        the insert operation. The property checked is that insert preserves
+        the red-black tree property. 3 mutations of this model are included.}
+ @item{@bold{delim-cont} A model of the contract and type system for
+        delimited control described in @citet[delim-cont-cont]. The language
+        is essentially PCF extended with operators for delimited continuations
+        and continuation marks, and contracts for those operations. 
+        The property checked is type soundness. 3
+        mutations of this model are included, one of which was found and fixed
+        during the original development of the model.
+        This was a pre-existing model developed by @citet[delim-cont-cont] which
+        was adapted for the benchmark.}]
+
 Given a method of producing random terms, the benchmark repeatedly
 attempts to find a counterexample for a buggy model by generating
 a term and checking it with the model's correctness property.
 Our performance metric is the average interval between counterexamples 
-(or, for deterministic generators, the interval before the 
-first counterexample is found).
-
-
+or, for deterministic generators, the interval before the 
+first counterexample is found.
 
 @figure["fig:benchmark-lines"
         @(list "Random testing performance of in-order enumeration, random indexing into an enumeration, "
