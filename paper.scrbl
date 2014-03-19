@@ -8,7 +8,7 @@
 
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   An Empirical Comparison Between Random Generation and Enumeration
-  for testing Redex Models
+  for Testing Redex Models
 }
 @doi{}
 
