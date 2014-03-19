@@ -67,3 +67,37 @@ sum of natural numbers.
 @; TODO: Figure out how to show values for (cons/e nats/e nats/e)
 @; TODO: show the triangle numbers.
 @; TODO: split this code between the two previous paragraphs?
+
+@; TODO: show examples?
+Another fundamental combinator is the disjoint union operator @(racket disj-sum/e)
+that takes two or more enumerators and predicates to distinguish between their elements and 
+returns an enumeration of their union. The resulting enumeration alternates between the 
+input enumerations, so that if every input enumeration is infinite, then each
+element is
+@;; Simplified to only show infinite case
+@;; TODO: fix so the code isn't going off the edge of the page
+@(racketblock
+  (define (disj-sum/e . e-ps)
+    (cond [(empty? e-ps) empty/e]
+          [(not (andmap (compose infinite? size) e-ps)) ...] ;; Finite case
+          [else ;; all infinite
+           (define es (map car e-ps))
+           (define ps (map cdr e-ps))
+           (define (dec n)
+             (define-values (q r) (quotient/remainder n (length es)))
+             (decode (list-ref es r) q))
+           (define (enc x)
+             (define (find-e n p? p?s)
+               (cond [(or (empty? p?s) (p? x)) n]
+                     [else (find-e (add1 n) (car p?s) (cdr p?s))]))
+             (define n (find-e 0 (car ps) (cdr ps)))
+             (define e (list-ref es n))
+             (+ n (* (encode e x) (length es))))
+           (enum +inf.0 dec enc)])))
+@;TODO: talk about finite case?
+
+@; TODO: fix/e and thunk/e
+
+@; TODO: except/e
+
+@; TODO: examples of derived combinators: many/e, many1/e
