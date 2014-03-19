@@ -84,5 +84,23 @@ Allowing us to easily write a function that enumerates non-empty lists.
 
 @; TODO: examples of other derived combinators?
 @; map/e with multiple arguments
+@; how to describe map/e?
+For more complex enumerations, it is useful to have higher-order combinators.
+One such combinator is @(racket map/e) which composes a bijection between any two
+sets with the bijection in an enumeration, so we can for example construct the 
+negative numbers using a bijection between negative numbers and natural numbers.
+@(interact 
+  (approximate 
+   (map/e (λ (nat) (* -1 (add1 nat)))
+          (λ (neg) (sub1 (* -1 neg)))
+          nats/e)
+   10))
 
 @; dep/e
+Finally at times we need a more dynamic enumeration combinator, one that takes
+an enumeration and constructs an enumeration for each of its elements.
+Set-theoretically this is a witness to the fact that countable unions of 
+countable sets are countable. We keep the original value in the output in 
+order to make a disjoint union.
+@; get a better example, something that NEEDS dep/e but is also intuitive
+@; this one only needs map/e, I think. It's used in redex for mismatch patterns
