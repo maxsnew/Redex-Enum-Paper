@@ -132,5 +132,24 @@ given type.
                          (cons (cons/e e self) pair?))))))
 
 @; TODO: except/e
+An advantage of encoding both sides of the bijection that defines an enumeration
+is the ability to filter individual elements. 
+@(racketblock
+  (define (except/e e x)
+    (define excepted (encode e x))
+    (define (dec n)
+      (decode e
+              (if (n . < . excepted)
+                  n
+                  (sub1 n))))
+    (define (enc y)
+      (define n (encode e y))
+      (if (n . < . excepted)
+          n
+          (add1 n)))))
+Allowing us to easily write a function that enumerates non-empty lists.
+@(racketblock
+  (define (many1/e e)
+    (except/e e '())))
 
-@; TODO: examples of derived combinators: many/e, many1/e
+@; TODO: examples of other derived combinators?
