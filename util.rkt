@@ -6,10 +6,12 @@
 (provide interact)
 
 (define enum-evaluator
-   (parameterize ([sandbox-output 'string]
-                  [sandbox-error-output 'string])
+  (call-with-trusted-sandbox-configuration 
+   (λ ()
+     (parameterize ([sandbox-output 'string]
+                    [sandbox-error-output 'string])
        (make-evaluator #:requires '(redex/private/enumerator)
-                       'racket)))
+                       'racket)))))
 
 (define-syntax-rule (interact code)
   (interaction #:eval enum-evaluator

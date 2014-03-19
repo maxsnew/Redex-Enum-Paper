@@ -5,3 +5,4 @@ paper.pdf
 *.js
 pict.png
 isabelle-authors-conjecture
+compiled/
