@@ -97,6 +97,39 @@ element is
 @;TODO: talk about finite case?
 
 @; TODO: fix/e and thunk/e
+Recursive enumerations can be easily constructed with a fix-point combinator,
+though in general a more open method is prefered. We implement mutual recursion
+using references and a primitive combinator that delays evaluation.
+But how do we determine the size of a recursive enumeration? Our combinators rely
+on statically knowing the sizes of their arguments, but in a recursive enumeration
+this is begging the question! Since it is not possible to statically know
+whether a recursive enumeration uses its parameter, we leave it to the caller
+to determine the correct size.
+@(racketblock
+  (define (thunk/e s thunk)
+    (define promise/e (delay (thunk)))
+    (enum s
+          (λ (n)
+            (decode (force promise/e) n))
+          (λ (x)
+            (encode (force promise/e) x))))
+  (define (fix/e s f)
+    (thunk/e s 
+             (λ () (f (fix/e s f))))))
+
+With pairing, alternation and recursion, we have the building blocks of algebraic
+data types. It is now straightforward to define an enumeration of lists of a 
+given type.
+@(racketblock
+  (define (many/e e)
+    (define s 
+      (if (= 0 (size e))
+          1
+          +inf.0))
+    (fix/e s
+           (λ (self)
+             (disj-sum/e (cons (const/e '())   null?)
+                         (cons (cons/e e self) pair?))))))
 
 @; TODO: except/e
 
