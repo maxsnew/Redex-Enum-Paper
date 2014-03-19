@@ -1,8 +1,15 @@
 #lang scribble/sigplan
 
-@(require "cite.rkt")
+@(require "cite.rkt" 
+          scribble/core
+          scribble/latex-properties)
 
-@title{Testing Redex Models by Enumerating Redex Patterns}
+@(define extra-tex-code #"\\usepackage{inconsolata}\n")
+
+@title[#:style (style #f (list (tex-addition extra-tex-code)))]{
+  An Empirical Comparison Between Random Generation and Enumeration
+  for testing Redex Models
+}
 @doi{}
 
 @authorinfo["Max New"
