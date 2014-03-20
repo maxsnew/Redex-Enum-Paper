@@ -31,12 +31,14 @@ Enumeration! Whoo hoo!
 
 @section{Enumeration Combinators}
 @include-section{combinators.scrbl}
+
 @section{Enumerating Redex Patterns}
 
 @section{Evaluation}
 @include-section{evaluation.scrbl}
 
 @section{Related Work}
+@include-section{related.scrbl}
 
 @section{Conclusion}
 
