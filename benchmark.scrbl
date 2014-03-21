@@ -3,6 +3,7 @@
 @(require "results/plot.rkt"
           "cite.rkt"
           scriblib/figure
+          scriblib/footnote
           (only-in pict scale))
 
 The benchmark is designed to evaluate the effectiveness of
@@ -144,6 +145,23 @@ delim-cont: 1M 2M 3SD
  of what the type of call/comp should be (D))
 
 @section{rvm}
+A preexisting model and test framework for the Racket virtual machine and
+bytecode verifier.@~cite[racket-virtual-machine] 
+The bugs were discovered during the development of the model and reported
+in section 7 of @citet[racket-virtual-machine].
+We used all of the bugs (with two exceptions)@note{We didn't include
+   bugs 1 and 7 (as specified in @citet[racket-virtual-machine]) for practical
+   reasons. The first affected the virtual machine model as opposed to the
+   verifier, which would have required us to include the entire VM
+   model in the benchmark, and the second would have required modifying
+   the abstract representation of the stack in the verifier model, a global
+   change that would have touched nearly every rule in the verifier.
+   }that were testable as
+violations of the desired ``internal properties'' of the bytecode 
+verifier as specified in that effort: the totality of the verifier
+over bytecode expressions, safety, and confluence, where the 
+latter two state that verified expressions can be successfully
+evaluated to a unique value by the virtual machine model.
 
 rvm: 3D 4M 5M 6M 14M 15S
  (3 feels deep because "not" and "uninit" are very far from each

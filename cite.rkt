@@ -24,6 +24,8 @@
   "Scheme and Functional Programming")
 (define jar 
   "Journal of Automated Reasoning")
+(define hosc 
+  "Higher-Order and Symbolic Computation")
 
 (define sfp2009-kf
   (make-bib
@@ -60,4 +62,11 @@
                        #:number 3
                        #:pages '(453 491))
    #:date 2012))
+
+(define racket-virtual-machine
+  (make-bib
+   #:author (authors "Casey Klein" "Robert Bruce Findler" "Matthew Flatt")
+   #:title "The Racket virtual machine and randomized testing"
+   #:location (journal-location hosc)
+   #:date 2013))
 
