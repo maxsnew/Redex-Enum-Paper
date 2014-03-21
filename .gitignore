@@ -4,5 +4,10 @@ paper.pdf
 *.html
 *.js
 pict.png
-isabelle-authors-conjecture
+refute/isabelle-authors-conjecture
+refute/isabelle-authors-conjecture.hi
+refute/isabelle-authors-conjecture.o
+refute/jscontest-authors-conjecture
+refute/jscontest-authors-conjecture.hi
+refute/jscontest-authors-conjecture.o
 compiled/

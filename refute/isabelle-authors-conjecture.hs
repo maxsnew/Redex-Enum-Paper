@@ -15,7 +15,7 @@ $ ./isabelle-authors-conjecture
 import Test.QuickCheck
 
 main :: IO ()
-main = quickCheckWith stdArgs {maxSuccess=100} prop_append
+main = quickCheckWith stdArgs {maxSuccess=1000} prop_append
 
 safeBang :: [a] -> Int -> Maybe a
 safeBang xs n = if (n >= 0) && (n < length xs)
