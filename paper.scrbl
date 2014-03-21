@@ -25,9 +25,35 @@
             "Northwestern University"
             "robby@eecs.northwestern.edu"]
 
-@section{Introduction}
+@abstract{
+  This paper presents a benchmark suite 
+  of buggy Redex models designed to test
+  bug-finding techniques. Our benchmark
+  contains large and small models,
+  easy and hard to find bugs, bugs
+  that we invented based on our experience
+  programming in Redex and bugs in models
+  written by others that happened during 
+  development.
+  
+  We evaluate three testing techniques:
+  a generic, yet tuned random generator for Redex
+  programs, random selection from 
+  a uniform distribution of Redex programs, and 
+  an in-order enumeration of Redex programs.
+  
+  Our results contradict the commonly-held
+  wisdom of the value between these three 
+  approaches. Specifically, selecting uniformly
+  at random is the worst-performing choice,
+  and enumeration and random selection 
+  are incomparable, with random being better
+  in the hour-long time frames, but in-order
+  enumeration being better the in minute-long
+  time frames.
+}
 
-Enumeration! Whoo hoo!
+@include-section["intro.scrbl"]
 
 @section{Enumeration Combinators}
 @include-section{combinators.scrbl}
