@@ -15,12 +15,14 @@
              (with-handlers ([exn:fail? void])
                (list-ref xs n))))))
 
-(define (try-jscontest)
+(define (try-dart)
   (redex-check 
    L
-   integer
-   (let ([x (term integer)])
-     (not (= (* x 2) (+ x 10))))))
+   (integer_x integer_y)
+   (let ([x (term integer_x)]
+         [y (term integer_y)])
+     (not (and (not (= x y))
+               (= (* x 2) (+ x 10)))))))
 
 (define (build-redex-results try)
   (for/list ([x (in-range 1000)])
@@ -72,11 +74,11 @@
      (eprintf "Please compile ~a.hs (run `ghc ~a.hs`)\n" file file)
      '()]))
 
-(printf "jscontest conjecture redex\n")
-(report-results (build-redex-results try-jscontest))
+(printf "dart conjecture redex\n")
+(report-results (build-redex-results try-dart))
 
-(printf "jscontest conjecture quickcheck\n")
-(report-results (build-quickcheck-results "jscontest-authors-conjecture"))
+(printf "dart conjecture quickcheck\n")
+(report-results (build-quickcheck-results "dart-authors-conjecture"))
 
 
 (printf "isabelle conjecture redex\n")
