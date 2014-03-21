@@ -25,4 +25,4 @@
 
 (define (white-space/comment? line)
   (or (regexp-match? #rx"^[ \t]*$" line)
-      (regexp-match? #rx"^;*$" line)))
+      (regexp-match? #rx"^;.*$" line)))
