@@ -1,6 +1,8 @@
 #lang racket
 
-(provide get-line-count)
+(provide get-line-count
+         get-counterexample
+         counterexample-size)
 
 (define type->base-files
   (hash 'stlc "stlc/stlc-base.rkt"
@@ -8,12 +10,16 @@
         'stlc-sub "stlc-sub/stlc-sub-base.rkt"
         'rbtrees "rbtrees/rbtrees-base.rkt"
         'list-machine "list-machine/list-machine-base.rkt"
-        'delim-cont "delim-cont/delim-cont-base.rkt"))
+        'delim-cont "delim-cont/delim-cont-base.rkt"
+        'rvm "rvm/verification-base.rkt"))
 
 (define (get-line-count type)
   (define path (collection-file-path (hash-ref type->base-files type) 
                                      "redex" "examples" "benchmark"))
   (number->string (line-count path)))
+
+(define (bmark-path file)
+  (collection-file-path file "redex" "examples" "benchmark"))
 
 (define (line-count path)
   (call-with-input-file path
@@ -26,3 +32,20 @@
 (define (white-space/comment? line)
   (or (regexp-match? #rx"^[ \t]*$" line)
       (regexp-match? #rx"^;.*$" line)))
+
+(define (counterexample-size type num)
+  (define cx (get-counterexample type num))
+  (count-pairs cx))
+
+(define (get-counterexample type num)
+  (define base (hash-ref type->base-files type))
+  (define path (bmark-path (regexp-replace "base" base (number->string num))))
+  (dynamic-require path 'small-counter-example))
+
+(define (count-pairs sexp)
+  (cond
+    [(pair? sexp)
+     (+ 1 
+        (count-pairs (car sexp))
+        (count-pairs (cdr sexp)))]
+    [else 0]))
