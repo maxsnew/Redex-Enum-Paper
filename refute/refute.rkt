@@ -69,7 +69,7 @@
             #f]))
        (printf "\n"))]
     [else
-     (eprintf "Please compile ~a.hs (ghc isabelle-authors-conjecture.h)\n" file)
+     (eprintf "Please compile ~a.hs (run `ghc ~a.hs`)\n" file file)
      '()]))
 
 (printf "jscontest conjecture redex\n")
