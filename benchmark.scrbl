@@ -2,6 +2,7 @@
 
 @(require "results/plot.rkt"
           "cite.rkt"
+          "line-counts.rkt"
           scriblib/figure
           scriblib/footnote
           (only-in pict scale))
@@ -65,7 +66,8 @@ A simply-typed lambda calculus with base
 types of numbers and lists of numbers, including the constants
 @tt{+}, which operates on numbers, and
 @tt{cons}, @tt{head}, @tt{tail}, and @tt{nil} (the empty list), all
-of which operate only on lists of numbers.
+of which operate only on lists of numbers. This model has @(get-line-count 'stlc)
+non-whitespace, non-comment lines of code.
 The property checked is type soundness: the combination of subject reduction 
 (that types are preserved by the reductions) and progress (that well-typed
 non-values always take a reduction step). 
