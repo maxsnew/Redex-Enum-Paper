@@ -1,26 +1,20 @@
 module Main where
-
-{- To run:
-$ cabal install quickcheck # if you don't have it
-
-# and then either:
-$ runhaskell isabelle-authors-conjecture
-
-# or
-$ ghc isabelle-authors-conjecture.hs
-$ ./isabelle-authors-conjecture
-
--}
-
 import Test.QuickCheck
 
+-- START
 main :: IO ()
-main = quickCheckWith stdArgs {maxSuccess=1000} prop_append
+main = quickCheckWith 
+       stdArgs {maxSuccess=1000} 
+       prop
 
-safeBang :: [a] -> Int -> Maybe a
-safeBang xs n = if (n >= 0) && (n < length xs)
-                then Just $ xs !! n
-                else Nothing
+nth :: [a] -> Int -> Maybe a
+nth xs n = if (n >= 0) && (n < length xs)
+           then Just (xs !! n)
+           else Nothing
                      
-prop_append :: [Int] -> [Int] -> Int -> Bool
-prop_append xs ys n = ((xs ++ ys) `safeBang` (length xs + n)) == (xs `safeBang` n)
+prop :: [Int] -> [Int] -> Int -> Bool
+prop xs ys n = 
+  (nth (xs ++ ys) (length xs + n)) == 
+  (nth xs n)
+-- STOP
+

@@ -1,28 +1,6 @@
 #lang racket
-(require redex/reduction-semantics)
-
-(define-language L)
-
-(define (try-isabelle)
-  (redex-check
-   L
-   ((any_1 ...) (any_2 ...) natural)
-   (let ([xs (term (any_1 ...))]
-         [ys (term (any_2 ...))]
-         [n (term natural)])
-     (equal? (with-handlers ([exn:fail? void])
-               (list-ref (append xs ys) (+ (length xs) n)))
-             (with-handlers ([exn:fail? void])
-               (list-ref xs n))))))
-
-(define (try-dart)
-  (redex-check 
-   L
-   (integer_x integer_y)
-   (let ([x (term integer_x)]
-         [y (term integer_y)])
-     (not (and (not (= x y))
-               (= (* x 2) (+ x 10)))))))
+(require "dart-authors-conjecture.rkt"
+         "isabelle-authors-conjecture.rkt")
 
 (define (build-redex-results try)
   (for/list ([x (in-range 1000)])

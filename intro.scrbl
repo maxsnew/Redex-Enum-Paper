@@ -1,8 +1,9 @@
 #lang scribble/base
 @(require "cite.rkt" "util.rkt"
+          scriblib/footnote
           scribble/manual)
 
-@title{Myths about Randomness and Enumeration}
+@title[#:tag "sec:intro"]{Myths about Randomness and Enumeration}
 
 Despite an early, convincing study on the value of 
 random testing@~cite[an-evaluation-of-random-testing], 
@@ -16,7 +17,9 @@ but a random integer solves this equation with probability
 @raw-latex|{\(2^{-32}\)}|.
 }
 
-When we run this example in Quickcheck@~cite[quickcheck],
+When we run this example in 
+Quickcheck@~cite[quickcheck],@note{For the precise code we used,
+ see the appendix.}
 giving it 1000 attempts to find a counter example, it finds it
 about half of the time, taking on average about 400 attempts 
 when it succeeds.

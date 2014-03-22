@@ -73,6 +73,9 @@
 @section[#:tag "sec:related-work"]{Related Work}
 @include-section{related.scrbl}
 
-@section{Conclusion}
+@include-section["conclusion.scrbl"]
 
 @generate-bibliography[]
+
+@include-section["appendix.scrbl"]
+
