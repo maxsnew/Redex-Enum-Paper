@@ -2,7 +2,7 @@
 @(require "cite.rkt" "util.rkt"
           scribble/manual)
 
-@title{Myths about Random Generation and Enumeration}
+@title{Myths about Randomness and Enumeration}
 
 Despite an early, convincing study on the value of 
 random testing@~cite[an-evaluation-of-random-testing], 
