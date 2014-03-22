@@ -25,11 +25,15 @@ about half of the time, taking on average about 400 attempts
 when it succeeds.
 Redex's random generator does a little bit better, finding it
 nearly every time, typically in about 150 attempts.
+
 Redex finds this bug quickly because it uses a geometric
 distribution for selecting integers, meaning that the probability
 it picks a given integer is related to how close that integer
 is to zero. Since @racket[10] isn't too far away, Redex is likely
-to choose it fairly frequently.
+to choose it fairly frequently. We aren't sure what distribution
+QuickCheck uses for integers, but a comment in the source code
+suggests that it too prefers numbers closer to zero than numbers
+further away.
 
 Not to single out a single paper, @citet[dart] use the same
 example and @citet[isabelle-testing] discuss this buggy
