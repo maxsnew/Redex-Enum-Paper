@@ -8,8 +8,8 @@
          max-unfair min-unfair max-fair min-fair
          render-enumerations
          enum-example
-         racketblock/define
-         fin/e)
+         fin/e
+         except/e*)
 
 (define (pair-pict) (grid 5 12 200 12))
 
@@ -158,8 +158,4 @@
   (enum-example stx count)
   (render-enumerations (approximate stx count)))
 
-(define-syntax-rule
-  (racketblock/define exp)
-  (begin (racketblock exp)
-         exp))
-
+(define (except/e* e l) (apply except/e e l))
