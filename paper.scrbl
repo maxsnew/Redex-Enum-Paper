@@ -70,11 +70,6 @@
 @section{Results}
 @include-section{results.scrbl}
 
-@section{Related Work}
-@include-section{related.scrbl}
-
-@section{Conclusion}
-
 @section[#:tag "sec:related-work"]{Related Work}
 @include-section{related.scrbl}
 
