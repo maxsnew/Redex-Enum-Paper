@@ -134,7 +134,7 @@ enumerator. It accepts an element and an enumeration, and returns one
 that doesn't have the given element. For example, the first
 18 elements of @racket[(except/e nats/e 13)] are
 @enum-example[(except/e nats/e 13) 18]
-The encoder for @racket[except/e] simply decodes the
+The decoder for @racket[except/e] simply encodes the
 given element and then either subtracts one before
 passing the natural number along (if it is above the 
 given exception) or does (if it isn't). The decoder uses
@@ -147,7 +147,7 @@ a few milliseconds to compute the
 @raw-latex|{\(2^{100,000}\)}|th element
 in the list of natural number enumeration given above.
 
-Our next combinator @racket[dep/e] doesn't have this property.
+Our next combinator @racket[dep/e] doesn't always have this property.
 It accepts an enumerator and a function from elements to enumerators
 and it enumerates pairs of elements where
 the enumeration used for the second position in the pair depends
@@ -170,6 +170,10 @@ from for the second element of the pair. Similarly, if the
 second enumerations are all infinite but the first one is finite,
 then @racket[dep/e] can use quotient and remainder to compute
 the indicies to supply to the given enumerations when decoding.
+In both of these cases, @racket[dep/e] preserves the good
+algorithmic properties of the previous combinators, requiring
+only linear time in the number of bits of the representation
+of the number for decoding.
 
 The troublesome case is when the 
 second enumerations are all finite. In that case, we
@@ -178,4 +182,6 @@ a single finite enumeration that consists of all of the
 finite enumerations, one after the other. Unfortunately,
 in this case, the @racket[dep/e] enumerator must compute
 all of the enumerators for the second component as soon
-as a single (sufficiently large) number is passed to decode.
+as a single (sufficiently large) number is passed to decode,
+which can, in the worst case, take time proportional the
+magnitude of the number during decoding.
