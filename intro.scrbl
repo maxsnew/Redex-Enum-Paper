@@ -24,8 +24,13 @@ giving it 1000 attempts to find a counter example, it finds it
 about half of the time, taking on average about 400 attempts 
 when it succeeds.
 Redex's random generator does a little bit better, finding it
-nearly every time, typically in about 150 attempts, but both
-generators find this bug which very high probability. 
+nearly every time, typically in about 150 attempts.
+Redex finds this bug quickly because it uses a geometric
+distribution for selecting integers, meaning that the probability
+it picks a given integer is related to how close that integer
+is to zero. Since @racket[10] isn't too far away, Redex is likely
+to choose it fairly frequently.
+
 Not to single out a single paper, @citet[dart] use the same
 example and @citet[isabelle-testing] discuss this buggy
 property (the last @racket[xs] should be @racket[ys]):
@@ -41,22 +46,23 @@ taking, on average, 4 attempts for Quickcheck and 5 for Redex
 to find a counterexample.
 
 While we certainly agree that random testing cannot find every 
-bug and better methods exist, our results show that random testing 
-can be a powerful tool for bug-finding, even using a generic random
+bug and more powerful methods exist, our results show that random testing 
+can be an effective tool for bug-finding, even using a generic random
 test case generator, i.e, one that is not tailored to the property being
-testing. Random testing becomes especially attractive because
+tested. Random testing is especially attractive because
 it is especially easily and cheaply applied, even to complex
 systems.
 
-Whereas ad-hoc random generation strategies 
-are often unfairly denegrated, randomly picking
-test inputs from a uniform distribution over a
-complex data-structure is often held up as an ideal, 
-also without any substantial evidence.
+Naturally, not all papers treat all random testing as hopelessly
+naive. There are a number of papers that suggest that
+ad-hoc random generation is a poor choice, but hold up
+a variation on random generation that selects test inputs 
+from a uniform distribution over a
+complex data-structure as an obviously-good choice.
 
 For example @citet[counting-and-generating-lambda-terms]
 present a technique for selecting from a uniform
-distribution of simply typable terms and argue that their
+distribution of simply typed terms and argue that their
 results are practical because they help ``debug compilers
 or other programs manipulating terms, e.g., type checkers
 or pretty printers.'' Also, 
@@ -78,7 +84,7 @@ worse, a fixed random generator like the one in Redex
 where the distribution of random terms cannot be directly adjusted
 by the user of the tool) is a less-effective bug finding 
 technique. These papers give no empirical evidence for why
-this kind of approach to random generation results in a
+this approach to random generation results in a
 set of terms that is more likely to find bugs.
 
 To try to put our understanding on a firmer footing, we
@@ -96,5 +102,5 @@ together with falsifiable properties that witness the bugs.
 We evaluate the different generation strategies against
 the benchmark, showing that random testing is the best overall
 strategy, but that in-order enumeration finds more bugs in 
-short time-frames. Selecting from the uniform distribution
-is not competitive with either of the other two approaches.
+short time-frames. Selecting from a uniform distribution
+is worse than the other two strategies on our benchmark suite.
