@@ -12,7 +12,7 @@ treated as a straw-man comparison in testing papers. For example,
 @a-quote{
 Spotting this defect requires the test case generator to 
 guess a value for x such that x * 2 == x + 10 holds, 
-but a random integer solves this equations with probability 
+but a random integer solves this equation with probability 
 @raw-latex|{\(2^{-32}\)}|.
 }
 
@@ -65,20 +65,22 @@ arbitrary subset of values.'' They go on to give a
 technique for building a random generation technique that
 ``is uniform: the generator for a
 given type and size gives the same probability to be
-produced to each possible value. In a testing context; this
+produced to each possible value. In a testing context this
 property ensures that no subclass will be missed because
-the generator is biased.'' The implication here being that
+the generator is biased.'' Their paper even goes to far as to
+use the word ``sound'' for random generators that are uniform.
+The implication being that
 Quickcheck-style random generation (or, presumably even
 worse, a fixed random generator like the one in Redex
-where the distribution of random terms cannot be adjusted
+where the distribution of random terms cannot be directly adjusted
 by the user of the tool) is a less-effective bug finding 
-technique. But these papers give no empirical evidence for why
+technique. These papers give no empirical evidence for why
 this kind of approach to random generation results in a
 set of terms that is more likely to find bugs.
 
 To try to put our understanding on a firmer footing, we
 have designed and built a new enumeration strategy for Redex.
-Our enumerator is based on @citet[bijective-term-encodings], 
+Our enumerator is based on @citet[bijective-term-encodings]'s, 
 but Redex's pattern language requires significant extensions
 to the basic strategy (as discussed in @secref["sec:related-work"]).
 We use the enumerator to provide a uniform distribution of terms
