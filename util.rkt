@@ -7,4 +7,4 @@
            args))
 
 (define (a-quote . args)
-  (paragraph (style "quote" '()) args))
+  (nested-flow (style 'inset '()) (list (paragraph (style #f '()) args))))

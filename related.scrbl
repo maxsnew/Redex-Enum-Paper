@@ -2,6 +2,19 @@
 
 @(require "cite.rkt")
 
+@;{
+
+   related work:
+
+- need to shout out to nice studies: 
+  - "Heuristics for Scalable Dynamic Test Generation"
+  - smallcheck paper
+  - early random testing studies
+
+
+}
+
+
 @section{Enumeration Methods}
 
 - Bijective Term Encodings

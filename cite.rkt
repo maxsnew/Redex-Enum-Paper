@@ -26,6 +26,20 @@
   "Journal of Automated Reasoning")
 (define hosc 
   "Higher-Order and Symbolic Computation")
+(define tools
+  "International Conference on Objects, Models, Components, Patterns")
+(define pldi
+  "Programming Language Design and Implementation")
+(define frocos
+  "Frontiers of Combining Systems")
+(define icfp
+  "International Conference on Functional Programming")
+(define ciclops
+  "International Colloquium on Implementation of Constraint LOgic Programming Systems")
+(define tose
+  "IEEE Transactions of Software Engineering")
+(define ml
+  "Workshop on ML")
 
 (define sfp2009-kf
   (make-bib
@@ -70,3 +84,65 @@
    #:location (journal-location hosc)
    #:date 2013))
 
+(define contract-driven-testing-of-javascript-code
+  (make-bib
+   #:title "Contract-Driven Testing of JavaScript Code"
+   #:author (authors "Phillip Heidegger" "Peter Thiemann")
+   #:location (proceedings-location tools)
+   #:date 2010))
+
+(define quickcheck
+  (make-bib
+   #:title "QuickCheck: a lightweight tool for random testing of Haskell programs"
+   #:author (authors "Koen Classen" "John Hughes")
+   #:date 2000
+   #:location (proceedings-location icfp)))
+
+(define dart
+  (make-bib 
+   #:title "DART: Directed Automated Random Testing"
+   #:author (authors "Patrice Godefroid" "Nils Klarlund" "Koushik Sen")
+   #:date 2005
+   #:location (proceedings-location pldi)))
+
+(define isabelle-testing
+  (make-bib
+   #:title "Automatic Proof and Disproof in Isabelle/HOL"
+   #:author (authors "Jasmin Christian Blanchette" "Lukas Bulwahn" "Tobias Nipkow")
+   #:date 2011
+   #:location (proceedings-location frocos)))
+
+(define bijective-term-encodings
+  (make-bib
+   #:title "Bijective Term Encodings"
+   #:author "Paul Tarau"
+   #:date 2011
+   #:location (proceedings-location ciclops)))
+
+(define small-scope-hypothesis
+  (make-bib
+   #:title "Evaluating the “Small Scope Hypothesis”"
+   #:author (authors "Alexandr Andoni" "Dumitru Daniliuc" "Sarfraz Khurshid" "Darko Marinov")
+   #:date 2002
+   #:location (proceedings-location popl)))
+
+(define an-evaluation-of-random-testing
+  (make-bib
+   #:title "An Evaluation of Random Testing"
+   #:author (authors "Joe W. Duran" "Simeon C. Ntafos")
+   #:date 1984
+   #:location (journal-location tose #:volume 10 #:number 4)))
+
+(define counting-and-generating-lambda-terms
+  (make-bib 
+   #:title "Counting and generating lambda terms"
+   #:author (authors "Katarzyna Grygiel" "Pierre Lescanne")
+   #:date 2013
+   #:location (journal-location jfp #:volume 23 #:number 5)))
+
+(define fast-and-sound-random-generation
+  (make-bib
+   #:title "Fast and Sound Random Generation for Automated Testing and Benchmarking in Objective Caml"
+   #:author (authors "Benjamin Canou" "Alexis Darrasse")
+   #:date 2009
+   #:location (proceedings-location ml)))
