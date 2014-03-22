@@ -2,7 +2,7 @@
 
 @(require "results/plot.rkt"
           "cite.rkt"
-          "line-counts.rkt"
+          "bug-info.rkt"
           scriblib/figure
           scriblib/footnote
           (only-in pict scale))
