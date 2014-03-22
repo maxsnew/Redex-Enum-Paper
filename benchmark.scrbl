@@ -46,17 +46,17 @@ as D, M, or S errors.
 We hope and expect that Redex should efficiently catch
 shallow errors, catch many medium errors, and be only infrequently
 useful in catching deep errors. Of course, it is possible for trivial
-types to manifest in deep problems and vice versa, but we hope that
+typos to manifest in deep problems and vice versa, but we hope that
 generally this is true. By analogy to type systems: a deep error is
 writing the wrong program, it might type check, but it's not the one
 you want; a medium error is the kind of situation where a runtime
 exception is thrown, the system catches it, but not beforehand and thus
 maybe with more work; while a shallow error is something that you
 expect the type-system to just identify.
-@;{except that sometimes when
-your finger slips trying to write "x" you write "y" which happens to
-also be a number... transforming your program into the wrong one (deep
-error).}
+There are exceptions of course, such as when your finger slips 
+trying to write "x" and you write "y", which happens to
+also be a number, transforming your program into the wrong one --
+a trivial mistake that becomes a deep error.
 
 We now discuss each of the models included in the benchmark,
 along with the errors we have introduced into each model.
