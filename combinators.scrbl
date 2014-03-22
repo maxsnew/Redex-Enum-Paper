@@ -5,6 +5,7 @@
           racket/list
           redex/private/enumerator
           scribble/core
+          "util.rkt"
           "enum-util.rkt")
 
 We represent enumerations as bijections between a the natural
@@ -143,8 +144,7 @@ One important point about the combinators used so far: the
 decoding function is linear in the number of bits in the
 number it is given. This means, for example, that it takes only
 a few milliseconds to compute the
-@(element (style "relax" '(exact-chars))
-          '("\\(2^{100,000}\\)"))th element
+@raw-latex|{\(2^{100,000}\)}|th element
 in the list of natural number enumeration given above.
 
 Our next combinator @racket[dep/e] doesn't have this property.
