@@ -5,7 +5,8 @@
          racket/list
          racket/match
          math/statistics
-         math/distributions)
+         math/distributions
+         redex/examples/benchmark/apply-diffs)
 
 (provide (all-defined-out))
 
@@ -106,7 +107,8 @@
                              (hash-ref sorted-times (cons name type)
                                        (λ () '())))))]
       ['()
-       (for/fold ([dstats '()] [name-avgs (hash)])
+       (for/fold ([dstats '()] [name-avgs (for/hash ([b (in-list (all-bug-files))])
+                                            (values b '()))])
          ([(name/type times) (in-hash sorted-times)]
           #:unless (and ((length times) . < . (min-trials))
                         (not (equal? (cdr name/type) 'ordered))))
@@ -127,6 +129,20 @@
                        (cons (mean times) (hash-ref name-avgs name '())))]
             [else name-avgs])))])))
 
+(define (bug-file? f)
+    (define m (regexp-match #rx"^.*/(.*-[0-9]\\.rkt)$"
+                            (path->string f)))
+    (and m
+        (second m)))
+
+(define (all-bug-files)
+  (sort
+   (flatten
+    (for/list ([d (in-list (get-directories directories))])
+      (for/list ([f (in-directory d)]
+                 #:when (bug-file? f))
+        (bug-file? f))))
+   string<?))
 
 (define (make-plot filenames)
   
@@ -144,19 +160,29 @@
   
   (plot-y-transform (axis-transform-bound log-transform 0.00001 +inf.0))
   
-  (define (name-order name)
-    (length
-     (or
-      (memf
-       (λ (n) (equal? n name))
-       (sort (hash-keys name-avgs)
-             >
-             #:key (λ (k)
-                     (define val (hash-ref name-avgs k))
-                     (if (number? val)
-                         val
-                         (mean val)))))
-      '())))
+  (define name-order 
+    ;; this function is mysteriously called a LOT...
+    (let ([memo (make-hash)])
+      (λ (name)
+        (hash-ref memo name
+                  (λ ()
+                    (define ans
+                      (length
+                       (or
+                        (memf
+                         (λ (n) (equal? n name))
+                         (sort (sort (hash-keys name-avgs)
+                                     string>?)
+                               >
+                               #:key (λ (k)
+                                       (define val (hash-ref name-avgs k))
+                                       (cond 
+                                         [(number? val) val]
+                                         [(empty? val) +inf.0]
+                                         [else (mean val)]))))
+                        '())))
+                    (hash-set! memo name ans)
+                    ans)))))
   
   (define (get-name-num name n)
     (+ (if (offset?)
