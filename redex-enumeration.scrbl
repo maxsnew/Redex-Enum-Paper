@@ -93,14 +93,51 @@ its input list. Here are the first @racket[12] elements of
 the @racket[(lon-without '())] enumeration:
 @enum-example[(lon-without '()) 12]
 
+The final pattern is a variation on Kleene star that
+requires that two distinct sub-sequences in a term have the
+same length. 
 
-@;{
- three things.
-   = (repeated) names: generate a pair; first build up the names in a table
-     and then the term and then put things together
+To explain the need for this pattern, first consider the Redex pattern
+@racketblock[((λ (x ...) e) v ...)]
+which matches application expressions where the function position
+has a lambda expression with some number of variables and
+the application itself has some number of arguments. That is,
+in Redex the appearance of @racket[...] indicates that the 
+term before may appear any number of times, possibly none.
+In this case, the term @racket[((λ (x) x) 1)] would match,
+as would @racket[((λ (x y) y) 1 2)] and so we might hope
+to use this as the pattern in a rewrite rule for function
+application. Unfortunately, the expression
+@racket[((λ (x) x) 1 2 3 4)] also matches where the first
+ellipsis (the one referring to the @racket[x]) has only
+a single element, but the second one (the one referring to
+@racket[v]) has four elements.
 
-   = repeats: clever thing. turn a pair of lists into a list of pairs.
+In order to specify a rewrite rules that fires only when the
+arity of the procedure matches the number of actual arguments
+supplied, Redex allows the ellpisis itself to have a subscript.
+This means not that the entire sequences are the same, but merely
+that they have the same length. So, we would write:
+@racketblock[((λ (x ..._1) e) v ..._1)]
+which allows the first two examples in the previous paragraph,
+but not the third.
 
-   = mismatch patterns => generate a list without duplicates
+To enumerate patterns like this, it is natural to think of using
+a dependent enumeration, where you first pick the length of the 
+sequence and then separately enumerate sequences dependent on
+the list. Such a strategy is inefficient, however, because
+the dependent enumeration requires constructing enumerators
+during decoding. 
 
-}
+Instead, if we separate the pattern into two parts, first
+one part that has the repeated elements, but now grouped:
+@racket[((x v) ...)]
+and then the remainder in a second part (just 
+@racket[(λ e)] in our example), then the enumerator can handle
+these two parts with the ordinary pairing operator and, once
+we have the term, we can rearrange it to match the original
+pattern. 
+
+This is the strategy that our enumerator implementation uses. Of course,
+ellipses can be nested, so the actual implementation is fairly complex,
+but the rearrangement is the key idea.
