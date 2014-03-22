@@ -93,13 +93,13 @@ recursive enumerations:
 For example, we can construct an enumerator
 for lists of numbers:
 @racketblock[(fix/e (λ (lon/e)
-                      (disj-sum/e (cons (const/e null)
+                      (disj-sum/e (cons (fin/e null)
                                         null?)
                                   (cons (cons/e nats/e lon/e)
                                         cons?))))]
 and here are its first @racket[12] elements:
 @enum-example[(fix/e (λ (lon/e)
-                        (disj-sum/e (cons (const/e null) null?)
+                        (disj-sum/e (cons (fin/e null) null?)
                                     (cons (cons/e nats/e lon/e) cons?))))
                12]
 A call like @racket[(fix/e f)] enumerator 
