@@ -8,7 +8,8 @@
 @figure["fig:benchmark-lines"
         @(list "Random testing performance of in-order enumeration, random indexing into an enumeration, "
                "and recursive generation from a grammar on a benchmark of Redex models.")
-        (scale (line-plot-24hour) 0.75)]
+        (scale (line-plot-4hour) 0.75)
+        @;{TODO: change when 4 hour results are in (scale (line-plot-24hour) 0.75)}]
 
 @; TODO: expand once final results are in
 
@@ -63,7 +64,8 @@ The most successful approach remained the baseline Redex generator.
 
 @figure*["fig:benchmark"
          "Performance results by individual bug."
-         (scale (res-plot-24hour) 0.75)]
+         (scale (res-plot-4hour) 0.75)
+         @;{TODO: Change when 24 hour results are in! (scale (res-plot-24hour) 0.75)}]
 
 - explains
 

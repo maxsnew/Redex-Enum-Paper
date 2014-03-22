@@ -22,10 +22,12 @@
         (plot-file (make-renderers d-stats)
                    output
                    #:y-label "# bugs found"
-                   #:x-label "seconds")
+                   #:x-label "seconds"
+                   #:x-min 0.05)
         (plot-pict (make-renderers d-stats)
                    #:y-label "# bugs found"
-                   #:x-label "seconds"))))
+                   #:x-label "seconds"
+                   #:x-min 0.05))))
 
 (define line-styles
   (list 'solid 'dot 'long-dash
