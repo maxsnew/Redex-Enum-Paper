@@ -17,17 +17,16 @@
 
 @section{Enumeration Methods}
 
-- Bijective Term Encodings
-
-Tarau's work on bijective encoding schemes for Prolog terms is most
+@citet[bijective-term-encodings]'s work on bijective encoding schemes for 
+Prolog terms is most
 similar to ours. However, we differ in two main ways. First, our
-enumerators correctly deal with enumeration of finite sets wherever
+enumerators deal with enumeration of finite sets wherever
 they appear in the larger structure. This is complicated because it
 forces our system to deal with mismatches between the cardinalities of
 two sides of a pair: for instance, the naive way to implement pairing
 is to give odd bits to the left element and even bits to the right
 element, but this cannot work if one side of the pair, say the left,
-can be "exhausted" as there will be arbitrarily numbers of bits that
+can be exhausted as there will be arbitrarily numbers of bits that
 do not enumerate more elements on the left. Second, we have a
 dependent pairing enumerator that allows the right element of a pair
 to depend on the actual value produced on the left. Like finite sets,
@@ -35,25 +34,20 @@ this is challenging because of the way each pairing of an element on
 the left with a set on the right consumes an unpredictable number of
 positions in the enumeration.
 
-- Feat: Functional Enumeration of Algebraic Types
-
+@citet[feat]'s 
 Feat is a system for enumeration that distinguishes itself from
-"list" perspectives on enumeration by focusing on the "function"
-perspective. We use the "function" perspective as well. While our
-approach is closer to Tarau, we share support for finite sets with
+``list'' perspectives on enumeration by focusing on the ``function''
+perspective. We use the ``function'' perspective as well. While our
+approach is closer to Tarau's, we share support for finite sets with
 Feat, but are distinct from Feat in our support for dependent pairing,
 which can be easily used to implement what Feat refers to
-as "invariants". Much of the work on Feat is focused on techniques to
-improve efficiency and employing enumeration in testing. Our case
-study and theirs give different conclusions: XXX.
+as ``invariants'' (although not efficiently).
 
-- Every Bit Counts
-
-Kennedy and Vytiniotis take a different approach to something like
+@citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages
 responding to an interactive question-and-answer game. The crucial
 insight in this perspective is that the questioner may have its own
-memory to help it avoid asking "silly" questions, such as whether a
+memory to help it avoid asking ``silly'' questions, such as whether a
 term is a number when the type system rules out a number at that
 position in the larger term structure. This aspect of their system,
 which is crucial in what they call dependent composition, is the same
@@ -61,22 +55,24 @@ as our dependent pairing.
 
 However, details of their system show that it is not an enumeration
 system. In particularly, the strongest proof they have is that if a
-game is total and proper, then "every bitstring encodes some value or
-is the prefix of such a bitstring". This means, that even for total,
-proper games there are some bitstrings (i.e. numbers) that do not
-encode some value. As such, it cannot be used to enumerate all
+game is total and proper, then ``every bitstring encodes some value or
+is the prefix of such a bitstring''. This means, that even for total,
+proper games there are some bitstrings that do not
+encode a value. As such, it cannot be used to enumerate all
 elements of the set being encoded. Furthermore, they show that many
 useful games are non-proper and must be converted into proper games by
-filtering a non-proper game: enumerating all possibile elements and
+filtering a non-proper game: enumerating all possible elements and
 removing those that do not match a predicate. This rejection-based
-approach to generating well-typed terms, for example, would be
-incredibly costly; as discussed in detail, for instance, in the paper
-on Feat. Our system has a similar "problem" with depedent pairs where
-to decode an element from the [(add1 n)]th set, you must have a
-count for each of the prior [n] sets. However, when these
+approach to generating well-typed terms, for example, is costly; 
+as discussed in detail, for instance, in the paper
+on Feat. Our system has a similar problem with dependent pairs where
+to decode an element from the n+1-st set, you must have a
+count for each of the prior n sets. However, when these
 counts are predictable, they need no be constructed; and when they
-have been previously computed, they can be reused.
+have been previously computed, they can be reused (and our
+implementation caches them).
 
+@;{
 @section{Related Problems}
 
 Enumeration is closely tied to other problems: counting, ranking and
@@ -116,12 +112,12 @@ Testing Under One Roof
 
 Exhaustive generation is a process that generates all possible
 instances of some combinatorial structure. This corresponds closely to
-the "list" view of enumeration, which could be turned into
-the "function" view by taking the index into the enumeration as the
+the ``list'' view of enumeration, which could be turned into
+the ``function'' view by taking the index into the enumeration as the
 encoding, except that there's no guarantee of ordering or other regime
 to make injection efficient (decoding does not have this problem, of
 course.) The New QuickCheck for Isabelle implements an interesting
-modification of the "list" view by representing the potentially
+modification of the ``list'' view by representing the potentially
 infinite stream as a function that accepts a reader of the stream,
 i.e. the continuation of [next], and calls it for each value,
 up to some bound.
@@ -140,6 +136,7 @@ where the neighborhood is typically a size bound, i.e. a uniform
 distribution over lambda terms with around five variables. The most
 common approach for this is with Boltzmann samplers, as these have
 application in physics.
+}
 
 @section{Automatic Checking}
 

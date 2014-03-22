@@ -40,6 +40,8 @@
   "IEEE Transactions of Software Engineering")
 (define ml
   "Workshop on ML")
+(define haskell
+  "Haskell Symposium")
 
 (define sfp2009-kf
   (make-bib
@@ -146,3 +148,21 @@
    #:author (authors "Benjamin Canou" "Alexis Darrasse")
    #:date 2009
    #:location (proceedings-location ml)))
+
+(define feat
+  (make-bib
+   #:title "Feat: Functional Enumeration of Algebraic Types"
+   #:author (authors "Jonas Duregård" "Patrik Jansson" "Meng Wang")
+   #:location (proceedings-location haskell)
+   #:date 2012))
+
+(define every-bit-counts
+  (make-bib
+   #:title "Every Bit Counts: The binary representation of typed data and programs"
+   #:author (authors "Andrew J. Kennedy" "Dimitrios Vytiniotis")
+   #:location (journal-location jfp #:volume 22 #:number "4-5")
+   #:date 2010))
+
+
+
+   
