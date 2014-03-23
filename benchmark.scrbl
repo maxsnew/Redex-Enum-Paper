@@ -141,6 +141,15 @@ for these two systems in @figure-ref["fig:benchmark"], we can see
 indeed some bugs have become easier to find (such as bug 7) and
 some have become more difficult (such as bug 2).
 
+This model is actually a subset of the language specified in
+@citet[palka-workshop], who used a specialized and optimized
+QuickCheck generator for a similar type system to find bugs 
+in GHC. We adapted this system (and its restriction in
+@bold{stlc}) because it has already been used successfully
+with random testing, which makes it a reasonable target for
+an automated testing benchmark.
+
+
 @;{
 poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
  (2 is something where people generally aren't specific about what is

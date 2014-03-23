@@ -194,3 +194,17 @@
    #:author (authors "Xuejun Yang" "Yang Chen" "Eric Eide" "John Regehr")
    #:date 2011
    #:location (proceedings-location pldi)))
+
+(define palka-workshop
+  (make-bib
+   #:author (authors "Michal H. Palka" "Koen Claessen"
+                     "Alejandro Russo" "John Hughes")
+   #:title "Testing an Optimising Compiler by Generating Random Lambda Terms"
+   #:location (proceedings-location "International Workshop on Automation of Software Test")
+   #:date 2011))
+
+(define palka-diss
+  (make-bib
+   #:author "Michal H. Palka"
+   #:title "Testing an Optimising Compiler by Generating Random Lambda Terms"
+   #:location (dissertation-location #:institution "Chalmers University of Technology, Göteborg")))
