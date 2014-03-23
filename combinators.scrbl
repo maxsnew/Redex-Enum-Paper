@@ -10,7 +10,7 @@
 
 We represent enumerations as bijections between a the natural
 numbers (or a prefix of them) and a set of terms. Concretely,
-our enumerations are triples or a function that encodes a term as a
+our enumerations are triples of a function that encodes a term as a
 natural number, a function that decodes a natural number into a
 term, and a size.
 
@@ -65,9 +65,12 @@ elements. It returns an enumeration of their union. The
 resulting enumeration alternates between the input
 enumerations, so that if given @racket[n] infinite
 enumerations, the resulting enumeration will alternate
-through each of the enumerations every @racket[n] numbers:
+through each of the enumerations every @racket[n] numbers.
+For example, the following is the beginning the disjoint
+sum of an enumeration of natural numbers and an enumeration
+of strings
 @enum-example[(disj-sum/e (cons nats/e number?)
-                          (cons (cons/e nats/e nats/e) pair?))
+                          (cons string/e string?))
               12]
 
 The @racket[disj-sum/e] enumerator also has to be fair and
@@ -154,7 +157,7 @@ the enumeration used for the second position in the pair depends
 on the actual values in the first position in the pair.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
-@racketblock[(dep/e nat/e (λ (i) (nats-above/e i)))]
+@racketblock[(dep/e nats/e (λ (i) (nats-above/e i)))]
 Here are the first 12 elements of the enumeration:
 @enum-example[(dep/e nats/e (λ (i) (nats-above/e i)))
               12]
@@ -169,7 +172,7 @@ using the dependent function to build the enumerator to select
 from for the second element of the pair. Similarly, if the
 second enumerations are all infinite but the first one is finite,
 then @racket[dep/e] can use quotient and remainder to compute
-the indicies to supply to the given enumerations when decoding.
+the indices to supply to the given enumerations when decoding.
 In both of these cases, @racket[dep/e] preserves the good
 algorithmic properties of the previous combinators, requiring
 only linear time in the number of bits of the representation
@@ -178,7 +181,7 @@ of the number for decoding.
 The troublesome case is when the 
 second enumerations are all finite. In that case, we
 think of the second component of the pair being drawn from
-a single finite enumeration that consists of all of the
+a single enumeration that consists of all of the
 finite enumerations, one after the other. Unfortunately,
 in this case, the @racket[dep/e] enumerator must compute
 all of the enumerators for the second component as soon

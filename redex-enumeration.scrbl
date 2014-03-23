@@ -24,7 +24,7 @@ augmented with a few numeric constants:
                          integer)
                       (τ ::= int (τ → τ))
                       (x ::= variable-not-otherwise-mentioned))]
-Enumerating member of @racket[e] can be done directly
+Enumerating members of @racket[e] can be done directly
 in terms of the combinators given in the previous section.
 Members of @racket[e] are a disjoint sum of products of
 either literals (like @racket[λ] and @racket[+]) or
@@ -77,8 +77,7 @@ with the actual terms, each placeholder gets a different element of
 the list.
 
 Generating a list without duplicates requires the @racket[dep/e] combinator
-and the @racket[except/e] combinator. Here's how to generate lists of
-distinct naturals:
+and the @racket[except/e] combinator.  Here's how to generate lists of distinct naturals:
 @racketblock/define[(define (lon-without eles)
                       (fix/e (λ (lon/e)
                                (disj-sum/e 
@@ -92,6 +91,10 @@ where @racket[except/e*] simply calls @racket[except/e] for each element of
 its input list. Here are the first @racket[12] elements of
 the @racket[(lon-without '())] enumeration:
 @enum-example[(lon-without '()) 12]
+This is the only place where dependent enumeration is used in the
+Redex enumeration library, and the patterns used
+are almost always finite, so we have not encountered degenerate performance
+with dependent generation in practice.
 
 The final pattern is a variation on Kleene star that
 requires that two distinct sub-sequences in a term have the
