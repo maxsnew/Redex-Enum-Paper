@@ -3,38 +3,40 @@
 @(require "results/plot.rkt"
           "cite.rkt"
           "bug-info.rkt"
+          scribble/core
           scriblib/figure
           scriblib/footnote
           scribble/manual
           (only-in pict scale))
 
-The benchmark is designed to evaluate the effectiveness of
-different automated testing strategies as they might be
-applied by a typical user of Redex. Thus we have attempted 
-to make use of models and bugs that we believe to be
-representative, based on our experiences developing, 
-using, and supporting Redex over the years.
+The programs in our benchmark come from two sources:
+synthetic examples based on our experience with Redex over
+the years and from models that we and others
+have developed and bugs that were encountered during
+the development process.
 
-The benchmark is based on six different Redex models, each
-of which provides at a minimum a grammar and a soundness
-predicate on terms.
-In practice, most of the models consist of a dynamic semantics 
-and some static well-formedness property, usually a type system.
-Typically, the predicate relates the dynamic
-properties of the system to the static properties,
-as in type soundness.
+The benchmark has six different Redex models, each
+of which provides a grammar of terms for the model
+and a soundness property that is universally quantified
+over those terms. Most of the models are of programming
+languages and most of the soundness properties are 
+type-soundness, but we also include red-black trees
+and a few models come with richer properties than
+just type-soundness.
 
-For each model, we have manually introduced bugs into a number of
-copies of the model, such that each copy is identical to the
-correct version aside from a single bug. We then compare
-automated testing strategies based on how well they are able 
-to find counterexamples for the soundness predicates
-of the buggy models. Of course, each buggy model also has
-a small counterexample in its source and a test case validating
-that it violates the soundness property, ensuring that the bugs
-are indeed bugs and are possible to find.
+For each model, we have manually introduced bugs into a
+number of copies of the model, such that each copy is
+identical to the correct, except for a single bug. The bugs
+always manifest as a term that falsifies the soundness
+property. We compare automated testing strategies based on
+how quickly they are able to find counterexamples for the
+soundness properties of the buggy models. Each buggy model
+also has a small counterexample in its source and a test
+case validating that it violates the soundness property,
+ensuring that the bugs are indeed bugs and are possible to
+find.
 
-We presume that errors come from one of three categories: 
+We classify each of the errors as either:
 @itemlist[
   @item{@bold{D} (Deep) Errors in the developer's understanding of the system, 
          such as when a type system really isn't sound.}
@@ -44,9 +46,8 @@ We presume that errors come from one of three categories:
          realize this side-condition must exist or forgets to write it down.}
   @item{@bold{S} (Shallow) Errors in the encoding of the system into Redex,
          due to typos or a misunderstanding of subtleties of Redex.}]
-When discussing the bugs we have introduced, we will categorize them 
-as D, M, or S errors.
 
+@;{
 We hope and expect that Redex should efficiently catch
 shallow errors, catch many medium errors, and be only infrequently
 useful in catching deep errors. Of course, it is possible for trivial
@@ -61,12 +62,42 @@ There are exceptions of course, such as when your finger slips
 trying to write "x" and you write "y", which happens to
 also be a number, transforming your program into the wrong one --
 a trivial mistake that becomes a deep error.
+}
 
-We now discuss each of the models included in the benchmark,
-along with the errors we have introduced into each model.
-@; TODO add bug table, reference here
-@; TODO some assertions about results are made here, check for consistency
-@; with final results
+Each subsection of this section introduces one of the
+models in the benchmark, along with the errors we introduced
+into each model.
+
+@figure*["fig:benchmark-overview" "Benchmark Overview"]{
+ @centered{
+  @tabular[#:sep 
+           @hspace[1]
+           (cons
+            (list @bold{Model}
+                  @bold{LOC}
+                  @bold{Bug #}
+                  @bold{S/M/D}
+                  @bold{Size}
+                  @bold{Description of Error})
+            (let ([last-model #f])
+              (for/list ([t/n (in-list all-types/nums)])
+                (define type (list-ref t/n 0))
+                (define num (list-ref t/n 1))
+                (begin0
+                  (list (if (equal? last-model type)
+                            ""
+                            (symbol->string type))
+                        (if (equal? last-model type)
+                            ""
+                            (get-line-count type))
+                        (number->string num)
+                        (symbol->string (get-category type num))
+                        (number->string (get-counterexample-size type num))
+                        (element (style "ErrorDescriptionBox" '())
+                                 (list (get-error type num))))
+                  (set! last-model type)))))]
+  }
+}
 
 @section{stlc} 
 A simply-typed lambda calculus with base

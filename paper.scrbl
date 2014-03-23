@@ -4,7 +4,12 @@
           scribble/core
           scribble/latex-properties)
 
-@(define extra-tex-code #"\\usepackage{inconsolata}\n")
+@(define extra-tex-code
+   (bytes-append #"\\usepackage{inconsolata}\n"
+                 
+                 ;; used for the table of the bugs
+                 #"\\newcommand{\\ErrorDescriptionBox}[1]{"
+                 #"\\begin{minipage}[t]{4.5in}#1\\end{minipage}}"))
 
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   An Empirical Comparison Between Random Generation and Enumeration
