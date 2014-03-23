@@ -5,7 +5,8 @@
          get-error
          get-diff
          get-category
-         get-counterexample-size)
+         get-counterexample-size
+         all-types/nums)
 
 ;; the the "get" functions all have the interface
 ;; symbol natural -> the data
@@ -19,6 +20,26 @@
         'list-machine "list-machine/list-machine-base.rkt"
         'delim-cont "delim-cont/delim-cont-base.rkt"
         'rvm "rvm/verification-base.rkt"))
+
+(define type->numof
+  (hash 'stlc 9
+        'poly-stlc 9
+        'stlc-sub 9
+        'list-machine 3
+        'rbtrees 3
+        ;; delim cont should be 3!
+        ;; but 3 needs a counterexample
+        ;; also it has never been found
+        'delim-cont 2))
+
+(define rvm-nums '(2 3 4 5 6 14 15))
+
+(define all-types/nums
+  (for*/list ([t (in-list (hash-keys type->base-files))]
+              [n (if (equal? t 'rvm)
+                     (in-list rvm-nums)
+                     (in-range 1 (add1 (hash-ref type->numof t))))])
+    (list t n)))
 
 
 (define type->num->cat
@@ -51,7 +72,11 @@
          2 'S
          3 'S
          4 'M
-         5 'SM)
+         5 'SM
+         6 'S
+         7 'S
+         8 'S
+         9 'SM)
    'list-machine
    ; list-machine: 1S 2M 3S
    (hash 1 'S
@@ -68,8 +93,9 @@
          2 'M
          3 'SD)
    'rvm
-   ; rvm: 3D 4M 5M 6M 14M 15S
-   (hash 3 'D
+   ; rvm: 2? 3D 4M 5M 6M 14M 15S
+   (hash 2 '?
+         3 'D
          4 'M
          5 'M
          6 'M
@@ -78,7 +104,6 @@
 
 (define (get-category type num)
   (hash-ref (hash-ref type->num->cat type) num))
-         
 
 (define (get-line-count type)
   (define path (bmark-path (hash-ref type->base-files type)))
