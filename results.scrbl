@@ -5,11 +5,11 @@
           scriblib/figure
           (only-in pict scale))
 
-@figure["fig:benchmark-lines"
-        @(list "Random testing performance of in-order enumeration, random indexing into an enumeration, "
-               "and recursive generation from a grammar on a benchmark of Redex models.")
-        (scale (line-plot-4hour) 0.75)
-        @;{TODO: change when 4 hour results are in (scale (line-plot-24hour) 0.75)}]
+@figure*["fig:benchmark-lines"
+         @(list "Random testing performance of in-order enumeration, random indexing into an enumeration, "
+                "and recursive generation from a grammar on a benchmark of Redex models.")
+         (scale (line-plot-4hour) 0.75)
+         @;{TODO: change when 4 hour results are in (scale (line-plot-24hour) 0.75)}]
 
 @; TODO: expand once final results are in
 

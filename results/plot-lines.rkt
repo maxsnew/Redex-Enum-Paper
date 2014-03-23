@@ -18,16 +18,16 @@
     (process-data
      (load-raw filenames)))
   (parameterize ([plot-x-transform log-transform]
+                 [plot-x-label "Time in Seconds"]
+                 [plot-y-label "Number of Bugs Found"]
+                 [plot-width 800] 
+                 [plot-height 400]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)])
     (if output
         (plot-file (make-renderers d-stats)
                    output
-                   #:y-label "# bugs found"
-                   #:x-label "seconds"
                    #:x-min 0.05)
         (plot-pict (make-renderers d-stats)
-                   #:y-label "# bugs found"
-                   #:x-label "seconds"
                    #:x-min 0.05))))
 
 (define line-styles
