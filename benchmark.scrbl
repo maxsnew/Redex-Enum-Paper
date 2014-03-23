@@ -29,7 +29,10 @@ copies of the model, such that each copy is identical to the
 correct version aside from a single bug. We then compare
 automated testing strategies based on how well they are able 
 to find counterexamples for the soundness predicates
-of the buggy models.
+of the buggy models. Of course, each buggy model also has
+a small counterexample in its source and a test case validated
+that it violates the soundness property, ensuring that the bugs
+are indeed bugs and are possible to find.
 
 We presume that errors come from one of three categories: 
 @itemlist[
@@ -78,25 +81,25 @@ non-values always take a reduction step).
 
 We introduced nine different bugs into this system.
 The first confuses the range and domain types of the function
-in the application rule, and has the small counterexample
+in the application rule, and has the small counterexample:
 @racket[hd 0]. 
 We consider this to be a shallow (S) bug, since it is 
-essentially a type and it is hard to imagine anyone with
+essentially a typo and it is hard to imagine anyone with
 any knowledge of type systems making this conceptual mistake.
 Bug 2 neglects to specify that a fully applied @racket[cons]
-is a values, thus the list @racket[((cons 0) nil)] violates
+is a value, thus the list @racket[((cons 0) nil)] violates
 the progress property. We consider this be be a medium (M) bug,
-as it is not type, but an oversight in the design of a system
+as it is not a typo, but an oversight in the design of a system
 that is otherwise correct in its approach.
 We consider the next three bugs to be shallow (S).
 Bug 3 reverses the range and the domain of function types
 in the type judgment for applications. This was one of the
-easiest bus for all of our approaches to find.
+easiest bugs for all of our approaches to find.
 Bug 4 assigns @racket[cons] a result type of @racket[int]. 
 (Initially we didn't include @racket[+] as an operation in this
 model, which made it impossible to observe this bug.)
 The fifth bug returns the head of a list when @racket[tl]
-is applied, we consider this to be shallow bug but interestingly
+is applied, we consider this to be a shallow bug but interestingly
 it is difficult to expose: none of our methods succeeded in doing
 so (see @figure-ref["fig:benchmark"]).
 Bug 6 (M) only applies the @racket[hd] constants to a partially
@@ -116,9 +119,29 @@ variable from the context.
 @section{poly-stlc} 
 This is a polymorphic version of @bold{stlc}, with
 a single numeric base type, polymorphic lists, and polymorphic 
-versions of the same constants. Again, the property checked is
-type soundness. 9 mutations are included.
+versions of the list constants. 
+No changes were made to the model except those necessary to 
+make the lists constants polymorphic.
+There is no type inference is the model, so all polymorphic
+terms are required to be instantiated with the correct
+types in order for the function to type check. 
+Of course, this makes it much more difficult to automatically 
+generate well-typed terms, and thus counterexamples.
+Again, the property checked is
+type soundness. 
 
+All of the bugs in this system are identical to those in
+@bold{stlc}, aside from any changes that had to be made
+to translate them, so we don't discuss them in detail.
+The interesting thing here is how otherwise unrelated changes
+to the system may make bugs much easier or much more difficult
+to find, something we have seen time and time again in our
+experience with automated testing. Comparing the results
+for these two systems in @figure-ref["fig:benchmark"], we can see
+indeed some bugs have become easier to find (such as bug 7) and
+some have become more difficult (such as bug 2).
+
+@;{
 poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
  (2 is something where people generally aren't specific about what is
  a value in their semantics in LaTeX, so they might forget about this
@@ -128,7 +151,7 @@ poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
  error. 6 feels like a misunderstanding of an algorithm. 8 does not
  feel like a legitimate error, maybe you could imagine someone testing
  with a half-baked lookup and forgetting to fix it, but I can't
- imagine anyone really making this mistake during authoring.)
+ imagine anyone really making this mistake during authoring.)}
 
 @section{stlc-sub} 
 The same language and type system as @bold{stlc},
