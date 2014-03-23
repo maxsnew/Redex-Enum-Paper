@@ -151,6 +151,7 @@ an automated testing benchmark.
 
 
 @;{
+   Jay's comments:
 poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
  (2 is something where people generally aren't specific about what is
  a value in their semantics in LaTeX, so they might forget about this
@@ -165,9 +166,67 @@ poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
 @section{stlc-sub} 
 The same language and type system as @bold{stlc},
 except that in this case all of the errors are in the substitution
-function. Type soundness is checked. 9 mutations are included.
+function. 
+Our own experience has been that it is easy to make
+subtle errors when writing substitution functions, so we added
+this set of tests specifically to target them with the benchmark.
+There are two soundness checks for this system.
+Bugs 1-5 are checked in the following way: given a candidate
+counterexample, a β-redex @emph{anywhere} in the term is
+reduced to get a second term, and then those two terms
+are required to be Kleene-equal, or that the result of
+passing both to the evaluator (which uses call-by-value
+standard reduction and thus may not reduce all β-redexes)
+is the same.
+Bugs 4-9 are checked using type soundness for this sysem
+as specified in the discussion of the @bold{stlc} model.
+We included two predicates for this system because we
+believe the first to be a good test for a substitution 
+function but not something that a typical Redex user
+would write, while the second is something one would
+see in most Redex models but is less effective at
+catching substitution bugs.
 
-stlc-sub: 1S 2S 3S 4M 5SM
+The first substitution bug we introduced simply omits
+the case that replaces the correct variable with the
+with the term to be substituted. 
+We considered this to
+be a shallow (S) error, and indeed all approaches were able 
+to uncover it, although the time it took to do so range
+from 1 second to around 2 minutes.
+Bug 2 permutes the order of arguments when making a
+recursive call. 
+This was also categorized as a shallow (S)
+bug, although a common one based on our experience
+writing substitutions in Redex.
+Bug 3 swaps the function and argument positions of
+an application recurring, again essentially a typo and
+a shallow error, although one of the more difficult to
+find with this system.
+The fourth substitution bug neglects to make the renamed
+bound variable ``fresh enough'' when when recurring past a lambda. 
+Specifically, it ensures that the new variable is fresh
+with respect to the body of the function but not the bound
+or substitution variables. This bugs has the rather involved
+counterexample:
+@centered[@racket[((λ (z int) (((λ (y1 int) (λ (y int) y)) z) 1)) 0)]]
+We categorized this error as medium or deep (MD), based on
+the fact that it could be attributed to either an
+oversight or a fundamental misunderstanding of substitution.
+Bug 5 carries out the substitution for all variables in the
+term. We categorized it as SM, since it is essentially a
+missing side condition, although a fairly egregious one.
+Bugs 6-9 are duplicates of bug 1-3 and bug 5, except that
+they are tested with type soundness instead. (It is impossible
+to detect bug 4 with this property.) 
+@; this really is surprising! can't think of what else to say
+@; about it right now
+Surprisingly, there
+is not as a clear a difference as one might expect in
+the effectiveness of the two properties in our results,
+although type soundness is just slightly less effective 
+overall.
+(See the ``sltc-sub'' models in @figure-ref["fig:benchmark"].)
 
 @section{list-machine} 
 An implementation of the 

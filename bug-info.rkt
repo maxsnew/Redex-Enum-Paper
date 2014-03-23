@@ -72,7 +72,7 @@
    (hash 1 'S
          2 'S
          3 'S
-         4 'M
+         4 'MD ;; adjusted to MD as Robby and Jay disagreed
          5 'SM
          6 'S
          7 'S
