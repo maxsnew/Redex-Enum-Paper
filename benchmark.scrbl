@@ -30,7 +30,7 @@ correct version aside from a single bug. We then compare
 automated testing strategies based on how well they are able 
 to find counterexamples for the soundness predicates
 of the buggy models. Of course, each buggy model also has
-a small counterexample in its source and a test case validated
+a small counterexample in its source and a test case validating
 that it violates the soundness property, ensuring that the bugs
 are indeed bugs and are possible to find.
 
@@ -102,13 +102,13 @@ The fifth bug returns the head of a list when @racket[tl]
 is applied, we consider this to be a shallow bug but interestingly
 it is difficult to expose: none of our methods succeeded in doing
 so (see @figure-ref["fig:benchmark"]).
-Bug 6 (M) only applies the @racket[hd] constants to a partially
+Bug 6 (M) only applies the @racket[hd] constant to a partially
 constructed list (i.e. the term @racket[(cons 0)] instead of
 @racket[((cons 0) nil)], the application of @racket[hd] to 
 the second of which is indeed the smallest counterexample for
 this bug.)
 All of our approaches also failed to expose bugs 5 and 6.
-The seventh bug, also of medium (M) depth, omits a production
+The seventh bug, also of medium (M) severity, omits a production
 from the reduction context and thus doesn't allow evaluation
 on the right-hand-side of function applications.
 Bug 8 always returns the type @racket[int] when looking up
@@ -132,7 +132,7 @@ type soundness.
 
 All of the bugs in this system are identical to those in
 @bold{stlc}, aside from any changes that had to be made
-to translate them, so we don't discuss them in detail.
+to translate them to this model, so we don't discuss them in detail.
 The interesting thing here is how otherwise unrelated changes
 to the system may make bugs much easier or much more difficult
 to find, something we have seen time and time again in our
@@ -192,7 +192,7 @@ the case that replaces the correct variable with the
 with the term to be substituted. 
 We considered this to
 be a shallow (S) error, and indeed all approaches were able 
-to uncover it, although the time it took to do so range
+to uncover it, although the time it took to do so ranged
 from 1 second to around 2 minutes.
 Bug 2 permutes the order of arguments when making a
 recursive call. 
@@ -202,21 +202,24 @@ writing substitutions in Redex.
 Bug 3 swaps the function and argument positions of
 an application recurring, again essentially a typo and
 a shallow error, although one of the more difficult to
-find with this system.
+find bugs in this model.
+
 The fourth substitution bug neglects to make the renamed
 bound variable ``fresh enough'' when when recurring past a lambda. 
 Specifically, it ensures that the new variable is fresh
 with respect to the body of the function but not the bound
-or substitution variables. This bugs has the rather involved
+or substitution variables. This bug has the rather involved
 counterexample:
 @centered[@racket[((λ (z int) (((λ (y1 int) (λ (y int) y)) z) 1)) 0)]]
 We categorized this error as medium or deep (MD), based on
 the fact that it could be attributed to either an
 oversight or a fundamental misunderstanding of substitution.
+
 Bug 5 carries out the substitution for all variables in the
 term. We categorized it as SM, since it is essentially a
 missing side condition, although a fairly egregious one.
-Bugs 6-9 are duplicates of bug 1-3 and bug 5, except that
+
+Bugs 6-9 are duplicates of bugs 1-3 and bug 5, except that
 they are tested with type soundness instead. (It is impossible
 to detect bug 4 with this property.) 
 @; this really is surprising! can't think of what else to say
@@ -228,6 +231,9 @@ although type soundness is just slightly less effective
 overall.
 (See the ``sltc-sub'' models in @figure-ref["fig:benchmark"].)
 
+@; TODO discussion for the rest of the models
+@; I found in helpful to reference the table in "bugs-table.scrbl"
+@; as I went though these
 @section{list-machine} 
 An implementation of the 
 @italic{list-machine benchmark} described in @citet[list-machine],
