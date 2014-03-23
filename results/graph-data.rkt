@@ -1,8 +1,26 @@
 #lang racket/base
 
-(require plot/pict
-         racket/cmdline
-         racket/list
+
+;                                                       
+;                                                       
+;                                                       
+;                                                       
+;  ;;;  ;;;  ;;;                    ;;;                 
+;  ;;;  ;;;  ;;;                                        
+;   ;;  ;;;  ;; ;;;;;  ;;; ;;;; ;;  ;;; ;;; ;;   ;; ;;; 
+;   ;; ;; ;; ;;;;;;;;; ;;;;;;;;;;;; ;;; ;;;;;;; ;;;;;;; 
+;   ;; ;; ;; ;;;;  ;;; ;;;  ;;; ;;; ;;; ;;; ;;; ;;; ;;; 
+;   ;;;;; ;;;;;  ;;;;; ;;;  ;;; ;;; ;;; ;;; ;;; ;;; ;;; 
+;    ;;;; ;;;;;;;; ;;; ;;;  ;;; ;;; ;;; ;;; ;;; ;;; ;;; 
+;    ;;;   ;;; ;;; ;;; ;;;  ;;; ;;; ;;; ;;; ;;; ;;;;;;; 
+;    ;;;   ;;;  ;;;;;; ;;;  ;;; ;;; ;;; ;;; ;;;  ;; ;;; 
+;                                                   ;;; 
+;                                               ;;;;;;  
+;                                                       
+;                                                       
+;; this is copied code from redex/examaples/benchmark/graph-data
+
+(require racket/list
          racket/match
          math/statistics
          math/distributions

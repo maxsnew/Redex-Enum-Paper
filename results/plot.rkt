@@ -18,7 +18,7 @@
 
 (define (dir->files d)
   (for/list ([f (in-directory d)]) 
-    (path->string (path->complete-path f))))
+    (path->string (path->complete-path f d))))
 
 (define (res-plot-24hour)
   (scale
@@ -37,3 +37,9 @@
 
 (define (line-plot-24hour)
   (plot-from-files (dir->files 24-hour)))
+
+(define (correlation-plot-4hour)
+  (correlation-plot (dir->files 4-hour)))
+
+(define (correlation-plot-24hour)
+  (correlation-plot (dir->files 24-hour)))

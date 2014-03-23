@@ -6,7 +6,8 @@
          get-diff
          get-category
          get-counterexample-size
-         all-types/nums)
+         all-types/nums
+         type->num->cat)
 
 ;; the "get" functions all have the interface
 ;; symbol natural -> the data
@@ -28,10 +29,7 @@
         'stlc-sub 9
         'list-machine 3
         'rbtrees 3
-        ;; delim cont should be 3!
-        ;; but 3 needs a counterexample
-        ;; also it has never been found
-        'delim-cont 2))
+        'delim-cont 3))
 
 (define rvm-nums '(2 3 4 5 6 14 15))
 
@@ -72,7 +70,7 @@
    (hash 1 'S
          2 'S
          3 'S
-         4 'MD ;; adjusted to MD as Robby and Jay disagreed
+         4 'D
          5 'SM
          6 'S
          7 'S
@@ -159,4 +157,3 @@
   (define base (hash-ref type->base-files type))
   (define path (bmark-path (regexp-replace "base" base (number->string num))))
   (dynamic-require path 'the-error))
-  
