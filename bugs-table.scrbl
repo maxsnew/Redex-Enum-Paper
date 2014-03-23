@@ -5,11 +5,11 @@
           racket/port
           racket/list)
 
-;; mainly made for my own sanity to help with writing 
-;; benchmark section
-;; but maybe a reduced, formatting-fixed, version would
-;; go in the paper
-;; (how do you get these to format well??...)
+@; mainly made for my own sanity to help with writing 
+@; benchmark section
+@; but maybe a reduced, formatting-fixed, version would
+@; go in the paper
+@; (how do you get these to format well??...)
 
 @[tabular #:style 'boxed #:sep @hspace[1]
           (cons
@@ -19,7 +19,8 @@
                  @bold{bug description}
                  @bold{bug category}
                  @bold{counterexample}
-                 @bold{counterexample size})
+                 @bold{counterexample size}
+                 @bold{diff})
            (for/list ([t/n (in-list all-types/nums)])
              (define type (first t/n))
              (define num (second t/n))
@@ -35,5 +36,5 @@
                          (pretty-display (get-counterexample type num)
                                          (current-output-port))))))
                    (number->string (get-counterexample-size type num))
-                   #;(verbatim
+                   (verbatim
                       (get-diff type num)))))]
