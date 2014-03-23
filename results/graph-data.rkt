@@ -12,9 +12,9 @@
 
 (define types (make-parameter '()))
 (define all-types '(grammar search search-gen search-gen-enum search-gen-ref search-gen-enum-ref enum ordered))
-(define names '("grammar" "search" "backjumping" "backjumping, ordered space" "backjumping, with refresh"
-                          "backjumping, ordered space with refresh" "random enumeration"
-                          "in-order enumeration"))
+(define names '("adhoc random" "search" "backjumping" "backjumping, ordered space" "backjumping, with refresh"
+                               "backjumping, ordered space with refresh" "uniform random"
+                               "in-order enumeration"))
 (define symbols '(circle triangle square asterisk diamond plus   5star diamond))
 (define colors  '(1 4 5 6 7 8 2 3))    
 (define type-names

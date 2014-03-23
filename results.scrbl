@@ -34,15 +34,15 @@ lie to the left of or above others for that interval.
 
 Interestingly, @figure-ref["fig:benchmark-lines"] clearly shows that
 the in-order enumeration is the best approach to use for time 
-periods less than around ten seconds, after which it is quickly surpassed
-by the other two strategies. For longer time periods, the baseline Redex
-generator performs best. Choosing randomly from the enumeration is
+periods less than around 100 seconds, after which it is quickly surpassed
+by the other two strategies. For longer time periods, the adhoc random
+generator performs best. Choosing randomly from a uniform distribution is
 never the best approach.
 
 The data shown in @Figure-ref["fig:benchmark-lines"] represents running
 each generation method on each bug for either 24 hours or until the error 
-in the average interval was reasonably small. Although there are 32 bugs 
-in the benchmark, no strategy was able to find more that 21 of them in
+in the average interval was reasonably small. Although there are 43 bugs 
+in the benchmark, no strategy was able to find more that 26 of them in
 a 24 hour period.
 
 @Figure-ref["fig:benchmark"] shows the results in more detail, with
@@ -51,13 +51,24 @@ with uncertainties.
 The error bars represent 95% confidence intervals in the averages. 
 (The in-order enumeration method is deterministic and thus has no 
 uncertainty.)
+The blank columns on the right represent the bugs that no method was
+able to find in less than 24 hours, of which there are 17.
 
 The averages shown in @figure-ref["fig:benchmark"] span nearly six
 orders of magnitude from less than a tenth of a second to several hours
 and thus represent a wide range of bugs in terms of how difficult it
-was to generate counterexamples.
+was to generate counterexamples. 
+For the most part, bugs that were ``easy'' (could be found in less
+than a few seconds) for one generator were easy for all of them.
+There are exceptions, most of which are for the in-order
+enumeration, which was able to find several bugs (such as
+``poly-stlc-8'') in much shorter times than the other approaches.
 
-The most successful approach remained the baseline Redex generator.
+The most successful approach (in terms of total successes) was the
+adhoc random generation approach already used in Redex.
+In-order enumeration also proved to be a good approach, but only
+over short time frames after which it is surpassed by both other
+generators.
 @; say something here about ``fair'' distributions, need some cites
 
 
