@@ -1,19 +1,9 @@
 #lang scribble/base
-
 @(require "cite.rkt")
 
-@;{
-
-   related work:
-
-- need to shout out to nice studies: 
-  - "Heuristics for Scalable Dynamic Test Generation"
-  - smallcheck paper
-  - early random testing studies
-
-
-}
-
+The related work divides into two categories: papers 
+about enumeration and papers with studies about
+random testing.
 
 @section{Enumeration Methods}
 
@@ -72,99 +62,41 @@ counts are predictable, they need no be constructed; and when they
 have been previously computed, they can be reused (and our
 implementation caches them).
 
-@;{
-@section{Related Problems}
+@section{Testing Studies}
 
-Enumeration is closely tied to other problems: counting, ranking and
-generation.
+We are aware of only one other studies that specifically compares
+random testing and enumeration, namely in
+@citet[small-check]'s original paper on SmallCheck. SmallCheck is an
+enumeration-based testing library for Haskell and the paper 
+contains a comparison with QuickCheck, Haskell random testing 
+library.
 
-- On counting untyped lambda terms (Lescanne)
-- Lambda-terms of bounded unary height (Bodini, Gardy)
-- Counting and generating lambda terms (Grygiel and Lescanne)
+Their study is not as in-depth as ours; the paper does not
+say, for example, how many errors were found by each of the
+techniques or in how much time, only that there were two 
+errors that were found by enumeration that were not found
+by random testing. The paper, however, does conclude 
+that ``SmallCheck, Lazy SmallCheck and QuickCheck are
+complementary approaches to property-based testing in Haskell,''
+a stance that our study supports (but for Redex).
 
-Counting answers the question: given some parameter, how many elements
-of a set are there? For instance, how many 32bit RGB colors are there?
-Or, most closely to our problem domain: how many typed lambda terms
-with fewer than five variables are there? There are many approaches to
-this problem (XXX) some of which could be seen as restricted versions
-of the enumeration approach we employ.
+@citet[one-roof] compares a single tool that supports both
+random testing and enumeration against a tool that reduces
+conjectures to boolean satisfiability and then uses a solver.
+The study concludes that the two techniques complement each other.
 
-- Binary lambda calculus and combinatory logic (Tromp)
-- Others from Tarau's paper
+Neither of the studies compare selecting randomly from a uniform
+distribution like ours does.
 
-Ranking, or numbering, is the problem of injecting objects into the
-naturals without the constraint that decoding is uncomputable,
-efficient, or forms a bijection.
+@citet[generating-random-lambda-terms]'s work is similar in spirit to
+Redex, as it focuses on testing programming languages. Pałka builds
+a specialized random generator for well-typed terms that found
+several bugs in GHC, the premier Haskell compiler.
+Similarly, @citet[finding-and-understanding-bugs-in-c-compilers]'s work 
+also presents a test-case generator tailored to testing programming 
+languages with complex well-formedness constraints, but this time
+C. 
 
-Generation can be divided into two approaches: exhaustive or
-non-exhaustive. 
-
-- Counting and generating lambda terms (Grygiel and Lescanne)
-
-- Generic algorithms for the generation of combinatorial
-objects (Martinez)
-
-- The Art of Computing Programming, Volume 4, Fascicle 4: Generating All
-Trees-History of Combinatorial Generation (Knuth)
-
-- The New QuickCheck for Isabelle: Random, Exhaustive, and Symbolic
-Testing Under One Roof
-
-Exhaustive generation is a process that generates all possible
-instances of some combinatorial structure. This corresponds closely to
-the ``list'' view of enumeration, which could be turned into
-the ``function'' view by taking the index into the enumeration as the
-encoding, except that there's no guarantee of ordering or other regime
-to make injection efficient (decoding does not have this problem, of
-course.) The New QuickCheck for Isabelle implements an interesting
-modification of the ``list'' view by representing the potentially
-infinite stream as a function that accepts a reader of the stream,
-i.e. the continuation of [next], and calls it for each value,
-up to some bound.
-
-- Efficient Random Sampling of Binary and Unary-Binary Trees via
-Holonomic Equations (Bacher, Bodini, Jacquot)
-
-- Boltzmann Samplers for the random generation of combinatorial structures (Duchon)
-
-- Fast and Sound Random Generation for Automated Testing and
-Benchmarking in OCaml
-
-Non-exhaustive generation is typically randomized and delivers
-efficient algorithms for sampling from some neighborhood of elements,
-where the neighborhood is typically a size bound, i.e. a uniform
-distribution over lambda terms with around five variables. The most
-common approach for this is with Boltzmann samplers, as these have
-application in physics.
-}
-
-@section{Automatic Checking}
-
-- Automatic Proof and Disproof in Isabelle/HOL
-
-XXX: No new enumeration methods, primarily cites QuickCheck and makes
-claims about its usefulness
-
-- Fast and Sound Random Generation for Automated Testing and
-Benchmarking in OCaml
-
-XXX Boltzmann models mentioned above, but we should talk about their
-claims of utility here
-
-- SmallCheck and Lazy SmallCheck: Automatic Exhaustive Testing for Small
-Values
-
-XXX "List" perspective is discussed above and Feat paper goes into
-details on the methodology. Herein we should talk about case study
-
-- Testing an Optimising Compiler by Generating Random Lambda Terms
-
-XXX Ad-hoc generation method, very similar to our grammar based
-approach. Does not enumerate
-
-- The New QuickCheck for Isabelle: Random, Exhaustive, and Symbolic
-Testing Under One Roof
-
-XXX Does not enumerate, in the sense of mapping to integers, instead
-they take the "list" approach, but unravel the lazy stream into a
-continuation-based representation. makes empirical claims
+Both of these papers provide empirical evidence that random generation
+techniques that do not sample from a uniform distribution can be
+highly successful at finding bugs.

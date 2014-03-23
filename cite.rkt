@@ -42,6 +42,8 @@
   "Workshop on ML")
 (define haskell
   "Haskell Symposium")
+(define cpp
+  "International Conference on Certified Programs and Proofs")
 
 (define sfp2009-kf
   (make-bib
@@ -163,6 +165,32 @@
    #:location (journal-location jfp #:volume 22 #:number "4-5")
    #:date 2010))
 
+(define small-check
+  (make-bib
+   #:title "SmallCheck and Lazy SmallCheck: Automatic Exhaustive Testing for Small Values"
+   #:author (authors "Colin Runciman" "Matthew Naylor" "Fredrik Lindblad")
+   #:location (proceedings-location haskell)
+   #:date 2008))
 
+(define one-roof
+  (make-bib
+   #:title "The New Quickcheck for Isabelle: Random, Exhaustive and Symbolic Testing Under One Roof"
+   #:author "Lukas Bulwahn"
+   #:location (proceedings-location cpp)
+   #:date 2012))
 
-   
+(define generating-random-lambda-terms
+  (make-bib
+   #:title "Testing an Optimising Compiler by Generating Random Lambda Terms"
+   #:author "Michał H. Pałka"
+   #:location (dissertation-location
+               #:institution "Chalmers University of Technology and Göteborg University"
+               #:degree "Licentiate of Philosophy")
+   #:date 2012))
+
+(define finding-and-understanding-bugs-in-c-compilers
+  (make-bib
+   #:title "Finding and Understanding Bugs in C Compilers"
+   #:author (authors "Xuejun Yang" "Yang Chen" "Eric Eide" "John Regehr")
+   #:date 2011
+   #:location (proceedings-location pldi)))
