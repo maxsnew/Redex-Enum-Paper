@@ -5,6 +5,7 @@
           "bug-info.rkt"
           scriblib/figure
           scriblib/footnote
+          scribble/manual
           (only-in pict scale))
 
 The benchmark is designed to evaluate the effectiveness of
@@ -60,6 +61,9 @@ a trivial mistake that becomes a deep error.
 
 We now discuss each of the models included in the benchmark,
 along with the errors we have introduced into each model.
+@; TODO add bug table, reference here
+@; TODO some assertions about results are made here, check for consistency
+@; with final results
 
 @section{stlc} 
 A simply-typed lambda calculus with base
@@ -72,8 +76,42 @@ The property checked is type soundness: the combination of subject reduction
 (that types are preserved by the reductions) and progress (that well-typed
 non-values always take a reduction step). 
 
-We introduced nine different bugs into the system.
-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
+We introduced nine different bugs into this system.
+The first confuses the range and domain types of the function
+in the application rule, and has the small counterexample
+@racket[hd 0]. 
+We consider this to be a shallow (S) bug, since it is 
+essentially a type and it is hard to imagine anyone with
+any knowledge of type systems making this conceptual mistake.
+Bug 2 neglects to specify that a fully applied @racket[cons]
+is a values, thus the list @racket[((cons 0) nil)] violates
+the progress property. We consider this be be a medium (M) bug,
+as it is not type, but an oversight in the design of a system
+that is otherwise correct in its approach.
+We consider the next three bugs to be shallow (S).
+Bug 3 reverses the range and the domain of function types
+in the type judgment for applications. This was one of the
+easiest bus for all of our approaches to find.
+Bug 4 assigns @racket[cons] a result type of @racket[int]. 
+(Initially we didn't include @racket[+] as an operation in this
+model, which made it impossible to observe this bug.)
+The fifth bug returns the head of a list when @racket[tl]
+is applied, we consider this to be shallow bug but interestingly
+it is difficult to expose: none of our methods succeeded in doing
+so (see @figure-ref["fig:benchmark"]).
+Bug 6 (M) only applies the @racket[hd] constants to a partially
+constructed list (i.e. the term @racket[(cons 0)] instead of
+@racket[((cons 0) nil)], the application of @racket[hd] to 
+the second of which is indeed the smallest counterexample for
+this bug.)
+All of our approaches also failed to expose bugs 5 and 6.
+The seventh bug, also of medium (M) depth, omits a production
+from the reduction context and thus doesn't allow evaluation
+on the right-hand-side of function applications.
+Bug 8 always returns the type @racket[int] when looking up
+a variable's type in the context.
+Similarly, bug 9 (S) may return the type of an incorrect (but present)
+variable from the context.
 
 @section{poly-stlc} 
 This is a polymorphic version of @bold{stlc}, with

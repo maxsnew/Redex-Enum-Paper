@@ -8,9 +8,10 @@
          get-counterexample-size
          all-types/nums)
 
-;; the the "get" functions all have the interface
+;; the "get" functions all have the interface
 ;; symbol natural -> the data
 ;; symbol is 'stlc etc., and the nat is the bug number
+;; (except get-line count, which gets the base file LOC)
 
 (define type->base-files
   (hash 'stlc "stlc/stlc-base.rkt"
