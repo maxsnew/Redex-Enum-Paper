@@ -6,7 +6,8 @@
          "../bug-info.rkt")
 
 (provide plot-from-files
-         correlation-plot)
+         correlation-plot
+         unique-sucesses)
 
 (module+
     main
@@ -65,14 +66,6 @@
 
 (define (correlation-plot filenames [output #f])
   (define-values (d-stats b) (process-data (load-raw filenames)))
-  (define (base+num+method->average base num method)
-    (define fn (format "~a-~a.rkt" base num))
-    (for/or ([ele (in-list d-stats)])
-      (define filename (list-ref ele 0))
-      (define-values (base name dir) (split-path filename))
-      (and (equal? (path->string name) fn)
-           (equal? method (list-ref ele 1))
-           (list-ref ele 2))))
   (define type/index (hash 'S 0
                            'SM 1
                            'M 2
@@ -110,7 +103,7 @@
         (for/list ([base+num (in-list all-types/nums)])
           (define base (list-ref base+num 0))
           (define num (list-ref base+num 1))
-          (define time (base+num+method->average base num 'grammar))
+          (define time (type+num+method->average d-stats base num 'grammar))
           (define cat (hash-ref (hash-ref type->num->cat base) num))
           ;; no time => no success; collect them to put on the rhs
           (unless time 
@@ -131,3 +124,41 @@
     (if output
         (plot-file pts output #:x-min 0.05)
         (plot-pict pts #:x-min 0.05))))
+
+
+(define/contract (type+num+method->average d-stats base num method)
+  (-> any/c any/c any/c (or/c 'grammar 'ordered 'enum) (or/c #f (and/c real? positive?)))
+  (define fn (format "~a-~a.rkt" base num))
+  (for/or ([ele (in-list d-stats)])
+    (define filename (list-ref ele 0))
+    (define-values (base name dir) (split-path filename))
+    (and (equal? (path->string name) fn)
+         (equal? method (list-ref ele 1))
+         (list-ref ele 2))))
+
+(define/contract (unique-sucesses filenames)
+  (-> (listof any/c)
+      (hash/c (or/c 'grammar 'ordered 'enum)
+              (listof (list/c symbol? number?))))
+  
+  ;; success-table : hash[(list/c base num) -o> (setof method)])
+  (define success-table (make-hash))
+  
+  (define-values (d-stats b) (process-data (load-raw filenames)))
+  (for ([base+num (in-list all-types/nums)])
+    (define base (list-ref base+num 0))
+    (define num (list-ref base+num 1))
+    (for ([method (in-list '(grammar ordered enum))])
+      (when (type+num+method->average d-stats base num method)
+        (define key (list base num))
+        (hash-set! success-table key
+                   (set-add (hash-ref success-table key (set))
+                            method)))))
+  
+  (define inverted-table (make-hash '((grammar . ()) (ordered . ()) (enum . ()))))
+  (for ([(k v) (in-hash success-table)])
+    (when (= (set-count v) 1)
+      (define method (car (set->list v)))
+      (hash-set! inverted-table method (cons k (hash-ref inverted-table method '())))))
+  (for/hash ([(k v) (in-hash inverted-table)])
+    (values k (sort v string<=? #:key (λ (x) (format "~s" x))))))

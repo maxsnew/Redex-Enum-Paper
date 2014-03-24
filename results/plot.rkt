@@ -43,3 +43,6 @@
 
 (define (correlation-plot-24hour)
   (correlation-plot (dir->files 24-hour)))
+
+(define (unique-sucesses-24hour)
+  (unique-sucesses (dir->files 24-hour)))
