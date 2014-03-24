@@ -18,8 +18,6 @@
                bugs whose counter-examples were never found)}
          (correlation-plot-24hour)]
 
-@; TODO: expand once final results are in
-
 For easy to find bugs (easy in the sense that at least one of the models 
 was able to find a counterexample quickly) the in-order enumeration 
 performed best, while for more difficult to find bugs the strategy
