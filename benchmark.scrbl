@@ -21,8 +21,10 @@ and a soundness property that is universally quantified
 over those terms. Most of the models are of programming
 languages and most of the soundness properties are 
 type-soundness, but we also include red-black trees
-and a few models come with richer properties than
-just type-soundness.
+with the property that insertion preserves the red-black
+invariant, as well as one richer property for programming
+language model (that is more effective for testing
+substitution functions).
 
 For each model, we have manually introduced bugs into a
 number of copies of the model, such that each copy is

@@ -61,18 +61,18 @@
 
 @include-section["intro.scrbl"]
 
-@section{Enumeration Combinators}
+@section[#:tag "sec:enum"]{Enumeration Combinators}
 @include-section{combinators.scrbl}
 
 @include-section["redex-enumeration.scrbl"]
 
-@section{Automated Testing Bechmark}
-@include-section{benchmark.scrbl}
-
 @section{Methodology}
 @include-section{methodology.scrbl}
 
-@section[#:tag "sec:results"]{Results}
+@section{Bechmark Description and Bug-Specific Results}
+@include-section{benchmark.scrbl}
+
+@section[#:tag "sec:results"]{Global Trends in Our Results}
 @include-section{results.scrbl}
 
 @section[#:tag "sec:related-work"]{Related Work}
