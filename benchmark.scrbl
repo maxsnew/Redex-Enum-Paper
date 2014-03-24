@@ -127,18 +127,17 @@ consider this be be a medium bug, as it is not a typo, but
 an oversight in the design of a system that is otherwise
 correct in its approach.
 
-We consider the next three bugs to be shallow.
-Bug 3 reverses the range and the domain of function types
-in the type judgment for applications. This was one of the
-easiest bug for all of our approaches to find.
-Bug 4 assigns @racket[cons] a result type of @racket[int]. 
-The fifth bug returns the head of a list when @racket[tl]
-is applied. Although we consider this to be a shallow bug,
-it is difficult to expose: none of our methods succeeded in doing
-so. Bug 6 only applies the @racket[hd] constant to a partially
-constructed list (i.e., the term @racket[(cons 0)] instead of
-@racket[((cons 0) nil)]).
-All of our approaches also failed to expose bugs 5 and 6.
+We consider the next three bugs to be shallow. Bug 3
+reverses the range and the domain of function types in the
+type judgment for applications. This was one of the easiest
+bug for all of our approaches to find. Bug 4 assigns
+@racket[cons] a result type of @racket[int]. The fifth bug
+returns the head of a list when @racket[tl] is applied. Bug
+6 only applies the @racket[hd] constant to a partially
+constructed list (i.e., the term @racket[(cons 0)] instead
+of @racket[((cons 0) nil)]). Only the grammar based random
+generation exposed bugs 5 and 6 and none of our approaches
+exposed bug 4.
 
 The seventh bug, also classified as medium, omits a production
 from the definition of evaluation contexts and thus doesn't reduce
@@ -308,25 +307,39 @@ in one situation. This is a simple bug.
 
 The first two bugs are among the easiest to find with all three
 generators finding the bug in at most a second or so. The third 
-bug is one of the ones where the ad hoc random generator finds its
+bug is one of the ones where the ad hoc random generator finds it
 in good time (about 10 minutes) but the other two generators 
 cannot find it even with 24 hours of time.
 
 @section{delim-cont}
-A model of the contract and type system for
-delimited control described in @citet[delim-cont-cont]. The language
-is essentially PCF extended with operators for delimited continuations
-and continuation marks, and contracts for those operations. 
-The property checked is type soundness. 3
-mutations of this model are included, one of which was found and fixed
-during the original development of the model.
-This was a pre-existing model developed by @citet[delim-cont-cont] which
-was adapted for the benchmark.
+@citet[delim-cont-cont]'s model of a contract and type system for
+delimited control. The language
+is Plotkin's PCF extended with operators for delimited continuations,
+continuation marks, and contracts for those operations. 
+The property checked is type soundness. Three
+mutations of this model are included. 
 
-delim-cont: 1M 2M 3SD 
- (1 is a real mistake and seems to be an algorithmic mistake. 2 is
- close to 1, and 3 is part way between a typo (S) and a misunderstanding
- of what the type of call/comp should be (D))
+The first of which was a bug we found by mining the model's
+git repository's history. This bug fails to put a list
+contract around the result of extracting the marks from a
+continuation, which has the effect of checking the contract
+that is supposed to be on the elements of a list against the
+list itself instead. We classify this as a medium bug.
+
+The second bug was in the rule for handling list contracts. When checking
+a contract against a cons pair, the rule didn't specify that it should
+apply only when the contract is actually a list contract, meaning
+that the cons rule would be used even on non-list contacts, leading
+to strange contract checking. We consider this a medium bug because
+the bug manifests itself as a missing @racket[list/c] in the rule.
+
+The last bug in this model makes a mistake in the typing
+rule for the continuation operator. The mistake is to leave
+off one-level of arrows, something that is easy to do with
+so many nested arrow types, as continuations tend to have.
+We classify this as a simple error.
+
+None of our generators can find any of these three errors.
 
 @section[#:tag "sec:rvm"]{rvm}
 A preexisting model and test framework for the Racket virtual machine and
