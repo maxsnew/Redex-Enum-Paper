@@ -78,9 +78,7 @@
                            'M 2
                            'MD 3
                            'D 4
-                           'SD 5
-                           'SMD 6
-                           '? 7))
+                           'U 5))
   (define index/type (for/hash ([(k v) (in-hash type/index)])
                        (values v k)))
 
@@ -117,9 +115,13 @@
           ;; no time => no success; collect them to put on the rhs
           (unless time 
             (hash-set! unknowns cat (+ 1 (hash-ref unknowns cat 0))))
+          (define (fail)
+            (error 'plot-lines.rkt "unknown category ~s ~s" cat base+num))
           (and time
                (list time
-                     (hash-ref type/index cat)))))))
+                     (hash-ref type/index 
+                               cat 
+                               fail)))))))
     (define unknown-pts
       (for/list ([(cat count) (in-hash unknowns)])
         (point-label (list unknown-x-position (hash-ref type/index cat))
@@ -127,5 +129,5 @@
                      #:anchor 'right)))
     (define pts (cons known-pts unknown-pts))
     (if output
-        (plot-file pts output)
-        (plot-pict pts))))
+        (plot-file pts output #:x-min 0.05)
+        (plot-pict pts #:x-min 0.05))))
