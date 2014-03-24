@@ -13,10 +13,10 @@
          (line-plot-24hour)]
 
 @figure["fig:correlation"
-        @list{Scatter Plot Between Human Estimate of Complexity and
-              Random Generation Success Time (Right-most column shows
-              bugs whose counter-examples were never found)}
-        (correlation-plot-24hour)]
+         @list{Scatter Plot Between Human Estimate of Complexity and
+               Random Generation Success Time (Right-most column shows
+               bugs whose counter-examples were never found)}
+         (correlation-plot-24hour)]
 
 @; TODO: expand once final results are in
 

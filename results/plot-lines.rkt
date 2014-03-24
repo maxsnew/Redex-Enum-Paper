@@ -1,7 +1,7 @@
 #lang racket
 
 (require redex/examples/benchmark/graph-data
-         plot
+         plot/pict pict
          "graph-data.rkt"
          "../bug-info.rkt")
 
@@ -134,8 +134,13 @@
               (cons (third s)
                     (hash-ref h (second s) '())))))
 
+(define (correlation-plot filenames)
+  (vl-append 10
+             (single-correlation-plot filenames 'grammar 1)
+             (single-correlation-plot filenames 'enum 2)
+             (single-correlation-plot filenames 'ordered 3)))
 
-(define (correlation-plot filenames [output #f])
+(define (single-correlation-plot filenames type color)
   (define-values (d-stats b) (process-data (load-raw filenames)))
   (define type/index (hash 'S 0
                            'SM 1
@@ -158,17 +163,20 @@
   (parameterize ([plot-x-transform log-transform]
                  [plot-y-ticks the-y-ticks]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)]
-                 [plot-x-label "Time in Seconds"]
+                 [plot-x-label (format "~a (seconds)" (hash-ref type-names type))]
                  [plot-y-label "Human Estimate of Bug Complexity"]
-                 [plot-width 270]
-                 [plot-height 270])
+                 [plot-width 240]
+                 [plot-height 240])
     (define unknowns (make-hash))
     (define unknown-x-position #e1e5)
     (define known-pts 
       (points 
        #:y-min -1
        #:y-max (hash-count type/index)
-       #:x-max #e16e4
+       #:x-max #e18e4
+       #:sym (hash-ref type-symbols type)
+       #:size (* (point-size) 1.5)
+       #:color color
        (filter
         values
         (for/list ([base+num (in-list all-types/nums)])
@@ -180,7 +188,7 @@
                           [(equal? base 'rvm)
                            'verification]
                           [else base])
-                        num 'grammar))
+                        num type))
           (define cat (hash-ref (hash-ref type->num->cat base) num))
           ;; no time => no success; collect them to put on the rhs
           (unless time 
@@ -198,9 +206,7 @@
                      (format "~a" count)
                      #:anchor 'right)))
     (define pts (cons known-pts unknown-pts))
-    (if output
-        (plot-file pts output #:x-min 0.05)
-        (plot-pict pts #:x-min 0.05))))
+    (plot-pict pts #:x-min 0.05 #:x-max #e18e4)))
 
 
 (define/contract (type+num+method->average d-stats base num method)
