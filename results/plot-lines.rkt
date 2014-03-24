@@ -99,12 +99,12 @@
                  [plot-width 270]
                  [plot-height 270])
     (define unknowns (make-hash))
-    (define unknown-x-position #e1e4)
+    (define unknown-x-position #e1e5)
     (define known-pts 
       (points 
        #:y-min -1
        #:y-max (hash-count type/index)
-       #:x-max #e16e3
+       #:x-max #e16e4
        (filter
         values
         (for/list ([base+num (in-list all-types/nums)])

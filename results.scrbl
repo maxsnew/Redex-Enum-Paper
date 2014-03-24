@@ -10,14 +10,13 @@
                random indexing into an enumeration,
                and recursive generation from a grammar on 
                a benchmark of Redex models.}
-         (scale (line-plot-4hour) 0.75)
-         @;{TODO: change when 4 hour results are in (scale (line-plot-24hour) 0.75)}]
+         (scale (line-plot-24hour) 0.75)]
 
 @figure["fig:correlation"
         @list{Scatter Plot Between Human Estimate of Complexity and
               Random Generation Success Time (Right-most column shows
               bugs whose counter-examples were never found)}
-        (correlation-plot-4hour)]
+        (correlation-plot-24hour)]
 
 @; TODO: expand once final results are in
 
@@ -83,8 +82,7 @@ generators.
 
 @figure*["fig:benchmark"
          "Performance results by individual bug."
-         (scale (res-plot-4hour) 0.75)
-         @;{TODO: Change when 24 hour results are in! (scale (res-plot-24hour) 0.75)}]
+         (scale (res-plot-24hour) 0.75)]
 
 - explains
 
