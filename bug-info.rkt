@@ -26,21 +26,25 @@
                "../racket-machine/reduction.rkt")))
 (define (type->base-file type) (car (hash-ref type->files type)))
 
-(define type->numof
-  (hash 'stlc 9
-        'poly-stlc 9
-        'stlc-sub 9
-        'list-machine 3
-        'rbtrees 3
-        'delim-cont 3))
+
+;; the order of this list is intended to match the
+;; order of the subsections in the benchmark section
+(define type->numof/order
+  '((stlc 9)
+    (poly-stlc 9)
+    (stlc-sub 9)
+    (list-machine 3)
+    (rbtrees 3)
+    (delim-cont 3)
+    (rvm there-is-no-number-here)))
 
 (define rvm-nums '(2 3 4 5 6 14 15))
 
 (define all-types/nums
-  (for*/list ([t (in-list (hash-keys type->files))]
+  (for*/list ([t (in-list (map car type->numof/order))]
               [n (if (equal? t 'rvm)
                      (in-list rvm-nums)
-                     (in-range 1 (add1 (hash-ref type->numof t))))])
+                     (in-range 1 (add1 (cadr (assoc t type->numof/order)))))])
     (list t n)))
 
 
