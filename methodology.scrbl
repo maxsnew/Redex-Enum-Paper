@@ -42,15 +42,25 @@ results.
 
 For the in-order enumeration, we simply indexed into the
 decode functions (as described in @secref["sec:enum"]),
-starting at zero and incrementing by one each time. For the
-random selection from the uniform distribution, we need a
-mechanism to pick a natural number. To do this, we first
-pick an exponent @raw-latex|{$i$}| in base 2 from the
+starting at zero and incrementing by one each time. 
+
+For the random selection from the uniform distribution, we
+need a mechanism to pick a natural number. To do this, we
+first pick an exponent @raw-latex|{$i$}| in base 2 from the
 geometric distribution and then pick uniformly at random an
 integer that is between @raw-latex|{$2^{i-1}$}| and 
-@raw-latex|{$2^i$}|.
+@raw-latex|{$2^i$}|. We repeat this process three times for
+each number and then take the largest -- this helps make
+sure that the numbers are not always small.
 
-For the random generation, we use Redex's existing 
+The random-selection results are quite sensitive to the
+precise probability of picking the zero exponent (the
+parameter of the geometric distribution). To maximize that
+method's chances of success we picked a value that produced
+terms that have depth between 3 and 4 on average. This seems
+to give that approach the best chance of success.
+
+For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned
 based on our experience programming in Redex, but not
 recently. The most recent change to it was a bug fix in
