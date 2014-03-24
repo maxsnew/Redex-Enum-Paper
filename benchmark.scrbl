@@ -270,11 +270,13 @@ cons typing rule. This bug amounts to a typo and is classified
 as simple.
 
 The second bug is a missing side-condition in the rule that updates
-the store that has the effect of ....
+the store that has the effect of updating the first position in
+the store instead of the proper position in the store for
+all of the store update operations. We classify this as a medium bug.
 
-list-machine: 1S 2M 3S
- (2 is something that would be easy to forget needs to specified
- translating from math where you might just assume alpha-varying)
+The final list-machine bug is a missing subscript in one rule
+that has the effect that the list cons operator does not store
+its result. We classify this as a simple bug.
 
 None of the list-machine bugs were found by any of our generation
 strategies, simply because the structure of the list-machine's
