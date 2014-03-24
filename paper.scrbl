@@ -72,7 +72,7 @@
 @section{Methodology}
 @include-section{methodology.scrbl}
 
-@section{Results}
+@section[#:tag "sec:results"]{Results}
 @include-section{results.scrbl}
 
 @section[#:tag "sec:related-work"]{Related Work}

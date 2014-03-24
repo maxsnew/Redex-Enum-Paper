@@ -58,26 +58,12 @@ The size column shows the number of interior nodes in the
 tree representing the smallest counter-example we know for
 each bug.
 
-@;{
-We hope and expect that Redex should efficiently catch
-shallow errors, catch many medium errors, and be only infrequently
-useful in catching deep errors. Of course, it is possible for trivial
-typos to manifest in deep problems and vice versa, but we hope that
-generally this is true. By analogy to type systems: a deep error is
-writing the wrong program, it might type check, but it's not the one
-you want; a medium error is the kind of situation where a runtime
-exception is thrown, the system catches it, but not beforehand and thus
-maybe with more work; while a shallow error is something that you
-expect the type-system to just identify.
-There are exceptions of course, such as when your finger slips 
-trying to write "x" and you write "y", which happens to
-also be a number, transforming your program into the wrong one --
-a trivial mistake that becomes a deep error.
-}
-
-Each subsection of this section introduces one of the
-models in the benchmark, along with the errors we introduced
-into each model.
+Each subsection of this section introduces one of the models
+in the benchmark, along with the errors we introduced into
+each model. The subsections also discuss the specific bugs,
+pointing out some of the more interesting bug-specific
+results we found. (@Secref["sec:results"] discusses the our
+results from a more global perspective.)
 
 @figure*["fig:benchmark-overview" "Benchmark Overview"]{
  @centered{
@@ -168,27 +154,23 @@ This is a polymorphic version of @bold{stlc}, with
 a single numeric base type, polymorphic lists, and polymorphic 
 versions of the list constants. 
 No changes were made to the model except those necessary to 
-make the lists constants polymorphic.
+make the list operations polymorphic.
 There is no type inference is the model, so all polymorphic
 terms are required to be instantiated with the correct
 types in order for the function to type check. 
 Of course, this makes it much more difficult to automatically 
 generate well-typed terms, and thus counterexamples.
-Again, the property checked is
-type soundness. 
+As with @bold{stlc}, the property checked is
+type soundness.
 
 All of the bugs in this system are identical to those in
 @bold{stlc}, aside from any changes that had to be made
-to translate them to this model, so we don't discuss them in detail.
-The interesting thing here is how otherwise unrelated changes
-to the system may make bugs much easier or much more difficult
-to find, something we have seen time and time again in our
-experience with automated testing. Comparing the results
+to translate them to this model. Comparing the results
 for these two systems in @figure-ref["fig:benchmark"], we can see
 indeed some bugs have become easier to find (such as bug 7) and
 some have become more difficult (such as bug 2).
 
-This model is actually a subset of the language specified in
+This model is also a subset of the language specified in
 @citet[palka-workshop], who used a specialized and optimized
 QuickCheck generator for a similar type system to find bugs 
 in GHC. We adapted this system (and its restriction in
@@ -196,71 +178,57 @@ in GHC. We adapted this system (and its restriction in
 with random testing, which makes it a reasonable target for
 an automated testing benchmark.
 
-
-@;{
-   Jay's comments:
-poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
- (2 is something where people generally aren't specific about what is
- a value in their semantics in LaTeX, so they might forget about this
- case. 4 might look like a D, but I can't imagine a reasonable person
- not knowing that cons should return a list and not an element; but
- this seems like a perfect example of a typo that becomes a deep
- error. 6 feels like a misunderstanding of an algorithm. 8 does not
- feel like a legitimate error, maybe you could imagine someone testing
- with a half-baked lookup and forgetting to fix it, but I can't
- imagine anyone really making this mistake during authoring.)}
-
 @section{stlc-sub} 
 The same language and type system as @bold{stlc},
 except that in this case all of the errors are in the substitution
 function. 
-Our own experience has been that it is easy to make
-subtle errors when writing substitution functions, so we added
-this set of tests specifically to target them with the benchmark.
-There are two soundness checks for this system.
-Bugs 1-5 are checked in the following way: given a candidate
-counterexample, a β-redex @emph{anywhere} in the term is
-reduced to get a second term, and then those two terms
-are required to be Kleene-equal, or that the result of
-passing both to the evaluator (which uses call-by-value
-standard reduction and thus may not reduce all β-redexes)
-is the same.
-Bugs 4-9 are checked using type soundness for this sysem
-as specified in the discussion of the @bold{stlc} model.
-We included two predicates for this system because we
-believe the first to be a good test for a substitution 
-function but not something that a typical Redex user
-would write, while the second is something one would
-see in most Redex models but is less effective at
-catching substitution bugs.
 
-The first substitution bug we introduced simply omits
-the case that replaces the correct variable with the
-with the term to be substituted. 
-We considered this to
-be a shallow (S) error, and indeed all approaches were able 
-to uncover it, although the time it took to do so ranged
-from 1 second to around 2 minutes.
+Our own experience has been that it is easy to make subtle
+errors when writing substitution functions, so we added this
+set of tests specifically to target them with the benchmark.
+There are two soundness checks for this system. Bugs 1-5 are
+checked in the following way: given a candidate
+counterexample, if it type checks, then all βv-redexes in
+the term are reduced (but not any new ones that might
+appear) to get a second term. Then, these two terms are
+checked to see if they both have the same type and that the
+result of passing both to the evaluator is the same.
+
+Bugs 4-9 are checked using type soundness for this sysem as
+specified in the discussion of the @bold{stlc} model. We
+included two predicates for this system because we believe
+the first to be a good test for a substitution function but
+not something that a typical Redex user would write, while
+the second is something one would see in most Redex models
+but is less effective at catching bugs in the substitution
+function.
+
+The first substitution bug we introduced simply omits the
+case that replaces the correct variable with the with the
+term to be substituted. We considered this to be a shallow
+error, and indeed all approaches were able to uncover it,
+although the time it took to do so ranged from 1 second to
+around 2 minutes.
+
 Bug 2 permutes the order of arguments when making a
-recursive call. 
-This was also categorized as a shallow (S)
-bug, although a common one based on our experience
-writing substitutions in Redex.
+recursive call. This is also categorized as a shallow bug,
+although it is a common one, at least  based on our
+experience writing substitutions in Redex.
+
 Bug 3 swaps the function and argument positions of
 an application recurring, again essentially a typo and
 a shallow error, although one of the more difficult to
 find bugs in this model.
 
 The fourth substitution bug neglects to make the renamed
-bound variable ``fresh enough'' when when recurring past a lambda. 
-Specifically, it ensures that the new variable is fresh
-with respect to the body of the function but not the bound
-or substitution variables. This bug has the rather involved
-counterexample:
-@centered[@racket[((λ (z int) (((λ (y1 int) (λ (y int) y)) z) 1)) 0)]]
-We categorized this error as medium or deep (MD), based on
-the fact that it could be attributed to either an
-oversight or a fundamental misunderstanding of substitution.
+bound variable fresh enough when when recurring past a
+lambda. Specifically, it ensures that the new variable is
+not one that appears in the body of the function, but it
+fails to make sure that the variable is different from the
+bound variable or the substituted variables. We categorized
+this error as deep because it corresponds to a
+misunderstanding of how to generate fresh variables, a
+central concern of substitution functions.
 
 Bug 5 carries out the substitution for all variables in the
 term. We categorized it as SM, since it is essentially a
