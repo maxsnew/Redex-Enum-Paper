@@ -286,20 +286,31 @@ for the random generators) and the smallest expressions that
 type check, while not huge, are still larger than in the other models
 (which is difficult for the enumerator).
 
-@section{rbtrees} A
-model implementing red-black trees via a judgment
-that a tree has the red-black property and a metafunction defining
-the insert operation. The property checked is that insert preserves
-the red-black tree property. 3 mutations of this model are included.
+@section{rbtrees} A model that implements the red-black
+tree insertion function and checks that insertion preserves
+the red-black tree invariant (and that the red-black tree is
+a binary search tree).
 
-rbtrees: 1SD 2SM 3SMD
- (1 is missing a fundamental thing, as is 2. But in the case of 1 it's
- like the author didn't realize it was needed (D) but in 2 it's
- missing a step of algorithm (M), yet its also a typo because I can
- see going through a paper translating things and accidentally
- skipping a line in the translation. 3 can really fit into every
- category: it's small so that's like S, but there's a case for the
- others as well.)
+The first bug simply removes the re-balancing operation from
+insert. We classified this bug as medium since it seems like
+the kind of mistake that a developer might make in staging
+the implementation. That is, the re-balancing operation is separate
+and so might be put off initially, but then forgotten. 
+
+The second bug misses one situation in the re-balancing
+operation, namely when a black node has two red nodes under
+it, with the second red node to the right of the first. This
+is a medium bug.
+
+The third bug is in the function that counts the black depth in
+the red-black tree predicate. It forgets to increment the count
+in one situation. This is a simple bug.
+
+The first two bugs are among the easiest to find with all three
+generators finding the bug in at most a second or so. The third 
+bug is one of the ones where the ad hoc random generator finds its
+in good time (about 10 minutes) but the other two generators 
+cannot find it even with 24 hours of time.
 
 @section{delim-cont}
 A model of the contract and type system for
