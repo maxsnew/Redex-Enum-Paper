@@ -23,8 +23,8 @@
   (parameterize ([plot-x-transform log-transform]
                  [plot-x-label "Time in Seconds"]
                  [plot-y-label "Number of Bugs Found"]
-                 [plot-width 800] 
-                 [plot-height 400]
+                 [plot-width 600] 
+                 [plot-height 300]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)])
     (if output
         (plot-file (make-renderers d-stats)

@@ -3,6 +3,7 @@
 (require "plot-lines.rkt"
          redex/examples/benchmark/graph-data
          racket/runtime-path
+         plot/pict
          pict)
 
 (provide (all-defined-out))
@@ -11,25 +12,23 @@
 (define-runtime-path 24-hour "24-hour")
 
 (define (res-plot-4hour)
-  (scale
-   (plot-results
-    (dir->files 4-hour))
-   0.5))
+  (plot-results
+   (dir->files 4-hour)))
 
 (define (dir->files d)
   (for/list ([f (in-directory d)]) 
     (path->string (path->complete-path f d))))
 
 (define (res-plot-24hour)
-  (scale
-   (plot-results
-    (dir->files 24-hour))
-   0.5))
+  (plot-results
+   (dir->files 24-hour)))
 
 (define (plot-results fnames)
   (parameterize ([confidence-interval #t]
                  ;[order-by 'grammar]
-                 [types '(grammar enum ordered)])
+                 [types '(grammar enum ordered)]
+                 [plot-width 650]
+                 [plot-height 400])
     (make-plot fnames)))
 
 (define (line-plot-4hour)

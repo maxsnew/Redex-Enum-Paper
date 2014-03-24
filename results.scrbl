@@ -10,7 +10,7 @@
                random indexing into an enumeration,
                and recursive generation from a grammar on 
                a benchmark of Redex models.}
-         (scale (line-plot-24hour) 0.75)]
+         (line-plot-24hour)]
 
 @figure["fig:correlation"
         @list{Scatter Plot Between Human Estimate of Complexity and
@@ -81,8 +81,8 @@ generators.
 
 
 @figure*["fig:benchmark"
-         "Performance results by individual bug."
-         (scale (res-plot-24hour) 0.75)]
+         "Performance Results by Individual Bug"
+         (res-plot-24hour)]
 
 - explains
 
