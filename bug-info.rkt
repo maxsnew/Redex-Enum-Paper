@@ -52,7 +52,7 @@
          5 'S
          6 'M
          7 'M
-         8 '?
+         8 'U
          9 'S)
    'poly-stlc
    ; poly-stlc: 1S 2M 3S 4S 5S 6M 7M 8? 9S
@@ -63,7 +63,7 @@
          5 'S
          6 'M
          7 'M
-         8 '?
+         8 'U
          9 'S)
    'stlc-sub
    ; stlc-sub: 1S 2S 3S 4M 5SM
@@ -83,17 +83,17 @@
          3 'S)
    'rbtrees
    ; rbtrees: 1SD 2SM 3SMD
-   (hash 1 'SD
-         2 'SM
-         3 'SMD)
+   (hash 1 'M
+         2 'M
+         3 'S)
    'delim-cont
    ; delim-cont: 1M 2M 3SD
    (hash 1 'M
          2 'M
-         3 'SD)
+         3 'S)
    'rvm
    ; rvm: 2? 3D 4M 5M 6M 14M 15S
-   (hash 2 '?
+   (hash 2 'M
          3 'D
          4 'M
          5 'M
