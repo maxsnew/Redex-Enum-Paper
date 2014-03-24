@@ -34,11 +34,16 @@ The table in @figure-ref["fig:benchmark-overview"] gives an overview
 of the benchmark suite, showing some numbers for each model and bug. 
 Each model has its name the number of lines of code in the correct
 version (the buggy versions are always within a few lines of the
-originals). Each bug has a number and with the exception of
-the rvm model, the numbers count from 1 up to the number of bugs.
-The rvm model bugs are all from @citet[racket-virtual-machine]'s work and 
-we follow their numbering scheme (see @secref["sec:rvm"] for
-more information about how we chose the bugs from that paper).
+originals). The line number counts include the specification of
+the property and a little bit of model-specific code to call into
+the different generators.
+
+Each bug has a number and, with the exception of the rvm
+model, the numbers count from 1 up to the number of bugs.
+The rvm model bugs are all from 
+@citet[racket-virtual-machine]'s work and we follow their
+numbering scheme (see @secref["sec:rvm"] for more
+information about how we chose the bugs from that paper).
 
 The @bold{S/M/D/U} column shows a classification of each bug as:
 @itemlist[
