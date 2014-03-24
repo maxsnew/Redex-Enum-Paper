@@ -2,6 +2,7 @@
 
 @(require "results/plot.rkt"
           "cite.rkt"
+          "util.rkt"
           scriblib/figure
           scriblib/footnote
           (only-in pict scale)
