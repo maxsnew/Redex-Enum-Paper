@@ -58,6 +58,8 @@ elements, the left-hand one has seen
 another, whereas the right-hand one has seen at most either
 @min-fair or @max-fair in all components.
 
+@; XXX I think we should add a "so what" to this paragraph to reinforce that it is tricky to get this right and obviously we do the right.
+
 Another combinator is the disjoint union
 operator, @racket[disj-sum/e], that takes two or more
 enumerators and predicates to distinguish between their
@@ -149,6 +151,8 @@ number it is given. This means, for example, that it takes only
 a few milliseconds to compute the
 @raw-latex|{\(2^{100,000}\)}|th element
 in the list of natural number enumeration given above.
+
+@; xxx put in a \newpage
 
 Our next combinator @racket[dep/e] doesn't always have this property.
 It accepts an enumerator and a function from elements to enumerators
