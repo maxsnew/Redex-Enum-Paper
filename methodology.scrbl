@@ -30,8 +30,7 @@ although we ran multiple combinations at once in parallel.
 
 We used the unreleased version 6.0.0.5 of Racket (of which
 Redex is a part); more precisely the version at git commit
-@tt{a7d6809243},@note{Available online:
- @url{https://github.com/plt/racket/commit/a7d6809243}}
+@tt{a7d6809243},@note{@url{https://github.com/plt/racket/commit/a7d6809243}}
 except for the in-order generation of the @bold{rvm} model,
 because we discovered a bug in that model late. They were
 run from a slightly different version of Racket, namely
@@ -44,7 +43,7 @@ decode functions (as described in @secref["sec:enum"]),
 starting at zero and incrementing by one each time. For the
 random selection from the uniform distribution, we need a
 mechanism to pick a natural number. To do this, we first
-pick an exponent @raw-latex|{$e$}| in base 2 from the
+pick an exponent @raw-latex|{$i$}| in base 2 from the
 geometric distribution and then pick uniformly at random an
 integer that is between @raw-latex|{$2^{i-1}$}| and 
 @raw-latex|{$2^i$}|.

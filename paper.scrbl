@@ -5,7 +5,8 @@
           scribble/latex-properties)
 
 @(define extra-tex-code
-   (bytes-append #"\\usepackage{inconsolata}\n"
+   (bytes-append #"\\usepackage{pslatex}\n"
+                 #"\\usepackage{inconsolata}\n"
                  
                  ;; used for the table of the bugs
                  #"\\newcommand{\\ErrorDescriptionBox}[1]{"
