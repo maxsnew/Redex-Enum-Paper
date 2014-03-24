@@ -14,7 +14,7 @@
 
 @figure["fig:correlation"
          @list{Scatter Plot Between Human Estimate of Complexity and
-               Random Generation Success Time (Right-most column shows
+               Random Generation Success Time in Seconds (Right-most column shows
                bugs whose counter-examples were never found)}
          (correlation-plot-24hour)]
 

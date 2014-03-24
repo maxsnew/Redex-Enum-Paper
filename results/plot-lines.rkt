@@ -163,7 +163,7 @@
   (parameterize ([plot-x-transform log-transform]
                  [plot-y-ticks the-y-ticks]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)]
-                 [plot-x-label (format "~a (seconds)" (hash-ref type-names type))]
+                 [plot-x-label (hash-ref type-names type)]
                  [plot-y-label "Human Estimate of Bug Complexity"]
                  [plot-width 240]
                  [plot-height 240])
@@ -207,7 +207,6 @@
                      #:anchor 'right)))
     (define pts (cons known-pts unknown-pts))
     (plot-pict pts #:x-min 0.05 #:x-max #e18e4)))
-
 
 (define/contract (type+num+method->average d-stats base num method)
   (-> any/c
