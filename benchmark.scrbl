@@ -38,14 +38,17 @@ find.
 
 We classify each of the errors as either:
 @itemlist[
-  @item{@bold{D} (Deep) Errors in the developer's understanding of the system, 
-         such as when a type system really isn't sound.}
-  @item{@bold{M} (Medium) Errors in the algorithm behind the
-         system, such as when two judgments happen to both apply except when
-         some algorithmic side-condition holds and the developer doesn't
-         realize this side-condition must exist or forgets to write it down.}
   @item{@bold{S} (Shallow) Errors in the encoding of the system into Redex,
-         due to typos or a misunderstanding of subtleties of Redex.}]
+         due to typos or a misunderstanding of subtleties of Redex.}
+  @item{@bold{M} (Medium) Errors in the algorithm behind the
+         system, such as using too simple of a data-structure that doesn't
+         allow some important distinction, or misunderstanding that some
+         rule should have a side-condition that limits its applicability.}
+  @item{@bold{D} (Deep) Errors in the developer's understanding of the system, 
+         such as when a type system really isn't sound and the author
+         doesn't realize it.}
+  @item{@bold{U} (Unnatural) Errors that are unlikely to have come up in
+         real Redex programs but are included for our own curiosity.}]
 
 @;{
 We hope and expect that Redex should efficiently catch
@@ -74,7 +77,7 @@ into each model.
            @hspace[1]
            (cons
             (list @bold{Model}
-                  @bold{LOC}
+                  @bold{LoC}
                   @bold{Bug #}
                   @bold{S/M/D}
                   @bold{Size}
