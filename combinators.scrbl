@@ -52,13 +52,17 @@ In particular, here are two different ways to make
 @(tabular (list (list (codeblock unfair-exp)
                       (codeblock fair-exp))))
 
-After enumerating @code{@(number->string num-enumerated)}
-elements, the left-hand one has seen
-@max-unfair in one component but only @min-unfair in
-another, whereas the right-hand one has seen at most either
-@min-fair or @max-fair in all components.
-
-@; XXX I think we should add a "so what" to this paragraph to reinforce that it is tricky to get this right and obviously we do the right.
+After enumerating @code{@(number->string num-enumerated)} elements,
+the left-hand one has seen @max-unfair in one component but only
+@min-unfair in another, whereas the right-hand one has seen at most
+either @min-fair or @max-fair in all components. We refer to the
+right-hand version as being "fair" and always prefer fairness in our
+implementations, because it appears to correspond to the uniformity
+that is perceived as valuable with enumeration. In our experience,
+most of the time the obvious version of an enumerator is not fair and
+the details required to tweak it are non-intuitive. In this case, the
+key insight to achieve fairness is to map the leaves of the enumerated
+structure to the triangle numbers.
 
 Another combinator is the disjoint union
 operator, @racket[disj-sum/e], that takes two or more
