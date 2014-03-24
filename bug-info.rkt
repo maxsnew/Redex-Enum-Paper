@@ -14,14 +14,17 @@
 ;; symbol is 'stlc etc., and the nat is the bug number
 ;; (except get-line count, which gets the base file LOC)
 
-(define type->base-files
-  (hash 'stlc "stlc/stlc-base.rkt"
-        'poly-stlc "poly-stlc/poly-stlc-base.rkt"
-        'stlc-sub "stlc-sub/stlc-sub-base.rkt"
-        'rbtrees "rbtrees/rbtrees-base.rkt"
-        'list-machine "list-machine/list-machine-base.rkt"
-        'delim-cont "delim-cont/delim-cont-base.rkt"
-        'rvm "rvm/verification-base.rkt"))
+(define type->files
+  (hash 'stlc '("stlc/stlc-base.rkt")
+        'poly-stlc '("poly-stlc/poly-stlc-base.rkt")
+        'stlc-sub '("stlc-sub/stlc-sub-base.rkt")
+        'rbtrees '("rbtrees/rbtrees-base.rkt")
+        'list-machine '("list-machine/list-machine-base.rkt")
+        'delim-cont '("delim-cont/delim-cont-base.rkt")
+        'rvm '("rvm/verification-base.rkt"
+               "../racket-machine/grammar.rkt"
+               "../racket-machine/reduction.rkt")))
+(define (type->base-file type) (car (hash-ref type->files type)))
 
 (define type->numof
   (hash 'stlc 9
@@ -34,7 +37,7 @@
 (define rvm-nums '(2 3 4 5 6 14 15))
 
 (define all-types/nums
-  (for*/list ([t (in-list (hash-keys type->base-files))]
+  (for*/list ([t (in-list (hash-keys type->files))]
               [n (if (equal? t 'rvm)
                      (in-list rvm-nums)
                      (in-range 1 (add1 (hash-ref type->numof t))))])
@@ -105,8 +108,10 @@
   (hash-ref (hash-ref type->num->cat type) num))
 
 (define (get-line-count type)
-  (define path (bmark-path (hash-ref type->base-files type)))
-  (number->string (line-count path)))
+  (number->string
+   (for/sum ([file (in-list (hash-ref type->files type))])
+     (define path (bmark-path file))
+     (line-count path))))
 
 (define (bmark-path file)
   (collection-file-path file "redex" "examples" "benchmark"))
@@ -128,7 +133,7 @@
   (count-pairs cx))
 
 (define (get-counterexample type num)
-  (define base (hash-ref type->base-files type))
+  (define base (type->base-file type))
   (define path (bmark-path (regexp-replace "base" base (number->string num))))
   (dynamic-require path 'small-counter-example))
 
@@ -141,7 +146,7 @@
     [else 0]))
 
 (define (get-diff type num)
-  (define base (hash-ref type->base-files type))
+  (define base (type->base-file type))
   (define path (bmark-path (regexp-replace "/.*base.rkt" base 
                                            (string-append "/"
                                                           (number->string num)
@@ -154,6 +159,6 @@
               "\n")))))
 
 (define (get-error type num)
-  (define base (hash-ref type->base-files type))
+  (define base (type->base-file type))
   (define path (bmark-path (regexp-replace "base" base (number->string num))))
   (dynamic-require path 'the-error))
