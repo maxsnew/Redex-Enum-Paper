@@ -15,16 +15,15 @@ the years and from models that we and others
 have developed and bugs that were encountered during
 the development process.
 
-The benchmark has six different Redex models, each
-of which provides a grammar of terms for the model
-and a soundness property that is universally quantified
-over those terms. Most of the models are of programming
-languages and most of the soundness properties are 
-type-soundness, but we also include red-black trees
-with the property that insertion preserves the red-black
-invariant, as well as one richer property for programming
-language model (that is more effective for testing
-substitution functions).
+The benchmark has six different Redex models, each of which
+provides a grammar of terms for the model and a soundness
+property that is universally quantified over those terms.
+Most of the models are of programming languages and most of
+the soundness properties are type-soundness, but we also
+include red-black trees with the property that insertion
+preserves the red-black invariant, as well as one richer
+property for one of the programming language models 
+(discussed in @secref["sec:stlc-sub"]).
 
 For each model, we have manually introduced bugs into a
 number of copies of the model, such that each copy is
@@ -34,7 +33,7 @@ property.
 
 The table in @figure-ref["fig:benchmark-overview"] gives an overview
 of the benchmark suite, showing some numbers for each model and bug. 
-Each model has its name the number of lines of code in the correct
+Each model has its name and the number of lines of code in the correct
 version (the buggy versions are always within a few lines of the
 originals). The line number counts include the specification of
 the property and a little bit of model-specific code to call into
@@ -59,7 +58,8 @@ The @bold{S/M/D/U} column shows a classification of each bug as:
          such as when a type system really isn't sound and the author
          doesn't realize it.}
   @item{@bold{U} (Unnatural) Errors that are unlikely to have come up in
-         real Redex programs but are included for our own curiosity.}]
+         real Redex programs but are included for our own curiosity. There
+         are only two bugs in this category.}]
 
 The size column shows the number of interior nodes in the
 tree representing the smallest counter-example we know for
@@ -114,18 +114,18 @@ preservation (if a term has a type and takes a step, then
 the resulting term has the same type) and progress (that
 well-typed non-values always take a reduction step). 
 
-We introduced nine different bugs into this system.
-The first confuses the range and domain types of the function
-in the application rule, and has the small counterexample:
-@racket[hd 0]. 
-We consider this to be a shallow bug, since it is 
-essentially a typo and it is hard to imagine anyone with
-any knowledge of type systems making this conceptual mistake.
-Bug 2 neglects to specify that a fully applied @racket[cons]
-is a value, thus the list @racket[((cons 0) nil)] violates
-the progress property. We consider this be be a medium bug,
-as it is not a typo, but an oversight in the design of a system
-that is otherwise correct in its approach.
+We introduced nine different bugs into this system. The
+first confuses the range and domain types of the function in
+the application rule, and has the small counterexample: 
+@racket[(hd 0)]. We consider this to be a shallow bug, since
+it is essentially a typo and it is hard to imagine anyone
+with any knowledge of type systems making this conceptual
+mistake. Bug 2 neglects to specify that a fully applied 
+@racket[cons] is a value, thus the list 
+@racket[((cons 0) nil)] violates the progress property. We
+consider this be be a medium bug, as it is not a typo, but
+an oversight in the design of a system that is otherwise
+correct in its approach.
 
 We consider the next three bugs to be shallow.
 Bug 3 reverses the range and the domain of function types
@@ -185,7 +185,7 @@ in GHC. We adapted this system (and its restriction in
 with random testing, which makes it a reasonable target for
 an automated testing benchmark.
 
-@section{stlc-sub} 
+@section[#:tag "sec:stlc-sub"]{stlc-sub} 
 The same language and type system as @bold{stlc},
 except that in this case all of the errors are in the substitution
 function. 
@@ -197,11 +197,12 @@ There are two soundness checks for this system. Bugs 1-5 are
 checked in the following way: given a candidate
 counterexample, if it type checks, then all βv-redexes in
 the term are reduced (but not any new ones that might
-appear) to get a second term. Then, these two terms are
-checked to see if they both have the same type and that the
-result of passing both to the evaluator is the same.
+appear)  using the substitution function to get a second
+term. Then, these two terms are checked to see if they both
+still type check and have the same type and that the result
+of passing both to the evaluator is the same.
 
-Bugs 4-9 are checked using type soundness for this sysem as
+Bugs 4-9 are checked using type soundness for this system as
 specified in the discussion of the @bold{stlc} model. We
 included two predicates for this system because we believe
 the first to be a good test for a substitution function but
@@ -232,45 +233,56 @@ bound variable fresh enough when when recurring past a
 lambda. Specifically, it ensures that the new variable is
 not one that appears in the body of the function, but it
 fails to make sure that the variable is different from the
-bound variable or the substituted variables. We categorized
+bound variable or the substituted variable. We categorized
 this error as deep because it corresponds to a
 misunderstanding of how to generate fresh variables, a
-central concern of substitution functions.
+central concern of the substitution function.
 
 Bug 5 carries out the substitution for all variables in the
-term. We categorized it as SM, since it is essentially a
-missing side condition, although a fairly egregious one.
+term, not just the given variable. We categorized it as SM,
+since it is essentially a missing side condition, although a
+fairly egregious one.
 
 Bugs 6-9 are duplicates of bugs 1-3 and bug 5, except that
-they are tested with type soundness instead. (It is impossible
-to detect bug 4 with this property.) 
-@; this really is surprising! can't think of what else to say
-@; about it right now
-Surprisingly, there
-is not as a clear a difference as one might expect in
-the effectiveness of the two properties in our results,
-although type soundness is just slightly less effective 
-overall.
-(See the ``sltc-sub'' models in @figure-ref["fig:benchmark"].)
+they are tested with type soundness instead. (It is
+impossible to detect bug 4 with this property.)
+Surprisingly, there is not as a clear a difference as one
+might expect in the effectiveness of the two properties in
+our results, although type soundness is slightly less
+effective overall. (See the ``sltc-sub'' models in 
+@figure-ref["fig:benchmark"].)
 
-@; TODO discussion for the rest of the models
-@; I found in helpful to reference the table in "bugs-table.scrbl"
-@; as I went though these
-@section{list-machine} 
-An implementation of the 
-@italic{list-machine benchmark} described in @citet[list-machine],
-this is a reduction semantics (as a pointer machine operating over
-an instruction pointer and a store) and a type system for a
-seven-instruction first-order assembly language that manipulates
-@tt{cons} and @tt{nil} values. The property checked is type soundness
-as specified in @citet[list-machine], namely that well-typed programs
-always step or halt (``do not get stuck''). 3 mutations are included.
-This was a pre-existing implementation of this system in Redex
-that we adapted for the benchmark.
+@section{list-machine} An implementation of 
+@citet[list-machine]'s list-machine benchmark. This is a
+reduction semantics (as a pointer machine operating over an
+instruction pointer and a store) and a type system for a
+seven-instruction first-order assembly language that
+manipulates @tt{cons} and @tt{nil} values. The property
+checked is type soundness as specified in 
+@citet[list-machine], namely that well-typed programs always
+step or halt. Three mutations are included. This model was
+one of the standard examples distributed with Redex that we
+adapted for the benchmark.
+
+The first list-machine bug incorrectly uses the head position
+of a cons pair where it should use the tail position in the 
+cons typing rule. This bug amounts to a typo and is classified
+as simple.
+
+The second bug is a missing side-condition in the rule that updates
+the store that has the effect of ....
 
 list-machine: 1S 2M 3S
  (2 is something that would be easy to forget needs to specified
  translating from math where you might just assume alpha-varying)
+
+None of the list-machine bugs were found by any of our generation
+strategies, simply because the structure of the list-machine's
+typing rules definition. These rules require the generators
+to generate both a term and a type that match (which is difficult
+for the random generators) and the smallest expressions that
+type check, while not huge, are still larger than in the other models
+(which is difficult for the enumerator).
 
 @section{rbtrees} A
 model implementing red-black trees via a judgment
