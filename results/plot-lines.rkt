@@ -70,7 +70,7 @@
                grammar-pr
                enum-pr
                ordered-pr))
-      (define x-position (list-ref grammar-pr 1))
+      (define y-position (list-ref grammar-pr 1))
       (define grammar-time (list-ref grammar-pr 0))
       (define enum-time (list-ref enum-pr 0))
       (define ordered-time (list-ref ordered-pr 0))
@@ -83,8 +83,10 @@
       (values current-winner
               (cond
                 [(and last-winner (not (equal? last-winner current-winner)))
-                 (cons (point-label (vector best x-position)
-                                    (format-time best)
+                 (cons (point-label (vector best y-position)
+                                    (format "~a, ~a"
+                                            (number+unit/s y-position "bug")
+                                            (format-time best))
                                     #:anchor 'bottom-right)
                        crossover-points)]
                 [else
@@ -103,14 +105,15 @@
       #:label (hash-ref type-names type)))))
 
 (define (format-time number)
-  (define (pl raw-n unit) 
-    (define n (round raw-n))
-    (format "~a ~a~a" n unit (if (= n 1) "" "s")))
   (cond
-    [(<= number 60) (pl number "second")]
-    [(<= number (* 60 60)) (pl (/ number 60) "minute")]
-    [(<= number (* 60 60 24)) (pl (/ number 60 60) "hour")]
-    [else (pl (/ number 60 60 24) "day")]))
+    [(<= number 60) (number+unit/s number "second")]
+    [(<= number (* 60 60)) (number+unit/s (/ number 60) "minute")]
+    [(<= number (* 60 60 24)) (number+unit/s (/ number 60 60) "hour")]
+    [else (number+unit/s (/ number 60 60 24) "day")]))
+
+(define (number+unit/s raw-n unit) 
+  (define n (round raw-n))
+  (format "~a ~a~a" n unit (if (= n 1) "" "s")))
 
 (module+ test
   (require rackunit)
@@ -230,82 +233,3 @@
       (hash-set! inverted-table method (cons k (hash-ref inverted-table method '())))))
   (for/hash ([(k v) (in-hash inverted-table)])
     (values k (sort v string<=? #:key (λ (x) (format "~s" x))))))
-
-(plot-from-files
- '("/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-6-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-6-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-6-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-5-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-4-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-3-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-15-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-15-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/verification-14-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-9-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-9-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-9-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-8-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-8-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-8-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-7-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-7-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-7-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-6-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-6-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-6-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-5-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-5-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-5-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-3-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-3-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-3-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-2-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-2-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-2-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-1-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-1-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-sub-1-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-9-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-9-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-9-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-8-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-8-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-8-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-7-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-7-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-7-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-6-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-5-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-4-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-3-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-3-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-3-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-2-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-2-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-2-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-1-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-1-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/stlc-1-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-3-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-2-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-2-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-2-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-1-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-1-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/rbtrees-1-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-9-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-9-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-9-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-8-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-8-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-8-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-7-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-7-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-7-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-3-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-3-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-3-enum-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-2-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-1-ordered-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-1-grammar-results.rktd"
-  "/Users/robby/git/max/Redex-Enum-Paper/results/24-hour/poly-stlc-1-enum-results.rktd"))
