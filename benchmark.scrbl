@@ -26,17 +26,21 @@ just type-soundness.
 
 For each model, we have manually introduced bugs into a
 number of copies of the model, such that each copy is
-identical to the correct, except for a single bug. The bugs
+identical to the correct one, except for a single bug. The bugs
 always manifest as a term that falsifies the soundness
-property. We compare automated testing strategies based on
-how quickly they are able to find counterexamples for the
-soundness properties of the buggy models. Each buggy model
-also has a small counterexample in its source and a test
-case validating that it violates the soundness property,
-ensuring that the bugs are indeed bugs and are possible to
-find.
+property. 
 
-We classify each of the errors as either:
+The table in @figure-ref["fig:benchmark-overview"] gives an overview
+of the benchmark suite, showing some numbers for each model and bug. 
+Each model has its name the number of lines of code in the correct
+version (the buggy versions are always within a few lines of the
+originals). Each bug has a number and with the exception of
+the rvm model, the numbers count from 1 up to the number of bugs.
+The rvm model bugs are all from @citet[racket-virtual-machine]'s work and 
+we follow their numbering scheme (see @secref["sec:rvm"] for
+more information about how we chose the bugs from that paper).
+
+The @bold{S/M/D/U} column shows a classification of each bug as:
 @itemlist[
   @item{@bold{S} (Shallow) Errors in the encoding of the system into Redex,
          due to typos or a misunderstanding of subtleties of Redex.}
@@ -49,6 +53,10 @@ We classify each of the errors as either:
          doesn't realize it.}
   @item{@bold{U} (Unnatural) Errors that are unlikely to have come up in
          real Redex programs but are included for our own curiosity.}]
+
+The size column shows the number of interior nodes in the
+tree representing the smallest counter-example we know for
+each bug.
 
 @;{
 We hope and expect that Redex should efficiently catch
@@ -79,7 +87,7 @@ into each model.
             (list @bold{Model}
                   @bold{LoC}
                   @bold{Bug #}
-                  @bold{S/M/D}
+                  @bold{S/M/D/U}
                   @bold{Size}
                   @bold{Description of Error})
             (let ([last-model #f])
@@ -102,53 +110,58 @@ into each model.
   }
 }
 
-@section{stlc} 
-A simply-typed lambda calculus with base
-types of numbers and lists of numbers, including the constants
+@section{stlc} A simply-typed lambda calculus with base
+types of numbers and lists of numbers, including the
+constants
 @tt{+}, which operates on numbers, and
-@tt{cons}, @tt{head}, @tt{tail}, and @tt{nil} (the empty list), all
-of which operate only on lists of numbers. This model has @(get-line-count 'stlc)
-non-whitespace, non-comment lines of code.
-The property checked is type soundness: the combination of subject reduction 
-(that types are preserved by the reductions) and progress (that well-typed
-non-values always take a reduction step). 
+@tt{cons}, @tt{head}, @tt{tail}, and @tt{nil} (the empty
+list), all of which operate only on lists of numbers. The
+property checked is type soundness: the combination of
+preservation (if a term has a type and takes a step, then
+the resulting term has the same type) and progress (that
+well-typed non-values always take a reduction step). 
 
 We introduced nine different bugs into this system.
 The first confuses the range and domain types of the function
 in the application rule, and has the small counterexample:
 @racket[hd 0]. 
-We consider this to be a shallow (S) bug, since it is 
+We consider this to be a shallow bug, since it is 
 essentially a typo and it is hard to imagine anyone with
 any knowledge of type systems making this conceptual mistake.
 Bug 2 neglects to specify that a fully applied @racket[cons]
 is a value, thus the list @racket[((cons 0) nil)] violates
-the progress property. We consider this be be a medium (M) bug,
+the progress property. We consider this be be a medium bug,
 as it is not a typo, but an oversight in the design of a system
 that is otherwise correct in its approach.
-We consider the next three bugs to be shallow (S).
+
+We consider the next three bugs to be shallow.
 Bug 3 reverses the range and the domain of function types
 in the type judgment for applications. This was one of the
-easiest bugs for all of our approaches to find.
+easiest bug for all of our approaches to find.
 Bug 4 assigns @racket[cons] a result type of @racket[int]. 
-(Initially we didn't include @racket[+] as an operation in this
-model, which made it impossible to observe this bug.)
 The fifth bug returns the head of a list when @racket[tl]
-is applied, we consider this to be a shallow bug but interestingly
+is applied. Although we consider this to be a shallow bug,
 it is difficult to expose: none of our methods succeeded in doing
-so (see @figure-ref["fig:benchmark"]).
-Bug 6 (M) only applies the @racket[hd] constant to a partially
-constructed list (i.e. the term @racket[(cons 0)] instead of
-@racket[((cons 0) nil)], the application of @racket[hd] to 
-the second of which is indeed the smallest counterexample for
-this bug.)
+so. Bug 6 only applies the @racket[hd] constant to a partially
+constructed list (i.e., the term @racket[(cons 0)] instead of
+@racket[((cons 0) nil)]).
 All of our approaches also failed to expose bugs 5 and 6.
-The seventh bug, also of medium (M) severity, omits a production
-from the reduction context and thus doesn't allow evaluation
-on the right-hand-side of function applications.
+
+The seventh bug, also classified as medium, omits a production
+from the definition of evaluation contexts and thus doesn't reduce
+the right-hand-side of function applications.
+
 Bug 8 always returns the type @racket[int] when looking up
-a variable's type in the context.
-Similarly, bug 9 (S) may return the type of an incorrect (but present)
-variable from the context.
+a variable's type in the context. This bug (and the identical one
+in the next system) are the only bugs we classify as unnatural. We
+included it because it requires a program to have a variable with
+a type that is more complex that just @racket[int] and to actually
+use that variable somehow.
+
+Bug 9 is simple; the variable lookup function has an error where it
+doesn't actually compare its input to variable in the environment,
+so it effectively means that each variable has the type of the nearest
+enclosing lambda expression.
 
 @section{poly-stlc} 
 This is a polymorphic version of @bold{stlc}, with
@@ -315,7 +328,7 @@ delim-cont: 1M 2M 3SD
  close to 1, and 3 is part way between a typo (S) and a misunderstanding
  of what the type of call/comp should be (D))
 
-@section{rvm}
+@section[#:tag "sec:rvm"]{rvm}
 A preexisting model and test framework for the Racket virtual machine and
 bytecode verifier.@~cite[racket-virtual-machine] 
 The bugs were discovered during the development of the model and reported
