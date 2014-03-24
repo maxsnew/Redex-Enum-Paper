@@ -31,12 +31,14 @@ although we ran multiple combinations at once in parallel.
 We used the unreleased version 6.0.0.5 of Racket (of which
 Redex is a part); more precisely the version at git commit
 @tt{a7d6809243},@note{@url{https://github.com/plt/racket/commit/a7d6809243}}
-except for the in-order generation of the @bold{rvm} model,
-because we discovered a bug in that model late. They were
-run from a slightly different version of Racket, namely
-commit @tt{da158e6d95}. The only other difference between
-the two versions are some improvements to Typed Racket that
-are unlikely to affect our results.
+except for the in-order generation of the @bold{rvm} model 
+(discussed in @secref["sec:rvm"]), because we recently
+discovered a bug in that model that could affect that
+generation method. They were run from a slightly different
+version of Racket, namely commit @tt{da158e6d95}. The only
+other difference between the two versions are some
+improvements to Typed Racket that are unlikely to affect our
+results.
 
 For the in-order enumeration, we simply indexed into the
 decode functions (as described in @secref["sec:enum"]),

@@ -70,7 +70,7 @@
 @section{Methodology}
 @include-section{methodology.scrbl}
 
-@section{Bechmark Description and Bug-Specific Results}
+@section{Bechmark Overview and Bug-Specific Results}
 @include-section{benchmark.scrbl}
 
 @section[#:tag "sec:results"]{Global Trends in Our Results}
