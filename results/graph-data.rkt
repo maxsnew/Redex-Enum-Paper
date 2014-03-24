@@ -19,6 +19,8 @@
 ;                                                       
 ;                                                       
 ;; this is copied code from redex/examaples/benchmark/graph-data
+;; it has (I infer) been modified since the copy, so it needs
+;; to be re-integrated back with the code in the benchmark
 
 (require racket/list
          racket/match
