@@ -174,7 +174,13 @@
         (for/list ([base+num (in-list all-types/nums)])
           (define base (list-ref base+num 0))
           (define num (list-ref base+num 1))
-          (define time (type+num+method->average d-stats base num 'grammar))
+          (define time (type+num+method->average
+                        d-stats 
+                        (cond
+                          [(equal? base 'rvm)
+                           'verification]
+                          [else base])
+                        num 'grammar))
           (define cat (hash-ref (hash-ref type->num->cat base) num))
           ;; no time => no success; collect them to put on the rhs
           (unless time 
@@ -198,7 +204,11 @@
 
 
 (define/contract (type+num+method->average d-stats base num method)
-  (-> any/c any/c any/c (or/c 'grammar 'ordered 'enum) (or/c #f (and/c real? positive?)))
+  (-> any/c
+      (or/c 'stlc 'poly-stlc 'stlc-sub 'list-machine 'rbtrees 'delim-cont 'verification) 
+      any/c
+      (or/c 'grammar 'ordered 'enum)
+      (or/c #f (and/c real? positive?)))
   (define fn (format "~a-~a.rkt" base num))
   (for/or ([ele (in-list d-stats)])
     (define filename (list-ref ele 0))
