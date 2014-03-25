@@ -18,63 +18,55 @@
                bugs whose counter-examples were never found)}
          (correlation-plot-24hour)]
 
-For easy to find bugs (easy in the sense that at least one of the models 
-was able to find a counterexample quickly) the in-order enumeration 
-performed best, while for more difficult to find bugs the strategy
-of recursively unfolding non-terminals was still the most effective.
-Perhaps surprisingly, we found that the random enumeration-based
-strategy had the worst performance. 
+Our primary concern with this study was the determine the
+relative merits of the three generation strategies. 
+@Figure-ref["fig:benchmark-lines"] shows our data with this
+aim in mind. Along its x-axis is time in seconds, again with
+a log scale and along the y-axis is the total number of bugs
+found for each point in time. There are three lines on the
+plot showing how the total number of bugs found changes as
+time passes.
 
-@Figure-ref["fig:benchmark-lines"] summarizes the testing performance 
-results for the three generation methods. 
-The x-axis show seconds on a logarithmic scale, and the y-axis shows 
-the total number of bugs found in intervals less than a given time. 
-Thus the plot shows how many of the bugs in the benchmark one would 
-expect to find by running one of the generators for a fixed interval.
-(The intervals are averages for the random generators
-and are the exact amount of time elapsed before the first counterexample is
-found for the deterministic, in-order, method.) 
-Strategies with better performance over a given interval will
-lie to the left of or above others for that interval.
+The blue dashed line shows the performance of in-order
+enumeration and it is clearly the winner in the left-hand
+side of the graph. The solid red line shows the performance
+of the ad hoc random generator and it is clearly the winner
+on the right-hand side of the graph, i.e. the longer
+time-frames.
 
-Interestingly, @figure-ref["fig:benchmark-lines"] clearly shows that
-the in-order enumeration is the best approach to use for time 
-periods less than around 100 seconds, after which it is quickly surpassed
-by the other two strategies. For longer time periods, the adhoc random
-generator performs best. Choosing randomly from a uniform distribution is
-never the best approach.
+There are two crossover points marked on the graph with
+black dots. After 2 minutes, with 17 of the bugs found, the
+enumerator starts to lose and random selection from the
+uniform distribution starts to win until 7 minutes pass, at
+which time the ad hoc generator starts to win and it never
+gives up the lead.
 
-The data shown in @Figure-ref["fig:benchmark-lines"] represents running
-each generation method on each bug for either 24 hours or until the error 
-in the average interval was reasonably small. Although there are 43 bugs 
-in the benchmark, no strategy was able to find more that 26 of them in
-a 24 hour period.
+Overall, we take this to mean that on interactive
+time-frames, the in-order enumeration is the best method and
+on longer time-frames ad hoc generation is the best. While
+selection from the uniform distribution does win briefly, it
+does not hold its lead for long and there are no bugs that
+it finds that ad hoc generation does not also find.
 
+Although there are 43 bugs in the benchmark, no strategy was
+able to find more than 30 of them in a 24 hour period.
 
+@figure-ref["fig:benchmark-overview"] also shows that, for
+the most part, bugs that were easy (could be found in less
+than a few seconds) for either the ad hoc generator or the
+generator that selected at random from the uniform
+distribution were easy for all three generators. The
+in-order enumeration, however, was able to find several bugs
+(such as bug #8 in poly-stlc) in much shorter times than the
+other approaches.
 
-For the most part, bugs that were ``easy'' (could be found in less
-than a few seconds) for one generator were easy for all of them.
-There are exceptions, most of which are for the in-order
-enumeration, which was able to find several bugs (such as
-``poly-stlc-8'') in much shorter times than the other approaches.
-
-The most successful approach (in terms of total successes) was the
-adhoc random generation approach already used in Redex.
-In-order enumeration also proved to be a good approach, but only
-over short time frames after which it is surpassed by both other
-generators.
-@; say something here about ``fair'' distributions, need some cites
-
-- explains
-
-- in-order looks good for short time frames
-- random gen better long
-- sampling from enumeration never great
-
-- nothing in upper left
-- uncertanties
-- some bugs hard for all of them
-- easy bugs are easy for all of them
-- some mixed
-
-- blank spots on summary graph
+We also compared the human notion of complexity of the bugs
+to how well the three random generators do, using the
+scatter plots in @figure-ref["fig:correlation"]. The x-axis
+shows the amount of time that a given generator took to find
+the bug and y-axis has the human-ranked complexity of the
+bug. For bugs that were never found, a single black dot
+(along with the count of bugs) is placed in a column on the
+right-hand side of the graph. These plots show that there is
+no correlation between how humans view the importance of the
+bugs and how effective our generators are at finding it.
