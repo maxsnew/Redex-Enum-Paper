@@ -339,34 +339,67 @@ off one-level of arrows, something that is easy to do with
 so many nested arrow types, as continuations tend to have.
 We classify this as a simple error.
 
-None of our generators were able to find any of these three errors
-in 24 hours.
+None of our generators can find these three errors in 24 hours.
 
-@section[#:tag "sec:rvm"]{rvm}
-A preexisting model and test framework for the Racket virtual machine and
-bytecode verifier.@~cite[racket-virtual-machine] 
-The bugs were discovered during the development of the model and reported
-in section 7 of @citet[racket-virtual-machine].
-We used all of the bugs (with two exceptions)@note{We didn't include
-   bugs 1 and 7 (as specified in @citet[racket-virtual-machine]) for practical
-   reasons. The first affected the virtual machine model as opposed to the
-   verifier, which would have required us to include the entire VM
-   model in the benchmark, and the second would have required modifying
-   the abstract representation of the stack in the verifier model, a global
-   change that would have touched nearly every rule in the verifier.
-   }that were testable as
-violations of the desired ``internal properties'' of the bytecode 
-verifier as specified in that effort: the totality of the verifier
-over bytecode expressions, safety, and confluence, where the 
-latter two state that verified expressions can be successfully
-evaluated to a unique value by the virtual machine model.
+@section[#:tag "sec:rvm"]{rvm} A existing model and test
+framework for the Racket virtual machine and bytecode
+verifier@~cite[racket-virtual-machine]. The bugs were
+discovered during the development of the model and reported
+in section 7 of that paper. Unlike the rest of the models,
+we do not number the bugs for this model sequentially but instead
+use the numbers from Klein et al's work.
 
-rvm: 3D 4M 5M 6M 14M 15S
- (3 feels deep because "not" and "uninit" are very far from each
- other. 4 & 5 are very close to not be useful having both.)
+We included only some of the bugs, excluding bugs for two
+reasons:
+@itemlist[@item{The paper tests two properties: an internal
+  soundness property that relates the verifier to the
+  virtual machine model, and an external property that
+  relates the verifier model to the verifier implementation.
+  We did no include any that require the latter properties because it
+  requires building a complete, buggy version of the Racket
+  runtime system to include in the benchmark.}
+           
+          @item{We included all of the internal properties
+  except those numbered 1 and 7 for practical reasons. The
+  first is the only bug in the machine model, as opposed to
+  the just the verifier, which would have required us to
+  include the entire VM model in the benchmark. The second
+  would have required modifying the abstract representation
+  of the stack in the verifier model in contorted way to
+  mimic a more C-like implementation of a global, imperative
+  stack. This bug was originally in the C implementation of
+  the verifier (not the Redex model) and to replicate it in
+  the Redex-based verifier model would require us to program
+  in a low-level imperative way in the Redex model,
+  something not easily done.}]
 
+These bugs are described in detail in Klein et al's paper.
+These bugs are generally difficult for our generation strategies
+to uncover. Three of the bugs were found only by the 
+ad hoc random generator, two were also found by the random
+selection from the uniform distribution and the remaining 
+two were not found by any of our generators in 24 hours.
+We suspect that it is the relatively large grammar of the language
+that makes it difficult for the in order enumerator to find
+these bugs. There are 24 productions for expressions which means
+that there are many terms even with relatively small sizes.
 
+This model is also unique in our benchmark suite because it
+includes a function that makes terms more likely to be
+useful test cases. In more detail, the machine model does
+not have variables, but instead is stack-based; bytecode
+expressions also contain internal pointers that must be
+valid. Generating a random (or in-order) term is relatively
+unlikely to produce one that satisfies these constraints.
+For example, of the of the first 10,000 terms produced by
+the in-order enumeration only 1625 satisfy the constraints.
+The ad hoc random generator generators produces about 900
+good terms in 10,000 attempts and the uniform random
+generator produces about 600 in 10,000 attempts.
 
-
-
-
+To make terms more likely to be good test cases, this
+model includes a function that looks for out-of-bounds
+stack offsets and bogus internal pointers and replaces
+them with random good values. This function is applied
+to each of the generated terms before using them to test
+the model.

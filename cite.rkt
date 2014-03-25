@@ -1,7 +1,8 @@
 #lang racket/base
 
 (require scriblib/autobib)
-(provide (except-out (all-defined-out) fpca jfp types icfem waaapl))
+(provide (except-out (all-defined-out) fpca jfp types icfem waaapl)
+         in-bib)
 (define-cite ~cite citet generate-bibliography)
 
 (define fpca
