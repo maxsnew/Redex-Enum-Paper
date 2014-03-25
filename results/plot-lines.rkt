@@ -145,9 +145,9 @@
   (define type/index (hash 'S 0
                            'SM 1
                            'M 2
-                           'MD 3
-                           'D 4
-                           'U 5))
+                           ;'MD 3
+                           'D 3
+                           'U 4))
   (define index/type (for/hash ([(k v) (in-hash type/index)])
                        (values v k)))
 
