@@ -113,7 +113,7 @@ The remainder of this paper explains our new enumeration
 strategy and its application to Redex in 
 @secref["sec:enum"] and @secref["sec:redex-enum"]; explains
 the methodology we used in our experiments, our benchmark
-suite, and our results in @secref["sec:methodology"], in 
+suite, and our results in @secref["sec:methodology"],
 @secref["sec:benchmark"], and @secref["sec:results"]; and
-concludes with a discussion of related work in 
-@secref["sec:related-work"].
+concludes after a discussion of related work in 
+@secref["sec:related-work"] and @secref["sec:conclusion"].
