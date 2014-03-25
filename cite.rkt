@@ -45,6 +45,8 @@
   "Haskell Symposium")
 (define cpp
   "International Conference on Certified Programs and Proofs")
+(define cacm
+  "Communications of the ACM")
 
 (define sfp2009-kf
   (make-bib
@@ -203,3 +205,10 @@
    #:title "Testing an Optimising Compiler by Generating Random Lambda Terms"
    #:location (proceedings-location "International Workshop on Automation of Software Test")
    #:date 2011))
+
+(define fuzzing-unix-utils
+  (make-bib
+   #:title "An Empirical Study of the Reliability of UNIX Utilities"
+   #:author (authors "Barton P. Miller" "Lars Fredriksen" "Bryan So")
+   #:location (journal-location cacm #:volume 33 #:number 12)
+   #:date 1990))

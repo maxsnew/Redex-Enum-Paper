@@ -97,8 +97,12 @@ several bugs in GHC, the premier Haskell compiler.
 Similarly, @citet[finding-and-understanding-bugs-in-c-compilers]'s work 
 also presents a test-case generator tailored to testing programming 
 languages with complex well-formedness constraints, but this time
-C. 
+C. @citet[fuzzing-unix-utils] designed a random generator for streams
+of characters with various properties (e.g. including nulls or not, 
+to include newline characters at specific points) and used it
+to find bugs in unix utilities.
 
-Both of these papers provide empirical evidence that random generation
-techniques that do not sample from a uniform distribution can be
-highly successful at finding bugs.
+All three of these papers provide empirical evidence that
+random generation techniques that do not sample from a
+uniform distribution can be highly successful at finding
+bugs.
