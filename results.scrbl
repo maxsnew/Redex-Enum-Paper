@@ -5,6 +5,8 @@
           scriblib/figure
           (only-in pict scale))
 
+@title[#:tag "sec:results"]{Global Trends in Our Results}
+
 @figure*["fig:benchmark-lines"
          @list{Random testing performance of in-order enumeration, 
                random indexing into an enumeration,

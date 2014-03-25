@@ -9,6 +9,8 @@
           scribble/manual
           (only-in pict scale))
 
+@title[#:tag "sec:benchmark"]{Bechmark Overview and Bug-Specific Results}
+
 The programs in our benchmark come from two sources:
 synthetic examples based on our experience with Redex over
 the years and from models that we and others

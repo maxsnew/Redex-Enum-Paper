@@ -1,6 +1,8 @@
 #lang scribble/base
 @(require "cite.rkt")
 
+@title[#:tag "sec:related-work"]{Related Work}
+
 The related work divides into two categories: papers 
 about enumeration and papers with studies about
 random testing.

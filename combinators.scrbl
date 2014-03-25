@@ -8,6 +8,8 @@
           "util.rkt"
           "enum-util.rkt")
 
+@title[#:tag "sec:enum"]{Enumeration Combinators}
+
 We represent enumerations as bijections between a the natural
 numbers (or a prefix of them) and a set of terms. Concretely,
 our enumerations are triples of a function that encodes a term as a

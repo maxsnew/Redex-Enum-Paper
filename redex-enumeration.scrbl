@@ -7,7 +7,7 @@
           racket/list
           racket/pretty)
 
-@title{Enumerating Redex Patterns}
+@title[#:tag "sec:redex-enum"]{Enumerating Redex Patterns}
 
 @(define example-term-index 100000000)
 

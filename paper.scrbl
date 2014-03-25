@@ -55,21 +55,16 @@ better in interactive time-frames.
 
 @include-section["intro.scrbl"]
 
-@section[#:tag "sec:enum"]{Enumeration Combinators}
 @include-section{combinators.scrbl}
 
 @include-section["redex-enumeration.scrbl"]
 
-@section{Methodology}
 @include-section{methodology.scrbl}
 
-@section{Bechmark Overview and Bug-Specific Results}
 @include-section{benchmark.scrbl}
 
-@section[#:tag "sec:results"]{Global Trends in Our Results}
 @include-section{results.scrbl}
 
-@section[#:tag "sec:related-work"]{Related Work}
 @include-section{related.scrbl}
 
 @include-section["conclusion.scrbl"]

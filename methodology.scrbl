@@ -9,6 +9,8 @@
           plot/pict 
           (only-in redex/private/generate-term pick-an-index))
 
+@title[#:tag "sec:methodology"]{Methodology}
+
 Our case study compares three types of test-case generation
 using a set of buggy models. Each model and bug is equipped
 with a property that should hold for every term (but doesn't

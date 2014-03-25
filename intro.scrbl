@@ -80,7 +80,7 @@ technique for building a random generation technique that
 given type and size gives the same probability to be
 produced to each possible value. In a testing context this
 property ensures that no subclass will be missed because
-the generator is biased.'' Their paper even goes to far as to
+the generator is biased.'' Their paper even goes so far as to
 use the word ``sound'' for random generators that are uniform.
 The implication being that
 Quickcheck-style random generation (or, presumably even
@@ -108,3 +108,12 @@ the benchmark, showing that random testing is the best overall
 strategy, but that in-order enumeration finds more bugs in 
 short time-frames. Selecting from a uniform distribution
 is worse than the other two strategies on our benchmark suite.
+
+The remainder of this paper explains our new enumeration
+strategy and its application to Redex in 
+@secref["sec:enum"] and @secref["sec:redex-enum"]; explains
+the methodology we used in our experiments, our benchmark
+suite, and our results in @secref["sec:methodology"], in 
+@secref["sec:benchmark"], and @secref["sec:results"]; and
+concludes with a discussion of related work in 
+@secref["sec:related-work"].
