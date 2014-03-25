@@ -139,7 +139,9 @@ generate counterexamples.
 }
 
 @figure*["fig:benchmark"
-         "Performance Results by Individual Bug"
+         '("Performance Results by Individual Bug,"
+           " following the naming scheme:"
+           " «model name»-«bug number».rkt")
          (res-plot-24hour)]
 
 @section{stlc} A simply-typed lambda calculus with base
