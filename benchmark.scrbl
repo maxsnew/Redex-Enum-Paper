@@ -316,10 +316,10 @@ cannot find it even with 24 hours of time.
 delimited control. The language
 is Plotkin's PCF extended with operators for delimited continuations,
 continuation marks, and contracts for those operations. 
-The property checked is type soundness. Three
-mutations of this model are included. 
+The property checked is type soundness. We added three bugs
+to this model.
 
-The first of which was a bug we found by mining the model's
+The first was a bug we found by mining the model's
 git repository's history. This bug fails to put a list
 contract around the result of extracting the marks from a
 continuation, which has the effect of checking the contract
@@ -339,7 +339,8 @@ off one-level of arrows, something that is easy to do with
 so many nested arrow types, as continuations tend to have.
 We classify this as a simple error.
 
-None of our generators can find any of these three errors.
+None of our generators were able to find any of these three errors
+in 24 hours.
 
 @section[#:tag "sec:rvm"]{rvm}
 A preexisting model and test framework for the Racket virtual machine and
