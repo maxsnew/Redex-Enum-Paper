@@ -136,20 +136,12 @@
 
 (define (get-counterexample-size type num)
   (define cx (get-counterexample type num))
-  (count-pairs cx))
+  (count-depth cx))
 
 (define (get-counterexample type num)
   (define base (type->base-file type))
   (define path (bmark-path (regexp-replace "base" base (number->string num))))
   (dynamic-require path 'small-counter-example))
-
-(define (count-pairs sexp)
-  (cond
-    [(pair? sexp)
-     (+ 1 
-        (count-pairs (car sexp))
-        (count-pairs (cdr sexp)))]
-    [else 0]))
 
 (define (get-diff type num)
   (define base (type->base-file type))
@@ -200,27 +192,51 @@
                 (format ": ~s" pick-an-index-arguments)))]))
 
 (define (build-avg/stddev-table)
-  (for/hash ([(type v) (in-hash type->files)])
-    (values type (build-avg/stddev-table-entry type))))
+  (parameterize ([pretty-print-exact-as-decimal #t]
+                 [pretty-print-columns 80])
+    (pretty-print
+     (for/hash ([(type v) (in-hash type->files)])
+       (values type (build-avg/stddev-table-entry type))))))
 
 (define (build-avg/stddev-table-entry type)
   (define base-file (bmark-path (type->base-file type)))
   (define generate-enum-term (dynamic-require base-file 'generate-enum-term))
-  (define (size l)
-    (cond
-      [(list? l) (+ 1 (apply max 0 (map size l)))]
-      [else 1]))
-  (define sizes
+  (define terms
     (for/list ([i (in-range 10000)])
-      (size (generate-enum-term))))
-  (list (mean sizes) (stddev sizes)))
+      (generate-enum-term)))
+  (define depths (map count-depth terms))
+  (define sizes (map count-size terms))
+  (list (mean depths) (stddev depths) (mean sizes) (stddev sizes)))
+
+(define (count-depth l)
+  (cond
+    [(list? l) (+ 1 (apply max 0 (map count-depth l)))]
+    [else 1]))
+
+(define (count-size l)
+  (cond
+    [(list? l) (apply + 1 (map count-size l))]
+    [else 1]))
+
+(module+ test
+  (require rackunit)
+  (check-equal? (count-depth 1) 1)
+  (check-equal? (count-depth '(1)) 2)
+  (check-equal? (count-depth '((1))) 3)
+  (check-equal? (count-depth '((1) (1))) 3)
+  (check-equal? (count-depth '((1) (1) (1) (1 1 1 1 1 1))) 3)
+  (check-equal? (count-size 1) 1)
+  (check-equal? (count-size '(1)) 2)
+  (check-equal? (count-size '((1))) 3)
+  (check-equal? (count-size '((1) (1))) 5)
+  (check-equal? (count-size '((1) (1) (1) (1 1 1 1 1 1))) 14))
 
 ; (build-avg/stddev-table) ;; run this to recompute the table
 (define avg/stddev-table
-  #hash((stlc . (34619/10000 2.8581372237875495))
-        (poly-stlc . (38659/10000 2.97299801379012))
-        (stlc-sub . (3459/1000 2.8327934975920854))
-        (rbtrees . (43651/10000 10.02421079137904))
-        (list-machine . (39261/10000 0.7503591073612688))
-        (delim-cont . (35663/10000 1.7183143804321723))
-        (rvm . (2939/1000 1.6312813981652583))))
+  #hash((list-machine . (3.9256 0.7572744812813911  13.0908 4.471057521437182))
+        (stlc         . (3.4735 2.862358773808762   14.1735 20.76807159439701))
+        (poly-stlc    . (3.9584 3.001178008715911   17.3118 23.658537164414877))
+        (stlc-sub     . (3.454  2.8536089430754172  14.0571 20.59367474711592))
+        (rbtrees      . (4.3012 6.984588646441535   15.8224 17.856753855054396))
+        (delim-cont   . (3.5616 1.7361467219103344  11.6961 9.77507773830981))
+        (rvm          . (2.9441 1.6180158188349087  16.1823 21.343417409355983))))

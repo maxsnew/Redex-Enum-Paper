@@ -2,10 +2,12 @@
 (require scribble/core 
          scribble/manual
          racket/list
+         racket/port
          rackunit)
 (provide raw-latex a-quote
          racketblock/define
-         add-commas)
+         add-commas
+         extract-pick-an-index)
 
 (define (raw-latex . args)
   (element (style "relax" '(exact-chars))
@@ -39,3 +41,23 @@
 (check-equal? (add-commas 12345) "12,345")
 (check-equal? (add-commas 123456789) "123,456,789")
 (check-equal? (add-commas 1234567890) "1,234,567,890")
+
+(define (extract-pick-an-index)
+  (define src (collection-file-path "generate-term.rkt" "redex" "private"))
+  (call-with-input-file src
+    (λ (port)
+      (let loop ()
+        (define l (read-line (peeking-input-port port)))
+        (cond
+          [(eof-object? l) (error 'methodology "didn't find pick-an-index")]
+          [(regexp-match #rx";; +pick-an-index +:.*Nat" l)
+           (define pp (peeking-input-port port))
+           (port-count-lines! pp)
+           (read pp)
+           (read pp)
+           (define-values (line col pos) (port-next-location pp))
+           (for/list ([i (in-range line)])
+             (string-append (read-line port) "\n"))]
+          [else
+           (read-line port)
+           (loop)])))))

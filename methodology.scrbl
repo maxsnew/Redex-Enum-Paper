@@ -3,11 +3,9 @@
 @(require "results/plot.rkt"
           "cite.rkt"
           "util.rkt"
+          scribble/manual
           scriblib/figure
-          scriblib/footnote
-          (only-in pict scale)
-          plot/pict 
-          (only-in redex/private/generate-term pick-an-index))
+          scriblib/footnote)
 
 @title[#:tag "sec:methodology"]{Methodology}
 
@@ -56,14 +54,27 @@ first pick an exponent @raw-latex|{$i$}| in base 2 from the
 geometric distribution and then pick uniformly at random an
 integer that is between @raw-latex|{$2^{i-1}$}| and 
 @raw-latex|{$2^i$}|. We repeat this process three times for
-each number and then take the largest -- this helps make
+and then take the largest -- this helps make
 sure that the numbers are not always small.
+
+We chose these numbers because there is not a fixed mean of
+the distribution of numbers. That is, if you take the mean
+of some number of samples and then add more samples and take
+the mean again, the mean of the new numbers is larger than
+the mean of the old. We believe this is a good property to
+have when indexing into our uniform distribution so as to
+avoid biasing the choice of examples towards some small size.
+
+The precise algorithm we used is implemented in these functions:
+@(apply
+  typeset-code
+  (extract-pick-an-index))
 
 The random-selection results are quite sensitive to the
 precise probability of picking the zero exponent (the
 parameter of the geometric distribution). To maximize that
 method's chances of success we picked a value that produced
-terms that have depth between 2 and 3 on average. This seems
+terms that have depth near 3 or 4 on average. This seems
 to give that approach the best chance of success.
 
 For the ad hoc random generation, we use Redex's existing 

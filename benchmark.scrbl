@@ -34,13 +34,19 @@ identical to the correct one, except for a single bug. The bugs
 always manifest as a term that falsifies the soundness
 property. 
 
-The table in @figure-ref["fig:benchmark-overview"] gives an overview
-of the benchmark suite, showing some numbers for each model and bug. 
-Each model has its name and the number of lines of code in the correct
-version (the buggy versions are always within a few lines of the
-originals). The line number counts include the specification of
-the property and a little bit of model-specific code to call into
-the different generators.
+The table in @figure-ref["fig:benchmark-overview"] gives an
+overview of the benchmark suite, showing some numbers for
+each model and bug. Each model has its name and the number
+of lines of code in the correct version (the buggy versions
+are always within a few lines of the originals). The line
+number counts include the model, the specification of the
+property, and a little bit of model-specific code to call
+into the different generators. The p-value column shows the
+argument to @racket[pick-a-number] that we used to get
+numbers to index into the uniform distribution for the model.
+The mean and standard deviation are of the depth of 10,000 
+random terms from the uniform distribution, picked with the given
+p value.
 
 Each bug has a number and, with the exception of the rvm
 model, the numbers count from 1 up to the number of bugs.
@@ -64,9 +70,8 @@ The @bold{S/M/D/U} column shows a classification of each bug as:
          real Redex programs but are included for our own curiosity. There
          are only two bugs in this category.}]
 
-The size column shows the number of interior nodes in the
-tree representing the smallest counter-example we know for
-each bug.
+The depth column shows the depth of the term representing
+the smallest counter-example we know for each bug.
 
 Each subsection of this section introduces one of the
 models in the benchmark, along with the errors we introduced
@@ -100,7 +105,7 @@ generate counterexamples.
                   @bold{Mean ± Stddev}
                   @bold{Bug #}
                   @bold{S/M/D/U}
-                  @bold{Size}
+                  @bold{Depth}
                   @bold{Description of Bug})
             (let ([last-model #f])
               (for/list ([t/n (in-list all-types/nums)])
