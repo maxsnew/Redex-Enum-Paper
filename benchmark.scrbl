@@ -7,6 +7,7 @@
           scriblib/figure
           scriblib/footnote
           scribble/manual
+          racket/format
           (only-in pict scale))
 
 @title[#:tag "sec:benchmark"]{Bechmark Overview and Bug-Specific Results}
@@ -95,14 +96,25 @@ generate counterexamples.
            (cons
             (list @bold{Model}
                   @bold{LoC}
+                  @bold{P-Value}
+                  @bold{Mean ± Stddev}
                   @bold{Bug #}
                   @bold{S/M/D/U}
                   @bold{Size}
-                  @bold{Description of Error})
+                  @bold{Description of Bug})
             (let ([last-model #f])
               (for/list ([t/n (in-list all-types/nums)])
                 (define type (list-ref t/n 0))
                 (define num (list-ref t/n 1))
+                (define-values (p-value mean/stddev)
+                  (if (equal? last-model type)
+                      (values "" "")
+                      (let-values ([(p-value mean stddev) (get-p-value/mean/stddev
+                                                           type)])
+                        (values (~r p-value)
+                                (~a (~r mean #:precision '(= 1))
+                                    " ± "
+                                    (~r stddev #:precision '(= 1)))))))
                 (begin0
                   (list (if (equal? last-model type)
                             ""
@@ -110,6 +122,8 @@ generate counterexamples.
                         (if (equal? last-model type)
                             ""
                             (get-line-count type))
+                        p-value
+                        mean/stddev
                         (number->string num)
                         (symbol->string (get-category type num))
                         (number->string (get-counterexample-size type num))

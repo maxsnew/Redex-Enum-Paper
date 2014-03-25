@@ -1,4 +1,5 @@
 #lang racket
+(require math/statistics)
 
 (provide get-line-count
          get-counterexample
@@ -7,7 +8,8 @@
          get-category
          get-counterexample-size
          all-types/nums
-         type->num->cat)
+         type->num->cat
+         get-p-value/mean/stddev)
 
 ;; the "get" functions all have the interface
 ;; symbol natural -> the data
@@ -166,3 +168,59 @@
   (define base (type->base-file type))
   (define path (bmark-path (regexp-replace "base" base (number->string num))))
   (dynamic-require path 'the-error))
+
+(define (get-p-value/mean/stddev type)
+  (define base-file (bmark-path (type->base-file type)))
+  (define exp
+    (call-with-input-file base-file
+      (λ (port)
+        (parameterize ([read-accept-reader #t])
+          (read port)))))
+  (define pick-an-index-arguments
+    (flatten
+     (let loop ([exp exp])
+       (match exp
+         [`(pick-an-index ,n) (list n)]
+         [(? list?)
+          (map loop exp)]
+         [_ '()]))))
+  
+  (cond
+    [(= 1 (length pick-an-index-arguments))
+     (define p-value (car pick-an-index-arguments))
+     (define mean/stddev (hash-ref avg/stddev-table type))
+     (values p-value
+             (list-ref mean/stddev 0)
+             (list-ref mean/stddev 1))]
+    [else
+     (error 'get-p-value "found ~a p-values~a"
+            (length pick-an-index-arguments)
+            (if (null? pick-an-index-arguments)
+                ""
+                (format ": ~s" pick-an-index-arguments)))]))
+
+(define (build-avg/stddev-table)
+  (for/hash ([(type v) (in-hash type->files)])
+    (values type (build-avg/stddev-table-entry type))))
+
+(define (build-avg/stddev-table-entry type)
+  (define base-file (bmark-path (type->base-file type)))
+  (define generate-enum-term (dynamic-require base-file 'generate-enum-term))
+  (define (size l)
+    (cond
+      [(list? l) (+ 1 (apply max 0 (map size l)))]
+      [else 1]))
+  (define sizes
+    (for/list ([i (in-range 10000)])
+      (size (generate-enum-term))))
+  (list (mean sizes) (stddev sizes)))
+
+; (build-avg/stddev-table) ;; run this to recompute the table
+(define avg/stddev-table
+  #hash((stlc . (34619/10000 2.8581372237875495))
+        (poly-stlc . (38659/10000 2.97299801379012))
+        (stlc-sub . (3459/1000 2.8327934975920854))
+        (rbtrees . (43651/10000 10.02421079137904))
+        (list-machine . (39261/10000 0.7503591073612688))
+        (delim-cont . (35663/10000 1.7183143804321723))
+        (rvm . (2939/1000 1.6312813981652583))))
