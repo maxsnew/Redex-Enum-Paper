@@ -59,7 +59,7 @@ systems.
 
 Naturally, not all papers treat all random testing as hopelessly
 naive. There are a number of papers that suggest that
-ad-hoc random generation is a poor choice, but hold up
+ad hoc random generation is a poor choice, but hold up
 a variation on random generation that selects test inputs 
 from a uniform distribution over a
 complex data-structure as an obviously-good choice.

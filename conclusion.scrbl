@@ -3,7 +3,7 @@
 
 @title[#:tag "sec:conclusion"]{Conclusion}
 
-Our study shows that the relationship between adhoc random
+Our study shows that the relationship between ad hoc random
 generation and in-order enumeration is subtle, and that
 selecting randomly from a uniform distribution is not as
 effective for testing as the literature claims. 
