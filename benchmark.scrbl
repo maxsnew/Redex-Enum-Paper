@@ -65,12 +65,26 @@ The size column shows the number of interior nodes in the
 tree representing the smallest counter-example we know for
 each bug.
 
-Each subsection of this section introduces one of the models
-in the benchmark, along with the errors we introduced into
-each model. The subsections also discuss the specific bugs,
-pointing out some of the more interesting bug-specific
-results we found. (@Secref["sec:results"] discusses the our
-results from a more global perspective.)
+Each subsection of this section introduces one of the
+models in the benchmark, along with the errors we introduced
+into each model. The subsections also discuss the specific
+bugs, pointing out some of the more interesting
+bug-specific results we found. @Secref["sec:results"]
+discusses the our results from a more global perspective.
+
+The bug-specific results are summarized in 
+@figure-ref["fig:benchmark"]. On the y-axis is time in
+seconds, using a log scale. The x-axis has all of the bugs,
+sorted by the average time required to find the bug for all
+three generators. The error bars represent 95% confidence
+intervals in the averages. (The in-order enumeration method
+is deterministic and thus has no uncertainty.) The blank
+columns on the right represent the bugs that no method was
+able to find in less than 24 hours, of which there are 13.
+The averages span nearly seven orders of magnitude from less
+than a tenth of a second to several hours and thus represent
+a wide range of bugs in terms of how difficult it is to
+generate counterexamples. 
 
 @figure*["fig:benchmark-overview" "Benchmark Overview"]{
  @centered{
@@ -102,6 +116,10 @@ results from a more global perspective.)
                   (set! last-model type)))))]
   }
 }
+
+@figure*["fig:benchmark"
+         "Performance Results by Individual Bug"
+         (res-plot-24hour)]
 
 @section{stlc} A simply-typed lambda calculus with base
 types of numbers and lists of numbers, including the
