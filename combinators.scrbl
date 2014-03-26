@@ -10,7 +10,7 @@
 
 @title[#:tag "sec:enum"]{Enumeration Combinators}
 
-We represent enumerations as bijections between a the natural
+We represent enumerations as bijections between the natural
 numbers (or a prefix of them) and a set of terms. Concretely,
 our enumerations are triples of a function that encodes a term as a
 natural number, a function that decodes a natural number into a
