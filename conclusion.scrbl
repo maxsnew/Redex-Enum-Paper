@@ -12,7 +12,7 @@ We have also learned that random testing's successes and
 failures are hard to predict. For example, why is stlc bug
 #4 so much harder to find than stlc bug #8? They both
 mistake the type int for some non-integer and have similarly
-small counter examples.
+small counterexamples.
 
 @(element (style "paragraph" '()) '("Acknowledgements."))
 Thanks to Neil Toronto for helping

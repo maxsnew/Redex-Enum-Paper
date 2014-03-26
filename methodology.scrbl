@@ -20,7 +20,7 @@ distribution, and ad hoc random generation.
 
 For each bug and generator, we run a script that repeatedly
 asks for terms and checks to see if they falsify the property.
-As soon as it finds a counter example to the property, it reports
+As soon as it finds a counterexample to the property, it reports
 the amount of time it has been running. The script runs until
 the uncertainty in the average becomes acceptably small or
 until 24 hours elapses, whichever comes first.
@@ -71,11 +71,10 @@ The precise algorithm we used is implemented in these functions:
   (extract-pick-an-index))
 
 The random-selection results are quite sensitive to the
-precise probability of picking the zero exponent (the
-parameter of the geometric distribution). To maximize that
-method's chances of success we picked a value that produced
-terms that have depth near 3 or 4 on average. This seems
-to give that approach the best chance of success.
+precise probability of picking the zero exponent (the 
+@racket[prob-of-zero] argument). We empirically chose
+benchmark-specific numbers in an attempt to maximize the
+success of the random uniform distribution method.
 
 For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned

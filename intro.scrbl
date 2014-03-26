@@ -20,7 +20,7 @@ but a random integer solves this equation with probability
 When we run this example in 
 Quickcheck@~cite[quickcheck],@note{For the precise code we used,
  see the appendix.}
-giving it 1000 attempts to find a counter example, it finds it
+giving it 1000 attempts to find a counterexample, it finds it
 about half of the time, taking on average about 400 attempts 
 when it succeeds.
 Redex's random generator does a little bit better, finding it

@@ -44,7 +44,7 @@ property, and a little bit of model-specific code to call
 into the different generators. The p-value column shows the
 argument to @racket[pick-a-number] that we used to get
 numbers to index into the uniform distribution for the model.
-The mean and standard deviation are of the depth of 10,000 
+The mean and standard deviation are of the size of 10,000 
 random terms from the uniform distribution, picked with the given
 p value.
 
@@ -70,8 +70,10 @@ The @bold{S/M/D/U} column shows a classification of each bug as:
          real Redex programs but are included for our own curiosity. There
          are only two bugs in this category.}]
 
-The depth column shows the depth of the term representing
-the smallest counter-example we know for each bug.
+The size column shows the size of the term representing the
+smallest counterexample we know for each bug, where we
+measure size as the number of pairs of parentheses and atoms
+in the sexpression representation of the term.
 
 Each subsection of this section introduces one of the
 models in the benchmark, along with the errors we introduced
@@ -105,21 +107,25 @@ generate counterexamples.
                   @bold{Mean ± Stddev}
                   @bold{Bug #}
                   @bold{S/M/D/U}
-                  @bold{Depth}
+                  @bold{Size}
                   @bold{Description of Bug})
             (let ([last-model #f])
               (for/list ([t/n (in-list all-types/nums)])
                 (define type (list-ref t/n 0))
                 (define num (list-ref t/n 1))
                 (define-values (p-value mean/stddev)
-                  (if (equal? last-model type)
-                      (values "" "")
-                      (let-values ([(p-value mean stddev) (get-p-value/mean/stddev
-                                                           type)])
-                        (values (~r p-value)
-                                (~a (~r mean #:precision '(= 1))
-                                    " ± "
-                                    (~r stddev #:precision '(= 1)))))))
+                  (cond
+                    [(equal? last-model type)
+                     (values "" "")]
+                    [else
+                     (define-values (p-value info-table)
+                       (get-p-value/mean/stddev type))
+                     (values (~r p-value)
+                             (~a (~r (hash-ref info-table 'mean-size)
+                                     #:precision '(= 1))
+                                 " ± "
+                                 (~r (hash-ref info-table 'stddev-size)
+                                     #:precision '(= 1))))]))
                 (begin0
                   (list (if (equal? last-model type)
                             ""
@@ -146,8 +152,7 @@ generate counterexamples.
 
 @section{stlc} A simply-typed lambda calculus with base
 types of numbers and lists of numbers, including the
-constants
-@tt{+}, which operates on numbers, and
+constants @tt{+}, which operates on numbers, and
 @tt{cons}, @tt{head}, @tt{tail}, and @tt{nil} (the empty
 list), all of which operate only on lists of numbers. The
 property checked is type soundness: the combination of

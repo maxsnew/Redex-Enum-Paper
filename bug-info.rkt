@@ -7,6 +7,7 @@
          get-diff
          get-category
          get-counterexample-size
+         get-counterexample-depth
          all-types/nums
          type->num->cat
          get-p-value/mean/stddev)
@@ -136,6 +137,10 @@
 
 (define (get-counterexample-size type num)
   (define cx (get-counterexample type num))
+  (count-size cx))
+
+(define (get-counterexample-depth type num)
+  (define cx (get-counterexample type num))
   (count-depth cx))
 
 (define (get-counterexample type num)
@@ -180,10 +185,8 @@
   (cond
     [(= 1 (length pick-an-index-arguments))
      (define p-value (car pick-an-index-arguments))
-     (define mean/stddev (hash-ref avg/stddev-table type))
      (values p-value
-             (list-ref mean/stddev 0)
-             (list-ref mean/stddev 1))]
+             (hash-ref avg/stddev-table type))]
     [else
      (error 'get-p-value "found ~a p-values~a"
             (length pick-an-index-arguments)
@@ -206,7 +209,8 @@
       (generate-enum-term)))
   (define depths (map count-depth terms))
   (define sizes (map count-size terms))
-  (list (mean depths) (stddev depths) (mean sizes) (stddev sizes)))
+  (hash 'mean-depth (mean depths) 'stddev-depth (stddev depths)
+        'mean-size (mean sizes) 'stddev-size (stddev sizes)))
 
 (define (count-depth l)
   (cond
@@ -231,12 +235,47 @@
   (check-equal? (count-size '((1) (1))) 5)
   (check-equal? (count-size '((1) (1) (1) (1 1 1 1 1 1))) 14))
 
-; (build-avg/stddev-table) ;; run this to recompute the table
+;; (build-avg/stddev-table) ;; run this to recompute the table
 (define avg/stddev-table
-  #hash((list-machine . (3.9256 0.7572744812813911  13.0908 4.471057521437182))
-        (stlc         . (3.4735 2.862358773808762   14.1735 20.76807159439701))
-        (poly-stlc    . (3.9584 3.001178008715911   17.3118 23.658537164414877))
-        (stlc-sub     . (3.454  2.8536089430754172  14.0571 20.59367474711592))
-        (rbtrees      . (4.3012 6.984588646441535   15.8224 17.856753855054396))
-        (delim-cont   . (3.5616 1.7361467219103344  11.6961 9.77507773830981))
-        (rvm          . (2.9441 1.6180158188349087  16.1823 21.343417409355983))))
+  #hash((list-machine
+         .
+         #hash((mean-depth . 3.9385)
+               (stddev-depth . 0.7533377396626297)
+               (mean-size . 13.1675)
+               (stddev-size . 4.485871570832139)))
+        (stlc
+         .
+         #hash((mean-depth . 3.4406)
+               (stddev-depth . 2.855988732470771)
+               (mean-size . 13.9393)
+               (stddev-size . 20.56101202543299)))
+        (poly-stlc
+         .
+         #hash((mean-depth . 3.9217)
+               (stddev-depth . 2.964417161939257)
+               (mean-size . 16.9613)
+               (stddev-size . 23.12202418280026)))
+        (stlc-sub
+         .
+         #hash((mean-depth . 3.4311)
+               (stddev-depth . 2.8578405816280235)
+               (mean-size . 14.0066)
+               (stddev-size . 20.890307715301848)))
+        (rbtrees
+         .
+         #hash((mean-depth . 4.1813)
+               (stddev-depth . 4.741985903606209)
+               (mean-size . 15.4888)
+               (stddev-size . 13.898326322259095)))
+        (delim-cont
+         .
+         #hash((mean-depth . 3.5486)
+               (stddev-depth . 1.7225092278417553)
+               (mean-size . 11.6105)
+               (stddev-size . 9.725409490093464)))
+        (rvm
+         .
+         #hash((mean-depth . 2.9229)
+               (stddev-depth . 1.6334489860414987)
+               (mean-size . 15.6927)
+               (stddev-size . 20.809734902444095)))))
