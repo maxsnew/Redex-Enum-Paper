@@ -74,7 +74,7 @@ resulting enumeration alternates between the input
 enumerations, so that if given @racket[n] infinite
 enumerations, the resulting enumeration will alternate
 through each of the enumerations every @racket[n] numbers.
-For example, the following is the beginning the disjoint
+For example, the following is the beginning of the disjoint
 sum of an enumeration of natural numbers and an enumeration
 of strings
 @enum-example[(disj-sum/e (cons nats/e number?)
@@ -84,7 +84,7 @@ of strings
 The @racket[disj-sum/e] enumerator also has to be fair and
 to account for finite enumerations. So this
 enumeration:
-@racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c) symbol?)
+@racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
                          (cons nats/e number?)
                          (cons (fin/e "x" "y") string?))]
 has to cycle through the finite enumerations until they
@@ -100,7 +100,7 @@ to compute which enumeration to use for a given index.
 
 We provide a fixed-point combinator for
 recursive enumerations:
-@racket[fix/e : (enum → enum) → enum]
+@racket[fix/e : (enum → enum) → enum].
 For example, we can construct an enumerator
 for lists of numbers:
 @racketblock[(fix/e (λ (lon/e)
@@ -148,7 +148,7 @@ that doesn't have the given element. For example, the first
 The decoder for @racket[except/e] simply encodes the
 given element and then either subtracts one before
 passing the natural number along (if it is above the 
-given exception) or does (if it isn't). The decoder uses
+given exception) or doesn't (if it isn't). The decoder uses
 similar logic.
 
 One important point about the combinators used so far: the

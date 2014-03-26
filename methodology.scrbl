@@ -60,7 +60,7 @@ sure that the numbers are not always small.
 We chose these numbers because there is not a fixed mean of
 the distribution of numbers. That is, if you take the mean
 of some number of samples and then add more samples and take
-the mean again, the mean of the new numbers is larger than
+the mean again, the mean of the new numbers is different from
 the mean of the old. We believe this is a good property to
 have when indexing into our uniform distribution so as to
 avoid biasing the choice of examples towards some small size.
@@ -71,7 +71,7 @@ The precise algorithm we used is implemented in these functions:
   (extract-pick-an-index))
 
 The random-selection results are quite sensitive to the
-precise probability of picking the zero exponent (the 
+probability of picking the zero exponent (the 
 @racket[prob-of-zero] argument). We empirically chose
 benchmark-specific numbers in an attempt to maximize the
 success of the random uniform distribution method.
@@ -82,11 +82,12 @@ based on our experience programming in Redex, but not
 recently. The most recent change to it was a bug fix in
 April of 2011 and the most recent change that affected
 the generation of random terms was in January of 2011,
-both well before we started the current study. This
-generator, which is based on the method of recursively
-unfolding non-terminals, is parameterized over the
-depth at which it attempts to stop recurring. We chose
-a value of 5 for this depth since that seemed to be the most 
-successful, as above. This produces terms of a similar 
-size to those of the random-selection generator, although 
-the distribution is different.
+both well before we started the current study. 
+
+This generator, which is based on the method of recursively
+unfolding non-terminals, is parameterized over the depth at
+which it attempts to stop unfolding non-terminals. We chose
+a value of 5 for this depth since that seemed to be the
+most successful. This produces terms of a similar size to
+those of the uniform random generator, although the
+distribution is different.

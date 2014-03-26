@@ -46,8 +46,8 @@ then the same term must appear in both places. For example, a substitution
 function will have a case with a pattern like this:
 @racketblock[(subst (λ (x : τ) e_1) x e_2)]
 to cover the situation where the substituted variable is the same as a
-lambda parameter (in this case just returning @racket[(λ (x : τ) e_1)], since
-there are no free occurrences of @racket[x] in the expression). In contrast
+parameter (in this case just returning the first argument, since
+there are no free occurrences of @racket[x]). In contrast
 the two expressions @racket[e_1] and @racket[e_2] are independent since
 they have different subscripts.
 When enumerating patterns like this one, @racket[(subst (λ (a : int) a) a 1)]
@@ -55,7 +55,7 @@ is valid, but the term @racket[(subst (λ (a : int) a) b 1)] is not.
 
 To handle such patterns the enumerator makes a pass over the entire term
 and collects all of the variables. It then enumerates a pair where the
-first component is an environment mapping the found variables to values
+first component is an environment mapping the found variables to terms
 and the second component is the rest of the term where the variables
 are replaced with constant enumerations that serve as placeholders. Once
 a term has been enumerated, Redex makes a pass over the term, replacing
@@ -94,7 +94,7 @@ the @racket[(lon-without '())] enumeration:
 @enum-example[(lon-without '()) 12]
 This is the only place where dependent enumeration is used in the
 Redex enumeration library, and the patterns used
-are almost always finite, so we have not encountered degenerate performance
+are almost always infinite, so we have not encountered degenerate performance
 with dependent generation in practice.
 
 The final pattern is a variation on Kleene star that
@@ -119,7 +119,7 @@ a single element, but the second one (the one referring to
 
 In order to specify a rewrite rules that fires only when the
 arity of the procedure matches the number of actual arguments
-supplied, Redex allows the ellpisis itself to have a subscript.
+supplied, Redex allows the ellipsis itself to have a subscript.
 This means not that the entire sequences are the same, but merely
 that they have the same length. So, we would write:
 @racketblock[((λ (x ..._1) e) v ..._1)]
@@ -134,7 +134,7 @@ the dependent enumeration requires constructing enumerators
 during decoding. 
 
 Instead, if we separate the pattern into two parts, first
-one part that has the repeated elements, but now grouped:
+one part that has the repeated elements, but now grouped together:
 @racket[((x v) ...)]
 and then the remainder in a second part (just 
 @racket[(λ e)] in our example), then the enumerator can handle
@@ -143,5 +143,5 @@ we have the term, we can rearrange it to match the original
 pattern. 
 
 This is the strategy that our enumerator implementation uses. Of course,
-ellipses can be nested, so the actual implementation is fairly complex,
-but the rearrangement is the key idea.
+ellipses can be nested, so the full implementation is more complex,
+but rearrangement is the key idea.

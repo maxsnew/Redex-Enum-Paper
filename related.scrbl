@@ -32,8 +32,8 @@ Feat is a system for enumeration that distinguishes itself from
 perspective. We use the ``function'' perspective as well. While our
 approach is closer to Tarau's, we share support for finite sets with
 Feat, but are distinct from Feat in our support for dependent pairing,
-which can be easily used to implement what Feat refers to
-as ``invariants'' (although not efficiently).
+which can be used to implement what Feat refers to
+as ``invariants'', although not efficiently.
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages
@@ -60,13 +60,13 @@ as discussed in detail, for instance, in the paper
 on Feat. Our system has a similar problem with dependent pairs where
 to decode an element from the n+1-st set, you must have a
 count for each of the prior n sets. However, when these
-counts are predictable, they need no be constructed; and when they
+counts are predictable, they need not be constructed; and when they
 have been previously computed, they can be reused (and our
 implementation caches them).
 
 @section{Testing Studies}
 
-We are aware of only one other studies that specifically compares
+We are aware of only one other study that specifically compares
 random testing and enumeration, namely in
 @citet[small-check]'s original paper on SmallCheck. SmallCheck is an
 enumeration-based testing library for Haskell and the paper 

@@ -10,7 +10,7 @@
           racket/format
           (only-in pict scale))
 
-@title[#:tag "sec:benchmark"]{Bechmark Overview and Bug-Specific Results}
+@title[#:tag "sec:benchmark"]{Benchmark Overview and Bug-Specific Results}
 
 The programs in our benchmark come from two sources:
 synthetic examples based on our experience with Redex over

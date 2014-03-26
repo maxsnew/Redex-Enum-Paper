@@ -20,11 +20,11 @@
                bugs whose counterexamples were never found)}
          (correlation-plot-24hour)]
 
-Our primary concern with this study was the determine the
+Our primary concern with this study was to determine the
 relative merits of the three generation strategies. 
 @Figure-ref["fig:benchmark-lines"] shows our data with this
 aim in mind. Along its x-axis is time in seconds, again with
-a log scale and along the y-axis is the total number of bugs
+a log scale, and along the y-axis is the total number of bugs
 found for each point in time. There are three lines on the
 plot showing how the total number of bugs found changes as
 time passes.
@@ -53,7 +53,7 @@ it finds that ad hoc generation does not also find.
 Although there are 43 bugs in the benchmark, no strategy was
 able to find more than 30 of them in a 24 hour period.
 
-@figure-ref["fig:benchmark-overview"] also shows that, for
+@Figure-ref["fig:benchmark-overview"] also shows that, for
 the most part, bugs that were easy (could be found in less
 than a few seconds) for either the ad hoc generator or the
 generator that selected at random from the uniform
