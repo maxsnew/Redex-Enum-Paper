@@ -152,7 +152,7 @@
                                       (λ (_) #\space)))]
     [else str]))
 
-(define rendered-enumeration-width 45)
+(define rendered-enumeration-width 40)
 
 (define-syntax-rule 
   (enum-example stx count)

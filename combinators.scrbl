@@ -79,21 +79,21 @@ sum of an enumeration of natural numbers and an enumeration
 of strings
 @enum-example[(disj-sum/e (cons nats/e number?)
                           (cons string/e string?))
-              12]
+              14]
 
 The @racket[disj-sum/e] enumerator also has to be fair and
-to account for finite enumerations. So, for example, this
+to account for finite enumerations. So this
 enumeration:
 @racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c) symbol?)
                          (cons nats/e number?)
                          (cons (fin/e "x" "y") string?))]
 has to cycle through the finite enumerations until they
-are exhausted before continuing with the rest of the natural
+are exhausted before producing the rest of the natural
 numbers:
 @enum-example[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
                           (cons nats/e number?)
                           (cons (fin/e "x" "y") string?))
-              16]
+              14]
 In general, this means that @racket[disj-sum/e] must track the
 ranges of natural numbers when each finite enumeration is exhausted
 to compute which enumeration to use for a given index.
@@ -143,8 +143,8 @@ enumerations of natural numbers that start at some point beyond zero:
 Also, we can exploit the bijection to define the @racket[except/e]
 enumerator. It accepts an element and an enumeration, and returns one
 that doesn't have the given element. For example, the first
-18 elements of @racket[(except/e nats/e 13)] are
-@enum-example[(except/e nats/e 13) 18]
+16 elements of @racket[(except/e nats/e 13)] are
+@enum-example[(except/e nats/e 13) 16]
 The decoder for @racket[except/e] simply encodes the
 given element and then either subtracts one before
 passing the natural number along (if it is above the 
@@ -161,10 +161,10 @@ in the list of natural number enumeration given above.
 @; xxx put in a \newpage
 
 Our next combinator @racket[dep/e] doesn't always have this property.
-It accepts an enumerator and a function from elements to enumerators
-and it enumerates pairs of elements where
+It accepts an enumerator and a function from elements to enumerators;
+it enumerates pairs of elements where
 the enumeration used for the second position in the pair depends
-on the actual values in the first position in the pair.
+on the actual values of the first position.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
 @racketblock[(dep/e nats/e (λ (i) (nats-above/e i)))]
@@ -177,7 +177,7 @@ of them are.
 The implementation of @racket[dep/e] has three different
 cases, depending on the cardinality of the enumerators it
 receives. If all of the enumerations are infinite, then it
-is very similar to the @racket[cons/e] enumerator, but just
+is just like @racket[cons/e], except
 using the dependent function to build the enumerator to select
 from for the second element of the pair. Similarly, if the
 second enumerations are all infinite but the first one is finite,

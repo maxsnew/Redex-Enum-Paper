@@ -85,7 +85,8 @@ and the @racket[except/e] combinator.  Here's how to generate lists of distinct 
                                 (cons (dep/e 
                                        (except/e* nats/e eles)
                                        (λ (new)
-                                         (lon-without (cons new eles))))
+                                         (lon-without
+                                          (cons new eles))))
                                       cons?)))))]
 where @racket[except/e*] simply calls @racket[except/e] for each element of
 its input list. Here are the first @racket[12] elements of
