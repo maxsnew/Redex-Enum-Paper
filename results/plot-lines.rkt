@@ -210,7 +210,7 @@
 
 (define/contract (type+num+method->average d-stats base num method)
   (-> any/c
-      (or/c 'stlc 'poly-stlc 'stlc-sub 'list-machine 'rbtrees 'delim-cont 'verification) 
+      (or/c 'stlc 'poly-stlc 'stlc-sub 'let-poly 'list-machine 'rbtrees 'delim-cont 'verification) 
       any/c
       (or/c 'grammar 'ordered 'enum)
       (or/c #f (and/c real? positive?)))

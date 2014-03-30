@@ -36,15 +36,16 @@ property.
 
 The table in @figure-ref["fig:benchmark-overview"] gives an
 overview of the benchmark suite, showing some numbers for
-each model and bug. Each model has its name and the number
+each model and bug. Each model has its name and a small
+table of information about it. The table contains the number
 of lines of code in the correct version (the buggy versions
 are always within a few lines of the originals). The line
 number counts include the model, the specification of the
 property, and a little bit of model-specific code to call
-into the different generators. The p-value column shows the
+into the different generators. The p-value is the
 argument to @racket[pick-a-number] that we used to get
 numbers to index into the uniform distribution for the model.
-The mean and standard deviation are of the size of 10,000 
+The mean (μ) and standard (σ) deviation are of the size of 10,000 
 random terms from the uniform distribution, picked with the given
 p value.
 
@@ -102,9 +103,7 @@ generate counterexamples.
            @hspace[1]
            (cons
             (list @bold{Model}
-                  @bold{LoC}
-                  @bold{P-Value}
-                  @bold{Mean ± Stddev}
+                  @bold{Info}
                   @bold{Bug #}
                   @bold{S/M/D/U}
                   @bold{Size}
@@ -113,28 +112,25 @@ generate counterexamples.
               (for/list ([t/n (in-list all-types/nums)])
                 (define type (list-ref t/n 0))
                 (define num (list-ref t/n 1))
-                (define-values (p-value mean/stddev)
-                  (cond
-                    [(equal? last-model type)
-                     (values "" "")]
-                    [else
-                     (define-values (p-value info-table)
-                       (get-p-value/mean/stddev type))
-                     (values (~r p-value)
-                             (~a (~r (hash-ref info-table 'mean-size)
-                                     #:precision '(= 1))
-                                 " ± "
-                                 (~r (hash-ref info-table 'stddev-size)
-                                     #:precision '(= 1))))]))
+                (define-values (p-value info-table) (get-p-value/mean/stddev type))
+                (define mean/stddev
+                  (~a (~r (hash-ref info-table 'mean-size)
+                          #:precision '(= 1))
+                      " ± "
+                      (~r (hash-ref info-table 'stddev-size)
+                          #:precision '(= 1))))
                 (begin0
                   (list (if (equal? last-model type)
                             ""
                             (symbol->string type))
-                        (if (equal? last-model type)
-                            ""
-                            (get-line-count type))
-                        p-value
-                        mean/stddev
+                        (case num
+                          [(1)
+                           (format "LoC: ~a" (get-line-count type))]
+                          [(2)
+                           (format "P-Value: ~a" (~r p-value))]
+                          [(3)
+                           (format "μ±σ: ~a" mean/stddev)]
+                          [else ""])
                         (number->string num)
                         (symbol->string (get-category type num))
                         (number->string (get-counterexample-size type num))
@@ -296,6 +292,8 @@ might expect in the effectiveness of the two properties in
 our results, although type soundness is slightly less
 effective overall. (See the ``sltc-sub'' models in 
 @figure-ref["fig:benchmark"].)
+
+@section{let-poly}
 
 @section{list-machine} An implementation of 
 @citet[list-machine]'s list-machine benchmark. This is a

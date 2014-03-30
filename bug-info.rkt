@@ -21,6 +21,7 @@
   (hash 'stlc '("stlc/stlc-base.rkt")
         'poly-stlc '("poly-stlc/poly-stlc-base.rkt")
         'stlc-sub '("stlc-sub/stlc-sub-base.rkt")
+        'let-poly '("let-poly/let-poly-base.rkt")
         'rbtrees '("rbtrees/rbtrees-base.rkt")
         'list-machine '("list-machine/list-machine-base.rkt")
         'delim-cont '("delim-cont/delim-cont-base.rkt")
@@ -36,6 +37,7 @@
   '((stlc 9)
     (poly-stlc 9)
     (stlc-sub 9)
+    (let-poly 7)
     (list-machine 3)
     (rbtrees 3)
     (delim-cont 3)
@@ -86,6 +88,14 @@
          7 'S
          8 'S
          9 'SM)
+   'let-poly
+   (hash 1 'S
+         2 'D
+         3 'M
+         4 'S
+         5 'M
+         6 'M
+         7 'D)
    'list-machine
    ; list-machine: 1S 2M 3S
    (hash 1 'S
@@ -255,6 +265,12 @@
                (stddev-depth . 2.964417161939257)
                (mean-size . 16.9613)
                (stddev-size . 23.12202418280026)))
+        (let-poly
+         .
+         #hash((mean-depth . 3.4069)
+               (stddev-depth . 2.5943269628171386)
+               (mean-size . 8.5698)
+               (stddev-size . 9.385985721276162)))
         (stlc-sub
          .
          #hash((mean-depth . 3.4311)
