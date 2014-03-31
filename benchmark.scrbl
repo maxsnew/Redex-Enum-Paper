@@ -108,10 +108,16 @@ generate counterexamples.
                   @bold{S/M/D/U}
                   @bold{Size}
                   @bold{Description of Bug})
-            (let ([last-model #f])
+            (let ([last-model #f]
+                  [n 0])
               (for/list ([t/n (in-list all-types/nums)])
                 (define type (list-ref t/n 0))
                 (define num (list-ref t/n 1))
+                (cond
+                  [(equal? last-model type)
+                   (set! n (+ n 1))]
+                  [else
+                   (set! n 1)])
                 (define-values (p-value info-table) (get-p-value/mean/stddev type))
                 (define mean/stddev
                   (~a (~r (hash-ref info-table 'mean-size)
@@ -123,7 +129,7 @@ generate counterexamples.
                   (list (if (equal? last-model type)
                             ""
                             (symbol->string type))
-                        (case num
+                        (case n
                           [(1)
                            (format "LoC: ~a" (get-line-count type))]
                           [(2)
