@@ -48,7 +48,7 @@ in-order enumeration of Redex programs.
 Our results contradict commonly-held, yet unsubstantiated
 wisdom regarding the relative value of these three
 approaches. Specifically, selecting uniformly at random is
-the worst-performing choice, and enumeration and random
+not the best-performing choice, and enumeration and ad hoc random
 selection are incomparable, with random being better with
 more than 10 minutes but in-order enumeration being better
 in interactive time-frames.
