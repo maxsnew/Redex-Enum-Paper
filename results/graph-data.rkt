@@ -46,7 +46,10 @@
            (for/list ([f filenames])
              (call-with-input-file f
                (λ (in)
-                 (read in))))))
+                 (define res (read in))
+                 (unless (list? res)
+                   (error 'load-raw "file ~a doesn't have a list" f))
+                 res)))))
   (let loop ([fixed-data '()]
                  [rest raw-data])
         (cond
