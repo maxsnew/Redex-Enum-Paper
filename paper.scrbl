@@ -49,6 +49,15 @@ That aside, I like the paper and wish you the best for acceptance at OOPSLA!
 
 Cheers,
 Aaron
+
+------ from a followup message
+
+For the terminology cite:
+
+> I got the terminology from some lecture notes of Thorsten Altenkirch's:
+>
+> http://www.cs.nott.ac.uk/~txa/publ/esslli96.pdf
+
 }
 
 @abstract{ 
