@@ -39,9 +39,11 @@ Fairness: we have struggled to find a mathematically precise notion of
 fairness. Intuitively, the idea is that a combinator that builds an
 enumeration out of sub-enumerations should not look much much deeper
 into one enumeration than the others. Pinning this down has proven to
-be more difficult that one might think at first glance, but we
-understand enough to provide more examples and intution than is in the
-submission, and we'll do that.
+be more difficult that one might think at first glance, however. We
+have developed a notion of "relative fairness" (ie if you declare one
+enumeration to be fair we know what it means for another to be as fair
+as that one is). We also understand it well enough to provide more
+examples and intution than is in the submission, and we'll do that.
 
 Reviewer D points us to Runeson & H\"{o}st: we plan to study this work
 more but for now we can certainly say that we have excised the one
