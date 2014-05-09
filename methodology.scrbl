@@ -9,7 +9,7 @@
 
 @title[#:tag "sec:methodology"]{Methodology}
 
-Our case study compares three types of test-case generation
+Our study compares three types of test-case generation
 using a set of buggy models. Each model and bug is equipped
 with a property that should hold for every term (but doesn't
 due to the bug) and three functions that generate terms, one
