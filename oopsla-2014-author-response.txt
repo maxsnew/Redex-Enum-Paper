@@ -8,7 +8,7 @@ quite helpful to us in understanding how to rewrite it. In particular,
 reviewer A's point that random testing is often combined with feedback
 is an especially potent counter-argument to our portrayal and we'll
 use that observation as a starting point for re-thinking the
-introduction. We are still frustrated by the bad rap ad-hoc random
+introduction. We are still frustrated by the bad rap ad hoc random
 generation gets in some circles and the rose-colored view that
 enumeration gets and we hope that this paper injects a little more
 sanity into the community's understanding of their relative value,
@@ -44,7 +44,7 @@ be more difficult that one might think at first glance, however. We
 have developed a notion of "relative fairness" (ie if you declare one
 enumeration to be fair we know what it means for another to be as fair
 as that one is). We also understand it well enough to provide more
-examples and intution than is in the submission, and we'll do that.
+examples and intuition than is in the submission, and we'll do that.
 
 Quickcheck's Integer distribution: we have read the code that
 implements it, but it is difficult to tell what distribution is
