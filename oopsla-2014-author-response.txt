@@ -11,7 +11,8 @@ use that observation as a starting point for re-thinking the
 introduction. We are still frustrated by the bad rap ad-hoc random
 generation gets in some circles and the rose-colored view that
 enumeration gets and we hope that this paper injects a little more
-sanity into the community's understanding of their relative value.
+sanity into the community's understanding of their relative value,
+however.
 
 Along these lines, we'll also provide some background on Redex. If the
 reviewer is curious, our paper "Run Your Research" (POPL 2012) gives
@@ -23,13 +24,13 @@ agree that this could be better, but it is not as bad as some seemed
 to think. We will clarify this in the paper, but for the record, all
 of the benchmark programs (except red-black trees) are "real" Redex
 programs in that they match typical things Redex programs do and have
-a size of a typical Redex program. RVM is one of the largest Redex
+the size of a typical Redex program. RVM is one of the largest Redex
 models in existence; list-machine is a Redex implementation of a model
 published by others and delim-cont is a model written by others.
 Several of the bugs there are real bugs, extracted from git
 histories. Since the submission date we have also added a model with
 let-polymorphism and the classic bug that confounded PL researchers
-for about a decade, as well as 8 other real bugs that came up during
+for about a decade, as well as 6 other real bugs that came up during
 the development of that model. We have also identified two bugs based
 on the version control history of the R6RS formal model that we expect
 to include in the benchmark. (None of the additions change our overall
@@ -45,10 +46,14 @@ enumeration to be fair we know what it means for another to be as fair
 as that one is). We also understand it well enough to provide more
 examples and intution than is in the submission, and we'll do that.
 
-Reviewer D points us to Runeson & H\"{o}st: we plan to study this work
-more but for now we can certainly say that we have excised the one
-occurrence of "case study" from the paper. If there are other specific
-terminological errors that you can point us to, we'll gladly change
-our paper. Fundamentally our goal is to communicate effectively what
-we've done and using the right terminology helps us with that, so
-thank you!
+Quickcheck's Integer distribution: we have read the code that
+implements it, but it is difficult to tell what distribution is
+used. We emailed a maintainer yesterday but haven't yet heard back. If
+we do, we'll put something more precise in the paper.
+
+Runeson & H\"{o}st: we plan to study this work more but for now we can
+certainly say that we have excised the one occurrence of "case study"
+from the paper. If there are other specific terminological errors that
+you can point us to, we'll gladly change our paper. Fundamentally our
+goal is to communicate effectively what we've done and using the right
+terminology helps us with that, so thank you!
