@@ -17,7 +17,7 @@
 (define (grid count num-points size arrow-head-size)
   (gen-grid cons/e count num-points size arrow-head-size))
 
-(define (gen-grid cons/e count num-points size arrow-head-size)
+(define (gen-grid cons/e count num-points size arrow-head-size #:arrows? arrows?)
   (define prs (cons/e nat/e nat/e))
   (define base
     (dc (λ (dc dx dy)
@@ -60,6 +60,7 @@
                              (text " ⋯")
                              (blank)))
                         txt))))
+    
     (let loop ([i 0]
                [pict base])
       (cond
@@ -72,14 +73,20 @@
          (define next (decode prs (+ i 1)))
          (define-values (x1 y1) (ij->xy (car this) (cdr this)))
          (define-values (x2 y2) (ij->xy (car next) (cdr next)))
+         (define index (text (format "~a" i)))
          (loop (+ i 1)
-               (pin-arrow-line
-                arrow-head-size
-                pict
-                pict
-                (λ (a b) (values x1 y1))
-                pict
-                (λ (a b) (values x2 y2))))])))))
+               (if arrows?
+                   (pin-arrow-line
+                    arrow-head-size
+                    pict
+                    pict
+                    (λ (a b) (values x1 y1))
+                    pict
+                    (λ (a b) (values x2 y2)))
+                   (pin-over pict
+                             (- x1 (/ (pict-width index) 2))
+                             (- y1 (/ (pict-height index) 2))
+                             index)))])))))
 
 
 (define-syntax-rule

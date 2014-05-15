@@ -123,6 +123,7 @@
        (item "disj-sum/e : enum a_1, enum a_2, ... → enum (a_1 or a_2 or ...)"))
 
 (slide #:title "Sum of many"
+       (item "Just need to do a quotient with remainder, still efficient")
        'alts
        (list 
         (list
@@ -155,9 +156,12 @@
        'next
        (code (define int-and-char/e (cons/e int/e char/e))))
 
+(slide #:title "Finite Product"
+       (t "For a finite product we'll just loop through the smaller enumeration"))
+
 (slide #:title "Product Example"
        (t "What order do we want?")
-       (gen-grid cons/e 10 0 500 12))
+       (gen-grid cons/e 10 0 500 12 #:arrows? #f))
 
 (slide #:title "Cantor Pairing Function"
        ;; TODO: latexify equation
@@ -171,23 +175,20 @@
        (append
         (for/list ([i (in-range 21)])
          (list
-          (gen-grid cantor-cons/e 10 i 500 12)))
-        (list (list (gen-grid cantor-cons/e 10 54 500 12)))))
+          (gen-grid cantor-cons/e 10 i 500 12 #:arrows? #t)))
+        (list (list (gen-grid cantor-cons/e 10 54 500 12 #:arrows? #t))
+              (list (gen-grid cantor-cons/e 10 55 500 12 #:arrows? #f)))))
 
-(slide #:title "Deriving encode"
-       (para "Given an injective and surjective encode function, we can always"
-             "construct a decode function by brute-force search.")
-       (para "Obviously this is too inefficient for practical use")
-       (item "Need to solve a quadratic Diophantine equation")
-       (item "Fortunately, an efficient solution is known: TODO"))
+(slide #:title "Cantor from-nat"
+       (para "First find the \"triangle root\" of the number, then use the \"triangle root remainder\" to locate it on that triangle."))
 
 (slide #:title "Nested Pairing"
-       (t "Once again nesting is too unfair to be used in general"))
+       (item "Once again nesting is too unfair to be used in general")
+       (item "Enumerating the first 100000 terms of (nat * nat) * nat, the first two average ~7.5 while the third slot averages ~150"))
 
 (slide #:title "Generalized Cantor N-Tupling"
-       (para "Known \"fair\" and efficient generalization to Skolem at latest."
+       (para "Known \"fair\" generalization to Skolem at latest."
              "But apparently combinatoricists only care about the to-nat function")
-       (para "But, decode?")
        (item "n-th degree Diophantine equation...") ;; TODO: copy the formula from Tarau's paper
        ;; TODO: clean this up!
        (item "Known search procedure (Tarau) that generalizes well with a lot of enumerations, but scales poorly with the input natural number for small tuples (1-10) the kinds of things used in Redex!"))
@@ -196,7 +197,7 @@
        (para "An enumeration defines an order on the set."
              "The Cantor bijection orders by the sum of the terms indices."
              "Maybe order some other way?")
-       (gen-grid cantor-cons/e 10 54 500 12)
+       (gen-grid cantor-cons/e 10 54 500 12 #:arrows? #t)
        (para "Instead of searching by layers of an n-simplex (triangle, tetrahedron)"
              "search by layers of an n-cube."))
 
@@ -205,15 +206,16 @@
        'alts
        (append
         (for/list ([i (in-range 25)])
-          (list (gen-grid boxy-cons/e 10 i 500 12)))
-        (list (list (gen-grid boxy-cons/e 10 99 500 12)))
-       ))
+          (list (gen-grid boxy-cons/e 10 i 500 12 #:arrows? #t)))
+        (list (list (gen-grid boxy-cons/e 10 99 500 12 #:arrows? #t))
+              (list (gen-grid boxy-cons/e 10 100 500 12 #:arrows? #f)))))
 
 (slide #:title "Boxy N-Tupling"
        (t "TODO: picture of boxy enumeration")
        (para "decode just need n-th root!"))
 
-(slide #:title "Mixed finite/infinite N-tupling")
+(slide #:title "Mixed finite/infinite N-tupling"
+       (para "To minimize the interplay between them, we collect all of the finite enumerations and infinite enumerations into separate bins then tuple them separately and then tuple the result"))
 
 (slide #:title "Fair?"
        (t "More on this later..."))
@@ -283,15 +285,17 @@
 
 (slide #:title "Raw Results"
        ;; TODO: generate this, it's not working!
-       (bitmap (make-object bitmap% "../pict_3.png"))
+       (scale (res-plot-24hour) 1.5)
+       #;(bitmap (make-object bitmap% "../pict_3.png"))
        )
 
-(slide #:title "Bugs per second"
+(slide #:title "Bugs found over Time"
+       (scale (line-plot-24hour) 1.5)
        ;; TODO: get this pict too
        )
 
 (slide #:title "Evaluation Conclusion"
-       (t "In-order enumeration best at interactive time-scales, random for long-running"))
+       (para "In-order enumeration best at interactive time-scales, random for long-running"))
 
 (slide #:title "Fairness...")
 ;; Who
