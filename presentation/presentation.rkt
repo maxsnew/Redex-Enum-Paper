@@ -156,14 +156,23 @@
        (code (define int-and-char/e (cons/e int/e char/e))))
 
 (slide #:title "Product Example"
-       (t "TODO: show picture of table")
-       'next
-       (t "What order do we want?"))
+       (t "What order do we want?")
+       (gen-grid cons/e 10 0 500 12))
 
 (slide #:title "Cantor Pairing Function"
-       (t "Familiar decode function")
-       (t "TODO: picture of Cantor pairing enumeration")
-       (t "TODO: derivation of encode"))
+       ;; TODO: latexify equation
+       (para "Normally defined Nat*Nat → Nat, which is our to-nat, but for enumeration, the from-nat function is more important")
+       (item "to-nat(n,m) = 1/2(n+m)(n+m+1) + m")
+       (item "For from-nat we need to solve z = (n+m)(n+m+1)/2 + m for z")
+       (item "With some ingenuity it's not so hard."))
+
+(slide #:title "Geometric Interpretation"
+       'alts
+       (append
+        (for/list ([i (in-range 21)])
+         (list
+          (gen-grid cantor-cons/e 10 i 500 12)))
+        (list (list (gen-grid cantor-cons/e 10 54 500 12)))))
 
 (slide #:title "Deriving encode"
        (para "Given an injective and surjective encode function, we can always"
@@ -176,20 +185,33 @@
        (t "Once again nesting is too unfair to be used in general"))
 
 (slide #:title "Generalized Cantor N-Tupling"
-       (t "Known \"fair\" generalization to Skolem at latest")
-       (para "But, encode?")
-       'next
-       (item "n-th degree Diophantine equation...")
-       (item "Known search procedure (Knuth) but still too inefficient"))
+       (para "Known \"fair\" and efficient generalization to Skolem at latest."
+             "But apparently combinatoricists only care about the to-nat function")
+       (para "But, decode?")
+       (item "n-th degree Diophantine equation...") ;; TODO: copy the formula from Tarau's paper
+       ;; TODO: clean this up!
+       (item "Known search procedure (Tarau) that generalizes well with a lot of enumerations, but scales poorly with the input natural number for small tuples (1-10) the kinds of things used in Redex!"))
 
 (slide #:title "Back to the drawing board..."
-       (t "Cantor tupling orders by the sum of the indices, what about the max?")
+       (para "An enumeration defines an order on the set."
+             "The Cantor bijection orders by the sum of the terms indices."
+             "Maybe order some other way?")
+       (gen-grid cantor-cons/e 10 54 500 12)
        (para "Instead of searching by layers of an n-simplex (triangle, tetrahedron)"
              "search by layers of an n-cube."))
 
+(slide #:title "Boxy Tupling"
+       (para "Order by the max instead of the sum?")
+       'alts
+       (append
+        (for/list ([i (in-range 25)])
+          (list (gen-grid boxy-cons/e 10 i 500 12)))
+        (list (list (gen-grid boxy-cons/e 10 99 500 12)))
+       ))
+
 (slide #:title "Boxy N-Tupling"
        (t "TODO: picture of boxy enumeration")
-       (para "encode: just need n-th root!"))
+       (para "decode just need n-th root!"))
 
 (slide #:title "Mixed finite/infinite N-tupling")
 
