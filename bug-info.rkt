@@ -195,6 +195,9 @@
   (cond
     [(= 1 (length pick-an-index-arguments))
      (define p-value (car pick-an-index-arguments))
+     (unless (number? p-value)
+       (eprintf "didn't find p-value for ~a\n" base-file))
+     (set! p-value 0)
      (values p-value
              (hash-ref avg/stddev-table type))]
     [else
