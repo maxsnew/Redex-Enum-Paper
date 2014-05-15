@@ -73,7 +73,8 @@
               (map as-tt (to-list a-d/e))
        ))
 ;; TODO: better version of this...
-(define (enum-col e n #:to-str [to-str (λ (x) (format "~a" x))])
+(define (enum-col e #:to-str [to-str (λ (x) (format "~s" x))])
+  (define n (min (size e) 20))
   (foldr vl-append 
          (blank)
          (for/list ([x (in-list (approximate e n))])
@@ -85,40 +86,68 @@
        (item "disj-sum/e : enum a, enum b → enum (a or b)")
        (code disj-sum/e nat/e string/e)
        'next
-       (enum-col int-or-str/e 10
-                 #:to-str (λ (x)
-                            (if (string? x)
-                                (format "~s" x)
-                                (format "~a" x)))))
+       (enum-col int-or-str/e))
 (define neg/e 
   (map/e (λ (x) (sub1 (- x)))
          (λ (x) (- (add1 x)))
          nat/e))
 (slide #:title "Sum Example"
-       (t "First consider only infinite enumerations")
        'alts
        (list 
         (list
-         (htl-append (enum-col nat/e 10)
-                   (enum-col neg/e 10)))
-        (list (enum-col (disj-sum/e (cons nat/e number?) (cons neg/e number?)) 20))))
+         (htl-append 10
+                     (enum-col nat/e)
+                     (enum-col neg/e)))
+        (list (enum-col (disj-sum/e (cons nat/e number?) (cons neg/e number?))))))
 
 (slide #:title "from-nat"
        (t "Just check if it's even or odd (constant time)"))
 
-(slide #:title "Nested Sum"
-       
-       (t "TODO: show why nested sum is unfair"))
+(slide #:title "Sum of 3 Things?"
+       (t "Mathematically, it doesn't matter, just iterate")
+       'alts
+       (list
+        (list
+         (htl-append 10
+                     (enum-col nat/e)
+                     (enum-col neg/e)
+                     (enum-col string/e)))
+        (list 
+         (htl-append 10
+                     (enum-col (disj-sum/e (cons nat/e number?) (cons neg/e number?)))
+                     (enum-col string/e )))
+        (list 
+         (enum-col (disj-sum/e (cons (disj-sum/e (cons nat/e number?) (cons neg/e number?)) number? ) (cons string/e string?))))))
 
 (slide #:title "Sum, redefined"
        (item "disj-sum/e : enum a_1, enum a_2, ... → enum (a_1 or a_2 or ...)"))
 
 (slide #:title "Sum of many"
-       (t "TODO: ")
-       )
+       'alts
+       (list 
+        (list
+         (htl-append 10
+                     (enum-col nat/e)
+                     (enum-col neg/e)
+                     (enum-col string/e)))
+        (list
+         (enum-col (disj-sum/e (cons nat/e number?)
+                               (cons neg/e number?)
+                               (cons string/e string?))))))
 
 (slide #:title "Sums of Finite Enumerations"
-       (t "Easily generalizes to arbitrary sums of finite, infinite enumerations"))
+       (t "Easily generalizes to arbitrary sums of finite, infinite enumerations")
+       'alts
+       (list
+        (list 
+         (htl-append 10
+                     (enum-col nat/e)
+                     (enum-col bool/e)
+                     (enum-col (fin/e 'a 'b 'c 'd))))
+        (list
+         (enum-col (disj-sum/e (cons nat/e number?)
+                               (cons bool/e boolean?)
+                               (cons (fin/e 'a 'b 'c 'd) symbol?))))))
 
 (slide #:title "Product"
        (item "Set interpretation: Cartesian Product")
