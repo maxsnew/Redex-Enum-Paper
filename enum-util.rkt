@@ -4,16 +4,20 @@
          scribble/manual)
 
 (provide pair-pict 
+         grid gen-grid
          unfair-exp fair-exp num-enumerated
          max-unfair min-unfair max-fair min-fair
          render-enumerations
          enum-example
-         fin/e
-         except/e*)
+         racketblock/define
+         fin/e)
 
 (define (pair-pict) (grid 5 12 200 12))
 
 (define (grid count num-points size arrow-head-size)
+  (gen-grid cons/e count num-points size arrow-head-size))
+
+(define (gen-grid cons/e count num-points size arrow-head-size)
   (define prs (cons/e nat/e nat/e))
   (define base
     (dc (λ (dc dx dy)
@@ -152,10 +156,14 @@
                                       (λ (_) #\space)))]
     [else str]))
 
-(define rendered-enumeration-width 40)
+(define rendered-enumeration-width 45)
 
 (define-syntax-rule 
   (enum-example stx count)
   (render-enumerations (approximate stx count)))
 
-(define (except/e* e l) (apply except/e e l))
+(define-syntax-rule
+  (racketblock/define exp)
+  (begin (racketblock exp)
+         exp))
+

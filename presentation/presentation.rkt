@@ -5,7 +5,11 @@
          slideshow/code
          "../enum-util.rkt"
          "../results/plot.rkt"
-         "../util.rkt")
+         )
+
+
+(define (as-tt x)
+  (tt (format "~a" x)))
 (slide (t "Enumerating Countable Sets for Property-Based Testing"))
 
 ;; Motivation
@@ -30,41 +34,62 @@
        (list
         (list
          (code (define-language rbtrees
-                 (tree ::= empty
-                           (node color val tree tree))))
+                 (tree  ::= empty
+                            (node color val tree tree))
+                 (color ::= red black)
+                 (val   ::= num)))
                  
-         (para "Need support for alternatives, tuples, recursion (fix points)"))
+         (para "Need support for finite sets, alternatives, tuples, recursion (fix points)"))
         (list
-         (t "Redex also supports more exotic types")
-         ;; TODO: change this to be a table of pattern <-> combinator feature
-         (code (define-language exotic
-                 (the-same     ::= (num_1 num_1))
-                 (different    ::= (num_!_1 num_!_1))
-                 (0-or-more    ::= (num ...))
-                 (same-len     ::= (num ..._1 string ..._1))))
-         'next
-         (para "Need to support some sort of dependent enumeration..."))))
+         (t "Redex also supports more exotic patterns, guiding combinator design")
+         (scale (table 2
+                       (map as-tt
+                            (list '(num_1 num_1) "Variable Bindings"
+                                  '(num_!_1 num_!_1) "Dependence, finite filtering"
+                                  '(num ...) "Sequencing"
+                                  '(num ..._1 string ..._1) "Sequences of same length"))
+                       cc-superimpose
+                       cc-superimpose
+                       10
+                       10)
+                0.75))))
 
 (slide #:title "Design Goals"
        (t "Combinators should be")
        (item "Efficient (produced enumerations should have linear complexity in the length of the bitstring of the input number)")
        (item "Fair (not favor one of the argument enumerations over others)"))
 
+(define-syntax-rule (define-with-code name code-name expr)
+  (begin
+    (define name expr)
+    (define code-name (code expr))))
+
+(define-with-code a-d/e fin-code (fin/e 'a 'b 'c 'd))
+(slide #:title "Finite Enumerations"
+       (t "Set Interpretation: Finite Sets")
+       (code (fin/e 'a 'b 'c 'd))
+       (foldr vl-append
+              (blank)
+              (map as-tt (to-list a-d/e))
+       ))
 ;; TODO: better version of this...
-(define (enum-col e n)
-  
-  (define to-str number->string)
+(define (enum-col e n #:to-str [to-str (λ (x) (format "~a" x))])
   (foldr vl-append 
          (blank)
          (for/list ([x (in-list (approximate e n))])
-           (text (to-str x)))))
+           (tt (to-str x)))))
+(define-with-code int-or-str/e i-c/e-code
+   (disj-sum/e (cons integer/e integer?) (cons string/e string?)))
 (slide #:title "Sum"
        (item "Set interpretation: Disjoint union")
        (item "disj-sum/e : enum a, enum b → enum (a or b)")
-       (code (define int-or-char/e 
-               (disj-sum/e int/e char/e)))
+       (code disj-sum/e nat/e string/e)
        'next
-       )
+       (enum-col int-or-str/e 10
+                 #:to-str (λ (x)
+                            (if (string? x)
+                                (format "~s" x)
+                                (format "~a" x)))))
 (define neg/e 
   (map/e (λ (x) (sub1 (- x)))
          (λ (x) (- (add1 x)))
@@ -143,11 +168,16 @@
        (t "More on this later..."))
 
 (slide #:title "Recursion"
+       (t "Set interpretation: ?")
+       (t "fix/e : (enum a → enum a), optional cardinality → enum a")
        (code (fix/e (λ (l/e) (disj-sum/e (fin/e '())
-                                         (cons/e nat/e l/e)))))
-       (t "TODO: fix/e")
-       (t "TODO: thunk/e for mutual recursion")
-       (t "TODO: caveats: order matters, we can't figure out size for you"))
+                                         (cons/e nat/e l/e))))))
+
+(slide #:title "Recursion Caveats"
+       (t "Order matters, the following diverges:")
+       (code (fix/e (λ (l/e)
+                      (disj-sum/e (cons/e nat/e l/e)
+                                  (fin/e '()))))))
 
 (slide #:title "Dependence"
        (t "Set interpretation: union of an indexed family of sets")
@@ -201,9 +231,16 @@
        (item "6 Redex models with 3-9 bugs each"))
 
 (slide #:title "Raw Results"
-       (bitmap (make-object bitmap% "../pict_3.png")))
+       ;; TODO: generate this, it's not working!
+       (bitmap (make-object bitmap% "../pict_3.png"))
+       )
 
+(slide #:title "Bugs per second"
+       ;; TODO: get this pict too
+       )
 
+(slide #:title "Evaluation Conclusion"
+       (t "In-order enumeration best at interactive time-scales, random for long-running"))
 
 (slide #:title "Fairness...")
 ;; Who
