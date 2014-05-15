@@ -83,7 +83,7 @@ and the @racket[except/e] combinator.  Here's how to generate lists of distinct 
                                (disj-sum/e 
                                 (cons (fin/e null) null?)
                                 (cons (dep/e 
-                                       (except/e* nats/e eles)
+                                       (except/e* nat/e eles)
                                        (λ (new)
                                          (lon-without
                                           (cons new eles))))

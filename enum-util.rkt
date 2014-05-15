@@ -14,7 +14,7 @@
 (define (pair-pict) (grid 5 12 200 12))
 
 (define (grid count num-points size arrow-head-size)
-  (define prs (cons/e nats/e nats/e))
+  (define prs (cons/e nat/e nat/e))
   (define base
     (dc (λ (dc dx dy)
           (for ([i (in-range 1 count)])
@@ -88,17 +88,17 @@
   (get-output-string sp))
 
 (define-values (fair-exp fair/e)
-  (to-count (cons/e (cons/e nats/e nats/e)
-                    (cons/e nats/e nats/e))))
+  (to-count (cons/e (cons/e nat/e nat/e)
+                    (cons/e nat/e nat/e))))
 
 (define-values (unfair-exp unfair/e)
   (to-count (cons/e 
-             nats/e
+             nat/e
              (cons/e 
-              nats/e
+              nat/e
               (cons/e
-               nats/e
-               nats/e)))))
+               nat/e
+               nat/e)))))
   
 (define num-enumerated 4000)
 (define (count-em enum)

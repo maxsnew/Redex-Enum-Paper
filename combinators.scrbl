@@ -17,7 +17,7 @@ natural number, a function that decodes a natural number into a
 term, and a size.
 
 To get started, we build a few enumerators by directly
-supplying encode and decode functions, e.g., @racket[nats/e]
+supplying encode and decode functions, e.g., @racket[nat/e]
 using the identity as both encoding and decoding functions.
 
 In general, we want to avoid working directly with the
@@ -43,9 +43,9 @@ imagine our sets as being laid out in an infinite table,
 this operator zig-zags through the table to enumerate all
 pairs:
 @centered{@pair-pict[]}
-which means that @racket[(cons/e nats/e nats/e)]'s
+which means that @racket[(cons/e nat/e nat/e)]'s
 first @racket[12] elements are
-@enum-example[(cons/e nats/e nats/e) 12]
+@enum-example[(cons/e nat/e nat/e) 12]
 
 Generalizing pairs to n-ary tuples is not simply a matter
 of combining pairs together in an arbitrary way. 
@@ -77,7 +77,7 @@ through each of the enumerations every @racket[n] numbers.
 For example, the following is the beginning of the disjoint
 sum of an enumeration of natural numbers and an enumeration
 of strings
-@enum-example[(disj-sum/e (cons nats/e number?)
+@enum-example[(disj-sum/e (cons nat/e number?)
                           (cons string/e string?))
               14]
 
@@ -85,13 +85,13 @@ The @racket[disj-sum/e] enumerator also has to be fair and
 to account for finite enumerations. So this
 enumeration:
 @racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                         (cons nats/e number?)
+                         (cons nat/e number?)
                          (cons (fin/e "x" "y") string?))]
 has to cycle through the finite enumerations until they
 are exhausted before producing the rest of the natural
 numbers:
 @enum-example[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                          (cons nats/e number?)
+                          (cons nat/e number?)
                           (cons (fin/e "x" "y") string?))
               14]
 In general, this means that @racket[disj-sum/e] must track the
@@ -106,12 +106,12 @@ for lists of numbers:
 @racketblock[(fix/e (λ (lon/e)
                       (disj-sum/e (cons (fin/e null)
                                         null?)
-                                  (cons (cons/e nats/e lon/e)
+                                  (cons (cons/e nat/e lon/e)
                                         cons?))))]
 and here are its first @racket[12] elements:
 @enum-example[(fix/e (λ (lon/e)
                         (disj-sum/e (cons (fin/e null) null?)
-                                    (cons (cons/e nats/e lon/e) cons?))))
+                                    (cons (cons/e nat/e lon/e) cons?))))
                12]
 A call like @racket[(fix/e f)] enumerator 
 calls @racket[(f (fix/e f))] to build the enumerator,
@@ -138,13 +138,13 @@ enumerations of natural numbers that start at some point beyond zero:
 @racketblock/define[(define (nats-above/e i)
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
-                             nats/e))]
+                             nat/e))]
 
 Also, we can exploit the bijection to define the @racket[except/e]
 enumerator. It accepts an element and an enumeration, and returns one
 that doesn't have the given element. For example, the first
-16 elements of @racket[(except/e nats/e 13)] are
-@enum-example[(except/e nats/e 13) 16]
+16 elements of @racket[(except/e nat/e 13)] are
+@enum-example[(except/e nat/e 13) 16]
 The decoder for @racket[except/e] simply encodes the
 given element and then either subtracts one before
 passing the natural number along (if it is above the 
@@ -167,9 +167,9 @@ the enumeration used for the second position in the pair depends
 on the actual values of the first position.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
-@racketblock[(dep/e nats/e (λ (i) (nats-above/e i)))]
+@racketblock[(dep/e nat/e (λ (i) (nats-above/e i)))]
 Here are the first 12 elements of the enumeration:
-@enum-example[(dep/e nats/e (λ (i) (nats-above/e i)))
+@enum-example[(dep/e nat/e (λ (i) (nats-above/e i)))
               12]
 The @racket[dep/e] combinator assumes that if any of the enumerations
 produced by the dependent function are infinite then all
