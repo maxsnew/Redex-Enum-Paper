@@ -1,7 +1,7 @@
 #lang slideshow
 
 (require plot
-         racket/draw 
+         racket/draw
          redex/private/enumerator
          slideshow/code
          "../enum-util.rkt"
@@ -17,6 +17,29 @@
 
 ;; Motivation
 (slide (t "First, a demo"))
+
+
+#;
+(slide
+ (scale-to-fit
+  (let ([lines
+         (call-with-input-file
+             (collection-file-path
+              "r6rs.rkt" "redex" "examples" "r6rs")
+           #;
+           (collection-file-path
+            "grammar.rkt" "redex" "examples" "racket-machine")
+           (λ (port)
+             (for/list ([x (in-lines port)]
+                        [i (in-naturals)]
+                        #:when (<= 28 i 179))
+               (tt x))))])
+    (define-values (left right)
+      (split-at lines (floor (/ (length lines) 2))))
+    (htl-append
+     (apply vl-append left)
+     (apply vl-append right)))
+  client-w client-h))
 
 ;; What
 (slide #:title "Enumeration"
@@ -36,24 +59,23 @@
        'alts
        (list
         (list
-         (code (define-language rbtrees
-                 (tree  ::= empty
-                            (node color val tree tree))
-                 (color ::= red black)
-                 (val   ::= number)))
-                 
+         (code (define-language bst
+                 (t   ::= leaf
+                          (node opcnn t t))
+                 (opcnn ::= natural
+                            +inf.0)))
+
          (para "Need support for finite sets, alternatives, tuples, recursion (fix points)"))
         (list
          (t "Redex also supports more exotic patterns, guiding combinator design")
          (scale (table 2
-                       (map as-tt
-                            (list '(number_1 number_1) "Variable Bindings"
-                                  '(number_!_1 number_!_1) "Dependence, finite filtering"
-                                  '(number ...) "Sequencing"
-                                  '(number ..._1 string ..._1) "Sequences of same length"))
+                       (list (as-tt '(number_1 number_1)) (t "Linear (duplicate) patterns")
+                             (as-tt '(number_!_1 number_!_1)) (t "Dependence, finite filtering")
+                             (as-tt '(number ...)) (t "Sequencing")
+                             (as-tt '(number ..._1 string ..._1)) (t "Sequences of same length"))
+                       lc-superimpose
                        cc-superimpose
-                       cc-superimpose
-                       10
+                       50
                        10)
                 0.75))))
 
@@ -74,7 +96,7 @@
        (foldr vl-append
               (blank)
               (map as-tt (to-list a-d/e))))
-;; TODO: better version of this...
+
 (define (enum-col e #:to-str [to-str (λ (x) (format "~s" x))])
   (define n (min (size e) 20))
   (foldr vl-append 
@@ -86,14 +108,13 @@
 (slide #:title "Sum"
        (item "Set interpretation: Disjoint union")
        (item "disj-sum/e : enum a, enum b → enum (a or b)")
-       (code disj-sum/e nat/e string/e)
-       'next
+       (code (disj-sum/e nat/e string/e))
        (enum-col int-or-str/e))
 (define neg/e 
   (map/e (λ (x) (sub1 (- x)))
          (λ (x) (- (add1 x)))
          nat/e))
-(slide #:title "Sum Example"
+(slide #:title "Integers from Nats via Sum"
        'alts
        (list 
         (list
@@ -106,7 +127,6 @@
        (t "Just check if it's even or odd (constant time)"))
 
 (slide #:title "Sum of 3 Things?"
-       (t "Mathematically, it doesn't matter, just iterate")
        'alts
        (list
         (list
@@ -121,11 +141,8 @@
         (list 
          (enum-col (disj-sum/e (cons (disj-sum/e (cons nat/e number?) (cons neg/e number?)) number? ) (cons string/e string?))))))
 
-(slide #:title "Sum, redefined"
-       (item "disj-sum/e : enum a_1, enum a_2, ... → enum (a_1 or a_2 or ...)"))
-
 (slide #:title "Sum of many"
-       (item "Just need to do a quotient with remainder, still efficient")
+       (para "Just need to do a quotient with remainder, still efficient")
        'alts
        (list 
         (list
@@ -143,7 +160,7 @@
        'alts
        (list
         (list 
-         (htl-append 10
+         (htl-append 30
                      (enum-col nat/e)
                      (enum-col (fin/e 'true 'false))
                      (enum-col (fin/e 'a 'b 'c 'd))))
@@ -152,20 +169,24 @@
                                (cons (fin/e 'true 'false) boolean?)
                                (cons (fin/e 'a 'b 'c 'd) symbol?))))))
 
-(slide #:title "Product"
-       (item "Set interpretation: Cartesian Product")
-       (item "cons/e : enum a, enum b → enum (a, b)"))
-
 (define-with-code n-o-b/e n-o-b-c
   (cons/e nat/e (fin/e 'true 'false)))
-(slide #:title "Finite Product"
-       (para "For at least one finite product we'll just loop through the smaller enumeration")
+(slide #:title "Product"
+       (item "Set interpretation: Cartesian Product")
+       (item "cons/e : enum a, enum b → enum (a ⊗ b)")
+       (comment "For at least one finite product we'll just loop through the smaller enumeration")
        n-o-b-c
        (enum-col n-o-b/e))
 
 (slide #:title "Infinite Product"
        (t "What order do we want?")
-       (gen-grid cons/e 10 0 500 12 #:arrows? #f))
+       'alts
+       (append
+        (for/list ([i (in-range 21)])
+          (list
+           (gen-grid cantor-cons/e 10 i 500 12 #:arrows? #t)))
+        (list (list (gen-grid cantor-cons/e 10 54 500 12 #:arrows? #t))
+              (list (gen-grid cantor-cons/e 10 55 500 12 #:arrows? #f)))))
 
 (slide #:title "Cantor Pairing Function"
        ;; TODO: latexify equation
@@ -175,16 +196,6 @@
        (item "For from-nat we need to solve for x,y:")
        (load-image "cantor-inverse-equation.png")
        (item "Quadratic Diophantine equation, not too hard."))
-
-(slide #:title "Geometric Interpretation"
-       'alts
-       (append
-        (for/list ([i (in-range 21)])
-         (list
-          (gen-grid cantor-cons/e 10 i 500 12 #:arrows? #t)))
-        (list (list (gen-grid cantor-cons/e 10 54 500 12 #:arrows? #t))
-              (list (gen-grid cantor-cons/e 10 55 500 12 #:arrows? #f)))))
-
 (slide #:title "Cantor from-nat"
        (para "First find the \"triangle root\" of the number, then use the \"triangle root remainder\" to locate it on that triangle."))
 
@@ -198,7 +209,7 @@
        (item "Geometric interpretation: order by layers of an n-simplex (triangle, tetrahedron, etc)")
        (load-image "cantor-n-tup-to-nat.png")
        (item "Decode has to solve a kth degree Diophantine equation...")
-       (item "Known search procedure (Tarau), but scales poorly with the input natural number for small numbers of enumerations (1-10) the kinds of things used in Redex!"))
+       (item "Known search procedure [Tarau 2012], but scales poorly with the input natural number for small numbers of enumerations (1-10) the kinds of things used in Redex!"))
 
 (slide #:title "Back to the drawing board..."
        (para "An enumeration defines an order on the set."
@@ -237,7 +248,7 @@
                    (define hi (expt (add1 i) 3))
                    (3vec-lines #:color color lo hi)))
                 get-bitmap)))
-
+; TODO: Draw cubes, talk about layers
 (slide #:title "Boxy N-Tupling"
        'alts
        (append
@@ -248,19 +259,31 @@
 (slide #:title "Mixed finite/infinite N-tupling"
        (para "To minimize the interplay between them, we collect all of the finite enumerations and infinite enumerations into separate bins then tuple them separately and then tuple the result"))
 
+#;
 (slide #:title "Fair?"
        (item "Both Cantor and Boxy .")
        (t "More on this later..."))
 
 (define lon/e (many/e nat/e))
 (slide #:title "Recursion"
-       (t "Set interpretation: ?")
        (t "fix/e : (enum a → enum a), optional cardinality → enum a")
        (code (fix/e (λ (l/e) 
                       (disj-sum/e (fin/e '())
                                   (cons/e nat/e l/e)))))
        (enum-col lon/e))
 
+(slide #:title "Recursion"
+       (t "fix/e : (enum a → enum a), optional cardinality → enum a")
+       [ltl-superimpose
+        [ghost
+         (code (fix/e (λ (l/e) 
+                        (disj-sum/e (fin/e '())
+                                    (cons/e nat/e l/e)))))]
+        (code (fix/e (λ (l/e) 
+                       (disj-sum/e (cons/e nat/e l/e)
+                                   (fin/e '())))))]
+       (ghost (enum-col lon/e)))
+#;
 (slide #:title "Recursion Caveats"
        (t "Order matters, the following diverges:")
        (code (fix/e (λ (l/e)
@@ -269,12 +292,13 @@
 
 (define-with-code ord/e ord-code
   (dep/e nat/e nat+/e))
+;; comment: ok for maze game, not for redex
 (slide #:title "Dependence"
        (t "Set interpretation: union of an indexed family of sets")
-       (t "dep/e : enum a, (a -> enum f(a)) -> enum (a, f(a))")
+       (t "dep/e : enum a, (a → enum b) → enum (a × b)")
+       (t "Slower than sum/pair; good enough for maze, not Redex")
        ord-code
-       (enum-col ord/e)
-       (t "Slow on some inputs, avoid whenever possible!"))
+       (enum-col ord/e))
 
 (define-with-code not-2/e not-2-code
   (except/e nat/e 2))
@@ -334,10 +358,7 @@
                           (code ((nat string) ... (real bool) ...))
                           (t "Recover the order later"))))))
 
-(slide #:title "Evaluation"
-       (item "What's the best way to use enumerations for testing?")
-       (item "How does the enumeration compare to (ad-hoc) random generators?"))
-
+#;
 (slide #:title "Enumeration Generation"
        'alts
        (list
@@ -351,8 +372,12 @@
          (item "Sample from a geometric distribution, then pick an index between 2^n, 2^(n+1)")
          (item "Sensitive to the probability of 0, branching factor of the grammar"))))
 
-(slide #:title "Comparison"
-       (item "3 techniques: Old Random Generator, Random natural indexing, In-order enumeration")
+(slide #:title "Evaluation"
+       (item "3 Techniques:")
+       (subitem "Existing, Good, Random Generator")
+       (subitem "Index with Random Natural Number")
+       (subitem "In-order Enumeration")
+       
        (item "6 Redex models with 3-9 bugs each"))
 
 (slide #:title "Raw Results"
@@ -362,23 +387,30 @@
 (slide #:title "Bugs found over Time"
        (scale (line-plot-24hour) 1.5))
 
-(slide #:title "Evaluation Conclusion"
-       (para "In-order enumeration best at interactive time-scales, random for long-running"))
-
+#;
 (slide #:title "Pinning down Fairness"
        (item "Picking a definition of fairness has been difficult")
        ;; TODO: say more
        )
 ;; Who
 (slide #:title "Related Work"
-       (item "Enumeration")
-       (subitem "Paul Tarau. Bijective Term Encodings.") (comment "Doesn't handle dependency or finite terms")
-       (subitem "Duregård et al. FEAT: Functional Enumeration of Algebraic Types") (comment "Doesn't handle dependency")
-       (item "Automated Testing")
-       (subitem "Runciman et al. SmallCheck and Lazy SmallCheck")
-       (subitem ""))
+       (item "Paul Tarau"
+             (it "Bijective Term Encodings")
+             "[ICLP 2012]") 
+       (comment "Doesn't handle dependency or finite terms")
+       (item "Duregård, Jansson, and Wang"
+             (it "FEAT: Functional Enumeration of Algebraic Types") 
+             "[Haskell 2012]" )
+       (comment "Doesn't handle dependency")
+       (item "Vytiniotis, Kennedy"
+             (it "Functional Pearl: Every Bit Counts")
+             "[ICFP 2010]")
+       
+       )
+
 (slide #:title "Thanks"
        (item "Robby Findler")
        (item "Paul Tarau")
-       (item "Jay McCarthy"))
+       (item "Jay McCarthy")
+       (item "Burke!"))
 (slide)

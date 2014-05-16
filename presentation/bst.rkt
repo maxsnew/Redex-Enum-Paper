@@ -1,53 +1,43 @@
 #lang racket
 
-(require redex)
+(require redex pict)
 
 (define-language bst
-  (t ::= leaf
-            (node val t t))
-  (val  ::= natural))
 
-(define-relation bst
-  [(leq? val_1 val_2)
-   ,((term val_1) . <= . (term val_2))])
-
-(define-relation bst
-  [(increasing? val_1 val_2 val_3)
-   ,((term val_1) . <= . (term val_2))
-   ,((term val_2) . <= . (term val_3))])
+  (t   ::= leaf
+           (node opcnn t t))
+  
+  (opcnn ::= natural
+             +inf.0))
 
 (define-judgment-form bst
-  #:mode (ordered? I)
-  [(ordered? leaf)]
-  [(ordered? (node val leaf leaf))]
-  [(leq? val_1 val_2)
-   (ordered? (node val_1 t_1 t_2))
-   -------------
-   (ordered? (node val_2 (node val_1 t_1 t_2) leaf))]
-  [(leq? val_1 val_2)
-   (ordered? (node val_2 t_1 t_2))
-   --------------
-   (ordered? (node val_1 leaf (node val_2 t_1 t_2)))]
-  [(increasing? val_1 val_2 val_3)
+  #:mode (ordered? I I I)
+  [(leq? opcnn_1 opcnn_2)
+   ----------------------
+   (ordered? leaf opcnn_1 opcnn_2)]
+  [(ordered? t_1 opcnn_2 opcnn_1)
+   (ordered? t_2 opcnn_1 opcnn_3)
+   (leq? opcnn_2 opcnn_1 opcnn_3)
    ----------------
-   (ordered? (node val_2 
-                   (node val_1 t_1 t_2)
-                   (node val_3 t_3 t_4)))])
-
-(define (==> p q)
-  (or (not p) q))
+   (ordered? (node opcnn_1 t_1 t_2) opcnn_2 opcnn_3)])
 
 (define-metafunction bst
-  [(insert val leaf)
-   (node val leaf leaf)]
-  [(insert val_1 (node val_2 t_1 t_2))
-   (node val_2 (insert val_1 t_1) t_2)
-   (where #t ,((term val_1) . <= . (term val_2)))]
-  [(insert val_1 (node val_2 t_1 t_2))
-   (node val_1 t_1 (insert val_2 t_2)) ;; Bug !
-   ])
+  [(insert opcnn leaf)
+   (node opcnn leaf leaf)]
+  [(insert opcnn_1 (node opcnn_2 t_1 t_2))
+   (node opcnn_1 (insert opcnn_2 t_1) t_2) ;; Bug !
+   (side-condition (term (leq? opcnn_1 opcnn_2)))]
+  [(insert opcnn_1 (node opcnn_2 t_1 t_2))
+   (node opcnn_2 t_1 (insert opcnn_1 t_2))])
 
-(redex-check bst (val_1 t_1)
-             (==> (judgment-holds (ordered? t_1))
-                  (judgment-holds (ordered? (insert val_1 t_1))))
-             #:attempts 10000)
+(define-relation bst
+  [(leq? opcnn ...)
+   ,(apply <= (term (opcnn ...)))])
+
+(define (find-bugs)
+  (redex-check 
+   bst
+   (opcnn t)
+   (implies (judgment-holds (ordered? t 0 +inf.0))
+            (judgment-holds (ordered? (insert opcnn t)
+                                      0 +inf.0)))))
