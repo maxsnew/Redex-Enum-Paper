@@ -44,14 +44,16 @@
 ;; What
 (slide #:title "Enumeration"
        (t "An enumeration consists of")
+       (item "A type of elements a")
        (item "A Cardinality (natural number or infinite)")
-       (item "An encoding function to-nat  : a → Nat")
-       (item "A decoding function from-nat : Nat → a"))
+       (item "A decoding function from-nat : Nat → a")
+       (item "An encoding function to-nat  : a → Nat"))
 
 (slide #:title "Examples"
        (item "Natural numbers: infinite, identity, identity")
        (item "Booleans: 2, 0 ↔ true and 1 ↔ false")
-       (item "Integers: infinite, ...")
+       (item "Integers: infinite, well there is one")
+       (item "Rationals: infinite,...")
        'next
        (para "Manually constructing such bijections is tricky, prefer combinators"))
 
@@ -61,11 +63,11 @@
         (list
          (code (define-language bst
                  (t   ::= leaf
-                          (node opcnn t t))
-                 (opcnn ::= natural
-                            +inf.0)))
+                          (node ext-nat t t))
+                 (ext-nat ::= natural
+                              +inf.0)))
 
-         (para "Need support for finite sets, alternatives, tuples, recursion (fix points)"))
+         (para "Need support for finite sets, alternatives, pairing, recursion"))
         (list
          (t "Redex also supports more exotic patterns, guiding combinator design")
          (scale (table 2
@@ -122,7 +124,7 @@
                      (enum-col nat/e)
                      (enum-col neg/e)))
         (list (enum-col (disj-sum/e (cons nat/e number?) (cons neg/e number?))))))
-
+#;
 (slide #:title "from-nat"
        (t "Just check if it's even or odd (constant time)"))
 
@@ -197,11 +199,14 @@
        (load-image "cantor-inverse-equation.png")
        (item "Quadratic Diophantine equation, not too hard."))
 (slide #:title "Cantor from-nat"
+       (load-image "cantor-inverse.png")
+       (para "where")
+       (load-image "cantor-inverse-help.png")
        (para "First find the \"triangle root\" of the number, then use the \"triangle root remainder\" to locate it on that triangle."))
 
 (slide #:title "Nested Pairing"
        (item "Once again nesting is too unfair to be used in general")
-       (item "Enumerating the first 100000 terms of (nat * nat) * nat, the first two average ~7.5 while the third slot averages ~150"))
+       (item "Enumerating the first 100000 terms of (nat×nat)×nat, the first two average ~7.5 while the third slot averages ~150"))
 
 (slide #:title "Generalized Cantor (more than 2 arguments)"
        (para "Known \"fair\" generalization to Skolem at latest."
@@ -236,10 +241,30 @@
 (define boxy-max 5)
 (define/contract (plot-layers n)
   (-> exact-positive-integer? pict?)
+  (bitmap (send 
+           (plot3d
+            #:x-max boxy-max
+            #:y-max boxy-max
+            #:z-max boxy-max
+            (for/list ([i (in-range n)])
+              (define color
+                (cond [(even? i) 'green]
+                      [else 'red]))
+              (define lo (expt i 3))
+              (define hi (expt (add1 i) 3))
+              (list
+               #;
+               (3vec-lines #:color color lo hi)
+               (rectangles3d
+                (list (vector (ivl 0 i) (ivl 0 i) (ivl 0 i)))
+                #:alpha (/ 0.5 (add1 i))
+                #:color color))))
+           get-bitmap)))
+#;
+(define/contract (plot-layers n)
+  (-> exact-positive-integer? pict?)
   (bitmap (send (plot3d
-                 #:x-max boxy-max
-                 #:y-max boxy-max
-                 #:z-max boxy-max
+
                  (for/list ([i (in-range n)])
                    (define color
                      (cond [(even? i) 'green]
@@ -255,7 +280,7 @@
         (for/list ([i (in-range 6)])
           (list (plot-layers (+ 1 i)))))
        (para "Decode just need nth root and a finite enumeration."))
-
+#;
 (slide #:title "Mixed finite/infinite N-tupling"
        (para "To minimize the interplay between them, we collect all of the finite enumerations and infinite enumerations into separate bins then tuple them separately and then tuple the result"))
 
@@ -266,14 +291,14 @@
 
 (define lon/e (many/e nat/e))
 (slide #:title "Recursion"
-       (t "fix/e : (enum a → enum a), optional cardinality → enum a")
+       (t "fix/e : (enum a → enum a) → enum a")
        (code (fix/e (λ (l/e) 
                       (disj-sum/e (fin/e '())
                                   (cons/e nat/e l/e)))))
        (enum-col lon/e))
 
 (slide #:title "Recursion"
-       (t "fix/e : (enum a → enum a), optional cardinality → enum a")
+       (t "fix/e : (enum a → enum a) → enum a")
        [ltl-superimpose
         [ghost
          (code (fix/e (λ (l/e) 
@@ -313,10 +338,6 @@
 
 ;; How
 
-(slide #:title "Applications"
-       (item "Testing")
-       (item "Games"))
-
 ;; TODO: get colors better
 (slide #:title "Redex patterns"
        'alts
@@ -336,7 +357,7 @@
               (item "Extract variables into environment, keeping track of how many")
               (code (nat_!_1 nat_!_1 nat_!_1))
               (htl-append (tt "{_!_1 → nat * nat * nat }")
-                          (tt "(0_!_1 1_!_1 2_!_1"))
+                          (tt "(0_!_1 1_!_1 2_!_1)"))
               (item "Combination of dependence and filtering")
               (enum-col #:to-str identity
                         (map/e (λ (xs)
@@ -413,4 +434,4 @@
        (item "Paul Tarau")
        (item "Jay McCarthy")
        (item "Burke!"))
-(slide)
+(slide (t "Questions?"))

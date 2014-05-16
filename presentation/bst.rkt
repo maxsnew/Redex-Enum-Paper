@@ -5,39 +5,44 @@
 (define-language bst
 
   (t   ::= leaf
-           (node opcnn t t))
+           (node ext-nat t t))
   
-  (opcnn ::= natural
-             +inf.0))
+  (ext-nat ::= natural
+               +inf.0))
 
 (define-judgment-form bst
-  #:mode (ordered? I I I)
-  [(leq? opcnn_1 opcnn_2)
+  #:mode (bound-ordered? I I I)
+  [(leq? ext-nat_1 ext-nat_2)
    ----------------------
-   (ordered? leaf opcnn_1 opcnn_2)]
-  [(ordered? t_1 opcnn_2 opcnn_1)
-   (ordered? t_2 opcnn_1 opcnn_3)
-   (leq? opcnn_2 opcnn_1 opcnn_3)
+   (bound-ordered? leaf ext-nat_1 ext-nat_2)]
+  [(bound-ordered? t_1 ext-nat_2 ext-nat_1)
+   (bound-ordered? t_2 ext-nat_1 ext-nat_3)
+   (leq? ext-nat_2 ext-nat_1 ext-nat_3)
    ----------------
-   (ordered? (node opcnn_1 t_1 t_2) opcnn_2 opcnn_3)])
+   (bound-ordered? (node ext-nat_1 t_1 t_2) ext-nat_2 ext-nat_3)])
 
 (define-metafunction bst
-  [(insert opcnn leaf)
-   (node opcnn leaf leaf)]
-  [(insert opcnn_1 (node opcnn_2 t_1 t_2))
-   (node opcnn_1 (insert opcnn_2 t_1) t_2) ;; Bug !
-   (side-condition (term (leq? opcnn_1 opcnn_2)))]
-  [(insert opcnn_1 (node opcnn_2 t_1 t_2))
-   (node opcnn_2 t_1 (insert opcnn_1 t_2))])
+  [(insert ext-nat leaf)
+   (node ext-nat leaf leaf)]
+  [(insert ext-nat_1 (node ext-nat_2 t_1 t_2))
+   (node ext-nat_1 (insert ext-nat_2 t_1) t_2) ;; Bug !
+   (side-condition (term (leq? ext-nat_1 ext-nat_2)))]
+  [(insert ext-nat_1 (node ext-nat_2 t_1 t_2))
+   (node ext-nat_2 t_1 (insert ext-nat_1 t_2))])
 
 (define-relation bst
-  [(leq? opcnn ...)
-   ,(apply <= (term (opcnn ...)))])
+  [(leq? ext-nat ...)
+   ,(apply <= (term (ext-nat ...)))])
 
 (define (find-bugs)
   (redex-check 
    bst
-   (opcnn t)
-   (implies (judgment-holds (ordered? t 0 +inf.0))
-            (judgment-holds (ordered? (insert opcnn t)
+   (ext-nat t)
+   (implies (judgment-holds (bound-ordered? t 0 +inf.0))
+            (judgment-holds (bound-ordered? (insert ext-nat t)
                                       0 +inf.0)))))
+
+(define (show-ordered)
+  (scale (render-judgment-form bound-ordered?) 1.5))
+(define (show-insert)
+  (scale (render-metafunction insert) 1.5))
