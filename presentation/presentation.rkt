@@ -1,13 +1,15 @@
 #lang slideshow
 
-(require racket/draw 
+(require plot
+         racket/draw 
          redex/private/enumerator
          slideshow/code
          "../enum-util.rkt"
          "../results/plot.rkt"
          )
 
-
+(define (load-image f)
+  (bitmap (make-object bitmap% f)))
 (define (as-tt x)
   (tt (format "~a" x)))
 (slide (t "Enumerating Countable Sets for Property-Based Testing"))
@@ -167,9 +169,11 @@
 (slide #:title "Cantor Pairing Function"
        ;; TODO: latexify equation
        (para "Normally defined Nat*Nat → Nat, which is our to-nat, but for enumeration, the from-nat function is more important")
-       (item "to-nat(n,m) = 1/2(n+m)(n+m+1) + m")
-       (item "For from-nat we need to solve z = (n+m)(n+m+1)/2 + m for z")
-       (item "With some ingenuity it's not so hard."))
+       (load-image "cantor-pair-to-nat.png")
+       
+       (item "For from-nat we need to solve for x,y:")
+       (load-image "cantor-inverse-equation.png")
+       (item "Quadratic Diophantine equation, not too hard."))
 
 (slide #:title "Geometric Interpretation"
        'alts
@@ -190,9 +194,9 @@
 (slide #:title "Generalized Cantor N-Tupling"
        (para "Known \"fair\" generalization to Skolem at latest."
              "But apparently combinatoricists only care about the to-nat function")
-       (item "n-th degree Diophantine equation...") ;; TODO: copy the formula from Tarau's paper
-       ;; TODO: clean this up!
-       (item "Known search procedure (Tarau) that generalizes well with a lot of enumerations, but scales poorly with the input natural number for small tuples (1-10) the kinds of things used in Redex!"))
+       (load-image "cantor-n-tup-to-nat.png")
+       (item "Decode has to solve a kth degree Diophantine equation...")
+       (item "Known search procedure (Tarau), but scales poorly with the input natural number for small numbers of enumerations (1-10) the kinds of things used in Redex!"))
 
 (slide #:title "Back to the drawing board..."
        (para "An enumeration defines an order on the set."
@@ -211,15 +215,42 @@
         (list (list (gen-grid boxy-cons/e 10 99 500 12 #:arrows? #t))
               (list (gen-grid boxy-cons/e 10 100 500 12 #:arrows? #f)))))
 
+(define (3vec-lines lo hi #:color color)
+  (define vecs/e (box-vec/e nat/e nat/e nat/e))
+  (lines3d #:color color
+           (for/list ([i (in-range lo hi)])
+             (decode vecs/e i))))
+(define boxy-max 5)
+(define/contract (plot-layers n)
+  (-> exact-positive-integer? pict?)
+  (bitmap (send (plot3d
+                 #:x-max boxy-max
+                 #:y-max boxy-max
+                 #:z-max boxy-max
+                 (for/list ([i (in-range n)])
+                   (define color
+                     (cond [(even? i) 'green]
+                           [else 'red]))
+                   (define lo (expt i 3))
+                   (define hi (expt (add1 i) 3))
+                   (3vec-lines #:color color lo hi)))
+                get-bitmap)))
+
 (slide #:title "Boxy N-Tupling"
-       (t "TODO: picture of boxy enumeration")
-       (para "decode just need n-th root!"))
+       'alts
+       (append
+        (for/list ([i (in-range 6)])
+          (list (plot-layers (+ 1 i))))
+        )
+       (para "Decode just need nth root and a finite enumeration."))
 
 (slide #:title "Mixed finite/infinite N-tupling"
        (para "To minimize the interplay between them, we collect all of the finite enumerations and infinite enumerations into separate bins then tuple them separately and then tuple the result"))
 
 (slide #:title "Fair?"
-       (t "More on this later..."))
+       (item "Both Cantor and Boxy .")
+       (t "More on this later...")
+       )
 
 (slide #:title "Recursion"
        (t "Set interpretation: ?")
@@ -326,14 +357,15 @@
        (comment "Random finds more bugs, but in-order finds them faster"))
 
 (slide #:title "Bugs found over Time"
-       (scale (line-plot-24hour) 1.5)
-       ;; TODO: get this pict too
-       )
+       (scale (line-plot-24hour) 1.5))
 
 (slide #:title "Evaluation Conclusion"
        (para "In-order enumeration best at interactive time-scales, random for long-running"))
 
-(slide #:title "Fairness...")
+(slide #:title "Pinning down Fairness"
+       (item "Picking a definition of fairness has been difficult")
+       ;; TODO: say more
+       )
 ;; Who
 (slide #:title "Related Work"
        (item "Enumeration")
