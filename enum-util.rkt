@@ -15,7 +15,7 @@
 (define (pair-pict) (grid 5 12 200 12))
 
 (define (grid count num-points size arrow-head-size)
-  (gen-grid cons/e count num-points size arrow-head-size))
+  (gen-grid cons/e count num-points size arrow-head-size #:arrows? #t))
 
 (define (gen-grid cons/e count num-points size arrow-head-size #:arrows? arrows?)
   (define prs (cons/e nat/e nat/e))

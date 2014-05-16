@@ -37,17 +37,17 @@
                  (tree  ::= empty
                             (node color val tree tree))
                  (color ::= red black)
-                 (val   ::= num)))
+                 (val   ::= number)))
                  
          (para "Need support for finite sets, alternatives, tuples, recursion (fix points)"))
         (list
          (t "Redex also supports more exotic patterns, guiding combinator design")
          (scale (table 2
                        (map as-tt
-                            (list '(num_1 num_1) "Variable Bindings"
-                                  '(num_!_1 num_!_1) "Dependence, finite filtering"
-                                  '(num ...) "Sequencing"
-                                  '(num ..._1 string ..._1) "Sequences of same length"))
+                            (list '(number_1 number_1) "Variable Bindings"
+                                  '(number_!_1 number_!_1) "Dependence, finite filtering"
+                                  '(number ...) "Sequencing"
+                                  '(number ..._1 string ..._1) "Sequences of same length"))
                        cc-superimpose
                        cc-superimpose
                        10
@@ -70,8 +70,7 @@
        (code (fin/e 'a 'b 'c 'd))
        (foldr vl-append
               (blank)
-              (map as-tt (to-list a-d/e))
-       ))
+              (map as-tt (to-list a-d/e))))
 ;; TODO: better version of this...
 (define (enum-col e #:to-str [to-str (λ (x) (format "~s" x))])
   (define n (min (size e) 20))
@@ -143,23 +142,25 @@
         (list 
          (htl-append 10
                      (enum-col nat/e)
-                     (enum-col bool/e)
+                     (enum-col (fin/e 'true 'false))
                      (enum-col (fin/e 'a 'b 'c 'd))))
         (list
          (enum-col (disj-sum/e (cons nat/e number?)
-                               (cons bool/e boolean?)
+                               (cons (fin/e 'true 'false) boolean?)
                                (cons (fin/e 'a 'b 'c 'd) symbol?))))))
 
 (slide #:title "Product"
        (item "Set interpretation: Cartesian Product")
-       (item "cons/e : enum a, enum b → enum (a, b)")
-       'next
-       (code (define int-and-char/e (cons/e int/e char/e))))
+       (item "cons/e : enum a, enum b → enum (a, b)"))
 
+(define-with-code n-o-b/e n-o-b-c
+  (cons/e nat/e (fin/e 'true 'false)))
 (slide #:title "Finite Product"
-       (t "For a finite product we'll just loop through the smaller enumeration"))
+       (t "For at least one finite product we'll just loop through the smaller enumeration")
+       n-o-b-c
+       (enum-col n-o-b/e))
 
-(slide #:title "Product Example"
+(slide #:title "Infinite Product"
        (t "What order do we want?")
        (gen-grid cons/e 10 0 500 12 #:arrows? #f))
 
@@ -232,16 +233,25 @@
                       (disj-sum/e (cons/e nat/e l/e)
                                   (fin/e '()))))))
 
+(define-with-code ord/e ord-code
+  (dep/e nat/e nat+/e))
 (slide #:title "Dependence"
        (t "Set interpretation: union of an indexed family of sets")
-       (t "TODO: ")
-       (t "Slow on some inputs!"))
+       (t "dep/e : enum a, (a -> enum f(a)) -> enum (a, f(a))")
+       ord-code
+       (enum-col ord/e)
+       (t "Slow on some inputs, avoid whenever possible!"))
 
+(define-with-code not-2/e not-2-code
+  (except/e nat/e 2))
 (slide #:title "Filter"
        (t "Set interpretation: subset")
-       (t "General filter is slow/hard")
-       (t "But removing finitely many (known) elements is easy!")
-       (t "except/e : enum a, a → enum a"))
+       (para "General filter is slow/hard"
+             "But removing finitely many (known) elements is easy!")
+       (t "except/e : enum a, a → enum a")
+       (para "Just use the to-nat function to find when it occurs, then skip it when indexing")
+       not-2-code
+       (enum-col not-2/e))
 
 ;; How
 
@@ -249,18 +259,46 @@
        (item "Testing")
        (item "Games"))
 
-(slide #:title "Exotic patterns"
+;; TODO: get colors better
+(slide #:title "Redex patterns"
        'alts
        (list
         (list (item "Extract all variables into an environment, then plug them in at the end")
               'alts
               (list
-               (list (code (same ::= (num_1 num_1))))
-               (list (code (same/e = (map/e plug 
-                                            unplug
-                                            (cons/e )))))
-               )
-              )))
+               (list (code (nat_1 nat_1 string_2 string_2)))
+               (list (htl-append (tt "{_1 → nat, _2 → string}") 
+                                 (tt "(_1 _1 _2 _2)"))
+                     (enum-col #:to-str (λ (x) (format "~a" x))
+                               (map/e (λ (xy)
+                                        (format "{_1 → ~a, _2 → ~s}" (car xy) (cdr xy))  )
+                                      identity
+                                      (cons/e nat/e string/e))))))
+        (list (item "Disequality Constraints")
+              (item "Extract variables into environment, keeping track of how many")
+              (code (nat_!_1 nat_!_1 nat_!_1))
+              (htl-append (tt "{_!_1 → nat * nat * nat }")
+                          (tt "(0_!_1 1_!_1 2_!_1"))
+              (item "Combination of dependence and filtering")
+              (enum-col #:to-str identity
+                        (map/e (λ (xs)
+                                 (apply format "{_!_1 → (~a, ~a, ~a)}" xs))
+                               identity
+                               (uniq-list/e nat/e 3))))
+        (list (item "Sequences")
+              (code (number ... string ...))
+              (item "Easy, just define listof/e using fix/e"))
+        (list (item "Sequences of the same length")
+              (code (nat ..._1 real ..._2 string ..._1 bool ..._2))
+              'alts
+              (list (list (t "Easy way: pick lengths and then generate lists of that length")
+                          (t "But can we avoid dependency?"))
+                    (list (t "Reorder, ")
+                          (code ((nat string) ..._1 (real bool) ..._2))
+                          'next
+                          (t "Drop indices")
+                          (code ((nat string) ... (real bool) ...))
+                          (t "Recover the order later"))))))
 
 (slide #:title "Evaluation"
        (item "What's the best way to use enumerations for testing?")
@@ -284,10 +322,8 @@
        (item "6 Redex models with 3-9 bugs each"))
 
 (slide #:title "Raw Results"
-       ;; TODO: generate this, it's not working!
        (scale (res-plot-24hour) 1.5)
-       #;(bitmap (make-object bitmap% "../pict_3.png"))
-       )
+       (comment "Random finds more bugs, but in-order finds them faster"))
 
 (slide #:title "Bugs found over Time"
        (scale (line-plot-24hour) 1.5)
@@ -310,3 +346,4 @@
        (item "Robby Findler")
        (item "Paul Tarau")
        (item "Jay McCarthy"))
+(slide)
