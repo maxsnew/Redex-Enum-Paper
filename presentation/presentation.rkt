@@ -9,6 +9,7 @@
          )
 
 (define (load-image f)
+  
   (bitmap (make-object bitmap% f)))
 (define (as-tt x)
   (tt (format "~a" x)))
@@ -158,7 +159,7 @@
 (define-with-code n-o-b/e n-o-b-c
   (cons/e nat/e (fin/e 'true 'false)))
 (slide #:title "Finite Product"
-       (t "For at least one finite product we'll just loop through the smaller enumeration")
+       (para "For at least one finite product we'll just loop through the smaller enumeration")
        n-o-b-c
        (enum-col n-o-b/e))
 
@@ -191,9 +192,10 @@
        (item "Once again nesting is too unfair to be used in general")
        (item "Enumerating the first 100000 terms of (nat * nat) * nat, the first two average ~7.5 while the third slot averages ~150"))
 
-(slide #:title "Generalized Cantor N-Tupling"
+(slide #:title "Generalized Cantor (more than 2 arguments)"
        (para "Known \"fair\" generalization to Skolem at latest."
              "But apparently combinatoricists only care about the to-nat function")
+       (item "Geometric interpretation: order by layers of an n-simplex (triangle, tetrahedron, etc)")
        (load-image "cantor-n-tup-to-nat.png")
        (item "Decode has to solve a kth degree Diophantine equation...")
        (item "Known search procedure (Tarau), but scales poorly with the input natural number for small numbers of enumerations (1-10) the kinds of things used in Redex!"))
@@ -204,7 +206,7 @@
              "Maybe order some other way?")
        (gen-grid cantor-cons/e 10 54 500 12 #:arrows? #t)
        (para "Instead of searching by layers of an n-simplex (triangle, tetrahedron)"
-             "search by layers of an n-cube."))
+             "search by layers of an hypercube."))
 
 (slide #:title "Boxy Tupling"
        (para "Order by the max instead of the sum?")
@@ -240,8 +242,7 @@
        'alts
        (append
         (for/list ([i (in-range 6)])
-          (list (plot-layers (+ 1 i))))
-        )
+          (list (plot-layers (+ 1 i)))))
        (para "Decode just need nth root and a finite enumeration."))
 
 (slide #:title "Mixed finite/infinite N-tupling"
@@ -249,14 +250,16 @@
 
 (slide #:title "Fair?"
        (item "Both Cantor and Boxy .")
-       (t "More on this later...")
-       )
+       (t "More on this later..."))
 
+(define lon/e (many/e nat/e))
 (slide #:title "Recursion"
        (t "Set interpretation: ?")
        (t "fix/e : (enum a → enum a), optional cardinality → enum a")
-       (code (fix/e (λ (l/e) (disj-sum/e (fin/e '())
-                                         (cons/e nat/e l/e))))))
+       (code (fix/e (λ (l/e) 
+                      (disj-sum/e (fin/e '())
+                                  (cons/e nat/e l/e)))))
+       (enum-col lon/e))
 
 (slide #:title "Recursion Caveats"
        (t "Order matters, the following diverges:")
