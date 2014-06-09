@@ -1,0 +1,380 @@
+===========================================================================
+                           oopsla14 Review #66A
+                    Updated 30 Apr 2014 10:54:09am EDT
+---------------------------------------------------------------------------
+   Paper #66: An Empirical Comparison Between Random Generation and
+              Enumeration for Testing Redex Models
+---------------------------------------------------------------------------
+
+                      Overall merit: 3. Weak accept
+                 Reviewer expertise: 4. Expert
+
+                         ===== Paper summary =====
+
+This paper presents a suite of buggy Redex models, and it uses this
+suite to evaluate three testing strategies: ad-hoc random generation
+of Redex programs (as originally implemented in the Redex system),
+random selection from a uniform distribution of programs, and an
+in-order enumeration of programs.  The last two strategies are based
+on a new mechanism for enumerating Redex programs, which is also a
+contribution of this work.  The evaluation of the three strategies
+finds that in-order enumeration finds most bugs in a short time
+period, and that ad-hoc random generation finds most bugs over a
+longer time period.
+
+              ===== Evaluation and comments for authors =====
+
+This paper contributes two valuable artifacts: a suite of buggy Redex
+models and a new test generation strategy for Redex.  I expect both of
+these to be very useful to future Redex developers and users.  The
+paper is well written and easy to read. I especially enjoyed reading
+Sections 2 and 3.
+
+That said, there is still a lot of room for improvement.  Some
+concrete suggestions are below, but briefly, the presentation is
+missing the broader context of related work on random testing,
+exhaustive testing and bug finding.  In this context, the results of
+the presented study are not surprising; rather, they support the
+prevailing wisdom.
+
+First, the broader literature doesn't really support the view that
+uniform random testing is more effective than other forms of random
+testing.  If anything, it supports the opposite view, since most
+general random testing tools rely on directed (non-uniform) random
+testing.  See, for example:
+
+  * Carlos Pacheco, Shuvendu K. Lahiri, Michael D. Ernst, and Thomas
+    Ball. 2007. Feedback-Directed Random Test Generation. In
+    Proceedings of the 29th international conference on Software
+    Engineering (ICSE '07).
+
+  * Alex Groce, Gerard Holzmann, and Rajeev Joshi. 2007. Randomized
+    Differential Testing as a Prelude to Formal Verification. In
+    Proceedings of the 29th international conference on Software
+    Engineering (ICSE '07).
+
+Second, a lot of prior work provides basis for the observation that
+in-order enumeration, which is a form of exhaustive testing, is more
+effective than random testing within shorter time periods.  This
+observation is closely related to the "small scope hypothesis," which
+states that most/many bugs involving complex inputs (e.g., instances
+of complex data structures) can be found within relatively small
+scopes---that is, by exhaustively testing programs on all inputs of
+small size.  Exhaustive testing will find all such inputs quickly, but
+it has little hope of (ever) finding bugs that depend on large inputs,
+due to the exponential increase in the size of the search space.  See
+the following papers for more on the small scope hypothesis and
+exhaustive testing:
+
+ * Alexandr Andoni, Dumitru Daniliuc and Sarfraz
+   Khurshid. 2003. Evaluating the Small Scope Hypothesis.   
+
+ * Chandrasekhar Boyapati, Sarfraz Khurshid, and Darko
+   Marinov. 2002. Korat: automated testing based on Java
+   predicates. In Proceedings of the 2002 ACM SIGSOFT international
+   symposium on Software testing and analysis (ISSTA '02). 
+
+The paper assumes that the reader is familiar with Redex, which many
+readers in the general OOPSLA audience may not be.  To appeal to a
+more general audience, it would help to include a paragraph or two in
+Section 1 introducing Redex, since this is central to understanding
+and following the paper.  It would also help to include a sentence or
+a phrase describing QuickCheck when it is introduced.  
+
+The examples in Section 1, which show that random testing is a useful
+bug finding method, could be more compelling.  For instance, Redex and
+QuickCheck solve the equality x*2 == x+10 quickly only because their
+number generators are biased to select small values.  It is easy to
+construct an equality that will be hard for both of these tools to
+satisfy even after hundreds of iterations.  Overall, Section 1 would
+benefit from a rewrite that reframes the motivation and contributions
+of the paper in the context of the broader literature on testing and
+bug finding.
+
+In Section 2, what does it mean that the "left-hand one has seen 87 in
+one component but only 3 in another"?  It has seen the value 87 or it
+has seen 87 different values?  Also in Section 2, I don't see how the
+definition of nats-above/e works.  What does (lambda (x) (- x i)) do?
+
+Typos:
+
+"with the with the"
+"no type inference is [in] the model"
+"when when"
+"simply because [of] the structure"
+"We did no[t] include"
+"the just the"
+"of the of the"
+"43 bugs in the benchmark[s]"
+
+===========================================================================
+                           oopsla14 Review #66B
+                    Updated 29 Apr 2014 10:33:54pm EDT
+---------------------------------------------------------------------------
+   Paper #66: An Empirical Comparison Between Random Generation and
+              Enumeration for Testing Redex Models
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Accept
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+This paper presents an empirical comparison of 3 testing approaches for 
+Redex models. Two of the approaches are based on random testing 
+(random selection from uniform distribution and ad-hoc random generation 
+tuned for Redex). The other approach is based on enumeration, for which a 
+library of combinators is first created. The authors create a benchmark, 
+which includes 7 programs (most being Redex models, but some being 
+programs such as red-black tree insertion) with various bugs (some
+synthetic and some real bugs found in previous versions of the program).
+Using this benchmark an empirical evaluation is conducted. The evaluation shows 
+that while enumeration based testing is a clear winer at finding bugs on shorter time 
+frames, ad-hoc random testing is better in the long run.
+
+              ===== Evaluation and comments for authors =====
+
+Pros:
+
++ A benchmark to "test" testing approaches.
+
++ Very nicely presented and written.
+
++ Elegant approach to enumeration based testing using combinators (extension of Tarau's work). 
+
++ Valuable results for the PL community at large.  
+
+Cons:
+
+- It's a bit of a shame that quite a few of the bugs in the benchmark were synthetic. 
+
+- Perhaps missing a more critical analysis of the results 
+as well as pointing out some directions for future work.
+
+Overall I thought this was a very nice paper: elegant, useful and a delight to read. 
+I am definitly supporting this paper. I think the results presented here are quite 
+interesting for various reasons and the pros definitly beat the cons. 
+
+This work brings a more empirical approach to the 
+Redex/QuickCheck community. Typically this community tends not to focus much 
+on empirical evaluation. I think that a benchmark, such as the one presented here, 
+can be useful to drive other empirical studies. Furthermore the study presented here 
+is quite interesting and it shows that there different merits to enumeration-based 
+testing and random selection.
+
+- Detailed comments:
+
+* Manually introduced bugs:
+
+I think the authors should try to justify this a bit better. I can certainly 
+understand that there are reasons for doing this, but it would be nice to 
+know what these reasons are?
+
+Could you not find some real bugs in previous versions of the models?  Also 
+you seem to feel strongly about some bugs being fairly common and others 
+not. Where does this intuition comes from? Observing other users playing 
+with Redex and making such mistakes?
+
+* More critical analysis and directions for Future Work:
+
+Looking for example at Figure two, it seems that there is a correlation between 
+the size of the programs under test and the number of bugs: the smaller the programs 
+the more likely bugs are to be found. In a way this is not surprising. However it would 
+be nice if something more could be said about this. I think there is only a small remark 
+about the relatively large grammar with respect to this.
+
+It would be nice if the authors could share their thoughts on whether they think scalability 
+to large problems is a fundamental problem or whether they think that it is possible to 
+come up with new testing strategies that scale better. 
+
+- Typos&Minor Comments:
+
+page 2 (and other various parts of the paper):
+
+"section n" -> "Section n"
+
+page 5, "a rewrite rules" -> "a rewrite rule"
+
+page 7 (and other parts):
+
+"figure n" -> "Figure n"
+
+page 10, "in order" -> "in-order"
+
+===========================================================================
+                           oopsla14 Review #66C
+                     Updated 4 May 2014 3:49:12pm EDT
+---------------------------------------------------------------------------
+   Paper #66: An Empirical Comparison Between Random Generation and
+              Enumeration for Testing Redex Models
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 4. Expert
+
+                         ===== Paper summary =====
+
+The paper presents a case study of the value of three different techniques for testing Redex models. The three techniques are uniform random testing, exhaustive enumeration of the domain, and ad hoc biased random testing. The main finding is that uniform random testing is that enumeration and biased random testing are the most profitable, at different ends of the spectrum.
+
+              ===== Evaluation and comments for authors =====
+
+Strengths:
+-Well done study. Good experimental practices.
+-Thorough benchmarks.
+-Well discussed.
+
+Weaknesses:
+-No new ideas, just case study.
+-Message not that stunning.
+-Not clear testing Redex gives any different insights than testing C or GHC, which was done in past work.
+-Verbosity, presentation too low-level.
+
+I was largely unexcited by this paper although the case study seems quite thorough. I guess part of the reason for my lack of excitement was the reaction I immediately had upon reading the abstract: "if you have defined these strategies just enumerate all three equally and you'll get more than any one individually". Indeed that's confirmed by the experiments and it's also roughly what the conclusion says is done in practice. 
+
+Generally the paper seemed more like a position statement or a case study of interest to a very specialized audience. It is telling that I finished reading the introduction and felt underwhelmed by the novelty value. If the introduction doesn't excite the reader then I see little chance the rest of the paper will.
+
+Having said this, there are some nice elements in the paper. The discussion of enumerators in sect.2 is nice, although not novel and hard-to-follow occasionally (e.g. for fix/e). Section 3 is similarly better than the rest. The case study itself was the least exciting part. I kept reading a mix of low-level details (sorry, but I don't care about the "bug fix in April of 2011") and tedious descriptions of all the bugs in every test subject. Somewhere around the 3rd test subject the phrase "kill me now" enters the reader's mind. The figures are also not optimal. A labeling of S/M/D/U could have appeared in fig2. Fig4 could then perhaps be omitted. Shouldn't the information of fig3 also be mostly apparent in fig2? Why do we not see the very last bump for uniform random testing after 10^4 sec in fig3? Is that figure truncated on the right?
+
+In the end we get to see some interesting insights. But it's not clear these are different than they would be in related testing domains (e.g., testing GHC or testing C compilers, which is part of cited related work). Also the paper appears to be of greater value to an audience already preoccupied with comparisons of random testing vs enumeration. I don't think this describes the OOPSLA audience.
+
+Local comments:
+-Redex is not even cited (or explained)! The reader is supposed to know about it.
+-Citations are not in numeric format.
+
+===========================================================================
+                           oopsla14 Review #66D
+                     Updated 6 May 2014 5:26:50pm EDT
+---------------------------------------------------------------------------
+   Paper #66: An Empirical Comparison Between Random Generation and
+              Enumeration for Testing Redex Models
+---------------------------------------------------------------------------
+
+                      Overall merit: 1. Reject
+                 Reviewer expertise: 3. Knowledgeable
+
+                         ===== Paper summary =====
+
+This paper describes a random test generator for Redex.
+The paper starts by explaining that random testing can be useful. It provides examples where  QuickCheck and Redex are good at random testing.
+Section two discusses 'Enumeration Combinators'. With them, terms can be generated (enumerated) and combined in different ways, ensuring 'fairness'.
+Section three applies these combinators to Redex abstract syntax definitions. In this way, random sentences (terms) can be enumerated.
+Section four discusses an evaluation of in-order enumeration, random selection from a uniform
+distribution, and ad hoc random generation, on a set of buggy models that come with property that should hold for any term.
+Section five discusses a number of systems that have been analyzed with the approach: the simply-typed lambda calculus (stlc), a polymorphic version of stlc, a version of stlc with bugs in the substitution function, a cons/nil manipulation language, red-black trees, and the racket virtual machine. Bugs in the rvm were 'generally difficult to uncover' for the proposed random testing technique.
+Section six compares human assessment of the difficulty to find a problem with the outcomes of the experiment. This showed that there is no correlation between how
+humans view the importance of the bugs and how effective the generators are at finding them.
+
+              ===== Evaluation and comments for authors =====
+
+
+What I missed in the introduction or initial sections of this paper was a decent introduction to Redex, why it has support for testing, how random testing is relevant to Redex, and how random testing for Redex is relevant to the wider community.
+
+The discussion of 'myths' in the introduction is not very helpful. It seems like a set of example on which Redex happens to do well. Many automated testing techniques have some element of randomness in them, justifying a more thoughtful analysis.
+
+"Naturally, not all papers treat random testing as hopelessly naive"
+Here the paper is implicitly saying that the papers cited cited do so.
+I would prefer a more neutral account.
+
+"We aren't sure what distribution QuickCheck uses..."
+I suggest the authors figure this out, instead of leaving the reader wondering.
+
+"The key insight is ... map to triangle numbers."
+Can you explain this key insight?
+
+Can you define 'fairness' of enumerations in the paper?
+
+Section two explains the enumaration technique, and on the fly mentions the technique's requirements (fair, fast) as side remarks. I think those requirements should be explicit, and I would expect measurements in the evaluation showing to what extent these have been reached.
+
+'Methodology' is the study of methods. You have one research method.
+Your research method is *not* a 'case study' as common in the literature. See, e.g.,
+Per Runeson, Martin HÃ¶st: Guidelines for conducting and reporting case study research in software engineering. Empirical Software Engineering 14(2): 131-164 (2009)
+
+I was a bit surprised that an unreleased version of racket was used for this experiment.
+
+The presented technique was not useful for the only realistic system (rvm) assessed. This is in sharp contrast with the tone of the introduction, in which criticism of random testing is described as 'hopelessly naive'.
+
+The comparison in section 6 with human estimates seems very shallow to me.
+
+What I miss after the presentation of the experiment is a critical discussion of the experiments, of its weaknesses, and of its implications beyond Redex.
+
+In the related work I would have expected a discussion of the wide range of search-based testing techniques (which use, e.g., genetic algorithms to select test cases -- see e.g., Mark Harman, S. Afshin Mansouri, Yuanyuan Zhang: Search-based software engineering: Trends, techniques and applications. ACM Comput. Surv. 45(1): 11 (2012). 
+
+The paper's discussion of grammar-based testing is very short. Three papers are discussed, which are said to "provide empirical evidence that random generation techniques that do not sample from a uniform distribution can be highly successful at finding bugs." But what I'd be curious to know is whether the proposed redex technique is any better than the discussed techniques (E.g., Yang's work has found real and unknown bugs in C compilers -- something the proposed redex technique has not done yet).
+
+The conclusion states "that selecting randomly from a uniform distribution is not as effective for testing as the literature claims." I am not sure which specific literature is meant here.
+
+The conclusion is unusual in that it includes a proposal for a mix of techniques that was not discussed earlier in the paper.
+
+Points in favor / against:
++ actual working implementation
+- very narrow focus
+- overly broad claims
+- inadequate discussion of random testing
+- presented examples in evaluation mostly very small
+- no critical analysis of threats to the validity of the experimental results
+- on only more or less realistic example the proposed technique does not work
+
+===========================================================================
+          Response by Robby Findler <robby@eecs.northwestern.edu>
+   Paper #66: An Empirical Comparison Between Random Generation and
+              Enumeration for Testing Redex Models
+---------------------------------------------------------------------------
+Thanks to all the reviewers for their helpful feedback. We plan to
+incorporate all of it in any future version of this paper; things we
+don't mention specifically below, we plan to simply follow the
+suggestions given (especially with respect to related work).
+
+As for the introduction, we plan to rewrite it. The feedback here is
+quite helpful to us in understanding how to rewrite it. In particular,
+reviewer A's point that random testing is often combined with feedback
+is an especially potent counter-argument to our portrayal and we'll
+use that observation as a starting point for rethinking the
+introduction. We are still frustrated by the bad rap ad hoc random
+generation gets in some circles and the rose-colored view that
+enumeration gets and we hope that this paper injects a little more
+sanity into the community's understanding of their relative value.
+
+Along these lines, we'll also provide some background on Redex. If the
+reviewer is curious, our paper "Run Your Research" (POPL 2012) gives
+much more background and we'll probably have a high-level version of
+that kind of an introduction.
+
+The realism of the benchmark left some reviewers dissatisfied. We
+agree that this could be better, but it is not as bad as some seemed
+to think. We will clarify this in the paper, but for the record, all
+of the benchmark programs (except red-black trees) are "real" Redex
+programs in that they match typical things Redex programs do and have
+the size of a typical Redex program. RVM is one of the largest Redex
+models in existence; list-machine is a Redex implementation of a model
+published by others and delim-cont is a model written by others.
+Several of the bugs there are real bugs, extracted from git
+histories. Since the submission date we have also added a model with
+let-polymorphism and the classic bug that confounded PL researchers
+for about a decade, as well as 6 other real bugs that came up during
+the development of that model. We have also identified two bugs based
+on the version control history of the R6RS formal model that we expect
+to include in the benchmark. (None of the additions change our overall
+results.)
+
+Fairness: we have struggled to find a mathematically precise notion of
+fairness. Intuitively, the idea is that a combinator that builds an
+enumeration out of sub-enumerations should not look much much deeper
+into one enumeration than the others. Pinning this down has proven to
+be more difficult that one might think at first glance, however. We
+have developed a notion of "relative fairness" (ie if you declare one
+enumeration to be fair we know what it means for another to be as fair
+as that one is). We also understand it well enough to provide more
+examples and intuition than is in the submission, and we'll do that.
+
+Quickcheck's Integer distribution: we have read the code that
+implements it, but it is difficult to tell what distribution is
+used. We emailed a maintainer yesterday but haven't yet heard back. If
+we do, we'll put something more precise in the paper.
+
+Runeson & H\"{o}st: we plan to study this work more but for now we can
+certainly say that we have excised the one occurrence of "case study"
+from the paper. If there are other specific terminological errors that
+you can point us to, we'll gladly change our paper. Fundamentally our
+goal is to communicate effectively what we've done and using the right
+terminology helps us with that, so thank you!
+
