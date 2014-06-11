@@ -430,7 +430,7 @@ ad hoc random generator, two were also found by the random
 selection from the uniform distribution and the remaining 
 two were not found by any of our generators in 24 hours.
 We suspect that it is the relatively large grammar of the language
-that makes it difficult for the in order enumerator to find
+that makes it difficult for the in-order enumerator to find
 these bugs. There are 24 productions for expressions which means
 that there are many terms even with relatively small sizes.
 

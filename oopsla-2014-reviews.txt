@@ -202,14 +202,27 @@ Fixed. (Except the last, which I think is correct as is.)
 >
 >"section n" -> "Section n"
 >
+
+This seems to be how Scribble's "secref" works...
+Either seems fine?
+
 >page 5, "a rewrite rules" -> "a rewrite rule"
 >
+
+Fixed.
+
 >page 7 (and other parts):
 >
 >"figure n" -> "Figure n"
 >
+
+Again, this is how Scribble does it.
+
 >page 10, "in order" -> "in-order"
 >
+
+Fixed.
+
 >===========================================================================
 >                           oopsla14 Review #66C
 >                     Updated 4 May 2014 3:49:12pm EDT

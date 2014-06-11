@@ -117,7 +117,7 @@ ellipsis (the one referring to the @racket[x]) has only
 a single element, but the second one (the one referring to
 @racket[v]) has four elements.
 
-In order to specify a rewrite rules that fires only when the
+In order to specify a rewrite rule that fires only when the
 arity of the procedure matches the number of actual arguments
 supplied, Redex allows the ellipsis itself to have a subscript.
 This means not that the entire sequences are the same, but merely
