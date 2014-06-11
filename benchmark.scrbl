@@ -209,7 +209,7 @@ a single numeric base type, polymorphic lists, and polymorphic
 versions of the list constants. 
 No changes were made to the model except those necessary to 
 make the list operations polymorphic.
-There is no type inference is the model, so all polymorphic
+There is no type inference in the model, so all polymorphic
 terms are required to be instantiated with the correct
 types in order for the function to type check. 
 Of course, this makes it much more difficult to automatically 
@@ -259,7 +259,7 @@ but is less effective at catching bugs in the substitution
 function.
 
 The first substitution bug we introduced simply omits the
-case that replaces the correct variable with the with the
+case that replaces the correct variable with the
 term to be substituted. We considered this to be a shallow
 error, and indeed all approaches were able to uncover it,
 although the time it took to do so ranged from 1 second to
@@ -276,7 +276,7 @@ a shallow error, although one of the more difficult to
 find bugs in this model.
 
 The fourth substitution bug neglects to make the renamed
-bound variable fresh enough when when recurring past a
+bound variable fresh enough when recurring past a
 lambda. Specifically, it ensures that the new variable is
 not one that appears in the body of the function, but it
 fails to make sure that the variable is different from the
@@ -328,7 +328,7 @@ that has the effect that the list cons operator does not store
 its result. We classify this as a simple bug.
 
 None of the list-machine bugs were found by any of our generation
-strategies, simply because the structure of the list-machine's
+strategies, simply because of the structure of the list-machine's
 typing rules definition. These rules require the generators
 to generate both a term and a type that match (which is difficult
 for the random generators) and the smallest expressions that
@@ -405,14 +405,14 @@ reasons:
   soundness property that relates the verifier to the
   virtual machine model, and an external property that
   relates the verifier model to the verifier implementation.
-  We did no include any that require the latter properties because it
+  We did not include any that require the latter properties because it
   requires building a complete, buggy version of the Racket
   runtime system to include in the benchmark.}
            
           @item{We included all of the internal properties
   except those numbered 1 and 7 for practical reasons. The
   first is the only bug in the machine model, as opposed to
-  the just the verifier, which would have required us to
+  just the verifier, which would have required us to
   include the entire VM model in the benchmark. The second
   would have required modifying the abstract representation
   of the stack in the verifier model in contorted way to
@@ -441,7 +441,7 @@ not have variables, but instead is stack-based; bytecode
 expressions also contain internal pointers that must be
 valid. Generating a random (or in-order) term is relatively
 unlikely to produce one that satisfies these constraints.
-For example, of the of the first 10,000 terms produced by
+For example, of the first 10,000 terms produced by
 the in-order enumeration only 1625 satisfy the constraints.
 The ad hoc random generator generators produces about 900
 good terms in 10,000 attempts and the uniform random

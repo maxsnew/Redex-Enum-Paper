@@ -113,6 +113,9 @@ Added these to the related work directory.
 >"of the of the"
 >"43 bugs in the benchmark[s]"
 >
+
+Fixed. (Except the last, which I think is correct as is.)
+
 >===========================================================================
 >                           oopsla14 Review #66B
 >                    Updated 29 Apr 2014 10:33:54pm EDT
