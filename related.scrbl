@@ -3,6 +3,9 @@
 
 @title[#:tag "sec:related-work"]{Related Work}
 
+@textit{Need to investigate @url{http://kaptoxic.github.io/SciFe/}. There is
+probably a paper at the scala workshop about it; camera ready is 6/23}
+
 The related work divides into two categories: papers 
 about enumeration and papers with studies about
 random testing.
