@@ -1,4 +1,4 @@
-#lang scribble/sigplan @10pt
+#lang scribble/lncs
 
 @(require "cite.rkt" 
           scribble/core
@@ -16,8 +16,13 @@
   An Empirical Comparison Between Random Generation and Enumeration
   for Testing Redex Models
 }
-@doi{}
-
+@;{@doi{}}
+@;{TODO: add e-mails, institutions}
+@authors[(author "Max New" )
+         (author "Burke Fetscher" )
+         (author "Jay McCarthy" )
+         (author "Robert Bruce Findler" )]
+@;{
 @authorinfo["Max New"
             "Northwestern University"
             "max.new@eecs.northwestern.edu"]
@@ -30,7 +35,7 @@
 @authorinfo["Robert Bruce Findler"
             "Northwestern University"
             "robby@eecs.northwestern.edu"]
-
+}
 @;{ Aaron's comments:
 
 Hi, guys.

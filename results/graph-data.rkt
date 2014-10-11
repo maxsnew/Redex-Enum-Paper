@@ -26,7 +26,7 @@
          racket/match
          math/statistics
          math/distributions
-         redex/examples/benchmark/apply-diffs)
+         redex/benchmark/run-benchmark)
 
 (provide process-data
          load-raw

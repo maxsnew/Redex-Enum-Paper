@@ -1,2 +1,2 @@
-paper.pdf: *.scrbl *.rkt
+paper.pdf:
 	scribble --pdf paper.scrbl

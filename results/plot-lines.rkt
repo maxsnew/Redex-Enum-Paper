@@ -1,6 +1,6 @@
 #lang racket
 
-(require redex/examples/benchmark/graph-data
+(require redex/benchmark/private/graph-data
          plot/pict pict
          "graph-data.rkt"
          "../bug-info.rkt")

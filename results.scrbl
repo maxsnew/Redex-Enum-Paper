@@ -1,12 +1,12 @@
 #lang scribble/base
 
-@(require "results/plot.rkt"
+@(require ;; "results/plot.rkt"
           "cite.rkt"
           scriblib/figure
           (only-in pict scale))
 
 @title[#:tag "sec:results"]{Global Trends in Our Results}
-
+@;{
 @figure*["fig:benchmark-lines"
          @list{Random testing performance of in-order enumeration, 
                random indexing into an enumeration,
@@ -19,7 +19,7 @@
                Random Generation Success Time in Seconds (Right-most column shows
                bugs whose counterexamples were never found)}
          (correlation-plot-24hour)]
-
+}
 Our primary concern with this study was to determine the
 relative merits of the three generation strategies. 
 @Figure-ref["fig:benchmark-lines"] shows our data with this

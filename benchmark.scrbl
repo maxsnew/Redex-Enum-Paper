@@ -1,6 +1,6 @@
 #lang scribble/base
 
-@(require "results/plot.rkt"
+@(require ;"results/plot.rkt"
           "cite.rkt"
           "bug-info.rkt"
           scribble/core
@@ -96,7 +96,7 @@ The averages span nearly seven orders of magnitude from less
 than a tenth of a second to several hours and thus represent
 a wide range of bugs in terms of how difficult it is to
 generate counterexamples. 
-
+@;{
 @figure*["fig:benchmark-overview" "Benchmark Overview"]{
  @centered{
   @tabular[#:sep 
@@ -144,13 +144,13 @@ generate counterexamples.
                                  (list (get-error type num))))
                   (set! last-model type)))))]
   }
-}
+}}
 
-@figure*["fig:benchmark"
-         '("Performance Results by Individual Bug,"
-           " following the naming scheme:"
-           " «model name»-«bug number».rkt")
-         (res-plot-24hour)]
+@;{@figure*["fig:benchmark"
+          '("Performance Results by Individual Bug,"
+            " following the naming scheme:"
+            " «model name»-«bug number».rkt")
+          (res-plot-24hour)]}
 
 @section{stlc} A simply-typed lambda calculus with base
 types of numbers and lists of numbers, including the

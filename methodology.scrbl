@@ -1,6 +1,6 @@
 #lang scribble/base
 
-@(require "results/plot.rkt"
+@(require ;"results/plot.rkt"
           "cite.rkt"
           "util.rkt"
           scribble/manual

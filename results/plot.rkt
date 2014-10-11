@@ -1,7 +1,7 @@
 #lang racket
 
 (require "plot-lines.rkt"
-         redex/examples/benchmark/graph-data
+         redex/benchmark/private/graph-data
          racket/runtime-path
          plot/pict
          pict)
