@@ -37,7 +37,7 @@ recursive references. For example, this is the
             (pretty-write example sp))
           (for/list ([line (in-lines (open-input-string
                                       (get-output-string sp)))])
-            (string-append line "\n"))))
+            (string-append (regexp-replace #rx"\u0011" line "q") "\n"))))
 
 There are three patterns in Redex that require special care when enumerating.
 The first is repeated names. If the same meta-variable is used twice
