@@ -51,9 +51,7 @@ random generator tuned for Redex programs, random selection
 from a uniform distribution of Redex programs, and an
 in-order enumeration of Redex programs.
   
-Our results contradict commonly-held, yet unsubstantiated
-wisdom regarding the relative value of these three
-approaches. Specifically, selecting uniformly at random is
+Our results show that selecting uniformly at random is
 not the best-performing choice, and enumeration and ad hoc random
 selection are incomparable, with random being better with
 more than 10 minutes but in-order enumeration being better

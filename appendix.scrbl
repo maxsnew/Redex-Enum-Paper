@@ -4,7 +4,7 @@
 @title[#:tag "sec:appendix"]{Appendix}
 
 This section shows the precise code we used to
-get the numbers discussed in @secref["sec:intro"].
+get the numbers discussed in @secref["sec:related-work"].
 This is the Quickcheck code for the first conjecture:
 @dart.hs
 

@@ -1,5 +1,5 @@
 #lang scribble/base
-@(require "cite.rkt")
+@(require "cite.rkt" "util.rkt" scribble/manual)
 
 @title[#:tag "sec:related-work"]{Related Work}
 
@@ -109,3 +109,37 @@ All three of these papers provide empirical evidence that
 random generation techniques that do not sample from a
 uniform distribution can be highly successful at finding
 bugs.
+
+Despite an early, convincing study on the value of 
+random testing@~cite[an-evaluation-of-random-testing], 
+random testing, there are other papers that suggest that random testing is
+a poor choice for bug-finding. For example, 
+@citet[contract-driven-testing-of-javascript-code] write:
+@a-quote{
+Spotting this defect requires the test case generator to 
+guess a value for x such that x * 2 == x + 10 holds, 
+but a random integer solves this equation with probability 
+@raw-latex|{\(2^{-32}\)}|.
+}
+
+When we run this example in 
+Quickcheck@~cite[quickcheck]
+giving it 1000 attempts to find a counterexample, it finds it
+about half of the time, taking on average about 400 attempts 
+when it succeeds.
+Redex's random generator does a little bit better, finding it
+nearly every time, typically in about 150 attempts.
+
+Not to single out a single paper, @citet[dart] use the same
+example and @citet[isabelle-testing] discuss this buggy
+property (the last @racket[xs] should be @racket[ys]):
+@racketblock[nth (append xs ys) (length xs+n) = nth xs n]
+saying that
+@a-quote{
+[r]andom testing typically fails to find the counterexample, even 
+with hundreds of iterations, because randomly chosen values for 
+@racket[n] are almost always out of bounds.
+}
+This property is easier for both Quickcheck and Redex,
+taking, on average, 4 attempts for Quickcheck and 5 for Redex
+to find a counterexample.

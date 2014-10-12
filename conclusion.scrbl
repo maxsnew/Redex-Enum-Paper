@@ -6,7 +6,7 @@
 Our study shows that the relationship between ad hoc random
 generation and in-order enumeration is subtle, and that
 selecting randomly from a uniform distribution is not as
-effective for testing as the literature claims. 
+effective for testing as it might appear.
 
 Based on these findings we have modified Redex's random
 testing functionality. The new default strategy for random
