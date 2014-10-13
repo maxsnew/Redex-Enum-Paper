@@ -55,9 +55,10 @@ outer face of an n simplex.
 Despite their conceptual similarity, we found the boxy enumeration to
 be much easier to implement efficiently. To understand why, note that
 most combinatorics applications of pairing functions are chiefly
-concerned with one half of the bijection: the one from ℕ×ℕ to ℕ,
-whereas for enumerations we are primarily concerned with the other
-half of the bijection, since that is the one used to generate terms.
+concerned with one half of the bijection: the one from pairs of
+natural numbers to natural numbers whereas for enumerations we are
+primarily concerned with the other half of the bijection, since that
+is the one used to generate terms.
 
 @;{TODO: insert math here to show }
 
