@@ -35,12 +35,45 @@ structure to the triangle numbers.
 @;{Cantor vs Boxy}
 @;{TODO: cite Wolfram Conference Elegant Pairing Function}
 @;{TODO: cite Tarau's n-tupling}
+@;{TODO: insert math formulae}
 
 The combinatorically-inclined reader may have noticed in our
-description of @racket{cons/e} that we did not use the classic Cantor
-pairing function for our bijection. Instead we used another simple
-bijection that we refer to as "boxy" pairing, and called an "Elegant"
-pairing function in TODO CITATION NEEDED. 
+description of @racket[cons/e] that we did not use the classic Cantor
+pairing function for our bijection, which can be interpreted as a more
+triangular grid walk:@centered{@cantor-cons-pict[]}
+
+Instead we used another simple bijection that we refer to as "boxy"
+pairing, and called an "Elegant" pairing function in TODO CITATION
+NEEDED. The two bijections are quite similar, they are both quadratic
+functions with similar geometric interpretations: boxy traces out the
+edges of increasingly large squares and Cantor traces out the bottoms
+of increasingly large triangles. This point of view leads to obvious
+generalizations to n-tuples. Generalized boxy should trace out the
+outer faces of an n cube and generalized Cantor should trace out the
+outer face of an n simplex.
+
+Despite their conceptual similarity, we found the boxy enumeration to
+be much easier to implement efficiently. To understand why, note that
+most combinatorics applications of pairing functions are chiefly
+concerned with one half of the bijection: the one from ℕ×ℕ to ℕ,
+whereas for enumerations we are primarily concerned with the other
+half of the bijection, since that is the one used to generate terms.
+
+@;{TODO: insert math here to show }
+
+So how do we invert these functions? We can invert the geometric
+process by finding what face on the n-dimensional object we've landed
+and then use an enumeration of the tuples on that face. For example,
+when we encode @racket[42] with @racket[cons/e], we first take the
+square root with remainder, giving us a root of @racket[6] with a
+remainder of @racket[8] this tells us that the largest value in the
+tuple is indexed with @racket[6], so we index into an enumeration of
+tuples with maximum index @racket[6] with the value @racket[8], to
+give us the correct value. Then boxy generalizes by taking the nth
+root with remainder, while Cantor generalizes by taking what could be
+called the nth simplicial root with remainder. Efficient
+implementations of nth integer root are easily available, so we use
+them.
 
 @;{TODO: Consider putting before Fair Pairing}
 @section{Fair Union}

@@ -3,7 +3,7 @@
          pict
          scribble/manual)
 
-(provide pair-pict 
+(provide pair-pict cantor-cons-pict
          grid gen-grid
          unfair-exp fair-exp num-enumerated
          max-unfair min-unfair max-fair min-fair
@@ -12,9 +12,16 @@
          except/e*
          fin/e)
 
-(define (pair-pict) (grid 5 16 200 12))
+(define (pair-pict) (box-cons-pict))
+(define (box-cons-pict) (grid cons/e 5 16 200 12))
+(define (cantor-cons-pict) (grid cantor-cons/e 5 12 200 12))
 
-(define (grid count num-points size arrow-head-size)
+(define (cantor-cons/e e1 e2)
+  (map/e (λ (xy) (cons (first xy) (second xy)))
+         (λ (x-y) (list (car x-y) (cdr x-y)))
+         (cantor-list/e e1 e2)))
+
+(define (grid cons/e count num-points size arrow-head-size)
   (gen-grid cons/e count num-points size arrow-head-size #:arrows? #t))
 
 (define (gen-grid cons/e count num-points size arrow-head-size #:arrows? arrows?)
