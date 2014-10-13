@@ -18,24 +18,13 @@
 }
 @;{@doi{}}
 @;{TODO: add e-mails, institutions}
-@authors[(author "Max New" )
-         (author "Burke Fetscher" )
-         (author "Jay McCarthy" )
-         (author "Robert Bruce Findler" )]
-@;{
-@authorinfo["Max New"
-            "Northwestern University"
-            "max.new@eecs.northwestern.edu"]
-@authorinfo["Burke Fetscher"
-            "Northwestern University"
-            "burke.fetscher@eecs.northwestern.edu"]
-@authorinfo["Jay McCarthy"
-            "Brigham Young University"
-            "jay@cs.byu.edu"]
-@authorinfo["Robert Bruce Findler"
-            "Northwestern University"
-            "robby@eecs.northwestern.edu"]
-}
+@authors[@(author #:inst "1" "Max New")
+         @(author #:inst "2" "Burke Fetscher")
+         @(author #:inst "3" "Jay McCarthy")
+         @(author #:inst "2" "Robert Bruce Findler")]
+@institutes[@institute{Northeastern University}
+            @institute{Northwestern University}
+            @institute{Vassar College}]         
 
 @abstract{ 
           
