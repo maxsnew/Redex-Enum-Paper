@@ -1,8 +1,10 @@
 #lang scribble/lncs
 
 @(require "cite.rkt" 
+          "util.rkt"
           scribble/core
-          scribble/latex-properties)
+          scribble/latex-properties
+          (except-in scribble/manual author))
 
 @(define extra-tex-code
    (bytes-append #"\\usepackage{pslatex}\n"
@@ -13,56 +15,57 @@
                  #"\\begin{minipage}[t]{4in}#1\\end{minipage}}"))
 
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
-  An Empirical Comparison Between Random Generation and Enumeration
-  for Testing Redex Models
+  Practical, Fair, and Efficient Enumeration for Algebraic Data-Structures
 }
-@;{@doi{}}
-@;{TODO: add e-mails, institutions}
-@authors[@(author #:inst "1" "Max New")
-         @(author #:inst "2" "Burke Fetscher")
-         @(author #:inst "3" "Jay McCarthy")
-         @(author #:inst "2" "Robert Bruce Findler")]
-@institutes[@institute{Northeastern University}
-            @institute{Northwestern University}
-            @institute{Vassar College}]         
+@authors[(author #:inst "1" "Max New")
+         (author #:inst "1" "Burke Fetscher")
+         (author #:inst "2" "Jay McCarthy" )
+         (author #:inst "1" "Robert Bruce Findler")]
+@institutes[(institute "Northwestern University")
+            (institute "Brigham Young University")]
 
-@abstract{ 
-          
-This paper presents a benchmark suite of buggy Redex models
-designed to test bug-finding techniques. Our benchmark
-contains large and small models, easy and hard to find bugs,
-bugs that we invented based on our experience programming in
-Redex and bugs in models written by others that happened
-during development.
-  
-We evaluate three testing techniques: a generic, ad hoc
-random generator tuned for Redex programs, random selection
-from a uniform distribution of Redex programs, and an
-in-order enumeration of Redex programs.
-  
-Our results show that selecting uniformly at random is
-not the best-performing choice, and enumeration and ad hoc random
-selection are incomparable, with random being better with
-more than 10 minutes but in-order enumeration being better
-in interactive time-frames.
-
+@abstract{
+ This paper reports on the design of a set of
+ enumeration combinators that are efficient, fair, 
+ and practical. They are efficient because most
+ of the combinators produce enumerations that
+ support indexing in time proportional to the
+ log of the given index. In practical terms, this
+ means that we can typically compute the 
+ @raw-latex{$2^{100,000}$}th element of an enumeration 
+ in a few milliseconds.
+ 
+ Fairness means that when the combinators build a new result
+ enumeration out of other ones, indexing into the result enumerator
+ does not index disproportionally
+ far into just a subset of the given enumerators. For example, 
+ this means that enumeration of the
+ @raw-latex{$n$}th element of a product
+ indexes about @raw-latex{$\sqrt{n}$} elements into each
+ of its components.
+ 
+ Our combinators are practical because they support the
+ entire language of Redex models, providing a new generator
+ for Redex's property-based testing. The paper reports
+ on an empirical comparison between enumeration-based 
+ property generation and ad hoc random generation, showing
+ that enumeration is more effective than ad hoc random
+ generation in short time-frames.
 }
 
-@include-section["intro.scrbl"]
+@include-section["combinators.scrbl"]
 
-@include-section{combinators.scrbl}
-
-@include-section{fairness.scrbl}
+@include-section["fairness.scrbl"]
 
 @include-section["redex-enumeration.scrbl"]
 
-@include-section{methodology.scrbl}
+@include-section["methodology.scrbl"]
 
-@include-section{benchmark.scrbl}
+@include-section["benchmark.scrbl"]
 
-@include-section{results.scrbl}
+@include-section["results.scrbl"]
 
-@include-section{related.scrbl}
+@include-section["related.scrbl"]
 
 @include-section["conclusion.scrbl"]
 

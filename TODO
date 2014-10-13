@@ -15,4 +15,6 @@ TODO maybe discuss other applications (games)
 
 TODO add to the related work with that Scala enumeration paper.
 
-TODO look into whether to change emphasis to enum vs redex benchmark [robby]
+DONE look into whether to change emphasis to enum vs redex benchmark [robby]
+
+DONE revise intro-to-combinators to be the actual intro

@@ -7,7 +7,7 @@
           scriblib/figure
           scriblib/footnote)
 
-@title[#:tag "sec:methodology"]{Methodology}
+@title[#:tag "sec:experimental-setup"]{Experimental Setup}
 
 Our study compares three types of test-case generation
 using a set of buggy models. Each model and bug is equipped

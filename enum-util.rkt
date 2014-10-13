@@ -13,7 +13,7 @@
          fin/e)
 
 (define (pair-pict) (box-cons-pict))
-(define (box-cons-pict) (grid cons/e 5 16 200 12))
+(define (box-cons-pict) (grid cons/e 5 24 200 12))
 (define (cantor-cons-pict) (grid cantor-cons/e 5 12 200 12))
 
 (define (cantor-cons/e e1 e2)
@@ -161,6 +161,10 @@
                                 "    "))
                               "\n")
                (loop (drop/min strs columns)))])))
+
+  ;; this drops leading quotes, which doesn't seem good
+  ;; because the line-breaking code above counts the leading
+  ;; quotes. Should really reconcile theses two
   (apply typeset-code line-strings))
 
 (define (pad-to w str)
@@ -170,7 +174,7 @@
                                       (λ (_) #\space)))]
     [else str]))
 
-(define rendered-enumeration-width 45)
+(define rendered-enumeration-width 55)
 
 (define-syntax-rule 
   (enum-example stx count)
