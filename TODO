@@ -1,0 +1,11 @@
+DONE rewrite introduction [robby]
+DONE move comments on specific papers from intro into related work (and
+perhaps shrink them up a bit). [robby]
+- make edits suggested by "small comments" sections of OOPSLA reviews  [jay?]
+- add a new section between the current 2 and 3 that discusses
+fairness and the euler/boxy pairing function (edit 2 to match that new
+one) [max]
+- re-run the benchmarks [burke]
+- maybe discuss other applications (games)
+- add to the related work with that Scala enumeration paper.
+- look into whether to change emphasis to enum vs redex benchmark [robby]
