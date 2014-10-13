@@ -38,6 +38,7 @@ other enumeration. If both are finite, we loop through the
 one with lesser cardinality. This corresponds to taking the
 quotient with remainder of the index with the lesser size.
 
+@;{TODO: Does boxy really "zig-zag"?}
 Infinite enumerations require more care. If we
 imagine our sets as being laid out in an infinite table,
 this operator zig-zags through the table to enumerate all
@@ -47,24 +48,9 @@ which means that @racket[(cons/e nat/e nat/e)]'s
 first @racket[12] elements are
 @enum-example[(cons/e nat/e nat/e) 12]
 
-Generalizing pairs to n-ary tuples is not simply a matter
-of combining pairs together in an arbitrary way. 
-In particular, here are two different ways to make
-4-tuples of natural numbers:
-@(tabular (list (list (codeblock unfair-exp)
-                      (codeblock fair-exp))))
-
-After enumerating @code{@(number->string num-enumerated)} elements,
-the left-hand one has seen @max-unfair in one component but only
-@min-unfair in another, whereas the right-hand one has seen at most
-either @min-fair or @max-fair in all components. We refer to the
-right-hand version as being "fair" and always prefer fairness in our
-implementations, because it appears to correspond to the uniformity
-that is perceived as valuable with enumeration. In our experience,
-most of the time the obvious version of an enumerator is not fair and
-the details required to tweak it are non-intuitive. In this case, the
-key insight to achieve fairness is to map the leaves of the enumerated
-structure to the triangle numbers.
+We generalize the binary @racket[cons/e] to an n-ary combinator
+@racket[list/e] that can be interpreted as a similar walk in an
+n-dimensional grid. We explain this in detail in @secref{sec:fair}.
 
 Another combinator is the disjoint union
 operator, @racket[disj-sum/e], that takes two or more
@@ -80,24 +66,8 @@ of strings
 @enum-example[(disj-sum/e (cons nat/e number?)
                           (cons string/e string?))
               14]
-
-The @racket[disj-sum/e] enumerator also has to be fair and
-to account for finite enumerations. So this
-enumeration:
-@racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                         (cons nat/e number?)
-                         (cons (fin/e "x" "y") string?))]
-has to cycle through the finite enumerations until they
-are exhausted before producing the rest of the natural
-numbers:
-@enum-example[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                          (cons nat/e number?)
-                          (cons (fin/e "x" "y") string?))
-              14]
-In general, this means that @racket[disj-sum/e] must track the
-ranges of natural numbers when each finite enumeration is exhausted
-to compute which enumeration to use for a given index.
-
+We explain the generalization to n-ary union in @secref{sec:fair}.
+              
 We provide a fixed-point combinator for
 recursive enumerations:
 @racket[fix/e : (enum → enum) → enum].

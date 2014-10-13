@@ -63,6 +63,8 @@ in interactive time-frames.
 
 @include-section{combinators.scrbl}
 
+@include-section{fairness.scrbl}
+
 @include-section["redex-enumeration.scrbl"]
 
 @include-section{methodology.scrbl}
