@@ -21,7 +21,7 @@
 This section introduces our enumeration library via examples, giving
 an overview of its capabilities and the basic structure of the 
 implementation. @Secref["sec:fair"] explains the concept of fairness
-in more detail and discusses why our combinators are fair. @Secref["sec:redex"]
+in more detail and discusses why our combinators are fair. @Secref["sec:redex-enum"]
 explains how our combinators can be used to express arbitrary Redex patterns
 (and thus provide an enumeration for expressions in a calculus). @Secref["sec:experimental-setup"]
 discusses the experiments we ran to evaluate the enumerator as a
