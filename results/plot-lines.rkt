@@ -1,25 +1,22 @@
 #lang racket
 
 (require redex/benchmark/private/graph-data
-         plot/pict pict
-         "graph-data.rkt"
-         "../bug-info.rkt")
+         plot/pict pict)
 
-(provide plot-from-files
-         correlation-plot
-         unique-sucesses)
+(provide plot-from-directory)
 
 (module+
     main
   (require racket/cmdline)
   (command-line
-   #:args filenames
-   (plot-from-files filenames "line-plot.pdf")))
+   #:args (directory)
+   (plot-from-directory directory "line-plot.pdf")))
 
-(define (plot-from-files filenames [output #f])
+(define (plot-from-directory directory [output #f])
   (define-values (d-stats _)
     (process-data
-     (load-raw filenames)))
+     (extract-data/log-directory directory)
+     (extract-names/log-directory directory)))
   (parameterize ([plot-x-transform log-transform]
                  [plot-x-label "Time in Seconds"]
                  [plot-y-label "Number of Bugs Found"]
@@ -100,9 +97,9 @@
      (lines
       (reverse pts)
       ;#:width 2
-      #:color (hash-ref type-colors type)
+      #:color ((type-colors) type)
       #:style (list-ref line-styles n)
-      #:label (hash-ref type-names type)))))
+      #:label ((type-names) type)))))
 
 (define (format-time number)
   (cond
@@ -133,15 +130,17 @@
     (hash-set h (second s)
               (cons (third s)
                     (hash-ref h (second s) '())))))
-
+#;
 (define (correlation-plot filenames)
   (vl-append 10
              (single-correlation-plot filenames 'grammar 1)
              (single-correlation-plot filenames 'enum 2)
              (single-correlation-plot filenames 'ordered 3)))
-
-(define (single-correlation-plot filenames type color)
-  (define-values (d-stats b) (process-data (load-raw filenames)))
+#;
+(define (single-correlation-plot directory type color)
+  (define-values (d-stats b) (process-data
+     (extract-data/log-directory directory)
+     (extract-names/log-directory directory)))
   (define type/index (hash 'S 0
                            'SM 1
                            'M 2
@@ -221,7 +220,7 @@
     (and (equal? (path->string name) fn)
          (equal? method (list-ref ele 1))
          (list-ref ele 2))))
-
+#;
 (define/contract (unique-sucesses filenames)
   (-> (listof any/c)
       (hash/c (or/c 'grammar 'ordered 'enum)
@@ -230,7 +229,9 @@
   ;; success-table : hash[(list/c base num) -o> (setof method)])
   (define success-table (make-hash))
   
-  (define-values (d-stats b) (process-data (load-raw filenames)))
+  (define-values (d-stats b) (process-data
+                              (extract-data/log-directory directory)
+                              (extract-names/log-directory directory)))
   (for ([base+num (in-list all-types/nums)])
     (define base (list-ref base+num 0))
     (define num (list-ref base+num 1))
