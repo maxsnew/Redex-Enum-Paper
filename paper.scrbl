@@ -22,7 +22,7 @@
          (author #:inst "2" "Jay McCarthy" )
          (author #:inst "1" "Robert Bruce Findler")]
 @institutes[(institute "Northwestern University")
-            (institute "Brigham Young University")]
+            (institute "Vassar College")]
 
 @abstract{
  This paper reports on the design of a set of
