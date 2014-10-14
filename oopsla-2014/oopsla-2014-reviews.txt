@@ -86,7 +86,9 @@ Added these to the related work directory.
 >Section 1 introducing Redex, since this is central to understanding
 >and following the paper.  It would also help to include a sentence or
 >a phrase describing QuickCheck when it is introduced.  
->
+
+TODO verify that this has been done
+
 >The examples in Section 1, which show that random testing is a useful
 >bug finding method, could be more compelling.  For instance, Redex and
 >QuickCheck solve the equality x*2 == x+10 quickly only because their
@@ -96,12 +98,20 @@ Added these to the related work directory.
 >benefit from a rewrite that reframes the motivation and contributions
 >of the paper in the context of the broader literature on testing and
 >bug finding.
->
+
+TODO verify that the new introduction does this
+
 >In Section 2, what does it mean that the "left-hand one has seen 87 in
 >one component but only 3 in another"?  It has seen the value 87 or it
->has seen 87 different values?  Also in Section 2, I don't see how the
+>has seen 87 different values?
+
+TODO explain
+
+>  Also in Section 2, I don't see how the
 >definition of nats-above/e works.  What does (lambda (x) (- x i)) do?
->
+
+TODO explain
+
 >Typos:
 >
 >"with the with the"
@@ -111,10 +121,12 @@ Added these to the related work directory.
 >"We did no[t] include"
 >"the just the"
 >"of the of the"
->"43 bugs in the benchmark[s]"
->
 
-Fixed. (Except the last, which I think is correct as is.)
+DONE
+
+>"43 bugs in the benchmark[s]"
+
+TODO robby thinks it's okay though
 
 >===========================================================================
 >                           oopsla14 Review #66B
@@ -183,7 +195,9 @@ Fixed. (Except the last, which I think is correct as is.)
 >you seem to feel strongly about some bugs being fairly common and others 
 >not. Where does this intuition comes from? Observing other users playing 
 >with Redex and making such mistakes?
->
+
+TODO any way to argue about these better?
+
 >* More critical analysis and directions for Future Work:
 >
 >Looking for example at Figure two, it seems that there is a correlation between 
@@ -195,7 +209,9 @@ Fixed. (Except the last, which I think is correct as is.)
 >It would be nice if the authors could share their thoughts on whether they think scalability 
 >to large problems is a fundamental problem or whether they think that it is possible to 
 >come up with new testing strategies that scale better. 
->
+
+TODO is this worth thinking about?
+
 >- Typos&Minor Comments:
 >
 >page 2 (and other various parts of the paper):
@@ -203,8 +219,7 @@ Fixed. (Except the last, which I think is correct as is.)
 >"section n" -> "Section n"
 >
 
-This seems to be how Scribble's "secref" works...
-Either seems fine?
+TODO use Secref
 
 >page 5, "a rewrite rules" -> "a rewrite rule"
 >
@@ -216,7 +231,7 @@ Fixed.
 >"figure n" -> "Figure n"
 >
 
-Again, this is how Scribble does it.
+TODO use Figref
 
 >page 10, "in order" -> "in-order"
 >
@@ -247,22 +262,40 @@ Fixed.
 >
 >Weaknesses:
 >-No new ideas, just case study.
+
+TODO emphasize new combinators
+
 >-Message not that stunning.
 >-Not clear testing Redex gives any different insights than testing C or GHC, which was done in past work.
+
+TODO better related work comparison
+
 >-Verbosity, presentation too low-level.
 >
 >I was largely unexcited by this paper although the case study seems quite thorough. I guess part of the reason for my lack of excitement was the reaction I immediately had upon reading the abstract: "if you have defined these strategies just enumerate all three equally and you'll get more than any one individually". Indeed that's confirmed by the experiments and it's also roughly what the conclusion says is done in practice. 
->
+
+TODO is the reviewer's claim of "done in practice" another way of
+complaining about related work?
+
 >Generally the paper seemed more like a position statement or a case study of interest to a very specialized audience. It is telling that I finished reading the introduction and felt underwhelmed by the novelty value. If the introduction doesn't excite the reader then I see little chance the rest of the paper will.
 >
 >Having said this, there are some nice elements in the paper. The discussion of enumerators in sect.2 is nice, although not novel and hard-to-follow occasionally (e.g. for fix/e). Section 3 is similarly better than the rest. The case study itself was the least exciting part. I kept reading a mix of low-level details (sorry, but I don't care about the "bug fix in April of 2011") and tedious descriptions of all the bugs in every test subject. Somewhere around the 3rd test subject the phrase "kill me now" enters the reader's mind. The figures are also not optimal. A labeling of S/M/D/U could have appeared in fig2. Fig4 could then perhaps be omitted. Shouldn't the information of fig3 also be mostly apparent in fig2? Why do we not see the very last bump for uniform random testing after 10^4 sec in fig3? Is that figure truncated on the right?
->
+
+TODO use the labeling in fig2
+TODO answer questions above
+
 >In the end we get to see some interesting insights. But it's not clear these are different than they would be in related testing domains (e.g., testing GHC or testing C compilers, which is part of cited related work). Also the paper appears to be of greater value to an audience already preoccupied with comparisons of random testing vs enumeration. I don't think this describes the OOPSLA audience.
 >
 >Local comments:
->-Redex is not even cited (or explained)! The reader is supposed to know about it.
+>-Redex is not even cited (or explained)! The reader is supposed to
+>know about it.
+
+TODO cite redex
+
 >-Citations are not in numeric format.
->
+
+TODO change citation format?
+
 >===========================================================================
 >                           oopsla14 Review #66D
 >                     Updated 6 May 2014 5:26:50pm EDT
@@ -290,43 +323,76 @@ Fixed.
 >
 >
 >What I missed in the introduction or initial sections of this paper was a decent introduction to Redex, why it has support for testing, how random testing is relevant to Redex, and how random testing for Redex is relevant to the wider community.
->
+
+TODO better introduction and Redex explanation
+
 >The discussion of 'myths' in the introduction is not very helpful. It seems like a set of example on which Redex happens to do well. Many automated testing techniques have some element of randomness in them, justifying a more thoughtful analysis.
->
+
+TODO does new emphasis remove need to think about this?
+
 >"Naturally, not all papers treat random testing as hopelessly naive"
 >Here the paper is implicitly saying that the papers cited cited do so.
 >I would prefer a more neutral account.
->
+
+DONE 
+
 >"We aren't sure what distribution QuickCheck uses..."
 >I suggest the authors figure this out, instead of leaving the reader wondering.
->
+
+TODO verify
+
 >"The key insight is ... map to triangle numbers."
 >Can you explain this key insight?
->
+
+TODO explain
+
 >Can you define 'fairness' of enumerations in the paper?
->
+
+TODO explain
+
 >Section two explains the enumaration technique, and on the fly mentions the technique's requirements (fair, fast) as side remarks. I think those requirements should be explicit, and I would expect measurements in the evaluation showing to what extent these have been reached.
->
+
+TODO define these early in intro
+
 >'Methodology' is the study of methods. You have one research method.
 >Your research method is *not* a 'case study' as common in the literature. See, e.g.,
 >Per Runeson, Martin HÃ¶st: Guidelines for conducting and reporting case study research in software engineering. Empirical Software Engineering 14(2): 131-164 (2009)
->
+
+TODO reword
+
 >I was a bit surprised that an unreleased version of racket was used for this experiment.
->
+
+TODO say this differently?
+
 >The presented technique was not useful for the only realistic system (rvm) assessed. This is in sharp contrast with the tone of the introduction, in which criticism of random testing is described as 'hopelessly naive'.
->
+
+TODO defend other models better
+
 >The comparison in section 6 with human estimates seems very shallow to me.
->
+
+TODO stronger punchline?
+
 >What I miss after the presentation of the experiment is a critical discussion of the experiments, of its weaknesses, and of its implications beyond Redex.
->
+
+TODO others asked for this too
+
 >In the related work I would have expected a discussion of the wide range of search-based testing techniques (which use, e.g., genetic algorithms to select test cases -- see e.g., Mark Harman, S. Afshin Mansouri, Yuanyuan Zhang: Search-based software engineering: Trends, techniques and applications. ACM Comput. Surv. 45(1): 11 (2012). 
->
+
+TODO verify mention in rw
+
 >The paper's discussion of grammar-based testing is very short. Three papers are discussed, which are said to "provide empirical evidence that random generation techniques that do not sample from a uniform distribution can be highly successful at finding bugs." But what I'd be curious to know is whether the proposed redex technique is any better than the discussed techniques (E.g., Yang's work has found real and unknown bugs in C compilers -- something the proposed redex technique has not done yet).
->
+
+TODO perhaps we assuming too much knowledge of other Redx random
+checking papers
+
 >The conclusion states "that selecting randomly from a uniform distribution is not as effective for testing as the literature claims." I am not sure which specific literature is meant here.
->
+
+TODO add cites
+
 >The conclusion is unusual in that it includes a proposal for a mix of techniques that was not discussed earlier in the paper.
->
+
+TODO evaluate the mix?
+
 >Points in favor / against:
 >+ actual working implementation
 >- very narrow focus

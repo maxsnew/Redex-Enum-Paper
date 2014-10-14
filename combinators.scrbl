@@ -8,117 +8,103 @@
           "util.rkt"
           "enum-util.rkt")
 
+@;{
+
+- implementation points:
+   => representation as three-tuples (size, two functions forming a bijection)
+   => running time as linear in the bit representation
+   
+}
+
 @title[#:tag "sec:enum"]{Enumeration Combinators}
 
-We represent enumerations as bijections between the natural
-numbers (or a prefix of them) and a set of terms. Concretely,
-our enumerations are triples of a function that encodes a term as a
-natural number, a function that decodes a natural number into a
-term, and a size.
+This section introduces our enumeration library via examples, giving
+an overview of its capabilities and the basic structure of the 
+implementation. @Secref["sec:fair"] explains the concept of fairness
+in more detail and discusses why our combinators are fair. @Secref["sec:redex"]
+explains how our combinators can be used to express arbitrary Redex patterns
+(and thus provide an enumeration for expressions in a calculus). @Secref["sec:experimental-setup"]
+discusses the experiments we ran to evaluate the enumerator as a
+counter-example generator and @secref["sec:results"] presents the results.
+@Secref["sec:related-work"] discusses related work and @secref["sec:conclusion"]
+concludes.
 
-To get started, we build a few enumerators by directly
-supplying encode and decode functions, e.g., @racket[nat/e]
-using the identity as both encoding and decoding functions.
+Our enumeration library provides some basic enumerations and combinators
+to build up more complex ones. Our enumerators consist of three pieces:
+a @racket[to-nat] function that computes the index of anything in the enumeration,
+a @racket[from-nat] function that computes a value from an index, and a size
+of the enumeration, which can be either a natural number or @racket[+inf.0]. In addition,
+the @racket[to-nat] and @racket[from-nat] functions form a bijection between
+the natural numbers (up to the size) and the values that are being enumerated.
 
-In general, we want to avoid working directly with the
-functions because we must manually verify that the functions
-form a bijection. It is more convenient and less error-prone to
-instead use a combinator library to construct enumerations.
-
-Our first combinator, @racket[fin/e] builds a finite enumeration 
+The most basic enumerator is @racket[nats/e]. It's @racket[to-nat]
+and @racket[from-nat] functions are simply the identity function
+and its size is @racket[+inf.0]. The combinator @racket[fin/e]
+builds a finite enumeration 
 from its arguments, so @racket[(fin/e 1 2 3 "a" "b" "c")] is
-an enumeration with the six given elements.
+an enumeration with the six given elements, where the elements
+are put in correspondence with the naturals in order they are
+given.
 
 The next combinator is the pairing operator 
-@racket[cons/e], that takes two enumerations and returns an
+@racket[cons/e]. It takes two enumerations and returns an
 enumeration of pairs of those values. If one of the
-enumerations is finite, the bijection loops through the
+enumerations is finite, the enumeration loops through the
 finite enumeration, pairing each with an element from the
 other enumeration. If both are finite, we loop through the
 one with lesser cardinality. This corresponds to taking the
 quotient with remainder of the index with the lesser size.
 
-Infinite enumerations require more care. If we
-imagine our sets as being laid out in an infinite table,
-this operator zig-zags through the table to enumerate all
-pairs:
+Pairing infinite enumerations require more care. If we
+imagine our sets as being laid out in an infinite two dimensional table,
+@racket[cons/e] walks along the edge of ever-widening
+squares to enumerate all pairs:
 @centered{@pair-pict[]}
 which means that @racket[(cons/e nat/e nat/e)]'s
-first @racket[12] elements are
-@enum-example[(cons/e nat/e nat/e) 12]
+first @racket[15] elements are
+@enum-example[(cons/e nat/e nat/e) 15]
 
-Generalizing pairs to n-ary tuples is not simply a matter
-of combining pairs together in an arbitrary way. 
-In particular, here are two different ways to make
-4-tuples of natural numbers:
-@(tabular (list (list (codeblock unfair-exp)
-                      (codeblock fair-exp))))
+The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
+that can be interpreted as a similar walk in an
+n-dimensional grid. We discuss this in detail in @secref["sec:fair"].
 
-After enumerating @code{@(number->string num-enumerated)} elements,
-the left-hand one has seen @max-unfair in one component but only
-@min-unfair in another, whereas the right-hand one has seen at most
-either @min-fair or @max-fair in all components. We refer to the
-right-hand version as being "fair" and always prefer fairness in our
-implementations, because it appears to correspond to the uniformity
-that is perceived as valuable with enumeration. In our experience,
-most of the time the obvious version of an enumerator is not fair and
-the details required to tweak it are non-intuitive. In this case, the
-key insight to achieve fairness is to map the leaves of the enumerated
-structure to the triangle numbers.
-
-Another combinator is the disjoint union
-operator, @racket[disj-sum/e], that takes two or more
-enumerators and predicates to distinguish between their
-elements. It returns an enumeration of their union. The
+The disjoint union enumerator, @racket[disj-sum/e], takes two or more
+pairs of enumerators and predicates. The predicates
+must distinguish the elements of the enumerations from
+each other. The
 resulting enumeration alternates between the input
 enumerations, so that if given @racket[n] infinite
 enumerations, the resulting enumeration will alternate
-through each of the enumerations every @racket[n] numbers.
+through each of the enumerations every @racket[n] positions.
 For example, the following is the beginning of the disjoint
 sum of an enumeration of natural numbers and an enumeration
 of strings
 @enum-example[(disj-sum/e (cons nat/e number?)
                           (cons string/e string?))
-              14]
-
-The @racket[disj-sum/e] enumerator also has to be fair and
-to account for finite enumerations. So this
-enumeration:
-@racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                         (cons nat/e number?)
-                         (cons (fin/e "x" "y") string?))]
-has to cycle through the finite enumerations until they
-are exhausted before producing the rest of the natural
-numbers:
-@enum-example[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                          (cons nat/e number?)
-                          (cons (fin/e "x" "y") string?))
-              14]
-In general, this means that @racket[disj-sum/e] must track the
-ranges of natural numbers when each finite enumeration is exhausted
-to compute which enumeration to use for a given index.
-
-We provide a fixed-point combinator for
-recursive enumerations:
-@racket[fix/e : (enum → enum) → enum].
+              18]
+              
+The combinator
+@racket[fix/e : (enum → enum) → enum] computes
+takes fixed points of enumerator functionals in
+order to build recursive enumerations.
 For example, we can construct an enumerator
 for lists of numbers:
-@racketblock[(fix/e (λ (lon/e)
-                      (disj-sum/e (cons (fin/e null)
-                                        null?)
-                                  (cons (cons/e nat/e lon/e)
-                                        cons?))))]
-and here are its first @racket[12] elements:
+@racketblock[
+(fix/e (λ (lon/e)
+         (disj-sum/e (cons (fin/e null) null?)
+                     (cons (cons/e nat/e lon/e) cons?))))]
+and here are its first @racket[15] elements:
 @enum-example[(fix/e (λ (lon/e)
-                        (disj-sum/e (cons (fin/e null) null?)
-                                    (cons (cons/e nat/e lon/e) cons?))))
-               12]
+                       (disj-sum/e (cons (fin/e null) null?)
+                                   (cons (cons/e nat/e lon/e) cons?))))
+               15]
 A call like @racket[(fix/e f)] enumerator 
 calls @racket[(f (fix/e f))] to build the enumerator,
 but it waits until the first time encoding or decoding 
 happens before computing it. This means that a use of
 @racket[fix/e] that is too eager, e.g.:
-@racket[(fix/e (lambda (x) x))] will fail to terminate.
+@racket[(fix/e (λ (x) x))] will cause it's @racket[from-nat]
+function to fail to terminate.
 Indeed, switching the order of the arguments to @racket[disj-sum/e]
 in the above example also produces an enumeration
 that fails to terminate when decoding or encoding happens.
@@ -133,34 +119,32 @@ correct size, defaulting to infinite if not specified.
 To build up more complex enumerations, it is useful to be able to 
 adjust the elements of an existing enumeration. We use @racket[map/e] 
 which composes a bijection between any two
-sets with the bijection in an enumeration, so we can for example construct 
+sets with the bijection in an enumeration, so we can, for example, construct 
 enumerations of natural numbers that start at some point beyond zero:
 @racketblock/define[(define (nats-above/e i)
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
                              nat/e))]
 
-Also, we can exploit the bijection to define the @racket[except/e]
+Also, we can exploit the bijection in our enumerators to define the @racket[except/e]
 enumerator. It accepts an element and an enumeration, and returns one
 that doesn't have the given element. For example, the first
-16 elements of @racket[(except/e nat/e 13)] are
-@enum-example[(except/e nat/e 13) 16]
-The decoder for @racket[except/e] simply encodes the
-given element and then either subtracts one before
+22 elements of @racket[(except/e nat/e 13)] are
+@enum-example[(except/e nat/e 13) 22]
+The @racket[from-nat] function for @racket[except/e] simply calls @racket[to-nat]
+on the given element and then either subtracts one before
 passing the natural number along (if it is above the 
-given exception) or doesn't (if it isn't). The decoder uses
-similar logic.
+given exception) or simply passes it along (if it is below). Similarly, the @racket[except/e]'s 
+@racket[to-nat] function calls the input enumerator's @racket[from-nat] function.
 
 One important point about the combinators used so far: the
 decoding function is linear in the number of bits in the
 number it is given. This means, for example, that it takes only
 a few milliseconds to compute the
-@raw-latex|{\(2^{100,000}\)}|th element
+@raw-latex{$2^{100,000}$}th element
 in the list of natural number enumeration given above.
 
-@; xxx put in a \newpage
-
-Our next combinator @racket[dep/e] doesn't always have this property.
+Our next combinator @racket[dep/e] does not always have this property.
 It accepts an enumerator and a function from elements to enumerators;
 it enumerates pairs of elements where
 the enumeration used for the second position in the pair depends
@@ -168,9 +152,9 @@ on the actual values of the first position.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
 @racketblock[(dep/e nat/e (λ (i) (nats-above/e i)))]
-Here are the first 12 elements of the enumeration:
+Here are the first 15 elements of the enumeration:
 @enum-example[(dep/e nat/e (λ (i) (nats-above/e i)))
-              12]
+              15]
 The @racket[dep/e] combinator assumes that if any of the enumerations
 produced by the dependent function are infinite then all
 of them are. 

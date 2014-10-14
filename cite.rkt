@@ -36,7 +36,7 @@
 (define icfp
   "International Conference on Functional Programming")
 (define ciclops
-  "International Colloquium on Implementation of Constraint LOgic Programming Systems")
+  "International Colloquium on Implementation of Constraint Logic Programming Systems")
 (define tose
   "IEEE Transactions of Software Engineering")
 (define ml
