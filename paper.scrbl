@@ -61,8 +61,6 @@
 
 @include-section["methodology.scrbl"]
 
-@include-section["benchmark.scrbl"]
-
 @include-section["results.scrbl"]
 
 @include-section["related.scrbl"]

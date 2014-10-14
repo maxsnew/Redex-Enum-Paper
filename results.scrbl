@@ -6,6 +6,14 @@
           (only-in pict scale))
 
 @title[#:tag "sec:results"]{Global Trends in Our Results}
+
+Benchmark comes from various places, including
+@citet[racket-virtual-machine]
+@citet[palka-workshop]
+@citet[list-machine]
+@citet[delim-cont-cont]
+
+
 @;{
 @figure*["fig:benchmark-lines"
          @list{Random testing performance of in-order enumeration, 
