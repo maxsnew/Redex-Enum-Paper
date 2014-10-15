@@ -9,6 +9,10 @@
 @(define extra-tex-code
    (bytes-append #"\\usepackage{pslatex}\n"
                  #"\\usepackage{inconsolata}\n"
+                 #"\\usepackage{savesym}\n"
+                 #"\\savesymbol{iint}\n"
+                 #"\\savesymbol{iiint}\n"
+                 #"\\usepackage{amsmath}\n"
                  
                  ;; used for the table of the bugs
                  #"\\newcommand{\\ErrorDescriptionBox}[1]{"
