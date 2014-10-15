@@ -66,7 +66,7 @@ concerned with one half of the bijection: the one from pairs of
 natural numbers to natural numbers.
 @;{TODO: see if I can make this prettier...}
 @centered{@raw-latex{$cantor\_pair(m, n) = \frac{(n+m)(n+m+1)}{2} + m$}}
-@(centered (scale (bitmap "box_pair.png") 0.35))
+@centered{@raw-latex{$box\_pair(m, n) = \begin{cases} x^2+x+y &\mbox{if } x\ge y\\ x+y^2   &\mbox{if } x < y \end{cases}$}}
 
 @;{Hilbert's 10th problem reference really necessary?}
 
