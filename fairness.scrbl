@@ -4,6 +4,7 @@
           scribble/manual
           racket/draw
           redex/private/enumerator
+          "cite.rkt"
           "enum-util.rkt"
           "util.rkt")
 
@@ -73,9 +74,8 @@ description of @racket[cons/e] that we did not use the classic Cantor
 pairing function for our bijection, which can be interpreted as a more
 triangular grid walk:@centered{@cantor-cons-pict[]}
 
-Instead we used another simple bijection that we refer to as "boxy"
-pairing, and called an "Elegant" pairing function in TODO CITATION
-NEEDED. The two bijections are quite similar, they are both quadratic
+Instead we use @citet[elegant-pairing-function]'s bijection,
+that we refer to as ``boxy'' pairing. The two bijections are quite similar, they are both quadratic
 functions with similar geometric interpretations: boxy traces out the
 edges of increasingly large squares and Cantor traces out the bottoms
 of increasingly large triangles. This point of view leads to obvious

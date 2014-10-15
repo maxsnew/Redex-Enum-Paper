@@ -221,3 +221,10 @@
    #:author (authors "Barton P. Miller" "Lars Fredriksen" "Bryan So")
    #:location (journal-location cacm #:volume 33 #:number 12)
    #:date 1990))
+
+(define elegant-pairing-function
+  (make-bib
+   #:title "An Elegant Pairing Function"
+   #:author "Matthew Szudzik"
+   #:url "http://szudzik.com/ElegantPairing.pdf"
+   #:date 2006))
