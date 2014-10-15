@@ -14,7 +14,7 @@
 
 (define (pair-pict) (box-cons-pict))
 (define (box-cons-pict) (grid cons/e 5 24 200 12))
-(define (cantor-cons-pict) (grid cantor-cons/e 5 12 200 12))
+(define (cantor-cons-pict) (grid cantor-cons/e 5 14 200 12))
 
 (define (cantor-cons/e e1 e2)
   (map/e (λ (xy) (cons (first xy) (second xy)))
