@@ -21,6 +21,30 @@
          (λ (x-y) (list (car x-y) (cdr x-y)))
          (cantor-list/e e1 e2)))
 
+(define (square x)(x . * . x))
+(define (weird-cons/e e1 e2)
+  (map/e (λ (n) 
+           (define flroot (integer-sqrt n))
+           (define p1 (n . - . (square flroot)))
+           (cons p1
+                 (flroot . - . (quotient (p1 . + . 1) 2))))
+         (λ (n)(error 'weird-cons-undefined))
+         nat/e))
+
+(define (search-invert f)
+  (λ (n)
+    (let/ec k
+      (for ([t (to-stream (cons/e nat/e nat/e))])
+        (when (equal? n (f t))
+          (k t))))))
+(define (exp-cons/e e1 e2)
+  (define (exp-pair xy)
+    (define x (car xy))
+    (define y (cdr xy))
+    (((expt 2 x) . * . ((2 . * . y) . + . 1)) . - . 1))
+  (map/e (search-invert exp-pair)
+         exp-pair
+         nat/e))
 (define (grid cons/e count num-points size arrow-head-size)
   (gen-grid cons/e count num-points size arrow-head-size #:arrows? #t))
 
