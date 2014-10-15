@@ -35,6 +35,8 @@
   "Frontiers of Combining Systems")
 (define icfp
   "International Conference on Functional Programming")
+(define iclp
+  "International Conference on Logic Programming")
 (define ciclops
   "International Colloquium on Implementation of Constraint Logic Programming Systems")
 (define tose
@@ -125,6 +127,13 @@
    #:author "Paul Tarau"
    #:date 2011
    #:location (proceedings-location ciclops)))
+
+(define inverting-cantor-n-tupling
+  (make-bib
+   #:title "Deriving a Fast Inverse of the Generalized Cantor N-tupling Bijection"
+   #:author "Paul Tarau"
+   #:date 2012
+   #:location (proceedings-location iclp)))
 
 (define small-scope-hypothesis
   (make-bib

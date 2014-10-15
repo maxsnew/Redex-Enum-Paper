@@ -1,0 +1,16 @@
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\[
+box\_pair(m, n) =
+\begin{cases} 
+  x^2+x+y &\mbox{if } x\ge y\\
+  x+y^2   &\mbox{if } x < y
+\end{cases}
+\]
+
+\[
+cantor\_tuple(n_1,n_2,\ldots,n_k) =
+  \binom{k-1+n_1+\cdots+n_k}{n}+\cdots+\binom{1+n_1+n_2}{2} + \binom{n_1}{1}
+  \]
+\end{document}
