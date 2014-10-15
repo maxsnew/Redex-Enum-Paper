@@ -115,39 +115,32 @@ procedure, and we found it too slow to use in practice.
 
 So how do we generalize boxy pairing to boxy tupling and how do we
 compute an efficient inverse? A geometric interpretation gives the
-answer. Every @raw-latex{$n$}-tuple whose maximal index is
-@raw-latex{$k$} gets mapped to a point on an outer face of an
-@raw-latex{$n$}-dimensional hypercube that whose side length is the
-@raw-latex{$n$\textsuperscript{th}} power of @raw-latex{$k$}. Then, to
-find where on the faces of that hypercube that the given tuple is, we
-bootstrap our pairing function with a pairing function for finite
-enumerations, and index into an enumeration of tuples of length
-@raw-latex{$n$} whose maximal value is @raw-latex{$k$}, which can be
-easily encoded using a version of @racket[list/e] that works for
-finite enumerations and @racket[disj-sum/e]. Then, to invert the
-bijection, we take a natural number @raw-latex{$m$} take its
-@raw-latex{$k$\textsuperscript{th}} root with remainder
-@raw-latex{$r$} and use @raw-latex{$r$} to index into our enumeration
-of tuples with maximal value
-@raw-latex{$\lfloor{\sqrt[k]{m}}\rfloor$}. Since we constructed that
-as an enumeration with existing combinators, we get definitions for
-both sides of the enumeration for free.
-
-@;{Todo: in the prev para put a picture of boxy-cons, but giving alternating colors to the different "layers"}
-@;{ Incorporate this example?
-We can invert the geometric process by finding what face on
-the n-dimensional object we've landed and then use an enumeration of
-the tuples on that face. For example, when we encode @racket[42] with
+answer. If we look back at the grid-walk describing @racket[cons/e] a
+pattern emerges, as the input indices grow, we trace out increasingly
+large squares. For example, when we encode @racket[42] with
 @racket[cons/e], we first take the square root with remainder, giving
-us a root of @racket[6] with a remainder of @racket[8] this tells us
-that the largest value in the tuple is indexed with @racket[6], so we
-index into an enumeration of tuples with maximum index @racket[6] with
-the value @racket[8], to give us the correct value. Then boxy
-generalizes by taking the nth root with remainder, while Cantor
-generalizes by taking what could be called the nth simplicial root
-with remainder. Efficient implementations of nth integer root are
-easily available, so we use them.
-}
+us a root of @racket[6] with a remainder of @racket[8]. This tells us
+that the larger value in the pair is @racket[6], and it's the
+@racket[8]th such pair. Then we construct an enumeration of pairs
+whose larger value is @racket[6], and index into that enumeration with
+@racket[8], giving us the pair @racket['(6 . 0)]. Then we can easily
+get the inverse transform by taking that pair, taking the maximum of
+@racket[6] and @racket[0] to get @racket[6], and then we use the other
+half of the enumeration of pairs above to find where in the
+enumeration of pairs with larger value @racket[6] this @racket['(6
+. 0)] is, and we find it is the @racket[8]th such pair. Then we square
+@racket[6] to get @racket[36] and finally add @racket[8] to get our
+original value of @racket[42].
+
+The key takeaway is that we find what "layer" a value is on and we
+bootstrap the implementation with existing implementations of
+@racket[cons/e] and @racket[disj-sum/e] for finite enumerations,
+giving us both halves of the layer enumeration in one fell
+swoop. Fortunately, unlike the Cantor pairing function, this is
+naturally generalized to an @raw-latex{$n$}-tupling function, by using
+the @raw-latex{$n$}th root and @raw-latex{$n$}th power intead of the
+square root and squaring. Otherwise the description is the same.
+
 @;{TODO: Consider putting before Fair Pairing}
 @section{Fair Union}
 The @racket{disj-sum/e}'s ...
