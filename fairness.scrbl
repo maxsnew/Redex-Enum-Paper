@@ -59,8 +59,24 @@ then the billionth element is
               1000000000))}, 
 which is much more balanced.
 
-We prefer fairness .....
-@;{TODO: Predictability/durability to changes, informed unfairness vs opaque unfairness}
+Fair combinators give us predictability for programs that
+use our enumerators. In Redex, our main application of
+enumeration combinators, fairness ensures that when a Redex
+programmer may makes an innocuous change to the grammar of
+the language (e.g. changing the relative order of two
+subexpressions in expression form) then the enumeration
+quality is not significantly affected. For example, consider
+an application expression. From the perspective of the
+enumerator, an application expression looks just like a list
+of expressions. An unfair enumerator might cause our
+bug-finding search to spend a lot of time generating
+different argument expressions and always using similar
+(simple, boring) function expressions. 
+
+Of course, the flip-side of this coin is that using unfair
+combinators can also improve the quality of the search in
+some cases, even over fair enumeration. ... we look for this
+... and need control ... explain more.
 
 @section{Fair Tupling}
 @;{Cantor vs Boxy}

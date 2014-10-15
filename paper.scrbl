@@ -63,6 +63,8 @@
  generation in short time-frames.
 }
 
+@include-section["intro.scrbl"]
+
 @include-section["combinators.scrbl"]
 
 @include-section["fairness.scrbl"]

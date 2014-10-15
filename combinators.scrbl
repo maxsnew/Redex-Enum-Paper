@@ -18,19 +18,9 @@
 
 @title[#:tag "sec:enum"]{Enumeration Combinators}
 
-This section introduces our enumeration library via examples, giving
-an overview of its capabilities and the basic structure of the 
-implementation. @Secref["sec:fair"] explains the concept of fairness
-in more detail and discusses why our combinators are fair. @Secref["sec:redex-enum"]
-explains how our combinators can be used to express arbitrary Redex patterns
-(and thus provide an enumeration for expressions in a calculus). @Secref["sec:experimental-setup"]
-discusses the experiments we ran to evaluate the enumerator as a
-counter-example generator and @secref["sec:results"] presents the results.
-@Secref["sec:related-work"] discusses related work and @secref["sec:conclusion"]
-concludes.
-
 Our enumeration library provides some basic enumerations and combinators
-to build up more complex ones. Our enumerators consist of three pieces:
+to build up more complex ones and this section gives an overview
+of the combinators. Each enumerator consist of three pieces:
 a @racket[to-nat] function that computes the index of anything in the enumeration,
 a @racket[from-nat] function that computes a value from an index, and a size
 of the enumeration, which can be either a natural number or @racket[+inf.0]. In addition,
