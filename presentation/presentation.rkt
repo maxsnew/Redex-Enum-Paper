@@ -5,16 +5,19 @@
          redex/private/enumerator
          slideshow/code
          "../enum-util.rkt"
-         "../results/plot.rkt"
+         ; "../results/plot.rkt"
          )
 
 (define (load-image f)
-  
   (bitmap (make-object bitmap% f)))
 (define (as-tt x)
   (tt (format "~a" x)))
 (slide (t "Enumerating Countable Sets for Property-Based Testing"))
-
+(define (cantor-cons/e e1 e2)
+  (map/e (λ (xy) `(,(first xy) . ,(second xy)))
+         (λ (xy) `(,(car xy)     ,(cdr xy)))
+         (cantor-list/e e1 e2)))
+(define boxy-cons/e cons/e)
 ;; Motivation
 (slide (t "First, a demo"))
 
