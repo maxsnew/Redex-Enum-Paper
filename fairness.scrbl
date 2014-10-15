@@ -8,36 +8,60 @@
           "util.rkt")
 
 @title[#:tag "sec:fair"]{Combinator Fairness}
-@section{Why Fairness?}
+
+A fair enumeration combinator is one that indexes into its
+given enumerators roughly equally, instead of indexing
+deeply into one and shallowly into a different one. For
+example, imagine we waned to build an enumerator for lists
+of length 4. This enumerator is one way to build it:
+@racketblock[(cons/e
+              nat/e
+              (cons/e
+               nat/e
+               (cons/e
+                nat/e
+                (cons/e
+                 nat/e
+                 (fin/e null)))))]
+Unfortunately, it is not fair. This is the 1,000,000,000th element,
+@code{@(format "~v"
+             (decode (cons/e
+                      nat/e
+                      (cons/e
+                       nat/e
+                       (cons/e
+                        nat/e
+                        (cons/e
+                         nat/e
+                         (fin/e null)))))
+                     1000000000))}
+and, as you can see, it has indexed far more deeply into the first
+@racket[nat/e] than the others. In contrast, if we balance the @racket[cons/e]
+expressions differently and use a @racket[map/e] to build the actual list:
+@racketblock[(map/e
+              (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))
+              (λ (l) (cons (cons (list-ref l 0) (list-ref l 1))
+                           (cons (list-ref l 4) (list-ref l 3))))
+              (cons/e
+               (cons/e nat/e nat/e)
+               (cons/e nat/e nat/e)))]
+then the billionth element is
+@tt{@(format "~v"
+             (decode 
+              (map/e
+               (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))
+               (λ (l) (cons (cons (list-ref l 0) (list-ref l 1))
+                            (cons (list-ref l 4) (list-ref l 3))))
+               (cons/e
+                (cons/e nat/e nat/e)
+                (cons/e nat/e nat/e)))
+              1000000000))}, 
+which is much more balanced.
+
+We prefer fairness .....
 @;{TODO: Predictability/durability to changes, informed unfairness vs opaque unfairness}
 
 @section{Fair Tupling}
-There are multiple natural ways to generalize pairs to n-ary
-tuples. Instead of constructing a new bijection function manually we
-could have used a combination of the @racket[cons/e] and
-@racket[map/e] combinators, giving confidence in its
-correctness. Indeed, if we only cared about producing correct
-bijections, this might be the best choice, however, for the purposes
-of test-case generation, the produced bijection is undesirable.
-
-@;{Verbatim moved from sec:enum}
-In particular, here are two different ways to make
-4-tuples of natural numbers:
-@(tabular (list (list (codeblock unfair-exp)
-                      (codeblock fair-exp))))
-
-After enumerating @code{@(number->string num-enumerated)} elements,
-the left-hand one has seen @max-unfair in one component but only
-@min-unfair in another, whereas the right-hand one has seen at most
-either @min-fair or @max-fair in all components. We refer to the
-right-hand version as being "fair" and always prefer fairness in our
-implementations, because it appears to correspond to the uniformity
-that is perceived as valuable with enumeration. In our experience,
-most of the time the obvious version of an enumerator is not fair and
-the details required to tweak it are non-intuitive. In this case, the
-key insight to achieve fairness is to map the leaves of the enumerated
-structure to the triangle numbers.
-
 @;{Cantor vs Boxy}
 @;{TODO: cite Wolfram Conference Elegant Pairing Function}
 @;{TODO: cite Tarau's n-tupling}
