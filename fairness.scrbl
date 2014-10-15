@@ -75,8 +75,20 @@ different argument expressions and always using similar
 
 Of course, the flip-side of this coin is that using unfair
 combinators can also improve the quality of the search in
-some cases, even over fair enumeration. ... we look for this
-... and need control ... explain more.
+some cases, even over fair enumeration. For example, when we
+are enumerating expressions that consist of a choice between
+variables and other kinds of expressions, we do not want to
+spend lots of time trying out different variables because most
+models are sensitive only to when variables differ from 
+each other, not their exact spelling. Accordingly unfairly
+biasing our enumerators away from different variables 
+can be win for finding bugs. Overall, however, it is important
+that we do have a fair set of combinators that correspond
+to the way that Redex programs are constructed and then when
+Redex programs are compiled into the combinators, the compilation
+can use domain knowledge about Redex patterns to selectively
+choose targeted unfairness, but still use fair combinators when it
+has no special knowledge.
 
 @section{Fair Tupling}
 @;{Cantor vs Boxy}
