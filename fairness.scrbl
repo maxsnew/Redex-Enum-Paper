@@ -46,7 +46,7 @@ expressions differently and use a @racket[map/e] to build the actual list:
                (cons/e nat/e nat/e)
                (cons/e nat/e nat/e)))]
 then the billionth element is
-@tt{@(format "~v"
+@code{@(format "~v"
              (decode 
               (map/e
                (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))

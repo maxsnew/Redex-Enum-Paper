@@ -14,6 +14,12 @@
                  #"\\savesymbol{iiint}\n"
                  #"\\usepackage{amsmath}\n"
                  
+                 ;; horrible hack to work around the fact that inconsolata in texlive 2013
+                 ;; doesn't have the straight quote character.
+                 #"\\savesymbol{textquotesingle}\n"
+                 #"\\newcommand{\\textquotesingle}{"
+                 #"\\fontfamily{cmtt}\\selectfont{}\\origtextquotesingle}\n"
+                 
                  ;; used for the table of the bugs
                  #"\\newcommand{\\ErrorDescriptionBox}[1]{"
                  #"\\begin{minipage}[t]{4in}#1\\end{minipage}}"))
