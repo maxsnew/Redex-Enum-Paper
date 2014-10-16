@@ -57,7 +57,7 @@ we added enumeration-based generation.
       +
       integer)
    (τ ::= int (τ → τ))
-   (x ::= variable))
+   (x ::= (variable-except ||)))
 
 
 To give a flavor for the new capability in Redex, consider
@@ -65,18 +65,8 @@ the float above, which contains a Redex program that defines
 the grammar of a simply-typed calculus plus numeric
 constants. With only this much written down, a Redex programmer can ask for
 first nine terms:
-@enum-example[(map/e (λ (i) 
-                       (define (replace-empty-var l)
-                         (cond
-                           [(pair? l) (cons (replace-empty-var (car l))
-                                            (replace-empty-var (cdr l)))]
-                           [(equal? l '||) 'a]
-                           [(equal? l 'a) 'b]
-                           [(and (symbol? l) (regexp-match? #rx"^[a-z]$" (symbol->string l)))
-                            ;; probably this needs to shift...?
-                            (error 'replace-empty-var "uhoh ~s" l)]
-                           [else l]))
-                       (replace-empty-var (generate-term L e #:i-th i)))
+@enum-example[(map/e (λ (i)
+                       (generate-term L e #:i-th i))
                      (λ (x) (error 'intro.scrbl "ack; dont' call this!"))
                      nat/e)
               9]
@@ -88,7 +78,7 @@ or the @(add-commas example-term-index)th term:
             (pretty-write example sp))
           (for/list ([line (in-lines (open-input-string
                                       (get-output-string sp)))])
-            (string-append (regexp-replace #rx"\u0011" line "q") "\n"))))
+            (string-append (regexp-replace #rx"\u0012" line "r") "\n"))))
 which takes only 10 or 20 milliseconds to compute.
 
 Thanks to our new library, we can randomly select large natural
@@ -119,7 +109,6 @@ time-frames, while the ad hoc random generator is more
 effective on long time-frames. Accordingly, the current
 implementation of Redex switches between generation modes
 based on the amount of time spent testing.
-
 Finally, @secref["sec:related-work"]
 discusses related work and @secref["sec:conclusion"]
 concludes.
