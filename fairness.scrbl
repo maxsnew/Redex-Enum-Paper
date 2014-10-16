@@ -65,10 +65,17 @@ just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using an
 the unfair @racket[(cons/e nat/e (cons/e nat/e nat/e))]
 and when using a fair tupling that combines three @racket[nat/e] 
-enumerators.
+enumerators. The x-coordinates of the plot correspond to the different
+values that appear in the tuples and the height of each bar is
+the number of times that particular number appeared when enumerating
+the first 1,000 tuples. As you can see, all three components have the
+same set of values for the fair tupling operation, but the first tuple
+element is considerably different from the other two when using the
+unfair combination.
 
 @figure*["fig:unfairness"
-         @list{??}
+         @list{Histograms of the occurrences of each natural number
+               in fair and unfair tuples}
          (parameterize ([plot-width 140]
                         [plot-height 140])
            (unfairness-histograms))]

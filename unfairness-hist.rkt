@@ -13,8 +13,8 @@
   (define unfair-hashes (build-hashes unfair))
   (define fair-hashes (build-hashes fair))
   (define-values (max-x max-y) (find-maxes unfair-hashes fair-hashes))
-  (vc-append (build-plots unfair-hashes max-x max-y #f #f)
-             (build-plots fair-hashes max-x max-y #t #t)))
+  (vc-append (build-plots fair-hashes max-x max-y #f #t)
+             (build-plots unfair-hashes max-x max-y #t #f)))
 
 (define (find-maxes v1 v2)
   (define max-x 0)
@@ -37,6 +37,7 @@
 
 (define (build-plots hashes max-x max-y x-labels? fair?)
   (apply hc-append
+         4
          (for/list ([x (in-vector hashes)]
                     [i (in-naturals)])
            (plot-one x max-x max-y
@@ -53,17 +54,25 @@
                          #f)))))
 
 (define (plot-one hash max-x max-y x-label y-label)
-  (plot-pict
-   #:x-max max-x
-   #:y-max max-y
-   #:x-label x-label
-   #:y-label y-label
-   (discrete-histogram
-    (sort
-     (for/list ([(k v) (in-hash hash)])
-       (vector k v))
-     < 
-     #:key (λ (x) (vector-ref x 0))))))
+  (parameterize ([plot-y-far-ticks no-ticks]
+                 [plot-x-ticks (linear-ticks)])
+    (plot-pict
+     #:x-max max-x
+     #:y-max max-y
+     #:x-label x-label
+     #:y-label y-label
+     (list
+      (parameterize ([plot-font-size 6])
+        (x-ticks (for/list ([x (in-range (+ max-x 1))]
+                            #:when (zero? (modulo x 4)))
+                   (tick (+ x .5) #t (format "~a" x)))))
+      (discrete-histogram
+       #:add-ticks? #f
+       (sort
+        (for/list ([(k v) (in-hash hash)])
+          (vector k v))
+        < 
+        #:key (λ (x) (vector-ref x 0))))))))
 
 (module+ main 
   (require slideshow)
