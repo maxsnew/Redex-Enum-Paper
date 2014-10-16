@@ -112,10 +112,6 @@ choose targeted unfairness, but still use fair combinators when it
 has no special knowledge.
 
 @section{Fair Tupling}
-@;{Cantor vs Boxy}
-@;{TODO: cite Wolfram Conference Elegant Pairing Function}
-@;{TODO: cite Tarau's n-tupling}
-@;{TODO: insert math formulae}
 @;{TODO: talk about finite vs infinite}
 
 The combinatorically-inclined reader may have noticed in our
@@ -137,7 +133,6 @@ lends itself to a more efficient implementation. To understand why, note
 that most combinatorics applications of pairing functions are chiefly
 concerned with one half of the bijection: the one from pairs of
 natural numbers to natural numbers.
-@;{TODO: see if I can make this prettier...}
 @centered{@raw-latex{$cantor\_pair(m, n) = \frac{(n+m)(n+m+1)}{2} + m$}}
 @centered{@raw-latex{$box\_pair(m, n) = \begin{cases} x^2+x+y &\mbox{if } x\ge y\\ x+y^2   &\mbox{if } x < y \end{cases}$}}
 
@@ -158,7 +153,7 @@ problem is that Diophantine equations are not generally solvable, we
 can easily define a highly inefficient (but correct) way to compute
 the inverse by trying every natural number, in order, applying the
 original @raw-latex{$cantor\_tuple$} function to see if it was the
-argument given. In @cite{interting-cantor-n-tupling}, they improve on
+argument given. In @citet[inverting-cantor-n-tupling], they improve on
 this implementation, but the algorithm there is still a search
 procedure, and we found it too slow to use in practice.
 
