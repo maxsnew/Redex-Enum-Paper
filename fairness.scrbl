@@ -4,6 +4,9 @@
           scribble/manual
           racket/draw
           redex/private/enumerator
+          plot
+          scriblib/figure
+          "unfairness-hist.rkt"
           "cite.rkt"
           "enum-util.rkt"
           "util.rkt")
@@ -57,7 +60,18 @@ then the billionth element is
                 (cons/e nat/e nat/e)
                 (cons/e nat/e nat/e)))
               1000000000))}, 
-which is much more balanced.
+which is much more balanced. This balance isn't specific to
+just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
+shows histograms for each of the components when using an
+the unfair @racket[(cons/e nat/e (cons/e nat/e nat/e))]
+and when using a fair tupling that combines three @racket[nat/e] 
+enumerators.
+
+@figure*["fig:unfairness"
+         @list{??}
+         (parameterize ([plot-width 140]
+                        [plot-height 140])
+           (unfairness-histograms))]
 
 Fair combinators give us predictability for programs that
 use our enumerators. In Redex, our main application of
