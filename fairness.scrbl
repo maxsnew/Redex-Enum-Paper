@@ -111,6 +111,21 @@ can use domain knowledge about Redex patterns to selectively
 choose targeted unfairness, but still use fair combinators when it
 has no special knowledge.
 
+@section{A Formal Definition of Fairness}
+We define an enumeration combinator to be a function whose arguments
+are enumerators and output is an enumerator.
+
+We say that an enumeration combinator @racket[c/e] is fair if, for
+every natural number @raw-latex{$m$}, there exists a natural number
+@raw-latex{$M > m$} and a multiset of natural numbers @raw-latex{S}
+such that when calling @racket[(decode (c/e e1 e2 e3 ...) i)] with
+every value of @raw-latex{$i$} from @raw-latex{$0$} to @raw-latex{$M$}
+every argument enumeration was called with exactly the natural numbers
+in @raw-latex{S}, that is, when enumerating all values from
+@raw-latex{$0$} to @raw-latex{$M$} in the result enumeration, every
+argument enumeration has been called with the same inputs, the same
+number of times.
+
 @section{Fair Tupling}
 @;{TODO: talk about finite vs infinite}
 
