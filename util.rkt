@@ -5,9 +5,13 @@
          racket/port
          rackunit)
 (provide raw-latex a-quote
+         texmath
          racketblock/define
          add-commas
          extract-pick-an-index)
+
+(define (texmath arg)
+  (raw-latex (string-append "$" arg "$")))
 
 (define (raw-latex . args)
   (element (style "relax" '(exact-chars))
