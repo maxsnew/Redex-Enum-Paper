@@ -13,8 +13,9 @@
   (define unfair-hashes (build-hashes unfair))
   (define fair-hashes (build-hashes fair))
   (define-values (max-x max-y) (find-maxes unfair-hashes fair-hashes))
-  (vc-append (build-plots fair-hashes max-x max-y #f #t)
-             (build-plots unfair-hashes max-x max-y #t #f)))
+  (vc-append 
+   (build-plots fair-hashes max-x max-y #f #t)
+   (build-plots unfair-hashes max-x max-y #t #f)))
 
 (define (find-maxes v1 v2)
   (define max-x 0)
@@ -38,6 +39,11 @@
 (define (build-plots hashes max-x max-y x-labels? fair?)
   (apply hc-append
          4
+         (text (format "Occurrences w/ ~a"
+                       (if fair? "Fair" "Unfair"))
+               'roman
+               10
+               (* pi 1/2))
          (for/list ([x (in-vector hashes)]
                     [i (in-naturals)])
            (plot-one x max-x max-y
@@ -48,10 +54,7 @@
                                     [(1) "second"]
                                     [(2) "third"]
                                     [else (error 'ack-unfairness)])))
-                     (if (= i 0)
-                         (format "Occurrences w/ ~a"
-                                 (if fair? "Fair" "Unfair"))
-                         #f)))))
+                     #f))))
 
 (define (plot-one hash max-x max-y x-label y-label)
   (parameterize ([plot-y-far-ticks no-ticks]

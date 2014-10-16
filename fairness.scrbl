@@ -76,8 +76,8 @@ unfair combination.
 @figure*["fig:unfairness"
          @list{Histograms of the occurrences of each natural number
                in fair and unfair tuples}
-         (parameterize ([plot-width 140]
-                        [plot-height 140])
+         (parameterize ([plot-width 135]
+                        [plot-height 135])
            (unfairness-histograms))]
 
 Fair combinators give us predictability for programs that
