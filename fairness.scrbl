@@ -254,8 +254,16 @@ naturally generalized to an @raw-latex{$n$}-tupling function, by using
 the @raw-latex{$n$}th root and @raw-latex{$n$}th power intead of the
 square root and squaring. Otherwise the description is the same.
 
-@;{TODO: Consider putting before Fair Pairing}
+@;{TODO: boxy-list/e is fair}
+We now prove that @racket[list/e], using the generalized boxy
+bijection, is fair.
+
+@;{TODO: triple/e is unfair}
+@;{TODO: cantor-list/e is fair}
+@;{TODO: prime factorized list/e is fair?} 
+
 @section{Fair Union}
+@;{TODO: write this section..}
 The @racket{disj-sum/e}'s ...
 The @racket[disj-sum/e] enumerator also has to be fair and
 to account for finite enumerations. So this
@@ -273,3 +281,6 @@ numbers:
 In general, this means that @racket[disj-sum/e] must track the
 ranges of natural numbers when each finite enumeration is exhausted
 to compute which enumeration to use for a given index.
+
+@;{TODO: disj-sum/e is fair}
+@;{TODO: (disj-sum/e (e_1 1?) ((disj-sum/e (e_2 2?) (e_3 3?)) (or 2? 3?)))}
