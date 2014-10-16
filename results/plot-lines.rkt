@@ -1,34 +1,35 @@
 #lang racket
 
 (require redex/benchmark/private/graph-data
-         plot/pict pict)
+         plot/pict pict
+         "process-data.rkt")
 
-(provide plot-from-directory)
+(provide plot-lines-from-directory
+         type-name->description)
 
-(module+
-    main
+(module+ main
   (require racket/cmdline)
   (command-line
    #:args (directory)
-   (plot-from-directory directory "line-plot.pdf")))
+   (plot-lines-from-directory directory "line-plot.pdf")))
 
-(define (plot-from-directory directory [output #f])
-  (define-values (d-stats _)
-    (process-data
-     (extract-data/log-directory directory)
-     (extract-names/log-directory directory)))
+(define (plot-lines-from-directory directory [output #f])
+  (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
+    (apply values (read-data-for-directory directory)))
   (parameterize ([plot-x-transform log-transform]
                  [plot-x-label "Time in Seconds"]
                  [plot-y-label "Number of Bugs Found"]
-                 [plot-width 600] 
-                 [plot-height 300]
+                 [plot-width 650] 
+                 [plot-height 400]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)])
     (if output
-        (plot-file (make-renderers d-stats)
+        (plot-file (make-renderers data-stats)
                    output
                    #:x-min 0.05)
-        (plot-pict (make-renderers d-stats)
-                   #:x-min 0.05))))
+        (rotate
+         (plot-pict (make-renderers data-stats)
+                    #:x-min 0.05)
+         (/ pi 2)))))
 
 (define line-styles
   (list 'solid 'dot 'long-dash
@@ -39,17 +40,20 @@
   
   ;; (listof (list/c type data))
   (define types+datas
-    (for/list ([(type avgs) (in-hash (sort-stats stats))]
-               [n (in-naturals)])
-      (define pts 
-        (for/fold ([l '()]) 
-          ([a (sort avgs <)]
-           [c (in-naturals)])
-          (cons (list a (add1 c))
-                (cons 
-                 (list a c) 
-                 l))))
-      (list type (reverse (cons (list max-t (/ (length pts) 2)) pts)))))
+    (sort
+     (for/list ([(type avgs) (in-hash (sort-stats stats))]
+                [n (in-naturals)])
+       (define pts 
+         (for/fold ([l '()]) 
+                   ([a (sort avgs <)]
+                    [c (in-naturals)])
+           (cons (list a (add1 c))
+                 (cons 
+                  (list a c) 
+                  l))))
+       (list type (reverse (cons (list max-t (/ (length pts) 2)) pts))))
+     symbol<?
+     #:key car))
   
   (unless (= 3 (length types+datas)) 
     (error 'plot-lines.rkt "ack: assuming that there are only three competitors"))
@@ -99,7 +103,13 @@
       ;#:width 2
       #:color ((type-colors) type)
       #:style (list-ref line-styles n)
-      #:label ((type-names) type)))))
+      #:label (type-name->description type)))))
+
+(define (type-name->description name)
+  (case name
+    [(grammar) "Ad Hoc Random Generation"]
+    [(ordered) "In-Order Enumeration"]
+    [(enum) "Uniform, Random Selection via Enumerators"]))
 
 (define (format-time number)
   (cond

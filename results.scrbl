@@ -1,8 +1,10 @@
 #lang scribble/base
 
-@(require ;; "results/plot.rkt"
+@(require "results/plot-lines.rkt"
+          "results/plot-points.rkt"
           "cite.rkt"
           scriblib/figure
+          racket/runtime-path
           (only-in pict scale))
 
 @title[#:tag "sec:results"]{Global Trends in Our Results}
@@ -13,21 +15,21 @@ Benchmark comes from various places, including
 @citet[list-machine]
 @citet[delim-cont-cont]
 
+@(define-runtime-path 10-14-14 "results/10-14-14")
 
-@;{
+@figure*["fig:benchmark-overview"
+         @list{The time each generator took to find the bugs, 
+               for each bug that the generator found; bars indicate
+               90% confidence intervals}
+         (plot-points-from-directory 10-14-14)]
+
 @figure*["fig:benchmark-lines"
-         @list{Random testing performance of in-order enumeration, 
-               random indexing into an enumeration,
-               and recursive generation from a grammar on 
-               a benchmark of Redex models.}
-         (line-plot-24hour)]
+         @list{Overview of random testing performance of ad hoc generation,
+               enumeration, and random indexing into an enumeration,
+               on a benchmark of Redex models.}
+         (plot-lines-from-directory 10-14-14)]
 
-@figure["fig:correlation"
-         @list{Scatter Plot Between Human Estimate of Complexity and
-               Random Generation Success Time in Seconds (Right-most column shows
-               bugs whose counterexamples were never found)}
-         (correlation-plot-24hour)]
-}
+
 Our primary concern with this study was to determine the
 relative merits of the three generation strategies. 
 @Figure-ref["fig:benchmark-lines"] shows our data with this
