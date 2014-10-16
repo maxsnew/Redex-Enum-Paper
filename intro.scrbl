@@ -13,8 +13,27 @@
 
 @title[#:tag "sec:intro"]{Introduction}
 
+@(element (style "relax" '(exact-chars)) '("~\\vspace{-.2in}"))
+
+@(compound-paragraph (style "wrapfigure" '())
+                     (list
+                      (paragraph (style #f '()) 
+                                 (list (element (style #f '(exact-chars)) '("{r}{1.7in}"))))
+                      (paragraph (style "vspace*" '()) 
+                                 (list (element (style #f '(exact-chars)) '("-.8in"))))
+                      @racketblock[(define-language L
+                                     (e ::= 
+                                        (e e)
+                                        (λ (x : τ) e)
+                                        x
+                                        +
+                                        integer)
+                                     (τ ::= int (τ → τ))
+                                     (x ::= variable))]
+                      (paragraph (style "vspace*" '()) 
+                                 (list (element (style #f '(exact-chars)) '("-.5in"))))))
 This paper reports on a new enumeration library that provides
-functions that can transform natural numbers into datastructures
+functions that transform natural numbers into datastructures
 in a way that supports property-based testing. Our primary
 application of this library is in Redex, a domain-specific
 programming language for operational semantics. Redex programmers
@@ -23,24 +42,45 @@ rules, type systems, etc., and properties that should hold for
 all programs in these languages that relate, say, the reduction
 semantics to the type system. Redex can then generate example
 programs and test the property, looking for counterexamples. Before
-this work, we largely relied on ad hoc random generation to generate
-candidate expressions but, inspired by Lazy Small Check@~cite[small-check]
-and FEAT@~cite[feat], we added enumeration-based generation.
+this work, we largely relied on an ad hoc random generator to find
+counterexamples but, inspired by the success of
+Lazy Small Check@~cite[small-check] and FEAT@~cite[feat], 
+we added enumeration-based generation.
 
 @(define example-term-index 100000000)
-To give a flavor for the new capability in Redex, here is a Redex program
-that defines the grammar of a simply-typed calculus plus numeric constants:
-@racketblock/define[(define-language L
-                      (e ::= 
-                         (e e)
-                         (λ (x : τ) e)
-                         x
-                         +
-                         integer)
-                      (τ ::= int (τ → τ))
-                      (x ::= variable-not-otherwise-mentioned))]
-With only this much written down, a Redex programmer can then ask for the 
-@(add-commas example-term-index)th term:
+
+@(define-language L
+   (e ::= 
+      (e e)
+      (λ (x : τ) e)
+      x
+      +
+      integer)
+   (τ ::= int (τ → τ))
+   (x ::= variable))
+
+
+To give a flavor for the new capability in Redex, consider
+the float above, which contains a Redex program that defines
+the grammar of a simply-typed calculus plus numeric
+constants. With only this much written down, a Redex programmer can ask for
+first nine terms:
+@enum-example[(map/e (λ (i) 
+                       (define (replace-empty-var l)
+                         (cond
+                           [(pair? l) (cons (replace-empty-var (car l))
+                                            (replace-empty-var (cdr l)))]
+                           [(equal? l '||) 'a]
+                           [(equal? l 'a) 'b]
+                           [(and (symbol? l) (regexp-match? #rx"^[a-z]$" (symbol->string l)))
+                            ;; probably this needs to shift...?
+                            (error 'replace-empty-var "uhoh ~s" l)]
+                           [else l]))
+                       (replace-empty-var (generate-term L e #:i-th i)))
+                     (λ (x) (error 'intro.scrbl "ack; dont' call this!"))
+                     nat/e)
+              9]
+or the @(add-commas example-term-index)th term:
 @(apply typeset-code
         (let ([sp (open-output-string)])
           (define example (generate-term L e #:i-th example-term-index))
@@ -51,25 +91,35 @@ With only this much written down, a Redex programmer can then ask for the
             (string-append (regexp-replace #rx"\u0011" line "q") "\n"))))
 which takes only 10 or 20 milliseconds to compute.
 
-Accordingly, thanks to our new library, we can select large random natural
-numbers and use them as a way to randomly select expressions for our property-based
-testing, as well as simply enumerating the first few thousand terms.
+Thanks to our new library, we can randomly select large natural
+numbers and use them as a way to generate expressions for our property-based
+testing. We can also simply enumerating the first few thousand terms
+and use those as inputs.
 
 The application of our combinators significantly influenced
-their design, leading us to a new concept for enumerators,
-which we dub ``fairness''. At the application level,
-fairness ensures that simple modifications to the Redex
-grammar do not significantly change the quality of the terms
-that the enumerator generates. We give a fuller
-discussion of fairness in @secref["sec:fair"], after introducing
-our library in @secref["sec:enum"].
-@Secref["sec:redex-enum"] connects our combinators to Redex
-in more detail, explaining how we can support arbitrary
-Redex patterns (as they go significantly beyond simple tree
-structures). To evaluate our combinator library, we tested
-it against the ad hoc random generator on a benchmark suite
-of Redex programs and report on the results in 
-@secref["sec:experimental-setup"] and 
-@secref["sec:results"]. @Secref["sec:related-work"]
+their design, leading us to put special emphasis on
+``fair'' enumerators. At the application level, fairness
+ensures that simple modifications to the Redex grammar do
+not significantly change the quality of the terms that the
+enumerator generates. We give a fuller discussion of
+fairness in @secref["sec:fair"], after introducing our
+library in @secref["sec:enum"]. @Secref["sec:redex-enum"]
+connects our combinators to Redex in more detail, explaining
+how we can support arbitrary Redex patterns (as they go
+significantly beyond simple tree structures). 
+
+To evaluate our combinator library, we conducted an
+empirical evaluation of its performance, as compared to the
+pre-existing ad hoc random generator. We compared them using
+a benchmark suite of Redex programs. We give a detailed
+report on the results in @secref["sec:experimental-setup"]
+and @secref["sec:results"], but the high-level takeaway is
+that our enumerators find more bugs per second in short
+time-frames, while the ad hoc random generator is more
+effective on long time-frames. Accordingly, the current
+implementation of Redex switches between generation modes
+based on the amount of time spent testing.
+
+Finally, @secref["sec:related-work"]
 discusses related work and @secref["sec:conclusion"]
 concludes.

@@ -13,6 +13,7 @@
                  #"\\savesymbol{iint}\n"
                  #"\\savesymbol{iiint}\n"
                  #"\\usepackage{amsmath}\n"
+                 #"\\usepackage{wrapfig}\n"
                  
                  ;; horrible hack to work around the fact that inconsolata in texlive 2013
                  ;; doesn't have the straight quote character.
@@ -21,8 +22,9 @@
                  #"\\fontfamily{cmtt}\\selectfont{}\\origtextquotesingle}\n"
                  
                  ;; used for the table of the bugs
-                 #"\\newcommand{\\ErrorDescriptionBox}[1]{"
-                 #"\\begin{minipage}[t]{4in}#1\\end{minipage}}"))
+                 #"\\newenvironment{IntroWrapFigure}"
+                 #"{\\begin{wrapfigure}{r}{4in}}"
+                 #"{\\end{wrapfigure}}\n"))
 
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   Practical, Fair, and Efficient Enumeration for Algebraic Data-Structures
