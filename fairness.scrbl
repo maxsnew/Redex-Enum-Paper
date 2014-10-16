@@ -255,8 +255,63 @@ the @raw-latex{$n$}th root and @raw-latex{$n$}th power intead of the
 square root and squaring. Otherwise the description is the same.
 
 @;{TODO: boxy-list/e is fair}
+@;{TODO: reference the racket source code for bounded-list/e}
+
 We now prove that @racket[list/e], using the generalized boxy
-bijection, is fair.
+bijection, is fair. The following is a function that takes a positive
+number @racket[k] and returns the decoding function the boxy bijection for @racket[k]-tuples specialized to natural numbers:
+
+@racketblock[(define (box-untuple k)
+               (λ (n)
+                 (define layer (integer-root n k)) ; floor of the kth root of n
+                 (define smallest (expt layer k))  ; layer^k
+                 (define layer/e (bounded-list/e k layer))
+                 (decode layer/e (- n smallest))))]
+                 
+Here @racket[bounded-list/e] is a function that takes a positive
+integer list length @racket[k] and a natural number bound
+@racket[layer] and returns an enumeration of lists of length
+@racket[k] that have a maximal value of @racket[layer]. For example the values of @racket[(bounded-list/e 3 2)] are
+
+@enum-example[(slice/e (list/e nat/e nat/e nat/e) 8 10000000000) 19]
+
+Since the elements of the enumerated lists are bounded by a specific
+number, @racket[bounded-list/e] always returns a finite enumeration,
+which we denote @racket[e]. Furthermore, enumerating every element of
+@racket[e] will use all of its arguments in exactly the same way since
+for any tuple @racket[(i_1 i_2 ... i_k)] in @racket[e], every
+permutation of that tuple is also in @racket[e], since it has the same
+maximum.
+
+With this lemma in hand, we prove that @racket[list/e] is fair by
+showing that for any infinite argument enumerations @racket[(e_1 e_2 ... e_k)]
+there is an infinite increasing sequence
+@texmath{(M_0,M_1,...)} of natural numbers such that for any
+@texmath{M_i} in the sequence, enumerating with all indices less than
+@texmath{M_i} in @racket[(list/e e_1 e_2 ... e_k)] calls all arguments
+@racket[e_j] with the same indices. This is sufficient to show that
+@racket[list/e] is fair since for any natural number @texmath{m} there
+is some @texmath{M_i > m} since @texmath{(M_0,M_1,...)} is infinite
+and increasing.
+
+Specifically, our sequence is the sequence of @texmath{k}th powers,
+that is @texmath{M_i = (i+1)^k}. We proceed by induction on
+@texmath{i}. For @texmath{i=0}, @texmath{M_0=1}, so we need only
+consider the value @racket[(decode (list/e e_1 e_2 ... e_k) 0)] which
+is exactly @racket[(list (decode e_1 0) (decode e_2 0) ... (decode e_k 0))],
+which calls all argument enumerations with the value @racket[0] and
+only @racket[0]. Next, assuming the theorem holds for all
+@texmath{M_i} with @texmath{i<l} we seek to prove it holds for
+@texmath{M_l}. We know the @racket[e_i] are called with the same
+arguments for the indices greater than or equal to @texmath{0} and
+less than @texmath{M_{l-1} = l^k} so we need only to show that the
+@racket[e_i] are called with the same arguments for indices greater
+than or equal to @texmath{l^k} and less than @texmath{(l+1)^k}. Those
+indices @texmath{j} are precisely the natural numbers for which
+@texmath{\lfloor\sqrt[k]{j}\rfloor = l} and thus together they fully
+enumerate the values of @racket[(bounded-list/e k l)], thus by our
+lemma, when called with those indices, the arguments @racket[e_i] are
+indexed with all the same indices. Thus indexing from @texmath{0} to @texmath{M_l} uses all @racket[e_i] equally, so by induction, @racket[list/e] is fair.
 
 @;{TODO: triple/e is unfair}
 @;{TODO: cantor-list/e is fair}
