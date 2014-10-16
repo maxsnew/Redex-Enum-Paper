@@ -49,6 +49,8 @@
   "International Conference on Certified Programs and Proofs")
 (define cacm
   "Communications of the ACM")
+(define tcs
+  "Theoretical Computer Science")
 
 (define sfp2009-kf
   (make-bib
@@ -242,3 +244,9 @@
    #:author "Matthew Szudzik"
    #:url "http://szudzik.com/ElegantPairing.pdf"
    #:date 2006))
+
+(define cantor-n-tupling
+  (make-bib
+   #:title "On arithmetical first-order theories allowing encoding and decoding of lists"
+   #:author (authors "Patrick Cegielski" "Denis Richard")
+   #:location (journal-location tcs #:volume 222 #:number "1-2")))
