@@ -39,7 +39,7 @@ until 24 hours elapses, whichever comes first.
 
 We used two identical 64 core AMD machines with Opteron
 6274s running at 2,200 MHz with a 2 MB L2 cache to run the
-bugs. Each machine has 64 gigabytes of memory. Our script
+benchmarks. Each machine has 64 gigabytes of memory. Our script
 runs each model/bug combination sequentially, although we
 ran multiple different combinations at once in parallel.
 We used the unreleased version 6.1.1.1 of Racket (of which
@@ -55,16 +55,16 @@ need a mechanism to pick a natural number. To do this, we
 first pick an exponent @raw-latex|{$i$}| in base 2 from the
 geometric distribution and then pick uniformly at random an
 integer that is between @raw-latex|{$2^{i-1}$}| and 
-@raw-latex|{$2^i$}|. We repeat this process three times for
+@raw-latex|{$2^i$}|. We repeat this process three times
 and then take the largest -- this helps make
 sure that the numbers are not always small.
 
-We chose distribution because it does not have a fixed mean.
+We choose this distribution because it does not have a fixed mean.
 That is, if you take the mean of some number of samples and
 then add more samples and take the mean again, the mean of
 the new numbers is larger than from the mean of the old. We
 believe this is a good property to have when indexing into
-our uniform distribution so as to avoid biasing our indicies
+our uniform distribution so as to avoid biasing our indices
 towards a small size.
 
 @figure*["fig:benchmark-lines"
@@ -117,17 +117,17 @@ found for each point in time. There are three lines on the
 plot showing how the total number of bugs found changes as
 time passes.
 
-The blue dashed line shows the performance of in-order
+The red dashed line shows the performance of in-order
 enumeration and it is clearly the winner in the left-hand
-side of the graph. The solid red line shows the performance
+side of the graph. The solid black line shows the performance
 of the ad hoc random generator and it is clearly the winner
 on the right-hand side of the graph, i.e. the longer
 time-frames.
 
 There are two crossover points marked on the graph with
-black dots. After 2 minutes, with 17 of the bugs found, the
+black dots. After 2 minutes, with 22 of the bugs found, the
 enumerator starts to lose and random selection from the
-uniform distribution starts to win until 7 minutes pass, at
+uniform distribution starts to win until 3 minutes pass, at
 which time the ad hoc generator starts to win and it never
 gives up the lead.
 
@@ -138,8 +138,8 @@ selection from the uniform distribution does win briefly, it
 does not hold its lead for long and there are no bugs that
 it finds that ad hoc generation does not also find.
 
-Although there are 43 bugs in the benchmark, no strategy was
-able to find more than 30 of them in a 24 hour period.
+Although there are 50 bugs in the benchmark, no strategy was
+able to find more than 37 of them in a 24 hour period.
 
 @Figure-ref["fig:benchmark-overview"] also shows that, for
 the most part, bugs that were easy (could be found in less
