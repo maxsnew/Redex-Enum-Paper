@@ -117,20 +117,43 @@ For this section we consider only infinite enumerations, since our
 notion of fairness necessitates indexing enumerations with arbitrarily
 large natural numbers.
 
-We define an enumeration combinator to be a function whose arguments
-are enumerators and output is an enumerator.
+We define an enumeration combinator @racket[c] to be a function whose
+arguments are enumerators and output is an enumerator. Precisely,
+@texmath{c : Enum(a_1) \cdots Enum(a_k) \to Enum(T(a_1,\cdots,a_k))}
+where @texmath{T} is a type-level function. From any purely functional
+enumeration we can extract 2 functions that fully define its
+bijection. The first,
+@texmath{args_c : \mathbb{N} \to ([\mathbb{N}],\ldots,[\mathbb{N}])}
 
-We say that an enumeration combinator @racket[c/e] is fair if, for
-every natural number @raw-latex{$m$}, there exists a natural number
-@raw-latex{$M > m$} and a multiset of natural numbers @raw-latex{S}
-such that when calling @racket[(decode (c/e e_1 e_2 ... e_k) i)] with
-every value of @raw-latex{$i$} greater than or equal to
-@raw-latex{$0$} and less than @raw-latex{$M$}, every argument
-enumeration was called with exactly the natural numbers in
-@raw-latex{S}.
+where the output tuple has length @texmath{k}, returns the
+@texmath{k}-tuple of lists of indices needed to index into the input
+enumerations when decoding from a given index. The second,
+@texmath{build_c : ([a_1],\ldots,[a_k]) \to T(a_1,\ldots,a_k)} is a
+function that is linear in its input arguments, ensuring that all of
+its inputs have to be used to construct the output. This function
+builds a value of the enumeration from components from the argument
+enumerations. Finally, these functions are related to the combinator
+by the rule that @racket[(decode (c e_1 ... e_k) i)] must be equal to
+@racketblock[(build_c (map (λ (i) (decode e_1 i)) is_1)
+                      ...
+                      (map (λ (i) (decode e_k i)) is_k))]
+where @racket[(is_1 ... is_k)] is @racket[(arg_c i)].
+
+We say that an enumeration combinator @racket[c] is fair if, for every
+natural number @raw-latex{$m$}, there exists a natural number
+@raw-latex{$M > m$} such that for every @texmath{h,j\in \{1,\ldots,k\},
+
+if apply @raw-latex{args_c} to every value greater than or equal to
+@texmath{0} and less than @texmath{M}, if you concatenate all of the
+lists in the @texmath{h}th column into a list @texmath{L_h} and in the
+@texmath{j}th column into a list @texmath{L_j} then @texmath{L_j} will
+be a permutation of @texmath{L_h}. In other words, when enumerating
+all values up to @raw-latex{$M$} in the result enumeration, all used
+values from argument enumerations will come from the same indices.
 
 We say an enumeration combinator is unfair if it is not fair.
 
+@;{TODO: update below explanation}
 The definition requires some unpacking. First, the fact that every
 argument was called with the same multiset of indices is saying that
 when enumerating all values from @raw-latex{$0$} to @raw-latex{$M$},

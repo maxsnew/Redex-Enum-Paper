@@ -13,6 +13,7 @@
                  #"\\savesymbol{iint}\n"
                  #"\\savesymbol{iiint}\n"
                  #"\\usepackage{amsmath}\n"
+                 #"\\usepackage{amsfonts}\n"
                  #"\\usepackage{wrapfig}\n"
                  
                  ;; horrible hack to work around the fact that inconsolata in texlive 2013
