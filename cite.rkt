@@ -249,4 +249,5 @@
   (make-bib
    #:title "On arithmetical first-order theories allowing encoding and decoding of lists"
    #:author (authors "Patrick Cegielski" "Denis Richard")
-   #:location (journal-location tcs #:volume 222 #:number "1-2")))
+   #:location (journal-location tcs #:volume 222 #:number "1-2")
+   #:date 1999))
