@@ -143,23 +143,31 @@ is some @texmath{M_i > m} since @texmath{(M_0,M_1,...)} is infinite
 and increasing.
 
 Specifically, our sequence is the sequence of @texmath{k}th powers,
-that is @texmath{M_i = (i+1)^k}. We proceed by induction on
-@texmath{i}. For @texmath{i=0}, @texmath{M_0=1}, so we need only
-consider the value @racket[(decode (list/e e_1 e_2 ... e_k) 0)] which
-is exactly @racket[(list (decode e_1 0) (decode e_2 0) ... (decode e_k 0))],
-which calls all argument enumerations with the value @racket[0] and
-only @racket[0]. Next, assuming the theorem holds for all
-@texmath{M_i} with @texmath{i<l} we seek to prove it holds for
-@texmath{M_l}. We know the @racket[e_i] are called with the same
-arguments for the indices greater than or equal to @texmath{0} and
-less than @texmath{M_{l-1} = l^k} so we need only to show that the
-@racket[e_i] are called with the same arguments for indices greater
-than or equal to @texmath{l^k} and less than @texmath{(l+1)^k}. Those
-indices @texmath{j} are precisely the natural numbers for which
-@texmath{\lfloor\sqrt[k]{j}\rfloor = l} and thus together they fully
-enumerate the values of @racket[(bounded-list/e k l)], thus by our
-lemma, when called with those indices, the arguments @racket[e_i] are
-indexed with all the same indices. Thus indexing from @texmath{0} to @texmath{M_l} uses all @racket[e_i] equally, so by induction, @racket[list/e] is fair.
+that is @texmath{M_i = (i+1)^k}. Let
+@texmath{h_1,h_2\in\{1,\ldots,k\}, representing two arbitrary argument
+enumerations. We proceed by induction on @texmath{i}. For
+@texmath{i=0}, @texmath{M_0=1}, so we need only consider the call
+@racket[(args 0)] which results in @racket[((0) ... (0))] so
+@texmath{L_{h_1}=L_{h_2}=[0]} i.e., both argument enumerations are
+used with the value @racket[0] and only @racket[0]. Next, assuming the
+theorem holds for all @texmath{M_i} with @texmath{i<l} we seek to
+prove it holds for @texmath{M_l}.
+
+If @texmath{L_{h_1}',L_{h_2}'} are the lists of @texmath{h_1,h_2}
+values resulting from calls to args for @texmath{0} up to
+@texmath{M_{l-1} - 1 = l^k - 1}, then by inductive hypothesis
+@texmath{L_{h_1}',L_{h_2}'} are permutations of each other. Then if we
+can show that the lists of @texmath{h_1,h_2} values from calls to args
+for @texmath{M_{l-1}=l^k} to @texmath{M_l-1=(l+1)^k-1} are
+permutations of each other, then we know that the @texmath{h_1,h_2}
+calls from @texmath{0} to @texmath{M_l-1} will be permutations of each
+other. Those indices @texmath{j} are precisely the natural numbers for
+which @texmath{\lfloor\sqrt[k]{j}\rfloor = l} and thus together they
+fully enumerate the values of @racket[(bounded-list/e k l)], thus by
+our lemma, when called with those indices, the @texmath{h_1,h_2}
+indices will be the same. Thus indexing from @texmath{0} to
+@texmath{M_l} uses all @racket[e_i] equally, so by induction,
+@racket[list/e] is fair.
 
 Now, let @racket[cantor-list/e] be a version of @racket[list/e] be a
 that uses the generalized Cantor
