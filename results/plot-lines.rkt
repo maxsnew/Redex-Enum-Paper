@@ -19,7 +19,7 @@
   (parameterize ([plot-x-transform log-transform]
                  [plot-x-label "Time in Seconds"]
                  [plot-y-label "Number of Bugs Found"]
-                 [plot-width 650] 
+                 [plot-width 630] 
                  [plot-height 400]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)])
     (if output

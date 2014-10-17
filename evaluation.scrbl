@@ -81,10 +81,12 @@ The precise algorithm we used is implemented in these functions:
 
 The random-selection results are quite sensitive to the
 probability of picking the zero exponent (the 
-@racket[prob-of-zero] argument). Because this method was
-our worst performing method, we empirically chose
+@racket[prob-of-zero] argument). Because this method was our
+worst performing method, we empirically chose
 benchmark-specific numbers in an attempt to maximize the
-success of the random uniform distribution method.
+success of the random uniform distribution method. Even with
+this artificial help, this method was still worse, overall
+than the other two.
 
 For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned
