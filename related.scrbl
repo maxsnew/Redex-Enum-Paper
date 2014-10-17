@@ -141,5 +141,9 @@ discusses random testing in the context of Redex. The other
 is entitled @italic{Making Random Judgments: Automatically
  Generating Well-Typed Terms from the Definition of a
  Type-System}. This paper has a less effective generator,
-but one that applies to all Redex models. The
-technical content is otherwise completely different.
+but one that applies to all Redex models, unlike the other paper
+which applies only to models with type systems. The technical
+content is otherwise completely different, specifically the
+the enumeration in this paper and the
+goal-directed search in the other paper
+are independent and complementary.
