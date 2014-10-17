@@ -52,8 +52,8 @@
                   (list a c) 
                   l))))
        (list type (reverse (cons (list max-t (/ (length pts) 2)) pts))))
-     symbol<?
-     #:key car))
+     <
+     #:key (λ (x) (hash-ref order (car x)))))
   
   (unless (= 3 (length types+datas)) 
     (error 'plot-lines.rkt "ack: assuming that there are only three competitors"))
@@ -105,6 +105,8 @@
       #:style (list-ref line-styles n)
       #:label (type-name->description type)))))
 
+(define order (hash 'grammar 0 'ordered 1 'enum 2))
+  
 (define (type-name->description name)
   (case name
     [(grammar) "Ad Hoc Random Generation"]

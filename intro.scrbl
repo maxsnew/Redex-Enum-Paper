@@ -102,13 +102,11 @@ To evaluate our combinator library, we conducted an
 empirical evaluation of its performance, as compared to the
 pre-existing ad hoc random generator. We compared them using
 a benchmark suite of Redex programs. We give a detailed
-report on the results in @secref["sec:experimental-setup"]
-and @secref["sec:results"], but the high-level takeaway is
-that our enumerators find more bugs per second in short
-time-frames, while the ad hoc random generator is more
-effective on long time-frames. Accordingly, the current
-implementation of Redex switches between generation modes
-based on the amount of time spent testing.
-Finally, @secref["sec:related-work"]
-discusses related work and @secref["sec:conclusion"]
-concludes.
+report on the results in @secref["sec:evaluation"], but the
+high-level takeaway is that our enumerators find more bugs
+per second in short time-frames, while the ad hoc random
+generator is more effective on long time-frames.
+Accordingly, the current implementation of Redex switches
+between generation modes based on the amount of time spent
+testing. Finally, @secref["sec:related-work"] discusses
+related work and @secref["sec:conclusion"] concludes.

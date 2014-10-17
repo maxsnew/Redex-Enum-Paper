@@ -14,6 +14,11 @@
   (parameterize ([type-names type-name->description]
                  [plot-width 450]
                  [plot-x-label #f]
+                 [type-symbols (λ (x)
+                                 (case x
+                                   [(grammar) 'triangle]
+                                   [(ordered) '5star]
+                                   [(enum) 'circle]))]
                  [plot-y-label "Average Number of Seconds to Find Bug"])
     (make-plot/data-stats/name-avgs data-stats name-avgs all-names
                                     max-non-f-value-from-list-ref-d2

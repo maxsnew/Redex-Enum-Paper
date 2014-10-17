@@ -73,9 +73,7 @@
 
 @include-section["redex-enumeration.scrbl"]
 
-@include-section["methodology.scrbl"]
-
-@include-section["results.scrbl"]
+@include-section["evaluation.scrbl"]
 
 @include-section["related.scrbl"]
 
