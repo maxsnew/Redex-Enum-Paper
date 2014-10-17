@@ -2,6 +2,7 @@
 @(require "util.rkt"
           "enum-util.rkt"
           scribble/manual
+          redex
           redex/reduction-semantics
           redex/private/enumerator
           racket/list
@@ -15,15 +16,24 @@ Redex provides the construct @racket[define-language]
 for specifying the grammar of a language. For example,
 this is the grammar for the simply-typed lambda calculus,
 augmented with a few numeric constants:
-@racketblock/define[(define-language L
-                      (e ::= 
-                         (e e)
-                         (λ (x : τ) e)
-                         x
-                         +
-                         integer)
-                      (τ ::= int (τ → τ))
-                      (x ::= variable-not-otherwise-mentioned))]
+@racketblock[(define-language L
+               (e ::= 
+                  (e e)
+                  (λ (x : τ) e)
+                  x
+                  +
+                  integer)
+               (τ ::= int (τ → τ))
+               (x ::= variable-not-otherwise-mentioned))]
+@(define-language L
+   (e ::= 
+      (e e)
+      (λ (x : τ) e)
+      x
+      +
+      integer)
+   (τ ::= int (τ → τ))
+   (x ::= (variable-except ||)))
 Enumerating members of @racket[e] can be done directly
 in terms of the combinators given in the previous section.
 Members of @racket[e] are a disjoint sum of products of
@@ -37,7 +47,7 @@ recursive references. For example, this is the
             (pretty-write example sp))
           (for/list ([line (in-lines (open-input-string
                                       (get-output-string sp)))])
-            (string-append (regexp-replace #rx"\u0011" line "q") "\n"))))
+            (string-append (regexp-replace #rx"\u0012" line "r") "\n"))))
 
 There are three patterns in Redex that require special care when enumerating.
 The first is repeated names. If the same meta-variable is used twice
@@ -77,21 +87,23 @@ with the actual terms, each placeholder gets a different element of
 the list.
 
 Generating a list without duplicates requires the @racket[dep/e] combinator
-and the @racket[except/e] combinator.  Here's how to generate lists of distinct naturals:
-@racketblock/define[(define (lon-without eles)
+and the @racket[except/e] combinator. For example, to generate lists of distinct naturals, we first define a helper function that takes as an argument a list of numbers to exclude
+@racketblock/define[(define (no-dups-without eles)
                       (fix/e (λ (lon/e)
                                (disj-sum/e 
                                 (cons (fin/e null) null?)
                                 (cons (dep/e 
                                        (except/e* nat/e eles)
                                        (λ (new)
-                                         (lon-without
+                                         (no-dups-without
                                           (cons new eles))))
                                       cons?)))))]
+@(define no-dups/e (no-dups-without '()))
 where @racket[except/e*] simply calls @racket[except/e] for each element of
-its input list. Here are the first @racket[12] elements of
-the @racket[(lon-without '())] enumeration:
-@enum-example[(lon-without '()) 12]
+its input list. We can then define @racket[(define no-dups/e (no-dups-without '()))]
+Here are the first @racket[12] elements of
+the @racket[no-dups/e] enumeration:
+@enum-example[no-dups/e 12]
 This is the only place where dependent enumeration is used in the
 Redex enumeration library, and the patterns used
 are almost always infinite, so we have not encountered degenerate performance
