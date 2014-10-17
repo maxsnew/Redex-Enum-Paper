@@ -314,7 +314,7 @@ lemma, when called with those indices, the arguments @racket[e_i] are
 indexed with all the same indices. Thus indexing from @texmath{0} to @texmath{M_l} uses all @racket[e_i] equally, so by induction, @racket[list/e] is fair.
 
 Now, let @racket[cantor-list/e] be a version of @racket[list/e] be a
-version of @racket[list/e] that uses the generalized Cantor
+that uses the generalized Cantor
 @texmath{n}-tupling bijection described above. We claim that
 @racket[cantor-list/e] is fair. We elide most details of the proof
 since it is almost exactly the same as the proof for boxy
@@ -326,10 +326,9 @@ traces out the outer face of increasingly large
 "root" of the input index and then using the remainder to index into a
 finite enumeration. In particular for @texmath{k} inputs, it takes the
 @texmath{k}-th simplicial root giving a root of @texmath{l} and
-remainder @texmath{r} uses @texmath{r} to index into an enumeration of
+remainder @texmath{r} then uses @texmath{r} to index into an enumeration of
 all lists of length @texmath{k} whose elements sum to @texmath{l}. And
-as with @racket[bounded-list/e], an enumeration of lists of a
-specified length that sum to the same value calls the arguments
+as with @racket[bounded-list/e], an enumeration of lists of length @texmath{k} that sum to the value @texmath{l}, when fully enumerated, calls the arguments
 @racket[e_i] with the same values. Thus we can show that there is an
 infinite increasing sequence @texmath{(M_0,M_1,...)} where indexing
 @texmath{0} to @texmath{M_i} uses all @racket[e_i] equally. For
