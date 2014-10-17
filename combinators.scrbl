@@ -72,6 +72,8 @@ of strings
 @enum-example[(disj-sum/e (cons nat/e number?)
                           (cons string/e string?))
               18]
+We generalize this combinator and describe it in detail in
+@secref["sec:fair"] as well.
               
 The combinator
 @racket[fix/e : (enum → enum) → enum] computes
@@ -116,16 +118,17 @@ enumerations of natural numbers that start at some point beyond zero:
                              (λ (x) (- x i))
                              nat/e))]
 
-Also, we can exploit the bijection in our enumerators to define the @racket[except/e]
-enumerator. It accepts an element and an enumeration, and returns one
-that doesn't have the given element. For example, the first
-22 elements of @racket[(except/e nat/e 13)] are
-@enum-example[(except/e nat/e 13) 22]
-The @racket[from-nat] function for @racket[except/e] simply calls @racket[to-nat]
-on the given element and then either subtracts one before
-passing the natural number along (if it is above the 
-given exception) or simply passes it along (if it is below). Similarly, the @racket[except/e]'s 
-@racket[to-nat] function calls the input enumerator's @racket[from-nat] function.
+Also, we can exploit the bidirectionality of our enumerators to define
+the @racket[except/e] enumerator. It accepts an element and an
+enumeration, and returns one that doesn't have the given element. For
+example, the first 22 elements of @racket[(except/e nat/e 13)] are
+@enum-example[(except/e nat/e 13) 22] The @racket[from-nat] function
+for @racket[except/e] simply uses the original enumerator's
+@racket[to-nat] on the given element and then either subtracts one
+before passing the natural number along (if it is above the given
+exception) or simply passes it along (if it is below). Similarly, the
+@racket[except/e]'s @racket[to-nat] function calls the input
+enumerator's @racket[to-nat] function.
 
 One important point about the combinators used so far: the
 decoding function is linear in the number of bits in the
