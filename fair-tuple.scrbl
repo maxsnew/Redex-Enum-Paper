@@ -114,6 +114,19 @@ for any tuple @racket[(i_1 i_2 ... i_k)] in @racket[e], every
 permutation of that tuple is also in @racket[e], since it has the same
 maximum.
 
+In order to show that @racket[list/e] is fair as we've defined it, we
+must define its @racket[args] and @racket[build]
+functions. @racket[args] is defined using the process above, which
+given an @racket[i] produces a list @racket[(i_1 ... i_k)] of indices
+with max @texmath{\lfloor i^{1/k}\rfloor} but to satisfy the type of
+@racket[args], it wraps each of those indices in a list to return
+@racket[((i_1)) ... ((i_k))], meaning that the enumeration produced by
+@racket[list/e] uses each of its argument enumerations once per
+decode. @racket[build] is defined as @racket[(define (build xs) (map first xs))],
+and it is linear since each of its arguments will only
+have one element in them since they were produced by the @racket[args]
+function.
+
 @;{TODO: add theorem styling}
 Theorem: @racket[list/e] is a fair combinator
 
