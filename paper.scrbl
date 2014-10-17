@@ -70,7 +70,7 @@
 
 @include-section["combinators.scrbl"]
 
-@include-section["fairness.scrbl"]
+@include-section["fair-intro.scrbl"]
 
 @include-section["redex-enumeration.scrbl"]
 
