@@ -13,21 +13,28 @@
 
 @title[#:tag "sec:fair"]{Combinator Fairness}
 
+@(define one-billion 1000000000)
+@(define fair-number-past-one-billion (* 1000 one-billion))
+@(unless (integer? (sqrt (sqrt fair-number-past-one-billion)))
+   (error 'ack! "not fair!"))
+@(define fair-four-tuple 
+   (map/e
+    (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))
+    (λ (l) (cons (cons (list-ref l 0) (list-ref l 1))
+                 (cons (list-ref l 4) (list-ref l 3))))
+    (cons/e
+     (cons/e nat/e nat/e)
+     (cons/e nat/e nat/e))))
+
 A fair enumeration combinator is one that indexes into its
 given enumerators roughly equally, instead of indexing
 deeply into one and shallowly into a different one. For
 example, imagine we waned to build an enumerator for lists
 of length 4. This enumerator is one way to build it:
-@racketblock[(cons/e
-              nat/e
-              (cons/e
-               nat/e
-               (cons/e
-                nat/e
-                (cons/e
-                 nat/e
-                 (fin/e null)))))]
-Unfortunately, it is not fair. This is the 1,000,000,000th element,
+@racketblock[(cons/e nat/e (cons/e nat/e 
+              (cons/e nat/e (cons/e nat/e 
+               (fin/e null)))))]
+Unfortunately, it is not fair. The @(add-commas one-billion)th element is
 @code{@(format "~v"
              (decode (cons/e
                       nat/e
@@ -38,31 +45,20 @@ Unfortunately, it is not fair. This is the 1,000,000,000th element,
                         (cons/e
                          nat/e
                          (fin/e null)))))
-                     1000000000))}
+                     one-billion))}
 and, as you can see, it has indexed far more deeply into the first
 @racket[nat/e] than the others. In contrast, if we balance the @racket[cons/e]
-expressions differently and use a @racket[map/e] to build the actual list:
-@racketblock[(map/e
-              (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))
-              (λ (l) (cons (cons (list-ref l 0) (list-ref l 1))
-                           (cons (list-ref l 4) (list-ref l 3))))
-              (cons/e
-               (cons/e nat/e nat/e)
-               (cons/e nat/e nat/e)))]
-then the billionth element is
-@code{@(format "~v"
-             (decode 
-              (map/e
-               (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))
-               (λ (l) (cons (cons (list-ref l 0) (list-ref l 1))
-                            (cons (list-ref l 4) (list-ref l 3))))
-               (cons/e
-                (cons/e nat/e nat/e)
-                (cons/e nat/e nat/e)))
-              1000000000))}, 
-which is much more balanced. This balance isn't specific to
+expressions like this:
+@racketblock[(cons/e
+              (cons/e nat/e nat/e)
+              (cons/e nat/e nat/e))]
+(and then were to use @racket[map/e] to adjust the elements of
+the enumeration to actually be lists), then the
+@(add-commas one-billion) element is
+@code{@(format "~v" (decode fair-four-tuple one-billion))},
+which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
-shows histograms for each of the components when using an
+shows histograms for each of the components when using
 the unfair @racket[(cons/e nat/e (cons/e nat/e nat/e))]
 and when using a fair tupling that combines three @racket[nat/e] 
 enumerators. The x-coordinates of the plot correspond to the different
@@ -79,6 +75,58 @@ unfair combination.
          (parameterize ([plot-width 135]
                         [plot-height 135])
            (unfairness-histograms))]
+
+The subtle point about fairness is that we cannot restrict 
+the combinators to work completely in lock-step on their argument
+enumerations, or else we would not admit @emph{any} pairing operation
+as fair. After all, a combinator that builds the pair
+of @racket[nat/e] with itself we must eventually produce the pair
+@racket['(1 . 4)], and that pair must come either before or
+after the pair @racket['(4 . 1)]. So if we insist that at
+every point in the enumeration that the combinator's result enumeration
+has used all of its argument enumerations equally, then pairing would
+be impossible. 
+
+Instead, we insist that there are infinitely many places in
+the enumeration where the combinators reach an equilibrium. That is,
+there are infinitely many points where the result of the combinator
+has used all of the argument enumerations equally.
+
+As a concrete example, consider the fair nested @racket[cons/e]
+described from the previous parargraph. As we saw, at the point @(add-commas one-billion),
+it was not at an equilibrium. But at @(add-commas (- fair-number-past-one-billion 1)),
+it produces 
+@code{@(format "~v" (decode fair-four-tuple (- fair-number-past-one-billion 1)))},
+and indeed it has indexed into each of the four @racket[nat/e] enumerations
+with the first @(add-commas (sqrt (sqrt fair-number-past-one-billion))) natural numbers.
+
+In general, it reaches an equilibrium point at every
+perfect fourth root and @racket[(cons/e nat/e nat/e)]
+reaches an equilibrium point at every perfect square. (The
+square diagram in @secref["sec:enum"] illustrate this.)
+
+@; ------------------------------------------------------------
+
+@bold{got to here}
+
+Then given any natural number @raw-latex{$m$}, we define
+@raw-latex{$M = (m+1)^2$}, and then when enumerating all values of
+@racket[(cons/e e_1 e_2)] less than @racket[M], we call each argument
+with every value between @raw-latex{$0$} and @raw-latex{$m$},
+@raw-latex{$m$} times. Instantiating @raw-latex{$m$} with @texmath{6},
+we see that for the indices @math{0} to @math{6}, we've used one side
+of the enumeration (the @texmath{y}-axis here) with slightly larger
+values than the other:
+
+@(centered (grid cons/e 5 6 200 12))
+
+But if we look at all the values up to @texmath{49=(6+1)^2} then we've
+both enumerations in the same way, making our walk here symmetric
+along the diagonal:
+
+@(centered (grid cons/e 7 48 200 12))
+
+@; ------------------------------------------------------------
 
 Fair combinators give us predictability for programs that
 use our enumerators. In Redex, our main application of
@@ -111,7 +159,8 @@ can use domain knowledge about Redex patterns to selectively
 choose targeted unfairness, but still use fair combinators when it
 has no special knowledge.
 
-@section{A Formal Definition of Fairness}
+
+@; ------------------------------------------------------------
 
 For this section we consider only infinite enumerations, since our
 notion of fairness necessitates indexing enumerations with arbitrarily
@@ -162,7 +211,7 @@ number of times. The usage of the value @raw-latex{$M$} in the
 definition allows combinators to favor certain argument enumerations
 for one value or several as long as fairness is again established
 after some finite number of steps. For instance @racket[disj-sum/e]
-has to use one of its arguments first, so it can't be fair "at every
+has to use one of its arguments first, so it cannot be fair "at every
 point", but when called with @raw-latex{$k$} arguments, it
 re-establishes fairness every @raw-latex{$k$} indices.
 
