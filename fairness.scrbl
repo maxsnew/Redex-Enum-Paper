@@ -493,7 +493,12 @@ are called with the same value. Thus @racket[disj-sum/e] is fair.
 Theorem: @racket[union-three/e] is unfair.
 
 Proof.
-We use the following equivalent definition for the decoding function of @racket[(union-three/e (cons e_1 1?) (cons e_2 2?) (cons e_3 3?))]:
+First, we define @racket[union/e] to be the resulting enumeration from
+a call to
+@racket[(union-three/e (cons e_1 1?) (cons e_2 2?) (cons e_3 3?))].
+We use the following equivalent definition for the decoding function
+of @racket[union/e]:
+
 @racketblock[(define (decode-three i)
                (define (q r) (quotient/remainder i 3))
                (match r
@@ -503,24 +508,22 @@ We use the following equivalent definition for the decoding function of @racket[
                  
 Now we will show that, similarly to the proof that @racket[triple/e]
 is unfair, for any @texmath{n > 4} there is an @texmath{i < n} and
-@texmath{h} such that
-@racket[(decode (union-three/e (cons e_1 1?) (cons e_2 2?) (cons e_3 3?)) i)]
-is equal to @racket[(decode e_1 h)] but there is no
-@texmath{j} such that
-@racket[(decode (union-three/e (cons e_1 1?) (cons e_2 2?) (cons e_3 3?)) j)]
-is @racket[(decode e_2 h)]. In other
+@texmath{h} such that @racket[(decode union/e i)] is equal to
+@racket[(decode e_1 h)] but there is no @texmath{j} such that
+@racket[(decode union/e j)] is @racket[(decode e_2 h)]. In other
 words, for any @texmath{n > 4}, when enumerating all values of
-@racket[(union-three/e (cons e_1 1?) (cons e_2 2?) (cons e_3 3?))]
-from @racket[0] to @racket[n], @racket[e_1] has been called with an
-index with which @racket[e_2] has not been called.
+@racket[union/e] from @racket[0] to @racket[n], @racket[e_1] has been
+called with an index with which @racket[e_2] has not been called.
 
 This relies on two basic properties of @racket[decode-three]. First,
 that when enumerating all indices @racket[0] to @racket[n],
 @racket[e_1] has been called with the index @texmath{\lfloor n/2\rfloor}.
-Second, that when enumerating all indices @racket[0] to
-@racket[n], @racket[e_2] has been called with indices that are all
-less than or equal to @texmath{\lfloor(\lfloor n/2\rfloor)/2\rfloor}.
-Both of these properties are direct from the
-definition of @racket[decode-three]. Then, we note that for @texmath{n>4},
-@texmath{n - (\lfloor n/2\rfloor) > 2} so for @texmath{n>4}, @texmath{\lfloor(\lfloor n/2\rfloor)/2\rfloor < \lfloor n/2\rfloor} so the largest value indexed into @racket[e_1] has not been used to index into @racket[e_2]. Thus @racket[decode-three] is unfair.
-
+Second, that when enumerating all indices @racket[0] to @racket[n],
+@racket[e_2] has been called with indices that are all less than or
+equal to @texmath{\lfloor(\lfloor n/2\rfloor)/2\rfloor}.  Both of
+these properties are direct from the definition of
+@racket[decode-three]. Then, we note that for @texmath{n>4},
+@texmath{n - (\lfloor n/2\rfloor) > 2} so for @texmath{n>4},
+@texmath{\lfloor(\lfloor n/2\rfloor)/2\rfloor < \lfloor n/2\rfloor} so
+the largest value indexed into @racket[e_1] has not been used to index
+into @racket[e_2]. Thus @racket[decode-three] is unfair.
