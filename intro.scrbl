@@ -83,7 +83,7 @@ which takes only 10 or 20 milliseconds to compute.
 
 Thanks to our new library, we can randomly select large natural
 numbers and use them as a way to generate expressions for our property-based
-testing. We can also simply enumerating the first few thousand terms
+testing. We can also simply enumerate the first few thousand terms
 and use those as inputs.
 
 The application of our combinators significantly influenced
