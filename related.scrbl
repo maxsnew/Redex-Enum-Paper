@@ -27,33 +27,35 @@ this is challenging because of the way each pairing of an element on
 the left with a set on the right consumes an unpredictable number of
 positions in the enumeration.
 
-@citet[feat]'s 
-Feat is a system for enumeration that distinguishes itself from
-``list'' perspectives on enumeration by focusing on the ``function''
-perspective. We use the ``function'' perspective as well. While our
-approach is closer to Tarau's, we share support for finite sets with
-Feat, but are distinct from Feat in our support for dependent pairing
-and fairness. Also, Feat has only one half of the bijection and thus
-cannot support @racket[except/e] (and thus cannot easily support
-identifiers that contain all strings, except without a small set of keywords).
-@citet[scife] is similar to Feat and, like Feat, does not support 
+@citet[feat]'s Feat is a system for enumeration that distinguishes
+itself from ``list'' perspectives on enumeration by focusing on the
+``function'' perspective. We use the ``function'' perspective as
+well. While our approach is closer to Tarau's, we share support for
+finite sets with Feat, but are distinct from Feat in our support for
+dependent pairing and fairness. Also, Feat has only one half of the
+bijection and thus cannot support @racket[except/e] (and thus cannot
+easily support identifiers that contain all strings, except without a
+small set of keywords).  @citet[scife] is similar to Feat, but with
+the addition of a dependent combinator. Like Feat, it does not support
 @racket[except/e] or fairness.
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages
-responding to an interactive question-and-answer game. 
+responding to an interactive question-and-answer game. This method also allows them to define an analagous dependent combinator.
 However, details of their system show that it is not well suited to
 using large indexes. In particular, the strongest proof they have is that if a
 game is total and proper, then ``every bitstring encodes some value or
 is the prefix of such a bitstring''. This means, that even for total,
 proper games there are some bitstrings that do not
-encode a value. As such, it cannot be used to enumerate all
+encode a value. As such, it cannot be used efficiently to enumerate all
 elements of the set being encoded.
 
-@citet[bit-monad-transformers] explicitly discuss fairness,
-but have a much stricter notion than we do and one that is
-not generalized to n-ary fair operators (neither do they
-provide any n-ary fair operators).
+@citet[bit-monad-transformers] explicitly discuss fairness in the
+context of logic programming, but talk about it in the specific cases
+of fair disjunction and fair conjunction (analagous to our
+@racket[disj-sum/e] and @racket[cons/e]), but they do not have a
+unification of these two different types of fairness, nor do they have
+a concept of n-ary fair operators, only binary.
 
 @section{Testing Studies}
 
