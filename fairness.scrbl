@@ -313,16 +313,13 @@ enumerate the values of @racket[(bounded-list/e k l)], thus by our
 lemma, when called with those indices, the arguments @racket[e_i] are
 indexed with all the same indices. Thus indexing from @texmath{0} to @texmath{M_l} uses all @racket[e_i] equally, so by induction, @racket[list/e] is fair.
 
-@;{TODO: triple/e is unfair}
-@;{TODO: cantor-list/e is fair}
-
 Now, let @racket[cantor-list/e] be a version of @racket[list/e] be a
 version of @racket[list/e] that uses the generalized Cantor
 @texmath{n}-tupling bijection described above. We claim that
 @racket[cantor-list/e] is fair. We elide most details of the proof
 since it is almost exactly the same as the proof for boxy
 @racket[list/e]. First, we note that as described in
-@citet{cantor-n-tupling}, the Cantor tupling bijection works in a
+@citet[cantor-n-tupling], the Cantor tupling bijection works in a
 similar way to the boxy bijection, that is, for @texmath{k} inputs it
 traces out the outer face of increasingly large
 @texmath{k}-simplices. This means it can be computed by taking a
@@ -339,6 +336,39 @@ infinite increasing sequence @texmath{(M_0,M_1,...)} where indexing
 @texmath{k} arguments, @texmath{M_i = \binom{i+k-1}{k}}, the
 @texmath{i}th @texmath{k}-simplicial number. The proof is then
 precisely analagous to the proof for boxy @racket[list/e].
+
+Now we prove that @racket[triple/e], as defined at the beginning of
+this section, is unfair. To do this we must show that there is a
+natural number @texmath{M} such that for every @texmath{m > M}, the
+multiset of calls to the argument enumerations @racket[e_i] are
+different. Specifically we will show that for all natural numbers
+greater than @texmath{4}, the multiset of calls to the first argument
+@racket[e_1] contains an index greater than any found in the multisets
+for @racket[e_2] and @racket[e_3].
+
+First we establish some elementary properties of @racket[cons/e],
+defined using the boxy bijection on 2 enumerations. First, for any
+natural number @texmath{i}, there exist @texmath{i_1}, @texmath{i_2}
+such that @racket[(decode (cons/e e_1 e_2) i_1)] is equal to
+@racket[(cons (decode e_1 i_1) (decode e_2 i_2))] and
+@texmath{i_1,i_2 \le \lfloor\sqrt{i}\rfloor}. This is a direct consequence of the
+definition of the boxy bijection, which is defined by taking the floor
+of the square root of @texmath{i} and then producing a pair whose max
+is @texmath{\lfloor\sqrt{i}\rfloor}. Next, for any natural number
+@texmath{i}, @racket[(decode (triple/e e_1 e_2 e_3) (* i i))] is equal
+to @racket[(cons (decode e_1 i) (cons (decode e_2 0) (decode e_3
+0)))], This is a direct usage of the definition, assuming the
+enumeration produced by @racket[bounded-list/e] produces this value
+first (as our implementation does). Thus for any natural number
+@texmath{i}, enumerating all values from @texmath{0} to @texmath{i},
+@racket[e_1] has been called with @texmath{\lfloor\sqrt{i}\rfloor}
+while for any @texmath{j} with which @racket[e_2] and @racket[e_3]
+have been called, @texmath{j \le \lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}.
+Then we note that if
+@texmath{i > 4}, then @texmath{\lfloor\sqrt{i}\rfloor < i}, so
+@texmath{\lfloor\sqrt{\lfloor\sqrt{i}\rfloor} < \lfloor\sqrt{i}\rfloor} and thus @racket[e_1] has been called with a
+value greater than any value @racket[e_2] or @racket[e_3] have been
+called with and thus @racket[triple/e] is unfair.
 
 @;{TODO: prime factorized list/e is fair?} 
 
