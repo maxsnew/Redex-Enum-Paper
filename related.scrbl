@@ -135,3 +135,11 @@ Of course, the reason Quickcheck and Redex find these bugs
 is because the distribution they use for integers is biased
 towards small integers, which is natural as those integers
 are usually more likely to be interesting during testing.
+
+This paper is one of two papers submitted to ESOP that
+discusses random testing in the context of Redex. The other
+is entitled @italic{Making Random Judgments: Automatically
+ Generating Well-Typed Terms from the Definition of a
+ Type-System}. This paper has a less effective generator,
+but one that applies to all Redex models. The
+technical content is otherwise completely different.
