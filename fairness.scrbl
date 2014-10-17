@@ -349,7 +349,7 @@ for @racket[e_2] and @racket[e_3].
 First we establish some elementary properties of @racket[cons/e],
 defined using the boxy bijection on 2 enumerations. First, for any
 natural number @texmath{i}, there exist @texmath{i_1}, @texmath{i_2}
-such that @racket[(decode (cons/e e_1 e_2) i_1)] is equal to
+such that @racket[(decode (cons/e e_1 e_2) i)] is equal to
 @racket[(cons (decode e_1 i_1) (decode e_2 i_2))] and
 @texmath{i_1,i_2 \le \lfloor\sqrt{i}\rfloor}. This is a direct consequence of the
 definition of the boxy bijection, which is defined by taking the floor
