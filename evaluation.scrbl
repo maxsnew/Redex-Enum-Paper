@@ -10,7 +10,7 @@
           racket/runtime-path
           (only-in pict scale))
 
-@(define-runtime-path 10-14-14 "results/10-14-14")
+@(define-runtime-path 10-17-14 "results/10-17-14")
 
 @title[#:tag "sec:evaluation"]{Empirical Evaluation}
 
@@ -71,7 +71,7 @@ towards a small size.
          @list{Overview of random testing performance of ad hoc generation,
                enumeration, and random indexing into an enumeration,
                on a benchmark of Redex models.}
-         (plot-lines-from-directory 10-14-14)]
+         (plot-lines-from-directory 10-17-14)]
 
 
 The precise algorithm we used is implemented in these functions:
@@ -108,7 +108,7 @@ distribution is different.
          @list{The mean time each generator takes to find the bugs,
                for each bug that some generator found; bars indicate
                90% confidence intervals}
-         (plot-points-from-directory 10-14-14)]
+         (plot-points-from-directory 10-17-14)]
 
 @Figure-ref["fig:benchmark-lines"] shows a high-level view
 of our results. Along its x-axis is time in seconds in a log
