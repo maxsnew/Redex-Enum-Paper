@@ -1,7 +1,10 @@
 #lang racket
 (require redex/private/enumerator
          pict
-         scribble/manual)
+         scribble/manual
+         rackunit)
+
+(require/expose redex/private/enumerator (float/e char/e))
 
 (provide pair-pict cantor-cons-pict
          grid gen-grid
@@ -11,6 +14,108 @@
          enum-example
          except/e*
          fin/e)
+
+(define (disj-sum-pict/good)
+  (gen-table disj-sum/e 8 24 40 12 #:arrows? #t))
+
+(define (disj-sum-pict/bad)
+  (define (bad-disj-sum/e a b c)
+    (disj-sum/e a
+                (cons (disj-sum/e b c)
+                      (λ (x) (or (char? x) (flonum? x))))))
+  (gen-table bad-disj-sum/e 12 24 40 6 #:arrows? #t))
+
+(define (gen-table disj-sum/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows?)
+  (define x-count 3)
+  (define width (* size-per-cell x-count))
+  (define height (* size-per-cell y-count))
+  (define prs 
+    (disj-sum/e (cons nat/e exact-integer?) 
+                (cons char/e char?)
+                (cons float/e flonum?)))
+  (define base
+    (dc (λ (dc dx dy)
+          #;
+          (for ([i (in-range 1 x-count)])
+            (send dc draw-line 
+                  (+ dx (* i size-per-cell))
+                  dy
+                  (+ dx (* i size-per-cell))
+                  (+ dy height)))
+          #;
+          (for ([i (in-range 1 y-count)])
+            (send dc draw-line 
+                  dx
+                  (+ dy (* i size-per-cell))
+                  (+ dx width)
+                  (+ dy (* i size-per-cell))))
+          (void))
+        width
+        height))
+  (hb-append
+   (apply 
+    vc-append
+    (for/list ([i (in-range y-count)])
+      (cc-superimpose 
+       (blank 0 size-per-cell)
+       (blank))))
+   (vc-append
+    (apply 
+     hc-append
+     (for/list ([i (in-list (list "nat?" "char?" "float?"))])
+       (define txt (text (format "~a" i)))
+       (cc-superimpose (blank size-per-cell 0)
+                       (refocus
+                        (hbl-append
+                         txt
+                         (blank))
+                        txt))))
+    
+    (let loop ([i 0]
+               [pict base])
+      (cond
+        [(= i num-points) pict]
+        [else
+         (define (i->xy v k)
+           (define i
+             (match v
+               [(? exact-integer?) 0]
+               [(? char?) 1]
+               [(? flonum?) 2]))
+           (define j
+             (match v
+               [(? exact-integer?) (encode nat/e v)]
+               [(? char?) (encode char/e v)]
+               [(? flonum?) (encode float/e v)]))
+           (values (* (+ i .5) size-per-cell)
+                   (* (+ j .5) size-per-cell)))
+         (define this (decode prs i))
+         (define next (decode prs (+ i 1)))
+         (define-values (x1 y1) (i->xy this i))
+         (define-values (x2 y2) (i->xy next (+ i 1)))
+         (define this-p 
+           (text (~a #:max-width 6 this)))
+         (define index-p (text (format "~a" i)))
+         (define index this-p)
+         (define pict+index
+           (pin-over pict
+                     (- x1 (/ (pict-width index) 2))
+                     (- y1 (/ (pict-height index) 2))
+                     index))
+         (loop (+ i 1)
+               (if arrows?
+                   (pin-arrow-line
+                    #:color "blue"
+                    #:alpha 0.5
+                    #:under? #t
+                    arrow-head-size
+                    pict+index
+                    pict+index
+                    (λ (a b) (values x1 (+ y1 (pict-height index))))
+                    pict+index
+                    (λ (a b) (values x2 (+ y2 (pict-height index)))))
+                   pict+index))])))))
+
 
 (define (pair-pict) (box-cons-pict))
 (define (box-cons-pict) (grid cons/e 5 24 200 12))
@@ -141,7 +246,7 @@
               (cons/e
                nat/e
                nat/e)))))
-  
+
 (define num-enumerated 4000)
 (define (count-em enum)
   (map (λ (x) (apply max x)) 
@@ -151,7 +256,7 @@
 (define fair-cons (count-em fair/e))
 (define (render-fair/unfair max/min which)
   (code (number->string (apply max/min which))))
-  
+
 (define max-unfair (render-fair/unfair max unfair-cons))
 (define min-unfair (render-fair/unfair min unfair-cons))
 (define max-fair (render-fair/unfair max fair-cons))
@@ -185,7 +290,7 @@
                                 "    "))
                               "\n")
                (loop (drop/min strs columns)))])))
-
+  
   ;; this drops leading quotes, which doesn't seem good
   ;; because the line-breaking code above counts the leading
   ;; quotes. Should really reconcile theses two
