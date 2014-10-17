@@ -7,6 +7,7 @@
 (require/expose redex/private/enumerator (float/e char/e))
 
 (provide pair-pict cantor-cons-pict
+         disj-sum-pict/good disj-sum-pict/bad
          grid gen-grid
          unfair-exp fair-exp num-enumerated
          max-unfair min-unfair max-fair min-fair
@@ -23,7 +24,7 @@
     (disj-sum/e a
                 (cons (disj-sum/e b c)
                       (λ (x) (or (char? x) (flonum? x))))))
-  (gen-table bad-disj-sum/e 12 24 40 6 #:arrows? #t))
+  (gen-table bad-disj-sum/e 8 16 40 6 #:arrows? #t))
 
 (define (gen-table disj-sum/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows?)
   (define x-count 3)
@@ -62,7 +63,7 @@
    (vc-append
     (apply 
      hc-append
-     (for/list ([i (in-list (list "nat?" "char?" "float?"))])
+     (for/list ([i (in-list (list "nat?" "sym?" "float?"))])
        (define txt (text (format "~a" i)))
        (cc-superimpose (blank size-per-cell 0)
                        (refocus
