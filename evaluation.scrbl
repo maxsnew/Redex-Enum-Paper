@@ -23,7 +23,7 @@ from a uniform distribution, and ad hoc random generation.
 The full benchmark consists of a number of models, including
 the Racket virtual machine model@~cite[racket-virtual-machine],
 a polymorphic λ-calculus used for random testing in other 
-work@~cite[palka-workshop], the list machine 
+work@~cite[palka-workshop generating-random-lambda-terms], the list machine 
 benchmark@~cite[list-machine], and a delimited continuation 
 contract model@~cite[delim-cont-cont], as well as a few models
 we built ourselves based on our experience with random generation

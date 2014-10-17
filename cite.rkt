@@ -67,6 +67,20 @@
    #:location (proceedings-location popl)
    #:date 2012))
 
+(define scife
+  (make-bib
+   #:author (authors "Ivan Kuraj" "Viktor Kuncak")
+   #:title "SciFe: Scala Framework for Efficient Enumeration of Data Structures with Invariants"
+   #:date 2014
+   #:location (proceedings-location "Scala Workshop")))
+
+(define bit-monad-transformers
+  (make-bib
+   #:title "Backtracking, Interleaving, and Terminating Monad Transformers"
+   #:author (authors "Oleg Kiselyov" "Chung-chieh Shan" "Daniel P. Friedman" "Amr Sabry")
+   #:location (proceedings-location icfp)
+   #:date 2005))
+
 
 (define delim-cont-cont
   (make-bib
