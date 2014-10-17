@@ -391,14 +391,59 @@ called with and thus @racket[triple/e] is unfair.
 
 @section{Fair Union}
 @;{TODO: write this section..}
-The @racket{disj-sum/e}'s ...
-The @racket[disj-sum/e] enumerator also has to be fair and
-to account for finite enumerations. So this
+
+Next we turn to @racket[disj-sum/e], the operation corresponding to the
+union of several enumerators.
+Recall that the arguments for @racket[disj-sum/e] are not just enumerators, but pairs
+consisting of an enumerator and a predicate to that returns true if a
+value is in that enumerator, in line with the Racket convention of
+using untagged union types. We will denote a call to
+@racket[disj-sum/e] with @racket[k] arguments by
+@racket[(disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?))]
+where given that @racket[x] is in one of the @racket[e_i], @racket[(1? x)] is true if there is some index @racket[i] such that @racket[(decode e_1 i)] is @racket[x].
+
+@racket[disj-sum/e] is relatively easy to define fairly. Given two infinite argument enumerations, we can simply alternate between one and the other, so the first ten elements of @racket[(disj-sum/e (nat/e number?) (string/e string?))] are simply the first five elements of @racket[nat/e] and @racket[string/e] interleaved, where @racket[string/e] is some enumeration of all Racket strings:
+@enum-example[(disj-sum/e (cons nat/e number?)
+                          (cons string/e string?)) 10]
+
+Again, to achieve fairness we cannot simply use the binary version of
+@racket[disj-sum/e] arbitrarily. For example, if we defined
+@(define (union-three/e ep_1 ep_2 ep_3)
+   (define e_2 (car ep_2))
+   (define 2?  (cdr ep_2))
+   (define e_3 (car ep_3))
+   (define 3?  (cdr ep_3))
+   (define (2-or-3? x) (or (2? x) (3? x)))
+   (disj-sum/e ep_1 (cons (disj-sum/e ep_2 ep_3) 2-or-3?)))
+@racketblock[(define (union-three/e ep_1 ep_2 ep_3)
+               (define e_2 (car ep_2))
+               (define 2?  (cdr ep_2))
+               (define e_3 (car ep_3))
+               (define 3?  (cdr ep_3))
+               (define (2-or-3? x) (or (2? x) (3? x)))
+               (disj-sum/e ep_1 (cons (disj-sum/e ep_2 ep_3) 2-or-3?)))]
+then enumerating the first 10 elements of               
+@racket[(union-three/e (cons nat/e number?) (cons string/e string?) (cons symbol/e symbol?))]
+is unfairly weighted to the first argument:
+@enum-example[(union-three/e (cons nat/e number?) (cons string/e string?) (cons (except/e var/e '||) symbol?)) 10]
+
+A fair generalization is fairly obvious. First we decode each argument
+with the value @racket[0], then each with @racket[1], and so on. So
+when given a call
+@racket[(decode (disj-sum/e (cons e_1 1?) ... (cons e_k k?)) i)]
+we divide @racket[i] by @racket[k], giving us a quotient of @racket[q]
+and remainder of @racket[r]. Then we call @racket[(decode e_r q)]. We
+see that, like @racket[list/e], we have a notion of "layers", if we
+think of the input enumerations as infinitely tall columns side by
+side, each layer is a horizontal slice of the columns.
+              
+Unlike @racket[list/e], @racket[disj-sum/e] enumerator also has an
+intuitive notion of fairness for finite enumerations. For example this
 enumeration:
 @racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
                          (cons nat/e number?)
                          (cons (fin/e "x" "y") string?))]
-has to cycle through the finite enumerations until they
+cycles through its two finite enumeration arguments until they
 are exhausted before producing the rest of the natural
 numbers:
 @enum-example[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
