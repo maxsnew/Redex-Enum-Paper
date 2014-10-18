@@ -229,8 +229,6 @@ is not in the other. Specifically we will show that for all natural
 numbers greater than @texmath{4}, @texmath{L_1} contains an index
 greater than any found in @texmath{L_2}.
 
-@;{TODO: slightly cleaner proof using floor(sqrt(floor(sqrt(i)))) < floor(sqrt(i-1)) for i > 4}
-
 First we establish some elementary properties of @texmath{args_cons},
 defined using the boxy bijection on 2 enumerations. First, for any
 natural number @texmath{i}, if @texmath{args(i) = ([i_1], [i_2])} then 
@@ -242,10 +240,10 @@ is @texmath{\lfloor\sqrt{i}\rfloor}. Next, for any positive natural number
 @texmath{\lfloor\sqrt l\rfloor = \lfloor\sqrt i\rfloor - 1} and
 @texmath{args(l) = ([\lfloor\sqrt l\rfloor], [0], [0])}.
 
-First there is a natural number @texmath{l} with @texmath{\lfloor\sqrt
-l\rfloor = \lfloor\sqrt i\rfloor - 1} for any @texmath{i > 0}.
-
-The rest of the statement is true by the definition of the boxy
+First there is a natural number @texmath{l} with
+@texmath{\lfloor\sqrt l\rfloor = \lfloor\sqrt i\rfloor - 1}
+for any @texmath{i > 0}.
+Then the rest of the statement is true by the definition of the boxy
 bijection since at least one of the lists in the triple
 @texmath{args(i)} must be @texmath{\lfloor\sqrt i\rfloor} since it is
 selected from @racket[(bounded-list/e 3 (floor (sqrt i)))], so the
@@ -253,17 +251,18 @@ values in @racket[(bounded-list/e 3 (floor (sqrt l)))] must have all
 been enumerated before @racket[i] since
 @texmath{\lfloor\sqrt l\rfloor < \lfloor\sqrt i\rfloor}.
 
-Thus for any natural number @texmath{i > 4}, if @texmath{L_1,L_2} are
+Thus for any natural number @texmath{i > 9}, if @texmath{L_1,L_2} are
 the elements from the first and second column when applying
 @texmath{args} to the values @texmath{0} to @texmath{i-1}, we get that
 @texmath{L_1} contains some @texmath{l} such that
 @texmath{\lfloor\sqrt l\rfloor = \lfloor\sqrt i\rfloor - 1} by our
 second lemma. On the other hand, since the values in @texmath{L_2} go
 through 2 calls to @texmath{args_{cons}}, we get that for any
-@texmath{x\in L_2}, @texmath{x \le
-\lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}. So we need to prove that
+@texmath{x\in L_2},
+@texmath{x \le \lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}.
+So we need to prove that
 @texmath{\lfloor\sqrt i\rfloor - 1 > \lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}
-which is true for all@texmath{i > 4}, so @texmath{L_1} contains a
+which is true for all@texmath{i > 9}, so @texmath{L_1} contains a
 value larger than any in @texmath{L_2}, so @texmath{L_1} and
 @texmath{L_2} are not equivalent. Thus @racket[triple/e] is unfair.
 
