@@ -77,8 +77,6 @@ In general, this means that @racket[disj-sum/e] must track the
 ranges of natural numbers when each finite enumeration is exhausted
 to compute which enumeration to use for a given index.
 
-@;{TODO: theorem style}
-
 Now we formalize @racket[disj-sum/e] for our definition of a
 combinator. Unfortunately @racket[disj-sum/e]'s arguments do not fit our
 definition of a combinator, because it takes predicates as well as
@@ -93,10 +91,9 @@ the @texmath{q}th element of the resulting tuple. The @texmath{build}
 function returns the element of the only non-empty list in its
 arguments, @texmath{build([],\ldots,[x],\ldots,[]) = x}.
 
-Theorem: @racket[disj-sum/e] is fair
+@theorem{@racket[disj-sum/e] is fair.}
 
-Proof.
-
+@proof{
 Let @texmath{k} be the number of input enumerations. The sequence
 @texmath{M_i = k(i+1)} is an infinite increasing sequence for which
 when calling @texmath{args(j)} with all @texmath{j = 0} to
@@ -120,14 +117,16 @@ is equal to @texmath{([],\ldots,[k(i+1)],\ldots,[])} where the
 @texmath{k(i+1)} is in the @texmath{j}th slot, so
 @texmath{B_l = [k(i+1)]} for each @texmath{l=1,\ldots,k}. Thus
 @racket[disj-sum/e] is fair.
+@qed
+}
 
 Next we turn to @racket[union-three/e]. Its build function is the same as the build function for @racket[disj-sum/e] specialized to three arguments. Its args function is defined by
 
 @raw-latex{\[args(i) = \begin{cases} ([\lfloor i/2 \rfloor],[],[]) & \text{if } i=2 \text{ mod } 2\\ ([],[\lfloor i/4 \rfloor],[]) & \text{if } i=1 \text{ mod } 4 \\ ([],[],[\lfloor i/4 \rfloor]) & \text{if } i=3 \text{ mod } 4 \end{cases} \]}
 
-Theorem: @racket[union-three/e] is unfair.
+@theorem{@racket[union-three/e] is unfair.}
 
-Proof.
+@proof{
 
 Now we will show that, similarly to the proof that @racket[triple/e]
 is unfair, for any @texmath{n > 4} there is an @texmath{i < n} and
@@ -157,3 +156,5 @@ equivalently that for @texmath{n > 8},
 Thus for any @texmath{n} there is a value in @texmath{L_1} that is
 greater than any in @texmath{L_2}, so @texmath{L_1} and @texmath{L_2}
 are not equivalent, so @racket[decode-three] is unfair.
+@qed
+}
