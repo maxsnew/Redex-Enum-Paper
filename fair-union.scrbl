@@ -137,15 +137,23 @@ case, the lists @texmath{L_1,L_2} produced by concatenating
 column-wise in calls of @texmath{args(i)} for @texmath{i=0,\ldots,n-1}
 would not be equivalent.
 
-This relies on two basic properties of @racket[decode-three]. First,
-that when enumerating all indices @racket[0] to @racket[n],
-@racket[e_1] has been called with the index @texmath{\lfloor n/2\rfloor}.
-Second, that when enumerating all indices @racket[0] to @racket[n],
-@racket[e_2] has been called with indices that are all less than or
-equal to @texmath{\lfloor(\lfloor n/2\rfloor)/2\rfloor}.  Both of
-these properties are direct from the definition of
-@racket[decode-three]. Then, we note that for @texmath{n>4},
-@texmath{n - (\lfloor n/2\rfloor) > 2} so for @texmath{n>4},
-@texmath{\lfloor(\lfloor n/2\rfloor)/2\rfloor < \lfloor n/2\rfloor} so
-the largest value indexed into @racket[e_1] has not been used to index
-into @racket[e_2]. Thus @racket[decode-three] is unfair.
+This relies on two elementary properties of the @texmath{args}
+function. First, there is some @texmath{j\in 0,\ldots,n-1} such that
+@texmath{args(j) = ([\lfloor (n-1)/2 \rfloor],[],[])}. This is true
+because either @texmath{n-1} is even, so
+@texmath{args(n-1) = ([\lfloor (n-1)/2 \rfloor],[],[])} or
+@texmath{n-1} is odd, so
+@texmath{\lfloor (n-1)/2 \rfloor = \lfloor (n-2)/2 \rfloor} and
+@texmath{args(n-2) = ([\lfloor (n-2)/2 \rfloor],[],[])}.
+Second, for every @texmath{j\in 0,\ldots,n-1} such that
+@texmath{args(j) = ([],h,[])} for some @texmath{h},
+@texmath{h \le \lfloor (n-1)/4\rfloor} which is a direct consequence
+of the definition of @texmath{args}.
+Finally, we rely on that fact that for @texmath{n > 9},
+@texmath{\lfloor (n-2)/2\rfloor > \lfloor (n-1)/4\rfloor}, or
+equivalently that for @texmath{n > 8},
+@texmath{\lfloor(n-1)/2\rfloor > \lfloor n/4\rfloor > 0}.
+
+Thus for any @texmath{n} there is a value in @texmath{L_1} that is
+greater than any in @texmath{L_2}, so @texmath{L_1} and @texmath{L_2}
+are not equivalent, so @racket[decode-three] is unfair.
