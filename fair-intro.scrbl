@@ -123,9 +123,9 @@ be an equilibrium point after @racket['(0 0 . 0)].
 Fair combinators give us predictability for programs that
 use our enumerators. In Redex, our main application of
 enumeration combinators, fairness ensures that when a Redex
-programmer may makes an innocuous change to the grammar of
+programmer makes an innocuous change to the grammar of
 the language (e.g. changing the relative order of two
-subexpressions in expression form) then the enumeration
+subexpressions in an expression form) the enumeration
 quality is not significantly affected. For example, consider
 an application expression. From the perspective of the
 enumerator, an application expression looks just like a list
@@ -135,7 +135,7 @@ different argument expressions and always using similar
 (simple, boring) function expressions. 
 
 Of course, the flip-side of this coin is that using unfair
-combinators can also improve the quality of the search in
+combinators can improve the quality of the search in
 some cases, even over fair enumeration. For example, when we
 are enumerating expressions that consist of a choice between
 variables and other kinds of expressions, we do not want to
