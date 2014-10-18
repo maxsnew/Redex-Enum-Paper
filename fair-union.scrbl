@@ -80,7 +80,7 @@ to compute which enumeration to use for a given index.
 @;{TODO: theorem style}
 
 Now we formalize @racket[disj-sum/e] for our definition of a
-combinator. Unfortunately disj-sum/e's arguments do not fit our
+combinator. Unfortunately @racket[disj-sum/e]'s arguments do not fit our
 definition of a combinator, because it takes predicates as well as
 enumerators. We could adapt the combinator definition to consider only
 the decoding part of an enumerator, but doing so would add complexity
@@ -97,8 +97,7 @@ Theorem: @racket[disj-sum/e] is fair
 
 Proof.
 
-We claim that @racket[disj-sum/e] is fair. When called with
-@texmath{k} arguments @racket[e_1 e_2 ... e_k] the sequence
+Let @texmath{k} be the number of input enumerations. The sequence
 @texmath{M_i = k(i+1)} is an infinite increasing sequence for which
 when enumerating
 @racket[(disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?))]
