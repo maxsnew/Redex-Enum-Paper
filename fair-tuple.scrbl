@@ -144,7 +144,7 @@ and increasing.
 
 Specifically, our sequence is the sequence of @texmath{k}th powers,
 that is @texmath{M_i = (i+1)^k}. Let
-@texmath{h_1,h_2\in\{1,\ldots,k\}, representing two arbitrary argument
+@texmath{h_1,h_2\in\{1,\ldots,k\}}, representing two arbitrary argument
 enumerations. We proceed by induction on @texmath{i}. For
 @texmath{i=0}, @texmath{M_0=1}, so we need only consider the call
 @racket[(args 0)] which results in @racket[((0) ... (0))] so
@@ -170,8 +170,14 @@ indices will be the same. Thus indexing from @texmath{0} to
 @racket[list/e] is fair.
 
 Now, let @racket[cantor-list/e] be a version of @racket[list/e] be a
-that uses the generalized Cantor
-@texmath{n}-tupling bijection described above.
+that uses the generalized Cantor @texmath{n}-tupling bijection
+described above. This is highly analogous to the boxy
+@racket[list/e]. For example, their @racket[args] functions both
+return lists of length 1 in every slot and their @racket[build]
+functions are exactly the same. To be precise @racket[(args i)] is
+equal to @racket[((i_1) (i_2) ... (i_k))] where
+@raw-latex{\[i = \binom{i_1}{1} + \binom{1+i_1+i_2}{2}+\cdots+\binom{k-1+i_1+\cdots+i_k}{k}\]}
+which the last equation is exactly generalized Cantor @texmath{k}-tupling.
 
 @;{TODO: theorem style}
 Theorem: @racket[cantor-list/e] is fair
