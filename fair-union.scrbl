@@ -99,29 +99,28 @@ Proof.
 
 Let @texmath{k} be the number of input enumerations. The sequence
 @texmath{M_i = k(i+1)} is an infinite increasing sequence for which
-when enumerating
-@racket[(disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?))]
-with all indices greater than or equal to
-@texmath{0} and less than @texmath{M_i=k(i+1)} the enumerations
-@racket[e_1 e_2 ... e_k] are called with the same arguments,
-specifically @texmath{0\cdots i}. We proceed by induction on
+when calling @texmath{args(j)} with all @texmath{j = 0} to
+@texmath{j = M_i - 1 = k(i+1) - 1}, and collecting results into lists
+@texmath{(L_1,\ldots,L_k)} each list @texmath{L_l} is the same,
+specifically @texmath{[0,\cdots, i]}. We proceed by induction on
 @texmath{i}.  For @texmath{i=0}, @texmath{M_0=k} and for
-@texmath{j=0\cdots(k-1)}, we have
-@racket[(decode (disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?)) j)]
-is exactly
-@racket[(decode e_{j+1} 0)] so each argument is called with the same
-number @texmath{0} exactly once. Then assuming this holds for
-@texmath{M_i}, for @texmath{M_{i+1} = k(i+2)} we know by inductive
-hypothesis that decoding from @texmath{0} to @texmath{M_i=k(i+1)}
-calls all arguments with the same values so we need only show that
-decoding from @texmath{M_i=k(i+1)} up to but not including
-@texmath{M_{i+1}=k(i+2)} uses all arguments equally, and similarly to
-the base case, by the definition of @racket[disj-sum/e],
-@racket[(decode (disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?)) (+ (* k (+ i 1)) j))]
-is equal to @racket[(decode e_{j+1} (* k (+ i 1)))] so all arguments
-are called with the same value. Thus @racket[disj-sum/e] is fair.
+@texmath{j=0\cdots(k-1)}, we have @texmath{args(j)} is exactly
+@texmath{([],\ldots,[0],\ldots,[])} where the non-empty list is the @texmath{j}th slot in the tuple soevery @texmath{L_l = [0]}.
 
-@;{TODO: (disj-sum/e (e_1 1?) ((disj-sum/e (e_2 2?) (e_3 3?)) (or 2? 3?)))}
+Then assuming this holds for @texmath{M_i}, for @texmath{M_{i+1} = k(i+2)}
+by inductive hypothesis, if we call @texmath{args(j)} with @texmath{j}
+from @texmath{0} to @texmath{M_i-1=k(i+1)-1} and concatenate column-wise into
+lists @texmath{(A_1,\ldots,A_k)}, all of @texmath{A_1,\ldots,A_k}
+are equivalent. Thus we need only show that calling @texmath{args(j)}
+with @texmath{j} from @texmath{M_i = k(i+1)} to
+@texmath{M_{i+1}-1=k(i+2)-1} and concatenating column-wise into lists
+@texmath{(B_1,\ldots,B_k)} means that all of @texmath{B_1,\ldots,B_k}
+are equivalent. Similarly to the base case, @texmath{args(k(i+2) + j)}
+is equal to @texmath{([],\ldots,[k(i+1)],\ldots,[])} where the
+@texmath{k(i+1)} is in the @texmath{j}th slot, so
+@texmath{B_l = [k(i+1)]} for each @texmath{l=1,\ldots,k}. Thus
+@racket[disj-sum/e] is fair.
+
 Theorem: @racket[union-three/e] is unfair.
 
 Proof.
