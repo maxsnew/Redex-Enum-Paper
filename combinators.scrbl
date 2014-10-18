@@ -27,7 +27,7 @@ of the enumeration, which can be either a natural number or @racket[+inf.0]. In 
 the @racket[to-nat] and @racket[from-nat] functions form a bijection between
 the natural numbers (up to the size) and the values that are being enumerated.
 
-The most basic enumerator is @racket[nats/e]. It's @racket[to-nat]
+The most basic enumerator is @racket[nats/e]. Its @racket[to-nat]
 and @racket[from-nat] functions are simply the identity function
 and its size is @racket[+inf.0]. The combinator @racket[fin/e]
 builds a finite enumeration 
@@ -95,7 +95,7 @@ calls @racket[(f (fix/e f))] to build the enumerator,
 but it waits until the first time encoding or decoding 
 happens before computing it. This means that a use of
 @racket[fix/e] that is too eager, e.g.:
-@racket[(fix/e (λ (x) x))] will cause it's @racket[from-nat]
+@racket[(fix/e (λ (x) x))] will cause its @racket[from-nat]
 function to fail to terminate.
 Indeed, switching the order of the arguments to @racket[disj-sum/e]
 in the above example also produces an enumeration
