@@ -46,8 +46,11 @@ Again, to achieve fairness we cannot simply use the binary version of
                (disj-sum/e ep_1 (cons (disj-sum/e ep_2 ep_3) 2-or-3?)))]
 then enumerating the first 10 elements of               
 @racket[(union-three/e (cons nat/e nat?) (cons symbol/e sym?) (cons float/e float?))]
-is unfairly weighted to the first argument:
-@(centered (disj-sum-pict/bad))
+is unfairly weighted to the first argument, as shown on the left in @figure-ref["fig:disj-sum"].
+
+@figure["fig:disj-sum" "Unfair (left) and fair (right) disjoint sum enumerations"]{
+  @centered{@(hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good))}
+}
 
 A fair generalization is fairly obvious. First we decode each argument
 with the value @racket[0], then each with @racket[1], and so on. So
@@ -57,8 +60,10 @@ we divide @racket[i] by @racket[k], giving us a quotient of @racket[q]
 and remainder of @racket[r]. Then we call @racket[(decode e_r q)]. We
 see that, like @racket[list/e], we have a notion of "layers", if we
 think of the input enumerations as infinitely tall columns side by
-side, each layer is a horizontal slice of the columns. So using the same enumerations as before, @racket[(disj-sum/e (cons nat/e exact-integer?) (cons symbol/e sym?) (cons float/e float?))] looks like this:
-@(centered (disj-sum-pict/good))
+side, each layer is a horizontal slice of the columns. 
+So using the same enumerations as before, 
+@racket[(disj-sum/e (cons nat/e exact-integer?) (cons symbol/e sym?) (cons float/e float?))] 
+looks like the right-hand side of @figure-ref["fig:disj-sum"].
               
 Unlike @racket[list/e], @racket[disj-sum/e] enumerator also has an
 intuitive notion of fairness for finite enumerations. For example this
@@ -73,9 +78,9 @@ numbers:
                           (cons nat/e number?)
                           (cons (fin/e "x" "y") string?))
               14]
-In general, this means that @racket[disj-sum/e] must track the
+This means that @racket[disj-sum/e] must track the
 ranges of natural numbers when each finite enumeration is exhausted
-to compute which enumeration to use for a given index.
+to compute which enumeration to use for some index.
 
 Now we formalize @racket[disj-sum/e] for our definition of a
 combinator. Unfortunately @racket[disj-sum/e]'s arguments do not fit our

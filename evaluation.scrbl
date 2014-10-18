@@ -37,6 +37,12 @@ the amount of time it has been running. The script runs until
 the uncertainty in the average becomes acceptably small or
 until 24 hours elapses, whichever comes first.
 
+@figure*["fig:benchmark-lines"
+         @list{Overview of random testing performance of ad hoc generation,
+               enumeration, and random indexing into an enumeration,
+               on a benchmark of Redex models.}
+         (plot-lines-from-directory 10-17-14)]
+
 We used two identical 64 core AMD machines with Opteron
 6274s running at 2,200 MHz with a 2 MB L2 cache to run the
 benchmarks. Each machine has 64 gigabytes of memory. Our script
@@ -67,26 +73,20 @@ believe this is a good property to have when indexing into
 our uniform distribution so as to avoid biasing our indices
 towards a small size.
 
-@figure*["fig:benchmark-lines"
-         @list{Overview of random testing performance of ad hoc generation,
-               enumeration, and random indexing into an enumeration,
-               on a benchmark of Redex models.}
-         (plot-lines-from-directory 10-17-14)]
-
-
-The precise algorithm we used is implemented in these functions:
-@(apply
-  typeset-code
-  (extract-pick-an-index))
-
 The random-selection results are quite sensitive to the
-probability of picking the zero exponent (the 
-@racket[prob-of-zero] argument). Because this method was our
+probability of picking the zero exponent from the geometric
+distribution. Because this method was our
 worst performing method, we empirically chose
 benchmark-specific numbers in an attempt to maximize the
 success of the random uniform distribution method. Even with
 this artificial help, this method was still worse, overall
 than the other two.
+
+@figure*["fig:benchmark-overview"
+         @list{The mean time each generator takes to find the bugs,
+               for each bug that some generator found; bars indicate
+               90% confidence intervals}
+         (plot-points-from-directory 10-17-14)]
 
 For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned
@@ -103,12 +103,6 @@ a value of 5 for this depth since that seemed to be the
 most successful. This produces terms of a similar size to
 those of the uniform random generator, although the
 distribution is different.
-
-@figure*["fig:benchmark-overview"
-         @list{The mean time each generator takes to find the bugs,
-               for each bug that some generator found; bars indicate
-               90% confidence intervals}
-         (plot-points-from-directory 10-17-14)]
 
 @Figure-ref["fig:benchmark-lines"] shows a high-level view
 of our results. Along its x-axis is time in seconds in a log

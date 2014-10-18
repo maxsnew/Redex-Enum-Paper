@@ -41,7 +41,8 @@ the addition of a dependent combinator. Like Feat, it does not support
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages
-responding to an interactive question-and-answer game. This method also allows them to define an analagous dependent combinator.
+responding to an interactive question-and-answer game. This method also 
+allows them to define an analagous dependent combinator.
 However, details of their system show that it is not well suited to
 using large indexes. In particular, the strongest proof they have is that if a
 game is total and proper, then ``every bitstring encodes some value or
@@ -52,8 +53,7 @@ elements of the set being encoded.
 
 @citet[bit-monad-transformers] explicitly discuss fairness in the
 context of logic programming, but talk about it in the specific cases
-of fair disjunction and fair conjunction (analagous to our
-@racket[disj-sum/e] and @racket[cons/e]), but they do not have a
+of fair disjunction and fair conjunction, but they do not have a
 unification of these two different types of fairness, nor do they have
 a concept of n-ary fair operators, only binary.
 
@@ -82,7 +82,7 @@ conjectures to boolean satisfiability and then uses a solver.
 The study concludes that the two techniques complement each other.
 
 Neither study compares selecting randomly from a uniform
-distribution like ours does.
+distribution like ours.
 
 @citet[generating-random-lambda-terms]'s work is similar in spirit to
 Redex, as it focuses on testing programming languages. Pałka builds

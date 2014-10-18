@@ -1,13 +1,15 @@
 #lang racket
 (require racket/runtime-path
+         scribble/core
          scribble/manual)
 
 (provide dart.hs dart.rkt isabelle.hs isabelle.rkt)
 
+(define (combine-code lines)
+  (apply verbatim lines))
 
 (define (extract filename)
-  (apply
-   verbatim
+  (combine-code
    (remove-leading-spaces
     (call-with-input-file filename
       (λ (port)
@@ -28,8 +30,11 @@
              (loop #f)])))))))
 
 (define (remove-leading-spaces lst)
+  (define without-trailing-space
+    (for/list ([s (in-list lst)])
+      (regexp-replace #rx" +$" s "")))
   (define counts
-    (for/list ([line (in-list lst)])
+    (for/list ([line (in-list without-trailing-space)])
       (cond
         [(regexp-match #rx"^ *$" line) +inf.0]
         [else
@@ -37,9 +42,9 @@
           (list-ref (regexp-match #rx"(^ *)" line) 1))])))
   (define smallest (apply min counts))
   (cond
-    [(= smallest +inf.0) lst]
+    [(= smallest +inf.0) without-trailing-space]
     [else
-     (for/list ([l (in-list lst)])
+     (for/list ([l (in-list without-trailing-space)])
        (substring l
                   (inexact->exact smallest)
                   (string-length l)))]))

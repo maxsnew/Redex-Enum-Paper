@@ -10,45 +10,6 @@
 
 @title[#:tag "sec:redex-enum"]{Enumerating Redex Patterns}
 
-@(define example-term-index 100000000)
-
-Redex provides the construct @racket[define-language]
-for specifying the grammar of a language. For example,
-this is the grammar for the simply-typed lambda calculus,
-augmented with a few numeric constants:
-@racketblock[(define-language L
-               (e ::= 
-                  (e e)
-                  (λ (x : τ) e)
-                  x
-                  +
-                  integer)
-               (τ ::= int (τ → τ))
-               (x ::= variable-not-otherwise-mentioned))]
-@(define-language L
-   (e ::= 
-      (e e)
-      (λ (x : τ) e)
-      x
-      +
-      integer)
-   (τ ::= int (τ → τ))
-   (x ::= (variable-except ||)))
-Enumerating members of @racket[e] can be done directly
-in terms of the combinators given in the previous section.
-Members of @racket[e] are a disjoint sum of products of
-either literals (like @racket[λ] and @racket[+]) or
-recursive references. For example, this is the
-@(add-commas example-term-index)th term:
-@(apply typeset-code
-        (let ([sp (open-output-string)])
-          (define example (generate-term L e #:i-th example-term-index))
-          (parameterize ([pretty-print-columns 40])
-            (pretty-write example sp))
-          (for/list ([line (in-lines (open-input-string
-                                      (get-output-string sp)))])
-            (string-append (regexp-replace #rx"\u0012" line "r") "\n"))))
-
 There are three patterns in Redex that require special care when enumerating.
 The first is repeated names. If the same meta-variable is used twice
 when defining a metafunction, reduction relation, or judgment form in Redex,
