@@ -184,28 +184,34 @@ Theorem: @racket[cantor-list/e] is fair
 
 Proof.
 
-We elide most details of the proof
-since it is almost exactly the same as the proof for boxy
-@racket[list/e]. First, we note that as described in
-@citet[cantor-n-tupling], the Cantor tupling bijection works in a
-similar way to the boxy bijection, that is, for @texmath{k} inputs it
-traces out the outer face of increasingly large
+We elide most details of the proof since it is almost exactly the same
+as the proof for boxy @racket[list/e]. First, we note that as
+described in @citet[cantor-n-tupling], the Cantor tupling bijection
+works in a similar way to the boxy bijection, that is, for @texmath{k}
+inputs it traces out the outer face of increasingly large
 @texmath{k}-simplices. This means it can be computed by taking a
 "root" of the input index and then using the remainder to index into a
 finite enumeration. In particular for @texmath{k} inputs, it takes the
 @texmath{k}-th simplicial root giving a root of @texmath{l} and
-remainder @texmath{r} then uses @texmath{r} to index into an enumeration of
-all lists of length @texmath{k} whose elements sum to @texmath{l}. And
-as with @racket[bounded-list/e], an enumeration of lists of length @texmath{k} that sum to the value @texmath{l}, when fully enumerated, calls the arguments
-@racket[e_i] with the same values. Thus we can show that there is an
-infinite increasing sequence @texmath{(M_0,M_1,...)} where indexing
-@texmath{0} to @texmath{M_i} uses all @racket[e_i] equally. For
-@texmath{k} arguments, @texmath{M_i = \binom{i+k-1}{k}}, the
-@texmath{i}th @texmath{k}-simplicial number. The proof is then
-precisely analagous to the proof for boxy @racket[list/e].
+remainder @texmath{r} then uses @texmath{r} to index into an
+enumeration of all lists of length @texmath{k} whose elements sum to
+@texmath{l}. And as with @racket[bounded-list/e], an enumeration of
+lists of length @texmath{k} that sum to the value @texmath{l}, when
+fully enumerated, calls the arguments @racket[e_i] with the same
+values. Thus we can show that there is an infinite increasing sequence
+@texmath{(M_0,M_1,...)} where indexing @texmath{0} to @texmath{M_i}
+uses all @racket[e_i] equally. For @texmath{k} arguments, @texmath{M_i
+= \binom{i+k-1}{k}}, the @texmath{i}th @texmath{k}-simplicial
+number. The proof is then precisely analagous to the proof for boxy
+@racket[list/e].
 
-Now recall @racket[triple/e], as defined at the beginning of
-this section.
+Now recall @racket[triple/e], as defined at the beginning of this
+section. Let @texmath{args_{cons}} be the args function for
+@texmath{cons/e}. Then the @texmath{args} function for
+@racket[triple/e] is @texmath{args(i) = ([i_1], [i_2], [i_3])} where
+@texmath{([i_1], [j]) = args_{cons}(i)} and @texmath{(i_2,i_3) =
+args_{cons}(j)}. The build function for @racket[triple/e] is
+@racket[(define (build is_1 is_2 is_3) (cons (first is_1) (cons (first is_2) (first is_3))))].
 
 @;{TODO: Theorem style}
 Theorem: @racket[triple/e] is unfair
