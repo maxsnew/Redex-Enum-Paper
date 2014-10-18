@@ -80,13 +80,14 @@ to compute which enumeration to use for a given index.
 @;{TODO: theorem style}
 
 Now we formalize @racket[disj-sum/e] for our definition of a
-combinator. This is a bit of a stretch of the definition since the
-arguments to @racket[disj-sum/e] are not just enumerators but pairs of
-enumerators and predicates, but we ignore the predicate arguments as
-they are not necessary for the side of the bijection we are defining
-anyway. The @texmath{args} function for @racket[disj-sum/e] when
-called with @racket[k] arguments is defined by
-@texmath{args(i) = ([],\ldots,[r],\ldots,[])} where
+combinator. Unfortunately disj-sum/e's arguments do not fit our
+definition of a combinator, because it takes predicates as well as
+enumerators. We could adapt the combinator definition to consider only
+the decoding part of an enumerator, but doing so would add complexity
+without increasing understanding, so we ignore the predicates for the
+purposes of the proof. The @texmath{args} function for
+@racket[disj-sum/e] when called with @racket[k] arguments is defined
+by @texmath{args(i) = ([],\ldots,[r],\ldots,[])} where
 @texmath{i / k = q} remainder @texmath{r} and the @texmath{[r]} was in
 the @texmath{q}th element of the resulting tuple. The @texmath{build}
 function returns the element of the only non-empty list in its
