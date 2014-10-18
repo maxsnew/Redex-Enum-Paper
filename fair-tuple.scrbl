@@ -84,9 +84,6 @@ naturally generalized to an @raw-latex{$n$}-tupling function, by using
 the @raw-latex{$n$}th root and @raw-latex{$n$}th power intead of the
 square root and squaring. Otherwise the description is the same.
 
-@;{TODO: boxy-list/e is fair}
-@;{TODO: reference the racket source code for bounded-list/e}
-
 We now prove that @racket[list/e], using the generalized boxy
 bijection, is fair. The following is a function that takes a positive
 number @racket[k] and returns the decoding function the boxy bijection for @racket[k]-tuples specialized to natural numbers:
@@ -126,7 +123,6 @@ and it is linear since each of its arguments will only
 have one element in them since they were produced by the @racket[args]
 function.
 
-@;{TODO: add theorem styling}
 @theorem{@racket[list/e] is a fair combinator}
 
 @proof{
@@ -167,6 +163,8 @@ our lemma, when called with those indices, the @texmath{h_1,h_2}
 indices will be the same. Thus indexing from @texmath{0} to
 @texmath{M_l} uses all @racket[e_i] equally, so by induction,
 @racket[list/e] is fair.
+@qed
+}
 
 Now, let @racket[cantor-list/e] be a version of @racket[list/e] be a
 that uses the generalized Cantor @texmath{n}-tupling bijection
@@ -177,8 +175,6 @@ functions are exactly the same. To be precise @racket[(args i)] is
 equal to @racket[((i_1) (i_2) ... (i_k))] where
 @raw-latex{\[i = \binom{i_1}{1} + \binom{1+i_1+i_2}{2}+\cdots+\binom{k-1+i_1+\cdots+i_k}{k}\]}
 which the last equation is exactly generalized Cantor @texmath{k}-tupling.
-@qed
-}
 
 @theorem{@racket[cantor-list/e] is fair}
 
@@ -203,6 +199,8 @@ uses all @racket[e_i] equally. For @texmath{k} arguments,
 @texmath{M_i = \binom{i+k-1}{k}}, the @texmath{i}th
 @texmath{k}-simplicial number. The proof is then precisely analagous
 to the proof for boxy @racket[list/e].
+@qed
+}
 
 Now recall @racket[triple/e], as defined at the beginning of this
 section. Let @texmath{args_{cons}} be the args function for
@@ -213,10 +211,7 @@ where @texmath{([i_1], [j]) = args_{cons}(i)} and
 @texmath{(i_2,i_3) = args_{cons}(j)}. The build function for
 @racket[triple/e] is
 @racket[(define (build is_1 is_2 is_3) (cons (first is_1) (cons (first is_2) (first is_3))))].
-@qed
-}
 
-@;{TODO: Theorem style}
 @theorem{@racket[triple/e] is unfair}
 
 @proof{
