@@ -257,7 +257,7 @@ the elements from the first and second column when applying
 @texmath{L_1} contains some @texmath{l} such that
 @texmath{\lfloor\sqrt l\rfloor = \lfloor\sqrt i\rfloor - 1} by our
 second lemma. On the other hand, since the values in @texmath{L_2} go
-through 2 calls to @texmath{args_{cons}}, we get that for any
+through two calls to @texmath{args_{cons}}, for any
 @texmath{x\in L_2},
 @texmath{x \le \lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}.
 So we need to prove that
