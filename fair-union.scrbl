@@ -12,7 +12,6 @@
           "util.rkt")
 
 @title{Fair Union}
-@;{TODO: write this section..}
 
 Next we turn to @racket[disj-sum/e], the operation corresponding to the
 union of several enumerators.
@@ -79,6 +78,19 @@ ranges of natural numbers when each finite enumeration is exhausted
 to compute which enumeration to use for a given index.
 
 @;{TODO: theorem style}
+
+Now we formalize @racket[disj-sum/e] for our definition of a
+combinator. This is a bit of a stretch of the definition since the
+arguments to @racket[disj-sum/e] are not just enumerators but pairs of
+enumerators and predicates, but we ignore the predicate arguments as
+they are not necessary for the side of the bijection we are defining
+anyway. The @texmath{args} function for @racket[disj-sum/e] when
+called with @racket[k] arguments is defined by
+@texmath{args(i) = ([],\ldots,[r],\ldots,[])} where
+@texmath{i / k = q} remainder @texmath{r} and the @texmath{[r]} was in
+the @texmath{q}th element of the resulting tuple. The @texmath{build}
+function returns the element of the only non-empty list in its
+arguments, @texmath{build([],\ldots,[x],\ldots,[]) = x}.
 
 Theorem: @racket[disj-sum/e] is fair
 
