@@ -3,12 +3,18 @@
          scribble/manual
          racket/list
          racket/port
-         rackunit)
+         rackunit
+         scribble/decode
+         (for-syntax racket/base))
 (provide raw-latex a-quote
          texmath
          racketblock/define
          add-commas
-         extract-pick-an-index)
+         extract-pick-an-index
+         theorem
+         proof
+         definition
+         qed)
 
 (define (texmath arg)
   (raw-latex (string-append "$" arg "$")))
@@ -65,3 +71,18 @@
           [else
            (read-line port)
            (loop)])))))
+
+(define-syntax (define-environment stx)
+  (syntax-case stx ()
+    [(_ id)
+     (identifier? #'id)
+     #`(define (id . args) (environment/proc 'id args))]))
+(define (environment/proc id args)
+  (compound-paragraph (style (symbol->string id) '())
+                      (list (decode-compound-paragraph args))))
+
+(define-environment theorem)
+(define-environment proof)
+(define-environment definition)
+(define qed (element (style "qed" '()) '()))
+

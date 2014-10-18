@@ -38,7 +38,7 @@ natural numbers to natural numbers.
 
 @;{Hilbert's 10th problem reference really necessary?}
 
-whereas for enumerations we are primarily concerned with the other
+For enumerations we are primarily concerned with the other
 half of the bijection, since that is the one used to generate
 terms. For the pairing case, these functions have fairly
 straightforward inverses, but their generalizations do not. This is
@@ -48,12 +48,11 @@ the generalization of the cantor pairing function to length
 {{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
 {{n_1}\choose{1}}$}} This means to be able to invert such equations is
 to solve a certain class of arbitrary degree diophantine
-equations. While the solution to Hilbert's $10\textsuperscript{th}$
-problem is that Diophantine equations are not generally solvable, we
+equations, which are not generally solvable. We
 can easily define a highly inefficient (but correct) way to compute
 the inverse by trying every natural number, in order, applying the
 original @raw-latex{$cantor\_tuple$} function to see if it was the
-argument given. In @citet[inverting-cantor-n-tupling], they improve on
+argument given. @citet[inverting-cantor-n-tupling] improves on
 this implementation, but the algorithm there is still a search
 procedure, and we found it too slow to use in practice.
 
@@ -76,7 +75,7 @@ enumeration of pairs with larger value @racket[6] this @racket['(6
 @racket[6] to get @racket[36] and finally add @racket[8] to get our
 original value of @racket[42].
 
-The key takeaway is that we find what "layer" a value is on and we
+The key idea is that we find what “layer” a value is on and we
 bootstrap the implementation with existing implementations of
 @racket[cons/e] and @racket[disj-sum/e] for finite enumerations,
 giving us both halves of the layer enumeration in one fell
@@ -128,9 +127,9 @@ have one element in them since they were produced by the @racket[args]
 function.
 
 @;{TODO: add theorem styling}
-Theorem: @racket[list/e] is a fair combinator
+@theorem{@racket[list/e] is a fair combinator}
 
-Proof.
+@proof{
 With this lemma in hand, we prove that @racket[list/e] is fair by
 showing that for any infinite argument enumerations @racket[(e_1 e_2 ... e_k)]
 there is an infinite increasing sequence
@@ -178,12 +177,12 @@ functions are exactly the same. To be precise @racket[(args i)] is
 equal to @racket[((i_1) (i_2) ... (i_k))] where
 @raw-latex{\[i = \binom{i_1}{1} + \binom{1+i_1+i_2}{2}+\cdots+\binom{k-1+i_1+\cdots+i_k}{k}\]}
 which the last equation is exactly generalized Cantor @texmath{k}-tupling.
+@qed
+}
 
-@;{TODO: theorem style}
-Theorem: @racket[cantor-list/e] is fair
+@theorem{@racket[cantor-list/e] is fair}
 
-Proof.
-
+@proof{
 We elide most details of the proof since it is almost exactly the same
 as the proof for boxy @racket[list/e]. First, we note that as
 described in @citet[cantor-n-tupling], the Cantor tupling bijection
@@ -214,11 +213,13 @@ where @texmath{([i_1], [j]) = args_{cons}(i)} and
 @texmath{(i_2,i_3) = args_{cons}(j)}. The build function for
 @racket[triple/e] is
 @racket[(define (build is_1 is_2 is_3) (cons (first is_1) (cons (first is_2) (first is_3))))].
+@qed
+}
 
 @;{TODO: Theorem style}
-Theorem: @racket[triple/e] is unfair
+@theorem{@racket[triple/e] is unfair}
 
-Proof.
+@proof{
 
 To prove something is unfair we must show that there is a natural
 number @texmath{M} such that for every @texmath{m > M}, there are
@@ -265,6 +266,7 @@ So we need to prove that
 which is true for all@texmath{i > 9}, so @texmath{L_1} contains a
 value larger than any in @texmath{L_2}, so @texmath{L_1} and
 @texmath{L_2} are not equivalent. Thus @racket[triple/e] is unfair.
-
+@qed
+}
 @;{TODO: prime factorized list/e is fair?} 
 
