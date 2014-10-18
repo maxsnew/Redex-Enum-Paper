@@ -173,7 +173,6 @@ where @texmath{T} is a type-level function. From any purely functional
 enumeration we can extract 2 functions that fully define its
 bijection. The first,
 @texmath{args_c : \mathbb{N} \to ([\mathbb{N}],\ldots,[\mathbb{N}])}
-
 where the output tuple has length @texmath{k}, returns the
 @texmath{k}-tuple of lists of indices needed to index into the input
 enumerations when decoding from a given index. The second,
@@ -188,15 +187,17 @@ by the rule that @racket[(decode (c e_1 ... e_k) i)] must be equal to
                       (map (λ (i) (decode e_k i)) is_k))]
 where @racket[(is_1 ... is_k)] is @racket[(arg_c i)].
 
+As a convenience, we say that two lists are equivalent if one is a
+permutation of the other.
+
 We say that an enumeration combinator @racket[c] is fair if, for every
 natural number @raw-latex{$m$}, there exists a natural number
 @raw-latex{$M > m$} such that for every @texmath{h,j\in \{1,\ldots,k\}},
-
-if apply @raw-latex{$args_c$} to every value greater than or equal to
-@texmath{0} and less than @texmath{M}, if you concatenate all of the
+if you apply @raw-latex{$args_c$} to every value greater than or equal to
+@texmath{0} and less than @texmath{M}, and concatenate all of the
 lists in the @texmath{h}th column into a list @texmath{L_h} and in the
-@texmath{j}th column into a list @texmath{L_j} then @texmath{L_j} will
-be a permutation of @texmath{L_h}. In other words, when enumerating
+@texmath{j}th column into a list @texmath{L_j} then @texmath{L_j}
+and @texmath{L_h} are equivalent. In other words, when enumerating
 all values up to @raw-latex{$M$} in the result enumeration, all used
 values from argument enumerations will come from the same indices.
 
