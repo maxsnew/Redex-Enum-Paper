@@ -121,30 +121,21 @@ is equal to @texmath{([],\ldots,[k(i+1)],\ldots,[])} where the
 @texmath{B_l = [k(i+1)]} for each @texmath{l=1,\ldots,k}. Thus
 @racket[disj-sum/e] is fair.
 
+Next we turn to @racket[union-three/e]. Its build function is the same as the build function for @racket[disj-sum/e] specialized to three arguments. Its args function is defined by
+
+@raw-latex{\[args(i) = \begin{cases} ([\lfloor i/2 \rfloor],[],[]) & \text{if } i=2 \text{ mod } 2\\ ([],[\lfloor i/4 \rfloor],[]) & \text{if } i=1 \text{ mod } 4 \\ ([],[],[\lfloor i/4 \rfloor]) & \text{if } i=3 \text{ mod } 4 \end{cases} \]}
+
 Theorem: @racket[union-three/e] is unfair.
 
 Proof.
-First, we define @racket[union/e] to be the resulting enumeration from
-a call to
-@racket[(union-three/e (cons e_1 1?) (cons e_2 2?) (cons e_3 3?))].
-We use the following equivalent definition for the decoding function
-of @racket[union/e]:
 
-@racketblock[(define (decode-three i)
-               (define (q r) (quotient/remainder i 3))
-               (match r
-                 [1 (decode e_2 (quotient q 2))]
-                 [3 (decode e_3 (quotient q 2))]
-                 [else (decode e_1 q)]))]
-                 
 Now we will show that, similarly to the proof that @racket[triple/e]
 is unfair, for any @texmath{n > 4} there is an @texmath{i < n} and
-@texmath{h} such that @racket[(decode union/e i)] is equal to
-@racket[(decode e_1 h)] but there is no @texmath{j} such that
-@racket[(decode union/e j)] is @racket[(decode e_2 h)]. In other
-words, for any @texmath{n > 4}, when enumerating all values of
-@racket[union/e] from @racket[0] to @racket[n], @racket[e_1] has been
-called with an index with which @racket[e_2] has not been called.
+@texmath{h} such that @texmath{args(i) = ([h],[],[])} but there is no
+@texmath{j < n} such that @texmath{args(i) = ([],[h],[])}. In that
+case, the lists @texmath{L_1,L_2} produced by concatenating
+column-wise in calls of @texmath{args(i)} for @texmath{i=0,\ldots,n-1}
+would not be equivalent.
 
 This relies on two basic properties of @racket[decode-three]. First,
 that when enumerating all indices @racket[0] to @racket[n],
