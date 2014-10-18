@@ -200,17 +200,19 @@ lists of length @texmath{k} that sum to the value @texmath{l}, when
 fully enumerated, calls the arguments @racket[e_i] with the same
 values. Thus we can show that there is an infinite increasing sequence
 @texmath{(M_0,M_1,...)} where indexing @texmath{0} to @texmath{M_i}
-uses all @racket[e_i] equally. For @texmath{k} arguments, @texmath{M_i
-= \binom{i+k-1}{k}}, the @texmath{i}th @texmath{k}-simplicial
-number. The proof is then precisely analagous to the proof for boxy
-@racket[list/e].
+uses all @racket[e_i] equally. For @texmath{k} arguments,
+@texmath{M_i = \binom{i+k-1}{k}}, the @texmath{i}th
+@texmath{k}-simplicial number. The proof is then precisely analagous
+to the proof for boxy @racket[list/e].
 
 Now recall @racket[triple/e], as defined at the beginning of this
 section. Let @texmath{args_{cons}} be the args function for
-@texmath{cons/e}. Then the @texmath{args} function for
-@racket[triple/e] is @texmath{args(i) = ([i_1], [i_2], [i_3])} where
-@texmath{([i_1], [j]) = args_{cons}(i)} and @texmath{(i_2,i_3) =
-args_{cons}(j)}. The build function for @racket[triple/e] is
+@texmath{cons/e}, which uses the boxy bijection on pairs. Then the
+@texmath{args} function for @racket[triple/e] is
+@texmath{args(i) = ([i_1], [i_2], [i_3])}
+where @texmath{([i_1], [j]) = args_{cons}(i)} and
+@texmath{(i_2,i_3) = args_{cons}(j)}. The build function for
+@racket[triple/e] is
 @racket[(define (build is_1 is_2 is_3) (cons (first is_1) (cons (first is_2) (first is_3))))].
 
 @;{TODO: Theorem style}
@@ -218,38 +220,52 @@ Theorem: @racket[triple/e] is unfair
 
 Proof.
 
-To do this we must show that there is a
-natural number @texmath{M} such that for every @texmath{m > M}, the
-multiset of calls to the argument enumerations @racket[e_i] are
-different. Specifically we will show that for all natural numbers
-greater than @texmath{4}, the multiset of calls to the first argument
-@racket[e_1] contains an index greater than any found in the multisets
-for @racket[e_2] and @racket[e_3].
+To prove something is unfair we must show that there is a natural
+number @texmath{M} such that for every @texmath{m > M}, there are
+indices @texmath{h,j\in\{1,2,3\}} such that @texmath{L_h} and
+@texmath{L_j} are not equivalent. To show that two lists are not
+equivalent it is sufficient to show that there is a value in one that
+is not in the other. Specifically we will show that for all natural
+numbers greater than @texmath{4}, @texmath{L_1} contains an index
+greater than any found in @texmath{L_2}.
 
 @;{TODO: slightly cleaner proof using floor(sqrt(floor(sqrt(i)))) < floor(sqrt(i-1)) for i > 4}
-First we establish some elementary properties of @racket[cons/e],
+
+First we establish some elementary properties of @texmath{args_cons},
 defined using the boxy bijection on 2 enumerations. First, for any
-natural number @texmath{i}, there exist @texmath{i_1}, @texmath{i_2}
-such that @racket[(decode (cons/e e_1 e_2) i)] is equal to
-@racket[(cons (decode e_1 i_1) (decode e_2 i_2))] and
+natural number @texmath{i}, if @texmath{args(i) = ([i_1], [i_2])} then 
 @texmath{i_1,i_2 \le \lfloor\sqrt{i}\rfloor}. This is a direct consequence of the
 definition of the boxy bijection, which is defined by taking the floor
 of the square root of @texmath{i} and then producing a pair whose max
-is @texmath{\lfloor\sqrt{i}\rfloor}. Next, for any natural number
-@texmath{i}, @racket[(decode (triple/e e_1 e_2 e_3) (* i i))] is equal
-to @racket[(cons (decode e_1 i) (cons (decode e_2 0) (decode e_3
-0)))], This is a direct usage of the definition, assuming the
-enumeration produced by @racket[bounded-list/e] produces this value
-first (as our implementation does). Thus for any natural number
-@texmath{i}, enumerating all values from @texmath{0} to @texmath{i},
-@racket[e_1] has been called with @texmath{\lfloor\sqrt{i}\rfloor}
-while for any @texmath{j} with which @racket[e_2] and @racket[e_3]
-have been called, @texmath{j \le \lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}.
-Then we note that if
-@texmath{i > 4}, then @texmath{\lfloor\sqrt{i}\rfloor < i}, so
-@texmath{\lfloor\sqrt{\lfloor\sqrt{i}\rfloor} < \lfloor\sqrt{i}\rfloor} and thus @racket[e_1] has been called with a
-value greater than any value @racket[e_2] or @racket[e_3] have been
-called with and thus @racket[triple/e] is unfair.
+is @texmath{\lfloor\sqrt{i}\rfloor}. Next, for any positive natural number
+@texmath{i}, there is a natural number @texmath{l} such that
+@texmath{\lfloor\sqrt l\rfloor = \lfloor\sqrt i\rfloor - 1} and
+@texmath{args(l) = ([\lfloor\sqrt l\rfloor], [0], [0])}.
+
+First there is a natural number @texmath{l} with @texmath{\lfloor\sqrt
+l\rfloor = \lfloor\sqrt i\rfloor - 1} for any @texmath{i > 0}.
+
+The rest of the statement is true by the definition of the boxy
+bijection since at least one of the lists in the triple
+@texmath{args(i)} must be @texmath{\lfloor\sqrt i\rfloor} since it is
+selected from @racket[(bounded-list/e 3 (floor (sqrt i)))], so the
+values in @racket[(bounded-list/e 3 (floor (sqrt l)))] must have all
+been enumerated before @racket[i] since
+@texmath{\lfloor\sqrt l\rfloor < \lfloor\sqrt i\rfloor}.
+
+Thus for any natural number @texmath{i > 4}, if @texmath{L_1,L_2} are
+the elements from the first and second column when applying
+@texmath{args} to the values @texmath{0} to @texmath{i-1}, we get that
+@texmath{L_1} contains some @texmath{l} such that
+@texmath{\lfloor\sqrt l\rfloor = \lfloor\sqrt i\rfloor - 1} by our
+second lemma. On the other hand, since the values in @texmath{L_2} go
+through 2 calls to @texmath{args_{cons}}, we get that for any
+@texmath{x\in L_2}, @texmath{x \le
+\lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}. So we need to prove that
+@texmath{\lfloor\sqrt i\rfloor - 1 > \lfloor\sqrt{\lfloor\sqrt{i}\rfloor}\rfloor}
+which is true for all@texmath{i > 4}, so @texmath{L_1} contains a
+value larger than any in @texmath{L_2}, so @texmath{L_1} and
+@texmath{L_2} are not equivalent. Thus @racket[triple/e] is unfair.
 
 @;{TODO: prime factorized list/e is fair?} 
 
