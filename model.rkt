@@ -8,7 +8,8 @@
      nat/e
      (sum/e e e)
      (cons/e e e)
-     (map/e f f e))
+     (map/e f f e)
+     (dep/e e f))
   (v ::= (cons v v) n)
   (n ::= integer)
   
@@ -17,7 +18,9 @@
       (< ae ae) (>= ae ae)
       n)
   
-  (f ::= (add integer)))
+  (f ::= 
+     (add integer)
+     produce-map/e-nat/e-with-add-of-given-int))
 
 (define-judgment-form L
   #:mode (from-nat I I O)
@@ -58,16 +61,27 @@
   
   [(from-nat e n v)
    ---------------------------------------------
-   (from-nat (map/e f_1 f_2 e) n (Eval (f_1 v)))]
+   (from-nat (map/e f_1 f_2 e) n (Eval-num (f_1 v)))]
   
   [(from-nat e n (Eval (f_2 v)))
    --------------------------------
-   (from-nat (map/e f_1 f_2 e) n v)])
+   (from-nat (map/e f_1 f_2 e) n v)]
+  
+  [(from-nat (cons/e e nat/e) n_1 (cons v_1 n_2))
+   (from-nat (Eval-enum (f v_1)) n_2 v_2)
+   ------------------------------------------
+   (from-nat (dep/e e f) n_1 (cons v_1 v_2))])
 
 (define-metafunction L
-  Eval : (f any) -> any
-  [(Eval ((add integer) n)) ,(+ (term integer) (term n))]
-  [(Eval (f any)) any])
+  Eval-num : (f any) -> any
+  [(Eval-num ((add integer) n)) ,(+ (term integer) (term n))]
+  [(Eval-num (f any)) any])
+
+(define-metafunction L
+  Eval-enum : (f any) -> any
+  [(Eval-enum (produce-map/e-nat/e-with-add-of-given-int integer))
+   (map/e (add integer) (add ,(- (term integer))) nat/e)]
+  [(Eval-enum (f any)) nat/e])
 
 (define-judgment-form L
   #:mode (odd I)
@@ -111,9 +125,23 @@
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
-  [(to-enum (map/e f_1 f_2 e))
-   ,(:map/e (term (to-fun f_1)) (term (to-fun f_2)) (term (to-enum e)))]
-  [(to-enum nat/e) ,:nat/e])
+  [(to-enum nat/e) ,:nat/e]
+  
+  ;; these don't handle all of the cases, but instead
+  ;; collapse into less interesting enumerations when
+  ;; we step outside of the useful area.
+  [(to-enum (map/e (add integer) any e))
+   ,(:map/e (λ (x) (if (integer? x) (+ x (term integer)) x))
+            (λ (x) (if (integer? x) (- x (term integer)) x))
+            (term (to-enum e)))]
+  [(to-enum (map/e any any e)) (to-enum e)]
+  [(to-enum (dep/e e produce-map/e-nat/e-with-add-of-given-int))
+   ,(:dep/e (term (to-enum e))
+            (λ (x) 
+              (if (integer? x)
+                  (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :nat/e)
+                  :nat/e)))]
+  [(to-enum (dep/e e any)) (to-enum (cons/e e nat/e))])
 
 (define-metafunction L
   to-fun : f -> any
