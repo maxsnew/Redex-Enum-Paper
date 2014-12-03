@@ -63,7 +63,7 @@
    ---------------------------------------------
    (from-nat (map/e f_1 f_2 e) n (Eval-num (f_1 v)))]
   
-  [(from-nat e n (Eval (f_2 v)))
+  [(from-nat e n (Eval-num (f_2 v)))
    --------------------------------
    (from-nat (map/e f_1 f_2 e) n v)]
   
@@ -96,7 +96,6 @@
   [(side-condition ,(even? (term n)))
    ---------
    (even n)])
-
 
 (define-metafunction L
   ae-interp : ae -> natural or boolean
@@ -281,7 +280,9 @@
     ['odd
      (λ (lws)
        (define arg (list-ref lws 2))
-       (list "" arg " is odd"))])
+       (list "" arg " is odd"))]
+    ['Eval-enum (λ (lws) (list "" (list-ref lws 2) ""))]
+    ['Eval-num (λ (lws) (list "" (list-ref lws 2) ""))])
    (thunk)))
 
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
