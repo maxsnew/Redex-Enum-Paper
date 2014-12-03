@@ -164,7 +164,19 @@
                       (t " ≥ ")
                       (loop #f ae2)))]
         [`(integer-sqrt ,(? symbol? n))
-         (hbl-append (t "√") (overline (t (format "~a" n))))]
+         (define var (it (format "~a" n)))
+         (define line (inset (hline (pict-width var)) 0 1 0 0))
+         (define left-side (t "√"))
+         (hbl-append (t "⌊")
+                     left-side 
+                     (lbl-superimpose 
+                      (refocus 
+                       (lbl-superimpose
+                        (lt-superimpose (ghost (inset left-side 0 0 (- (pict-width left-side)) 0))
+                                        line)
+                        var)
+                       var))
+                     (t "⌋"))]
         [`(/ ,ae1 2)
          (define numerator (loop #f ae1))
          (define line (frame (blank (+ (pict-width numerator) 4) 0)))
@@ -173,8 +185,7 @@
          (define arg (loop #t ae))
          (hbl-append arg (t "²"))] 
         [(? number?) (t (format "~a" ae))]
-        [(? symbol?) 
-         ;; need to be using the redex typesetting here....
+        [(? symbol-with-no-underscores?)
          (it (format "~a" ae))]
         [_ 
          (eprintf "missing ~s\n" ae)
@@ -196,8 +207,10 @@
     (define line (inset (hline (pict-width p)) 0 0 0 -2))
     (refocus (vc-append line p) p))
   
+  (define (symbol-with-no-underscores? x) 
+    (and (symbol? x) (not (regexp-match? #rx"_" (symbol->string x)))))
   (define (t str) (text str))
-  (define (it str) (text str '(italic)))
+  (define (it str) (text str '(italic . roman)))
   
   (with-compound-rewriters
    (['from-nat
@@ -206,7 +219,7 @@
        (define enum (list-ref lws 2))
        (define n (list-ref lws 3))
        (define v (list-ref lws 4))
-       (list "" enum " ⊕ " n " = " v ""))]
+       (list "" enum " @ " n " = " v ""))]
     ['ae-interp
      (λ (lws)
        (list (ae->pict (to-sexp (lw-e (caddr lws))))))]
@@ -228,7 +241,7 @@
          1.5))
 
 (module+ test
-  (require rackunit)
+  (require rackunit) 
   
   (define (n->nn n)
     (define level (integer-sqrt n))
