@@ -7,14 +7,17 @@
   (e ::= 
      nat/e
      (sum/e e e)
-     (cons/e e e))
+     (cons/e e e)
+     (map/e f f e))
   (v ::= (cons v v) n)
-  (n ::= natural)
+  (n ::= integer)
   
   (ae ::=
       (+ ae ae) (- ae ae) (/ ae ae) (* ae ae) (- ae ae ae) (integer-sqrt ae) (sqr ae)
       (< ae ae) (>= ae ae)
-      n))
+      n)
+  
+  (f ::= (add integer)))
 
 (define-judgment-form L
   #:mode (from-nat I I O)
@@ -50,7 +53,21 @@
                                                               1)
                                                            2))) v_2)
    --------------------------------------------
-   (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))])
+   (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))]
+  
+  
+  [(from-nat e n v)
+   ---------------------------------------------
+   (from-nat (map/e f_1 f_2 e) n (Eval (f_1 v)))]
+  
+  [(from-nat e n (Eval (f_2 v)))
+   --------------------------------
+   (from-nat (map/e f_1 f_2 e) n v)])
+
+(define-metafunction L
+  Eval : (f any) -> any
+  [(Eval ((add integer) n)) ,(+ (term integer) (term n))]
+  [(Eval (f any)) any])
 
 (define-judgment-form L
   #:mode (odd I)
@@ -94,7 +111,13 @@
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
+  [(to-enum (map/e f_1 f_2 e))
+   ,(:map/e (term (to-fun f_1)) (term (to-fun f_2)) (term (to-enum e)))]
   [(to-enum nat/e) ,:nat/e])
+
+(define-metafunction L
+  to-fun : f -> any
+  [(to-fun (add integer)) ,(λ (x) (if (integer? x) (+ x (term integer)) x))])
 
 (define-metafunction L
   to-val : v -> any
@@ -236,10 +259,10 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (module+ main
-  (scale (w/rewriters
-          (render-judgment-form from-nat))
-         1.5))
+  (w/rewriters
+   (render-judgment-form from-nat)))
 
+#;
 (module+ test
   (require rackunit) 
   
@@ -260,5 +283,4 @@
    (for/and ([x (in-range 1000)])
      (equal? (n->nn x) (n->nn/e x))))
   
-  (redex-check L (e n_maybe-too-big) (try-one (term e) (term n_maybe-too-big))))
-
+  (redex-check L (e natural_maybe-too-big) (try-one (term e) (term natural_maybe-too-big))))
