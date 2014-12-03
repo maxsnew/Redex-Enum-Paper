@@ -228,9 +228,7 @@
                        var))
                      (t "⌋"))]
         [`(/ ,ae1 2)
-         (define numerator (loop #f ae1))
-         (define line (frame (blank (+ (pict-width numerator) 4) 0)))
-         (vc-append numerator line (t "2"))]
+         (hbl-append (loop #t ae1) (t "/2"))]
         [`(sqr ,ae)
          (define arg (loop #t ae))
          (hbl-append arg (t "²"))] 
