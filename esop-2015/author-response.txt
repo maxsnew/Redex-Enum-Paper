@@ -1,4 +1,4 @@
-  Re: Reviewer A
+==== Review A ===
 
 After reading your review and reflecting on it, we completely agree
 that the clarifying power of a formal semantics would be a huge help
@@ -7,7 +7,7 @@ to readers. We plan to include one in future versions of this paper
 translation to Redex more carefully is similarly important and we plan
 to improve that too.
 
-  Re: Reviewer C
+=== Review C ===
 
 You seem to be asking us to work on a different problem that the one
 we chose to work on. The system is intended to be lightweight, giving
@@ -24,9 +24,12 @@ system and the fact that "a combination of in order and ad hoc
 outperforms the fair technique in all cases" is to be expected since
 it combines our technique with a complementary one.
 
-  Re: Reviewer D
+=== Reviewer D ===
 
-To your QUESTION, yes, that is the claim.
+re "QUESTION": yes, that is our claim.
 
-We thank reviewers B and D for the papers provided, and we agree that
-they might be useful in extensions of our work.
+
+
+
+A special thanks to reviewers B and D for pointing out those
+papers. We agree that they might be useful in extensions of our work.
