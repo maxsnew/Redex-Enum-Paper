@@ -22,6 +22,7 @@
   
   (f ::= 
      (add integer)
+     (mult real)
      produce-map/e-nat/e-with-add-of-given-int))
 
 (define-judgment-form L
@@ -75,6 +76,7 @@
 (define-metafunction L
   Eval-num : (f any) -> any
   [(Eval-num ((add integer) n)) ,(+ (term integer) (term n))]
+  [(Eval-num ((mult real) n)) ,(* (term real) (term n))]
   [(Eval-num (f any)) any])
 
 (define-metafunction L
@@ -133,6 +135,10 @@
    ,(:map/e (λ (x) (if (integer? x) (+ x (term integer)) x))
             (λ (x) (if (integer? x) (- x (term integer)) x))
             (term (to-enum e)))]
+  [(to-enum (map/e (mult real) any e))
+   ,(:map/e (λ (x) (if (integer? x) (* x (term real)) x))
+            (λ (x) (if (integer? x) (/ x (term real)) x))
+            (term (to-enum e)))]
   [(to-enum (map/e any any e)) (to-enum e)]
   [(to-enum (dep/e e produce-map/e-nat/e-with-add-of-given-int))
    ,(:dep/e (term (to-enum e))
@@ -141,10 +147,6 @@
                   (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :nat/e)
                   :nat/e)))]
   [(to-enum (dep/e e any)) (to-enum (cons/e e nat/e))])
-
-(define-metafunction L
-  to-fun : f -> any
-  [(to-fun (add integer)) ,(λ (x) (if (integer? x) (+ x (term integer)) x))])
 
 (define-metafunction L
   to-val : v -> any
@@ -312,9 +314,8 @@
 
 (module+ main (semantics-figure))
 
-#;
 (module+ test
-  (require rackunit) 
+  (require rackunit rackunit/log)
   
   (define (n->nn n)
     (define level (integer-sqrt n))
@@ -333,4 +334,58 @@
    (for/and ([x (in-range 1000)])
      (equal? (n->nn x) (n->nn/e x))))
   
-  (redex-check L (e natural_maybe-too-big) (try-one (term e) (term natural_maybe-too-big))))
+  (define (try-many e)
+    (for ([x (in-range 1000)])
+      (define trial (try-one e x))
+      (test-log! trial)
+      (unless trial
+        (eprintf "try-many: failed for ~s at ~s\n" e x))))
+  
+  (try-many (term nat/e))
+  (try-many (term (cons/e nat/e nat/e)))
+  (try-many (term (sum/e nat/e (cons/e nat/e nat/e))))
+  (try-many (term (sum/e (cons/e nat/e nat/e) nat/e)))
+  (try-many (term (map/e (add 1) (add -1) nat/e)))
+  
+  ;; test dep/e
+  (for ([x (in-range 1000)])
+    (define l
+      (judgment-holds 
+       (from-nat (dep/e nat/e produce-map/e-nat/e-with-add-of-given-int)
+                 ,x
+                 v)
+       (to-val v)))
+    (define passes (and (pair? l)
+                        (null? (cdr l))
+                        (let ([enum-value (car l)])
+                          (<= (car enum-value) (cdr enum-value)))))
+    (test-log! passes)
+    (unless passes
+      (eprintf "dep/e test failes for ~s, got ~s\n" x l)))
+  
+  ;; test we can recombine and get nats back
+  (for ([x (in-range 1000)])
+    (define l
+      (judgment-holds 
+       (from-nat (sum/e (map/e (mult 2) (mult 1/2) nat/e)
+                        (map/e (add 1) (add -1) (map/e (mult 2) (mult 1/2) nat/e)))
+                 ,x
+                 v)
+       (to-val v)))
+    (define n (and (pair? l) 
+                   (null? (cdr l))
+                   ;; above checks we got one result from the judgment
+                   (let ([v (car l)])
+                     ;; here we drop the sum/e injection
+                     (cdr v))))
+    (define passed? (equal? n x))
+    (test-log! passed?)
+    (unless passed?
+      (eprintf "nat/e recombination didn't work for ~s, got ~s" x l)))
+  
+  ;; this doesn't pass because dep/e does a different 
+  ;; order than the implementation in data/enumerate
+  #;
+  (redex-check 
+   L (e natural_maybe-too-big)
+   (try-one (term e) (term natural_maybe-too-big))))
