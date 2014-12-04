@@ -10,13 +10,15 @@ to improve that too.
 === Review C ===
 
 You seem to be asking us to work on a different problem that the one
-we chose to work on. The system is intended to be lightweight, giving
-a user a useful generator with no extra generation-specific
-input. Since the system doesn't have specific domain knowledge, fair
-enumerators are a "best-effort" that ensure that the generator is not
-biased in ways bad for testing. A more experienced user can then use
-the enumeration system as a library for constructing generators that
-are biased towards generating more useful inputs.
+we chose to work on. Yes, taking the property into account can be more
+productive when there is information that's easily accessible, but
+that information is not always going to be accessible for a variety of
+reasons. Furthermore, fair enumerators are "best-effort" to ensure
+that the generator is not biased in ways bad for testing. A more
+experienced user can then use the enumeration system as a library for
+constructing generators that are biased towards generating more useful
+inputs as they choose without having to worry about a bias that cannot
+be overcome because it is part of the core enumeration library.
 
 Meanwhile, you seem to have made a technical error in your comments.
 The "in-order" and "uniform random" are both using the enumeration
