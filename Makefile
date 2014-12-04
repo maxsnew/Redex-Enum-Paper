@@ -1,5 +1,5 @@
 paper.pdf:  DNE
-	scribble --pdf paper.scrbl
+	raco make -v paper.scrbl && scribble --pdf paper.scrbl
 
 
 DNE:
