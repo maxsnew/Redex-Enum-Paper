@@ -34,4 +34,4 @@ re "QUESTION": yes, that is our claim.
 
 
 A special thanks to reviewers B and D for pointing out those
-papers. We agree that they might be useful in extensions of our work.
+papers. We agree that they could be useful in extensions of our work.
