@@ -4,10 +4,16 @@ We think the reviewer is not judging the contributions of the paper
 within its intended domain. As we acknowledge in the paper, fair
 enumerations are not the "best" for all testing systems, however the
 context of the system is to be a lightweight, automatically-derived
-system accessible to a user with little to no experience with random
-testing. Since the system doesn't have specific domain knowledge, fair
-enumerators are a "best-effort" that ensure that the generator is not
-biased in ways bad for testing. A more experienced user can then use
-the enumeration system as a library for constructing enumerators that
-are biased towards generating more useful inputs.
+test generator accessible to a user with little to no experience with
+random testing. Since the system doesn't have specific domain
+knowledge, fair enumerators are a "best-effort" that ensure that the
+generator is not biased in ways bad for testing. A more experienced
+user can then use the enumeration system as a library for constructing
+generators that are biased towards generating more useful inputs.
 
+We are also concerned that the reviewer misinterpreted the evaluation
+section.  Just in case, we'd like to clarify that the "in-order" and
+"uniform random" are both using the enumeration system and the fact
+that "a combination of in order and ad hoc outperforms the fair
+technique in all cases" is to be expected sense it combines our
+technique with a complementary one.
