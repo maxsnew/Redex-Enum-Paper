@@ -3,6 +3,8 @@
          pict
          (prefix-in : data/enumerate))
 
+(provide semantics-figure sr)
+
 (define-language L
   (e ::= 
      nat/e
@@ -26,15 +28,15 @@
   #:mode (from-nat I I O)
   #:contract (from-nat e natural v)
   
-  [--------------------
+  [-------------------- "nat/e"
    (from-nat nat/e n n)]
   
   [(even n) (from-nat e_1 (ae-interp (/ n 2)) v)
-   -----------------------------------
+   ---------------------------------------------  "+l"
    (from-nat (sum/e e_1 e_2) n (cons 0 v))]
   
   [(odd n) (from-nat e_2 (ae-interp (/ (- n 1) 2)) v)
-   -----------------------------------
+   -------------------------------------------------- "+r"
    (from-nat (sum/e e_1 e_2) n (cons 1 v))]
   
   [(side-condition (ae-interp
@@ -43,7 +45,7 @@
                        (sqr (+ (integer-sqrt n) 1)))))
    (from-nat e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1)
    (from-nat e_2 (ae-interp (integer-sqrt n)) v_2)
-   --------------------------------------------
+   ----------------------------------------------------------- "cons/e x"
    (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))]
   
   [(side-condition (ae-interp
@@ -55,21 +57,21 @@
                                                               (sqr (integer-sqrt n))
                                                               1)
                                                            2))) v_2)
-   --------------------------------------------
+   ---------------------------------------------------------------------------------------- "cons/e y"
    (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))]
   
   
   [(from-nat e n v)
-   ---------------------------------------------
+   -------------------------------------------------  "map in"
    (from-nat (map/e f_1 f_2 e) n (Eval-num (f_1 v)))]
   
   [(from-nat e n (Eval-num (f_2 v)))
-   --------------------------------
+   ---------------------------------  "map out"
    (from-nat (map/e f_1 f_2 e) n v)]
   
   [(from-nat (cons/e e nat/e) n_1 (cons v_1 n_2))
    (from-nat (Eval-enum (f v_1)) n_2 v_2)
-   ------------------------------------------
+   ----------------------------------------------  "dep/e"
    (from-nat (dep/e e f) n_1 (cons v_1 v_2))])
 
 (define-metafunction L
@@ -285,9 +287,32 @@
 
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
-(module+ main
+(define linebreaking-with-cases
+  '(("+l" "+r")
+    ("cons/e x")
+    ("cons/e y")
+    ("map in" "map out")
+    ("nat/e" "dep/e")))
+
+(define (semantics-figure)
   (w/rewriters
-   (render-judgment-form from-nat)))
+   (apply
+    vc-append
+    20
+    (for/list ([line (in-list linebreaking-with-cases)])
+      (apply 
+       hb-append
+       30
+       (for/list ([name (in-list line)])
+         (parameterize ([judgment-form-cases (list name)])
+           (render-judgment-form from-nat))))))))
+
+(define-syntax-rule 
+  (sr e)
+  (sr/proc (λ () (render-term L e))))
+(define (sr/proc t) (parameterize ([default-font-size 11]) (t)))
+
+(module+ main (semantics-figure))
 
 #;
 (module+ test
