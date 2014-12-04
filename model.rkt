@@ -43,16 +43,14 @@
                     (< (- (+ (* 2 n) 1)
                           (sqr (integer-sqrt n)))
                        (sqr (+ (integer-sqrt n) 1)))))
-   (from-nat e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1)
-   (from-nat e_2 (ae-interp (integer-sqrt n)) v_2)
+   (from-nat e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1) (from-nat e_2 (ae-interp (integer-sqrt n)) v_2)
    ----------------------------------------------------------- "cons/e x"
    (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))]
   
   [(side-condition (ae-interp
                     (>= (- (+ (* 2 n) 1)
                            (sqr (integer-sqrt n)))
-                        (sqr (+ (integer-sqrt n) 1)))))
-   (from-nat e_1 (ae-interp (integer-sqrt n)) v_1)
+                        (sqr (+ (integer-sqrt n) 1))))) (from-nat e_1 (ae-interp (integer-sqrt n)) v_1)
    (from-nat e_2 (ae-interp (- n (sqr (integer-sqrt n)) (/ (- (sqr (+ (integer-sqrt n) 1))
                                                               (sqr (integer-sqrt n))
                                                               1)
