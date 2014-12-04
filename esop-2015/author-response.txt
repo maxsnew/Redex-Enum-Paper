@@ -1,31 +1,28 @@
   Re: Reviewer A
-  
-We appreciate the feedback on the formal semantics of the system, and
-we think this problem can be easily rectified in the final version of
-the paper.
 
-The comments on the translation of redex models to enumerations are
-also valid, and could also be easily added to section 4.
+After reading your review and reflecting on it, we completely agree
+that the clarifying power of a formal semantics would be a huge help
+to readers. We plan to include one in future versions of this paper
+(and indeed have already started working on it). Explaining the
+translation to Redex more carefully is similarly important and we plan
+to improve that too.
 
   Re: Reviewer C
 
-We think the reviewer is not judging the contributions of the paper
-within its intended domain. As we acknowledge in the paper, fair
-enumerations are not the "best" for all testing systems, however the
-context of the system is to be a lightweight, automatically-derived
-test generator accessible to a user with little to no experience with
-random testing. Since the system doesn't have specific domain
-knowledge, fair enumerators are a "best-effort" that ensure that the
-generator is not biased in ways bad for testing. A more experienced
-user can then use the enumeration system as a library for constructing
-generators that are biased towards generating more useful inputs.
+You seem to be asking us to work on a different problem that the one
+we chose to work on. The system is intended to be lightweight, giving
+a user a useful generator with no extra generation-specific
+input. Since the system doesn't have specific domain knowledge, fair
+enumerators are a "best-effort" that ensure that the generator is not
+biased in ways bad for testing. A more experienced user can then use
+the enumeration system as a library for constructing generators that
+are biased towards generating more useful inputs.
 
-We are also concerned that the reviewer misinterpreted the evaluation
-section.  Just in case, we'd like to clarify that the "in-order" and
-"uniform random" are both using the enumeration system and the fact
-that "a combination of in order and ad hoc outperforms the fair
-technique in all cases" is to be expected sense it combines our
-technique with a complementary one.
+Meanwhile, you seem to have made a technical error in your comments.
+The "in-order" and "uniform random" are both using the enumeration
+system and the fact that "a combination of in order and ad hoc
+outperforms the fair technique in all cases" is to be expected since
+it combines our technique with a complementary one.
 
   Re: Reviewer D
 
