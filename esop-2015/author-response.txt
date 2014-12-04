@@ -1,5 +1,14 @@
-  Re: Reviewer C
+  Re: Reviewer A
   
+We appreciate the feedback on the formal semantics of the system, and
+we think this problem can be easily rectified in the final version of
+the paper.
+
+The comments on the translation of redex models to enumerations are
+also valid, and could also be easily added to section 4.
+
+  Re: Reviewer C
+
 We think the reviewer is not judging the contributions of the paper
 within its intended domain. As we acknowledge in the paper, fair
 enumerations are not the "best" for all testing systems, however the
