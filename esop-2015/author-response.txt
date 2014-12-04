@@ -26,3 +26,10 @@ section.  Just in case, we'd like to clarify that the "in-order" and
 that "a combination of in order and ad hoc outperforms the fair
 technique in all cases" is to be expected sense it combines our
 technique with a complementary one.
+
+  Re: Reviewer D
+
+To your QUESTION, yes, that is the claim.
+
+We thank reviewers B and D for the papers provided, and we agree that
+they might be useful in extensions of our work.
