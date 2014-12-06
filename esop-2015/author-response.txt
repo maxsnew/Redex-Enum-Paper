@@ -20,7 +20,8 @@ of that effort is to change the how enumeration works (using
 dependency more).
 
 Dependent enumeration is also used in the game Tally Maze (included in
-"PLT Games" in the Racket distribution) to enumerate mazes.
+"PLT Games" in the Racket distribution:
+http://docs.racket-lang.org/games/tally-maze.html) to enumerate mazes.
 
 
 [ content above the line added after review E appeared ]
