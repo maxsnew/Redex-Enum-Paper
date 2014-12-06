@@ -1,3 +1,24 @@
+==== Review E ===
+
+Much of your review matches Review A, so we won't repeat those
+comments here. But yes: our more general set of combinators and the
+notion of fairness are the main contributions, in our opinion.
+
+As for Feat, the two main differences are our support for n-ary fair
+combinators and our support for dependency. Redex uses dependency only
+a little (because dependency is more expensive than other combinators,
+so we work hard to avoid it when possible for Redex) but it is
+necessary to support certain Redex programs (discussed at the bottom
+of page 15 and the top of 16).
+
+Dependency is, generally speaking, very natural. It is needed to
+support enumeration of well-typed terms (or even closed ones) and we
+use it in the game Tally Maze (included in "PLT Games" in the Racket
+distribution).
+
+[ content above the line added after review E appeared ]
+-------------------------------------------------------------------
+
 ==== Review A ===
 
 After reading your review and reflecting on it, we completely agree
