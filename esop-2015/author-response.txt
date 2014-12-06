@@ -5,22 +5,23 @@ comments here. But yes: our more general set of combinators and the
 notion of fairness are the main contributions, in our opinion.
 
 As for Feat, the two main differences are our support for n-ary fair
-combinators and our support for dependency. Redex uses dependency only
-a little (because dependency is more expensive than other combinators,
-so we work hard to avoid it when possible for Redex) but it is
-necessary to support certain Redex programs (discussed at the bottom
-of page 15 and the top of 16).
+combinators and our support for dependency. Redex currently uses
+dependency only a little (because dependency is more expensive than
+other combinators, so we work hard to avoid it when possible for
+Redex) but it is necessary to support certain Redex programs
+(discussed at the bottom of page 15 and the top of 16).
 
-Dependency is, generally speaking, very natural. It is needed to
-support enumeration of well-typed terms (or even closed ones) and we
-use it in the game Tally Maze (included in "PLT Games" in the Racket
-distribution).
-
-The Redex enumerators do, in fact, generate all bossible variable
+Dependency is, generally speaking, very natural. As one example, it is
+needed to support enumeration of well-typed terms, or even closed
+ones. The Redex enumerators currently generate all possible variable
 names because Redex doesn't have special support for binding
-forms. That feature is currently being implemented and when it's done,
-the enumerators would need to use dep/e to generate only open terms
-and to not duplicate alpha-equivalent terms.
+forms. That support is currently being implemented, however, and part
+of that effort is to change the how enumeration works (using
+dependency more).
+
+Dependent enumeration is also used in the game Tally Maze (included in
+"PLT Games" in the Racket distribution) to enumerate mazes.
+
 
 [ content above the line added after review E appeared ]
 -------------------------------------------------------------------
