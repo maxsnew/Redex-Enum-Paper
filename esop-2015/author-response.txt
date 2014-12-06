@@ -16,6 +16,12 @@ support enumeration of well-typed terms (or even closed ones) and we
 use it in the game Tally Maze (included in "PLT Games" in the Racket
 distribution).
 
+The Redex enumerators do, in fact, generate all bossible variable
+names because Redex doesn't have special support for binding
+forms. That feature is currently being implemented and when it's done,
+the enumerators would need to use dep/e to generate only open terms
+and to not duplicate alpha-equivalent terms.
+
 [ content above the line added after review E appeared ]
 -------------------------------------------------------------------
 
