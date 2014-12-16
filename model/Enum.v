@@ -1,19 +1,12 @@
-
-(* XXX I tried to make this Set -> Set and have Enum track what it
-returns, but it had to be Set -> Type. I thought this was what was
-complicating the _fun proofs, but it wasn't *)
-
 Inductive Enum : Set :=
 | E_Nat : Enum
 | E_Pair : Enum -> Enum -> Enum.
 Hint Constructors Enum.
 
-Fixpoint Enum_Type e :=
-  match e with
-    | E_Nat => nat
-    | E_Pair l r =>
-      (prod (Enum_Type l) (Enum_Type r))
-  end.
+Inductive Value : Set :=
+| V_Nat : nat -> Value
+| V_Pair : Value -> Value -> Value.
+Hint Constructors Value.
 
 Variable Pairing : nat -> nat -> nat -> Prop.
 Variable Pairing_to : nat -> nat -> nat.
@@ -27,17 +20,32 @@ Variable Pairing_from_sound :
     (l, r) = Pairing_from n ->
     Pairing n l r.
 Hint Resolve Pairing_from_sound.
+Variable Pairing_from_fun :
+  forall l r n1 n2,
+    Pairing n1 l r ->
+    Pairing n2 l r ->
+    n1 = n2.
+Variable Pairing_to_l_fun :
+  forall n l1 l2 r1 r2,
+    Pairing n l1 r1 ->
+    Pairing n l2 r2 ->
+    l1 = l2.
+Variable Pairing_to_r_fun :
+  forall n l1 l2 r1 r2,
+    Pairing n l1 r1 ->
+    Pairing n l2 r2 ->
+    r1 = r2.
 
-Inductive Enumerates : forall (e:Enum), nat -> (Enum_Type e) -> Prop :=
+Inductive Enumerates : Enum -> nat -> Value -> Prop :=
 | ES_Nat :
   forall n,
-    Enumerates E_Nat n n
+    Enumerates E_Nat n (V_Nat n)
 | ES_Pair :
   forall l r n ln rn lx rx,
     Pairing n ln rn ->
     Enumerates l ln lx ->
     Enumerates r rn rx ->
-    Enumerates (E_Pair l r) n (lx,rx).
+    Enumerates (E_Pair l r) n (V_Pair lx rx).
 Hint Constructors Enumerates.
 
 Theorem Enumerates_to_fun :
@@ -46,8 +54,18 @@ Theorem Enumerates_to_fun :
     Enumerates e n2 x ->
     n1 = n2.
 Proof.
-  induction e; intros x n1 n2 E1 E2.
-Admitted.
+  induction e; intros x n1 n2 E1 E2; inversion E1; inversion E2.
+  
+  congruence.
+
+  subst.
+  replace lx0 with lx in *; try congruence.
+  replace rx0 with rx in *; try congruence.
+  erewrite (IHe1 _ _ _ H2 H9) in *.
+  erewrite (IHe2 _ _ _ H5 H12) in *.
+  erewrite (Pairing_from_fun _ _ _ _ H1 H8) in *.
+  auto.
+Qed.
 
 Theorem Enumerates_from_fun :
   forall e n x1 x2,
@@ -55,22 +73,35 @@ Theorem Enumerates_from_fun :
     Enumerates e n x2 ->
     x1 = x2.
 Proof.
-  induction e; intros n x1 x2 E1 E2.
-Admitted.
+  induction e; intros x n1 n2 E1 E2; inversion E1; inversion E2; eauto.
+
+  subst.
+  erewrite (Pairing_to_l_fun _ _ _ _ _ H1 H8) in *.
+  erewrite (Pairing_to_r_fun _ _ _ _ _ H1 H8) in *.
+  erewrite (IHe1 _ _ _ H2 H9) in *.
+  erewrite (IHe2 _ _ _ H5 H12) in *.
+  auto.
+Qed.
 
 Definition Enumerates_to_dec:
   forall e x,
-    { n | Enumerates e n x }.
+    { n | Enumerates e n x } + { forall n, ~ Enumerates e n x }.
 Proof.
-  induction e.
+  induction e; destruct x; eauto;
+    try ( right; intros _n E; inversion E; fail ).
 
-  eauto.
+  rename x1 into lx. rename x2 into rx.
+  rename e1 into l. rename e2 into r.
+  destruct (IHe1 lx) as [[ln EL] | LF].
+  destruct (IHe2 rx) as [[rn ER] | RF].
+  
+  left. eauto.
 
-  intros [lx rx]. 
-  rename e1 into l. rename e2 into r.  
-  destruct (IHe1 lx) as [ln EL].
-  destruct (IHe2 rx) as [rn ER].
-  eauto.
+  right. intros _n E; inversion E.
+  eapply RF. apply H6.
+
+  right. intros _n E; inversion E.
+  eapply LF. apply H5.
 Qed.
 
 Definition Enumerates_from_dec:
@@ -87,7 +118,6 @@ Proof.
   destruct PF as [ln rn].
   destruct (IHe1 ln) as [lx EL].
   destruct (IHe2 rn) as [rx ER].
-  simpl.
   eauto.
 Qed.
 
