@@ -65,7 +65,8 @@ Defined.
 Inductive Enum : Set :=
 | E_Nat : Enum
 | E_Pair : Enum -> Enum -> Enum
-| E_Map : Bijection Value Value -> Enum -> Enum.
+| E_Map : Bijection Value Value -> Enum -> Enum
+| E_Dep : Enum -> (Value -> Enum) -> Enum.
 Hint Constructors Enum.
 
 Variable Pairing : nat -> nat -> nat -> Prop.
@@ -110,7 +111,13 @@ Inductive Enumerates : Enum -> nat -> Value -> Prop :=
   forall bi inner inner_x n x,
     Bijects bi x inner_x ->
     Enumerates inner n inner_x ->
-    Enumerates (E_Map bi inner) n x.
+    Enumerates (E_Map bi inner) n x
+| ES_Dep:
+  forall l f n ln rn lx rx,
+    Pairing n ln rn ->
+    Enumerates l ln lx ->
+    Enumerates (f lx) rn rx ->
+    Enumerates (E_Dep l f) n (V_Pair lx rx).
 Hint Constructors Enumerates.
 
 Theorem Enumerates_to_fun :
@@ -135,6 +142,13 @@ Proof.
   erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H7) in *.
   erewrite (IHe _ _ _ H4 H10) in *.
   auto.
+
+  subst.
+  inversion H12. subst lx0 rx0.
+  erewrite (IHe _ _ _ H3 H10) in *.
+  erewrite (H _ _ _ _ H6 H13) in *.
+  erewrite (Pairing_from_fun _ _ _ _ H2 H9) in *.
+  auto.
 Qed.
 
 Theorem Enumerates_from_fun :
@@ -155,6 +169,13 @@ Proof.
   subst.
   erewrite (IHe _ _ _ H4 H10) in *.
   erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H7) in *.
+  auto.
+
+  subst.
+  erewrite (Pairing_to_l_fun _ _ _ _ _ H2 H9) in *.
+  erewrite (Pairing_to_r_fun _ _ _ _ _ H2 H9) in *.
+  erewrite (IHe _ _ _ H3 H10) in *.
+  erewrite (H _ _ _ _ H6 H13) in *.
   auto.
 Qed.
 
@@ -198,6 +219,16 @@ Proof.
 
   right. intros _n E; inversion E.
   eapply LF. apply H5.
+
+  destruct (IHe x1) as [[ln EL] | LF].
+  destruct (H x1 x2) as [[rn ER] | RF].
+  left. eauto.
+
+  right. intros _n E; inversion E.
+  eapply RF. apply H7.
+
+  right. intros _n E; inversion E.
+  eapply LF. apply H6.
 Defined.
 
 Definition Enumerates_from_dec:
@@ -218,6 +249,14 @@ Proof.
   destruct (IHe n) as [x IHE].
   destruct (Bijects_from_dec _ _ b x) as [y B].
   exists y. eauto.
+
+  intros n.
+  rename e into l. rename e0 into f.
+  remember (Pairing_from n) as PF.
+  destruct PF as [ln rn].
+  destruct (IHe ln) as [lx EL].
+  destruct (H lx rn) as [rx ER].
+  exists (V_Pair lx rx). eauto.
 Defined.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
