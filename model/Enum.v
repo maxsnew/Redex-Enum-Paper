@@ -1,6 +1,10 @@
+Require Import Omega.
+
 Inductive Value : Set :=
 | V_Nat : nat -> Value
-| V_Pair : Value -> Value -> Value.
+| V_Pair : Value -> Value -> Value
+| V_Sum_Left : Value -> Value
+| V_Sum_Right : Value -> Value.
 Hint Constructors Value.
 
 Definition Bijection (A:Set) (B:Set) :=
@@ -66,7 +70,8 @@ Inductive Enum : Set :=
 | E_Nat : Enum
 | E_Pair : Enum -> Enum -> Enum
 | E_Map : Bijection Value Value -> Enum -> Enum
-| E_Dep : Enum -> (Value -> Enum) -> Enum.
+| E_Dep : Enum -> (Value -> Enum) -> Enum
+| E_Sum : Enum -> Enum -> Enum.
 Hint Constructors Enum.
 
 Variable Pairing : nat -> nat -> nat -> Prop.
@@ -117,7 +122,17 @@ Inductive Enumerates : Enum -> nat -> Value -> Prop :=
     Pairing n ln rn ->
     Enumerates l ln lx ->
     Enumerates (f lx) rn rx ->
-    Enumerates (E_Dep l f) n (V_Pair lx rx).
+    Enumerates (E_Dep l f) n (V_Pair lx rx)
+| ES_Sum_Left:
+  forall l r n ln lx,
+    n = 2 * ln ->
+    Enumerates l ln lx ->
+    Enumerates (E_Sum l r) n (V_Sum_Left lx)
+| ES_Sum_Right:
+  forall l r n rn rx,
+    n = 2 * rn + 1 ->
+    Enumerates r rn rx ->
+    Enumerates (E_Sum l r) n (V_Sum_Right rx).
 Hint Constructors Enumerates.
 
 Theorem Enumerates_to_fun :
@@ -149,6 +164,46 @@ Proof.
   erewrite (H _ _ _ _ H6 H13) in *.
   erewrite (Pairing_from_fun _ _ _ _ H2 H9) in *.
   auto.
+
+  subst.
+  inversion H9. subst lx0.
+  erewrite (IHe1 _ _ _ H4 H10).
+  auto.
+
+  subst.
+  congruence.
+
+  subst.
+  congruence.
+
+  subst.
+  inversion H9. subst rx0.
+  erewrite (IHe2 _ _ _ H4 H10).
+  auto.
+Qed.
+
+Lemma even_fun:
+  forall x y,
+    2 * x = 2 * y ->
+    x = y.
+Proof.
+  induction x as [|x]; intros; omega.
+Qed.
+
+Lemma odd_neq_even:
+  forall x y,
+    2 * x = 2 * y + 1 ->
+    False.
+Proof.
+  induction x as [|x]; intros; omega.
+Qed.
+
+Lemma odd_fun:
+  forall x y,
+    2 * x + 1 = 2 * y + 1 ->
+    x = y.
+Proof.
+  induction x as [|x]; intros; omega.
 Qed.
 
 Theorem Enumerates_from_fun :
@@ -176,6 +231,20 @@ Proof.
   erewrite (Pairing_to_r_fun _ _ _ _ _ H2 H9) in *.
   erewrite (IHe _ _ _ H3 H10) in *.
   erewrite (H _ _ _ _ H6 H13) in *.
+  auto.
+
+  subst.
+  erewrite (even_fun _ _ H7) in *.
+  erewrite (IHe1 _ _ _ H4 H10) in *.
+  auto.
+
+  subst.  apply odd_neq_even in H7. contradiction.
+
+  subst. symmetry in H7. apply odd_neq_even in H7. contradiction.
+
+  subst. 
+  erewrite (odd_fun _ _ H7) in *.
+  erewrite (IHe2 _ _ _ H4 H10) in *.
   auto.
 Qed.
 
@@ -229,6 +298,26 @@ Proof.
 
   right. intros _n E; inversion E.
   eapply LF. apply H6.
+
+  destruct (IHe1 x) as [[ln EL] | LF].
+  eauto.
+  right. intros _n E. inversion E.
+  eapply LF. apply H4.
+
+  destruct (IHe2 x) as [[rn ER] | RF].
+  eauto.
+  right. intros _n E. inversion E.
+  eapply RF. apply H4.
+Defined.
+
+Lemma even_odd_eq_dec:
+  forall n,
+    { l | n = 2 * l } + { r | n = 2 * r + 1 }.
+Proof.
+ induction n as [|n]; eauto.
+ destruct IHn as [[en EQ]|[on EQ]]; subst.
+ right. exists en. omega.
+ left. exists (S on). omega.
 Defined.
 
 Definition Enumerates_from_dec:
@@ -257,6 +346,13 @@ Proof.
   destruct (IHe ln) as [lx EL].
   destruct (H lx rn) as [rx ER].
   exists (V_Pair lx rx). eauto.
+
+  intros n.
+  destruct (even_odd_eq_dec n) as [[ln EQ] | [rn EQ]].
+  destruct (IHe1 ln) as [lx EL].
+  eauto.
+  destruct (IHe2 rn) as [rx ER].
+  eauto.
 Defined.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
