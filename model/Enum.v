@@ -74,33 +74,117 @@ Inductive Enum : Set :=
 | E_Sum : Enum -> Enum -> Enum.
 Hint Constructors Enum.
 
-Variable Pairing : nat -> nat -> nat -> Prop.
-Variable Pairing_to : nat -> nat -> nat.
-Variable Pairing_to_sound :
-  forall l r,
-    Pairing (Pairing_to l r) l r.
-Hint Resolve Pairing_to_sound.
-Variable Pairing_from : nat -> (nat * nat).
-Variable Pairing_from_sound :
-  forall n l r,
-    (l, r) = Pairing_from n ->
-    Pairing n l r.
-Hint Resolve Pairing_from_sound.
-Variable Pairing_from_fun :
+Inductive Pairing : nat -> nat -> nat -> Prop :=
+| P_XBig :
+  forall x y,
+    y <= x ->
+    Pairing (x*x + x + y) x y
+| P_XSmall :
+  forall x y,
+    x < y ->
+    Pairing (x + y*y) x y.
+Hint Constructors Pairing.
+
+Theorem Pairing_from_fun :
   forall l r n1 n2,
     Pairing n1 l r ->
     Pairing n2 l r ->
     n1 = n2.
-Variable Pairing_to_l_fun :
+Proof.
+  intros l r n1 n2 P1 P2.
+  inversion P1; inversion P2; subst; omega.
+Qed.
+
+Require Import Psatz.
+Lemma Pairing_to_incompat:
+  forall l1 l2 r1 r2,
+    r1 <= l1 ->
+    l2 < r2 ->
+    l2 + r2 * r2 = l1 * l1 + l1 + r1 ->
+    False.
+Proof.
+Admitted.
+
+Theorem Pairing_to_fun :
+  forall n l1 l2 r1 r2,
+    Pairing n l1 r1 ->
+    Pairing n l2 r2 ->
+    (l1 = l2) /\ (r1 = r2).
+Proof.
+  intros n l1 l2 r1 r2 P1 P2.
+  inversion P1; inversion P2; clear P1; clear P2; subst.
+
+  replace l1 with l2 in *. replace r1 with r2 in *. auto.
+  nia. nia.
+
+  cut False. contradiction.
+  eapply (Pairing_to_incompat _ _ _ _ H H3 H4).
+
+  cut False. contradiction.
+  symmetry in H4.
+  eapply (Pairing_to_incompat _ _ _ _ H3 H H4).
+
+  replace r1 with r2 in *. replace l1 with l2 in *. auto.
+  nia. nia.
+Qed.
+
+Theorem Pairing_to_l_fun :
   forall n l1 l2 r1 r2,
     Pairing n l1 r1 ->
     Pairing n l2 r2 ->
     l1 = l2.
-Variable Pairing_to_r_fun :
+Proof.
+  intros n l1 l2 r1 r2 P1 P2.
+  edestruct (Pairing_to_fun _ _ _ _ _ P1 P2). auto.
+Qed.
+Theorem Pairing_to_r_fun :
   forall n l1 l2 r1 r2,
     Pairing n l1 r1 ->
     Pairing n l2 r2 ->
     r1 = r2.
+Proof.
+  intros n l1 l2 r1 r2 P1 P2.
+  edestruct (Pairing_to_fun _ _ _ _ _ P1 P2). auto.
+Qed.
+
+Theorem Pairing_to_dec:
+  forall x y,
+    { n | Pairing n x y }.
+Proof.
+  intros x y.
+  destruct (le_lt_dec y x) as [BIG | SMALL]; eauto.
+Defined.
+
+Definition Pairing_to x y : nat := proj1_sig (Pairing_to_dec x y).
+Corollary Pairing_to_sound :
+  forall l r,
+    Pairing (Pairing_to l r) l r.
+Proof.
+  intros l r. unfold Pairing_to.
+  remember (Pairing_to_dec l r) as vn.
+  destruct vn as [n P]. simpl. auto.
+Qed.
+Hint Resolve Pairing_to_sound.
+
+Theorem Pairing_from_dec:
+  forall n,
+    { xy | Pairing n (fst xy) (snd xy) }.
+Proof.
+  intros n.
+Admitted.
+
+Definition Pairing_from n : (nat * nat) := proj1_sig (Pairing_from_dec n).
+Corollary Pairing_from_sound :
+  forall n l r,
+    (l, r) = Pairing_from n ->
+    Pairing n l r.
+Proof.
+  intros n l r. unfold Pairing_from.
+  remember (Pairing_from_dec n) as vlr.
+  destruct vlr as [[l' r'] P]. simpl in *.
+  intros EQ. congruence. 
+Qed.
+Hint Resolve Pairing_from_sound.
 
 Inductive Enumerates : Enum -> nat -> Value -> Prop :=
 | ES_Nat :
