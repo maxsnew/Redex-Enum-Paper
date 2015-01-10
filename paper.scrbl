@@ -1,4 +1,4 @@
-#lang scribble/lncs
+#lang scribble/sigplan
 
 @(require "cite.rkt" 
           "util.rkt"
@@ -30,12 +30,21 @@
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   Practical, Fair, and Efficient Enumeration for Algebraic Data-Structures
 }
-@authors[(author #:inst "1" "Max New")
-         (author #:inst "1" "Burke Fetscher")
-         (author #:inst "2" "Jay McCarthy" )
-         (author #:inst "1" "Robert Bruce Findler")]
-@institutes[(institute "Northwestern University")
-            (institute "Vassar College")]
+@authorinfo["Max New"
+	    "Northwestern University"
+	    "max.new@eecs.northwestern.edu"]
+
+@authorinfo["Burke Fetscher"
+	    "Northwestern University"
+	    "burke.fetscher@eecs.northwestern.edu"]
+
+@authorinfo["Jay McCarthy"
+	    "Vassar College"
+	    "TODO@vassar_I_guess.edu"]
+
+@authorinfo["Robert Bruce Findler"
+	    "Northwestern University"
+	    "robby@eecs.northwestern.edu"]
 
 @abstract{
  This paper reports on the design of a set of

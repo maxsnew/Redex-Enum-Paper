@@ -1,4 +1,4 @@
-#lang scribble/lncs
+#lang scribble/sigplan
 
 @(require pict
           scribble/manual
