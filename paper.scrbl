@@ -21,7 +21,18 @@
                  #"\\savesymbol{textquotesingle}\n"
                  #"\\newcommand{\\textquotesingle}{"
                  #"\\fontfamily{cmtt}\\selectfont{}\\origtextquotesingle}\n"
-                 
+
+                 ;; theorem, proof, and \qed definitions from
+                 ;; http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/Theorems.html
+                 ;; so that the paper at least runs
+                 #"\\newtheorem{theorem}{Theorem}\n"
+                 #"\\newenvironment{proof}[1][Proof]{\\begin{trivlist}\n"
+                 #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
+                 #"\\newcommand{\\qed}{\\nobreak \\ifvmode \\relax \\else\n"
+                 #"\\ifdim\\lastskip<1.5em \\hskip-\\lastskip\n"
+                 #"\\hskip1.5em plus0em minus0.5em \\fi \\nobreak\n"
+                 #"\\vrule height0.75em width0.5em depth0.25em\\fi}\n"
+
                  ;; used for the table of the bugs
                  #"\\newenvironment{IntroWrapFigure}"
                  #"{\\begin{wrapfigure}{r}{4in}}"
