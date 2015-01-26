@@ -1,11 +1,21 @@
 Require Import Omega.
 
-Inductive Value : Set :=
-| V_Nat : nat -> Value
-| V_Pair : Value -> Value -> Value
-| V_Sum_Left : Value -> Value
-| V_Sum_Right : Value -> Value.
+Inductive Value : Set -> Type :=
+| V_Nat : nat -> Value nat
+| V_Pair : forall {A B}, Value A -> Value B -> Value (A * B)
+| V_Sum_Left : forall {A} {B : Set}, Value A -> Value (A + B)
+| V_Sum_Right : forall {A : Set} {B}, Value B -> Value (A + B).
 Hint Constructors Value.
+
+Fixpoint UnVal {A} (v : Value A) : A :=
+  match v with
+    | V_Nat n => n
+    | V_Pair _ _ l r => (UnVal l, UnVal r)
+    | V_Sum_Left _ _ vl => inl (UnVal vl)
+    | V_Sum_Right _ _ vr => inr (UnVal vr)
+  end.
+
+Eval compute in (UnVal (V_Pair (V_Nat 1) (V_Nat 2))).
 
 Definition Bijection (A:Set) (B:Set) :=
   { fg : (A->B)*(B->A) |
@@ -66,12 +76,12 @@ Proof.
   simpl in *. auto.
 Defined.
 
-Inductive Enum : Set :=
-| E_Nat : Enum
-| E_Pair : Enum -> Enum -> Enum
-| E_Map : Bijection Value Value -> Enum -> Enum
-| E_Dep : Enum -> (Value -> Enum) -> Enum
-| E_Sum : Enum -> Enum -> Enum.
+Inductive Enum : Set -> Type :=
+| E_Nat : Enum nat
+| E_Pair : forall {A B}, Enum A -> Enum B -> Enum (A * B)
+| E_Map : forall {A B}, Bijection B A -> Enum A -> Enum B
+| E_Dep : forall {A B}, Enum A -> (A -> Enum B) -> Enum (A * B)
+| E_Sum : forall {A B}, Enum A -> Enum B -> Enum (A + B).
 Hint Constructors Enum.
 
 Inductive Pairing : nat -> nat -> nat -> Prop :=
@@ -103,6 +113,7 @@ Lemma Pairing_to_incompat:
     l2 + r2 * r2 = l1 * l1 + l1 + r1 ->
     False.
 Proof.
+  
 Admitted.
 
 Theorem Pairing_to_fun :
@@ -186,48 +197,55 @@ Proof.
 Qed.
 Hint Resolve Pairing_from_sound.
 
-Inductive Enumerates : Enum -> nat -> Value -> Prop :=
+Inductive Enumerates : forall {A}, Enum A -> nat -> A -> Prop :=
 | ES_Nat :
   forall n,
-    Enumerates E_Nat n (V_Nat n)
+    Enumerates E_Nat n n
 | ES_Pair :
-  forall l r n ln rn lx rx,
+  forall A B l r n ln rn lx rx,
     Pairing n ln rn ->
-    Enumerates l ln lx ->
-    Enumerates r rn rx ->
-    Enumerates (E_Pair l r) n (V_Pair lx rx)
+    @Enumerates A l ln lx ->
+    @Enumerates B r rn rx ->
+    Enumerates (E_Pair l r) n (lx, rx)
 | ES_Map :
-  forall bi inner inner_x n x,
+  forall A B (bi : Bijection A B) inner inner_x n x,
     Bijects bi x inner_x ->
     Enumerates inner n inner_x ->
     Enumerates (E_Map bi inner) n x
 | ES_Dep:
-  forall l f n ln rn lx rx,
+  forall A B l f n ln rn lx rx,
     Pairing n ln rn ->
-    Enumerates l ln lx ->
-    Enumerates (f lx) rn rx ->
-    Enumerates (E_Dep l f) n (V_Pair lx rx)
+    @Enumerates A l ln lx ->
+    @Enumerates B (f lx) rn rx ->
+    Enumerates (E_Dep l f) n (lx, rx)
 | ES_Sum_Left:
-  forall l r n ln lx,
+  forall (A B : Set) l r n ln lx,
     n = 2 * ln ->
-    Enumerates l ln lx ->
-    Enumerates (E_Sum l r) n (V_Sum_Left lx)
+    @Enumerates A l ln lx ->
+    Enumerates (E_Sum l r) n (@inl A B lx)
 | ES_Sum_Right:
-  forall l r n rn rx,
+  forall (A B : Set) l r n rn rx,
     n = 2 * rn + 1 ->
-    Enumerates r rn rx ->
-    Enumerates (E_Sum l r) n (V_Sum_Right rx).
+    @Enumerates B r rn rx ->
+    Enumerates (E_Sum l r) n (@inr A B rx).
 Hint Constructors Enumerates.
 
+Require Import ssreflect.
 Theorem Enumerates_to_fun :
-  forall e x n1 n2,
-    Enumerates e n1 x ->
-    Enumerates e n2 x ->
+  forall A e x n1 n2,
+    @Enumerates A e n1 x ->
+    @Enumerates A e n2 x ->
     n1 = n2.
 Proof.
   induction e; intros x n1 n2 E1 E2; inversion E1; inversion E2.
+  rewrite <- H in H0.
+  symmetry.
 
-  congruence.
+  remember (existT (fun x0 : Set => x0) nat) as blah.
+
+  destruct H0.
+  destruct H; destruct H0.
+  auto.
 
   subst.
   replace lx0 with lx in *; try congruence.
