@@ -529,4 +529,27 @@ Proof.
     eauto.
 Defined.
 
+Definition Trace_on (e : Enum) (n : nat) : Trace :=
+  let (nt, _) := (Enumerates_from_dec e n) in snd nt.
+
+Fixpoint Trace_less_than (e : Enum) n : Trace :=
+  match n with 
+    | 0 => trace_zero
+    | S n' => trace_plus (Trace_on e n') (Trace_less_than e n')
+  end.
+
+Definition Fair (k : Enum -> Enum -> Enum) :=
+  forall n,
+    exists m count,
+      forall e1 e2,
+        n < m /\ Trace_less_than (k (E_Trace lft e1) (E_Trace rght e2)) m = (count, count).
+
+Theorem Sum_Fair : Fair E_Sum.
+Admitted.
+
+Theorem Pair_Fair : Fair E_Pair.
+Admitted.
+
+(* Cant' prove (cons e1 (cons e2 e3)) is unfair because you need to trace 3 things.. *)
+
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
