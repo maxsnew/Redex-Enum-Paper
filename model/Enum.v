@@ -211,10 +211,6 @@ Definition trace_right n (t : Trace) : Trace :=
   in (l, n).
 
 Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
-| ES_Trace_Left :
-    forall n e v t,
-      Enumerates e n v t ->
-      Enumerates (E_Trace lft e) n v (trace_left 1 t)
 | ES_Nat :
   forall n,
     Enumerates E_Nat n (V_Nat n) trace_zero
@@ -244,61 +240,64 @@ Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
   forall l r n rn rx t,
     n = 2 * rn + 1 ->
     Enumerates r rn rx t ->
-    Enumerates (E_Sum l r) n (V_Sum_Right rx) t.
+    Enumerates (E_Sum l r) n (V_Sum_Right rx) t
+| ES_Trace_Left :
+    forall n e v t,
+      Enumerates e n v t ->
+      Enumerates (E_Trace lft e) n v (trace_left 1 t)
+| ES_Trace_Right :
+    forall n e v t,
+      Enumerates e n v t ->
+      Enumerates (E_Trace rght e) n v (trace_right 1 t)
+.
 Hint Constructors Enumerates.
 
+(* Couldn't prove this with traces assumed to be equal. *)
 Theorem Enumerates_to_fun :
-  forall e x n1 n2 t,
-    Enumerates e n1 x t ->
-    Enumerates e n2 x t ->
+  forall e x n1 n2 t1 t2,
+    Enumerates e n1 x t1 ->
+    Enumerates e n2 x t2 ->
     n1 = n2.
-Admitted.
-(* Proof. *)
-(*   induction e; intros x n1 n2 t E1 E2; inversion E1; inversion E2; subst; try congruence. *)
+Proof.
+  induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; subst; try congruence.
 
-(*   replace lx0 with lx in *; try congruence. *)
-(*   replace rx0 with rx in *; try congruence. *)
-(*   replace lt0 with lt in *. *)
-(*   Focus 2. *)
-  
-(*   assert (ln = ln0). *)
-(*   - apply IHe1 with (x := lx) (t := lt). *)
-(*     assumption. *)
-    
-(*   remember (IHe1 lx ln rn _ _). *)
-(*   erewrite (IHe1 lx ln rn _ _) in *. *)
-(*   erewrite (IHe2 _ _ _ H5 H12) in *. *)
-(*   erewrite (Pairing_from_fun _ _ _ _ H1 H8) in *. *)
-(*   auto. *)
+  (* E_Pair *)
+  - replace lx0 with lx in *; try congruence.
+    replace rx0 with rx in *; try congruence.
+    erewrite (IHe1 _ _ _ _ _ H2 H10) in *.
+    erewrite (IHe2 _ _ _ _ _ H6 H14) in *.
+    erewrite (Pairing_from_fun _ _ _ _ H1 H9) in *.
+    auto.
 
-(*   subst. *)
-(*   erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H7) in *. *)
-(*   erewrite (IHe _ _ _ H4 H10) in *. *)
-(*   auto. *)
+  (* E_Map *)
+  - erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H8) in *.
+    erewrite (IHe _ _ _ _ _ H5 H12) in *.
+    auto.
 
-(*   subst. *)
-(*   inversion H12. subst lx0 rx0. *)
-(*   erewrite (IHe _ _ _ H3 H10) in *. *)
-(*   erewrite (H _ _ _ _ H6 H13) in *. *)
-(*   erewrite (Pairing_from_fun _ _ _ _ H2 H9) in *. *)
-(*   auto. *)
+  (* E_Dep *)
+  - inversion H13.
+    subst.
+    erewrite (IHe _ _ _ _ _ H3 H11) in *.
+    erewrite (H _ _ _ _ _ _ H7 H15) in *.
+    erewrite (Pairing_from_fun _ _ _ _ H2 H10) in *.
+    auto.
 
-(*   subst. *)
-(*   inversion H9. subst lx0. *)
-(*   erewrite (IHe1 _ _ _ H4 H10). *)
-(*   auto. *)
+  (* E_Sum Left *)
+  - inversion H10; subst.
+    erewrite (IHe1 _ _ _ _ _ H5 H12).
+    auto.
 
-(*   subst. *)
-(*   congruence. *)
+  (* E_Sum Right *)
+  - inversion H10; subst.
+    erewrite (IHe2 _ _ _ _ _ H5 H12).
+    auto.
 
-(*   subst. *)
-(*   congruence. *)
+  (* E_Trace_Left *)
+  - apply IHe with (x := x) (t1 := t) (t2 := t0); assumption.
 
-(*   subst. *)
-(*   inversion H9. subst rx0. *)
-(*   erewrite (IHe2 _ _ _ H4 H10). *)
-(*   auto. *)
-(* Qed. *)
+  (* E_Trace_Right *)
+  - apply IHe with (x := x) (t1 := t) (t2 := t0); assumption.
+Qed.
 
 Lemma even_fun:
   forall x y,
@@ -330,7 +329,7 @@ Theorem Enumerates_from_fun :
     Enumerates e n x2 t2 ->
     x1 = x2 /\ t1 = t2.
 Proof.
-  induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; eauto; subst.
+  induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; eauto; subst; try congruence.
   
   (* E_Pair *)
   - erewrite (Pairing_to_l_fun _ _ _ _ _ H1 H9) in *.
@@ -368,9 +367,12 @@ Proof.
     destruct (IHe2 _ _ _ _ _ H5 H12); subst.
     auto.
 
-  (* E_Trace *)
+  (* E_Trace_Left *)
   - destruct (IHe _ _ _ _ _ H4 H10); subst.
     auto.
+
+  (* E_Trace_Right *)
+  - destruct (IHe _ _ _ _ _ H4 H10); subst; auto.
 Qed.
 
 Lemma Enumerates_to_dec_Map :
