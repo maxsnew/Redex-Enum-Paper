@@ -375,66 +375,105 @@ Proof.
   - destruct (IHe _ _ _ _ _ H4 H10); subst; auto.
 Qed.
 
+(* Map/Trace compatibility lemmas *)
 Lemma Enumerates_to_dec_Map :
   forall b e x,
     (forall x,
-      { n | Enumerates e n x }
-      + { forall n, ~ Enumerates e n x }) ->
-    { n | Enumerates (E_Map b e) n x }
-    + { forall n, ~ Enumerates (E_Map b e) n x }.
+      { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }
+      + { forall n t, ~ Enumerates e n x t }) ->
+    { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Map b e) n x t }
+    + { forall n t, ~ Enumerates (E_Map b e) n x t }.
 Proof.
   intros b e x IHe.
   destruct (Bijects_to_dec _ _ b x) as [y B].
-  destruct (IHe y) as [[n IHE] | NIH].
+  destruct (IHe y) as [[nt IHE] | NIH].
   
-  left. exists n. eauto.
-  right. intros n E.
-  inversion E. subst n0 x0 inner bi.
-  rename H1 into B'. rename H4 into IHE.
+  left. exists nt. destruct nt. eauto.
+  
+  right. intros n t E.
+  inversion E. subst n0 x0 t0 inner bi.
+  rename H1 into B'. rename H5 into IHE.
   erewrite (Bijects_fun_right _ _ _ _ _ _ B B') in *.
   eapply NIH. apply IHE.
 Defined.
 Hint Resolve Enumerates_to_dec_Map.
 
+Lemma Enumerates_to_dec_Trace :
+  forall lor e x,
+    (forall x,
+      { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }
+      + { forall n t, ~ Enumerates e n x t }) ->
+    { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Trace lor e) n x t }
+    + { forall n t, ~ Enumerates (E_Trace lor e) n x t }.
+Proof.
+  intros lor e x IHe.
+  destruct (IHe x) as [[[n t] IHE] | NIH].
+
+  left.
+  destruct lor.
+  exists (n, trace_left  1 t); eauto.
+  exists (n, trace_right 1 t); eauto.
+
+  right.
+  intros n t E.
+  inversion E; eapply NIH; eauto.
+Defined.
+Hint Resolve Enumerates_to_dec_Trace.
+
+
 Definition Enumerates_to_dec:
   forall e x,
-    { n | Enumerates e n x } + { forall n, ~ Enumerates e n x }.
+    { nt : nat * Trace | let (n, t) := nt in Enumerates e n x t } + { forall n t, ~ Enumerates e n x t }.
 Proof.
   induction e; destruct x; eauto;
-    try ( right; intros _n E; inversion E; fail ).
+    try ( right; intros _n _t E; inversion E; fail ).
 
-  rename x1 into lx. rename x2 into rx.
-  rename e1 into l. rename e2 into r.
-  destruct (IHe1 lx) as [[ln EL] | LF].
-  destruct (IHe2 rx) as [[rn ER] | RF].
+  (* E_Nat *)
+  - left; exists (n, trace_zero); constructor.
 
-  left. eauto.
+  (* E_Pair *)
+  - rename x1 into lx. rename x2 into rx.
+    rename e1 into l. rename e2 into r.
+    destruct (IHe1 lx) as [[[ln lt] EL] | LF].
+    destruct (IHe2 rx) as [[[rn rt] ER] | RF].
+    left.
+    destruct (Pairing_to_dec ln rn) as [n P].
+    exists (n, trace_plus lt rt).
+    eauto.
 
-  right. intros _n E; inversion E.
-  eapply RF. apply H6.
+    right. intros _n _t E; inversion E; subst.
+    eapply RF; eauto.
 
-  right. intros _n E; inversion E.
-  eapply LF. apply H5.
+    right. intros _n _t E; inversion E; subst.
+    eapply LF; eauto.
 
-  destruct (IHe x1) as [[ln EL] | LF].
-  destruct (H x1 x2) as [[rn ER] | RF].
-  left. eauto.
+  (* E_Dep *)
+  - destruct (IHe x1) as [[[ln lt] EL] | LF].
+    destruct (H x1 x2) as [[[rn rt] ER] | RF].
+    left.
+    destruct (Pairing_to_dec ln rn) as [n P].
+    exists (n, trace_plus lt rt).
+    eauto.
 
-  right. intros _n E; inversion E.
-  eapply RF. apply H7.
+    right. intros _n _t E; inversion E; subst.
+    eapply RF; eauto.
 
-  right. intros _n E; inversion E.
-  eapply LF. apply H6.
+    right. intros _n _t E; inversion E; subst.
+    eapply LF; eauto.
 
-  destruct (IHe1 x) as [[ln EL] | LF].
-  eauto.
-  right. intros _n E. inversion E.
-  eapply LF. apply H4.
+  (* E_Sum Left *)
+  - destruct (IHe1 x) as [[[ln lt] EL] | LF].
+    left. exists (2 * ln, lt). eauto.
+      
+    right. intros _n _t E. inversion E; subst.
+    eapply LF; eauto.
 
-  destruct (IHe2 x) as [[rn ER] | RF].
-  eauto.
-  right. intros _n E. inversion E.
-  eapply RF. apply H4.
+  (* E_Sum Right *)
+  - destruct (IHe2 x) as [[[rn rt] ER] | RF].
+    left. exists (2 * rn + 1, rt). eauto.
+
+    right. intros _n _t E. inversion E; subst.
+    eapply RF; eauto.
 Defined.
 
 Lemma even_odd_eq_dec:
@@ -449,7 +488,7 @@ Defined.
 
 Definition Enumerates_from_dec:
   forall e n,
-    { x | Enumerates e n x }.
+    { (x, t) | Enumerates e n x t }.
 Proof.
   induction e; eauto.
 
