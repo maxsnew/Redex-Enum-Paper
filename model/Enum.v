@@ -188,7 +188,7 @@ Proof.
   intros n l r. unfold Pairing_from.
   remember (Pairing_from_dec n) as vlr.
   destruct vlr as [[l' r'] P]. simpl in *.
-  intros EQ. congruence. 
+  intros EQ. congruence.
 Qed.
 Hint Resolve Pairing_from_sound.
 
@@ -197,9 +197,9 @@ Definition Trace := prod nat nat.
 Definition trace_zero : Trace := (0, 0).
 Definition trace_plus (t1 t2 : Trace) : Trace :=
   let (l1, r1) := t1
-  in 
+  in
   let (l2, r2) := t2
-  in 
+  in
   (l1 + l2, r1 + r2).
 
 Definition trace_left n (t : Trace) : Trace :=
@@ -247,7 +247,7 @@ Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
     n = 2 * rn + 1 ->
     Enumerates r rn rx t ->
     Enumerates (E_Sum l r) n (V_Sum_Right rx) t
-| ES_Trace : 
+| ES_Trace :
     forall n lor e v t,
       Enumerates e n v t ->
       Enumerates (E_Trace lor e) n v (trace_at 1 lor t)
@@ -329,7 +329,7 @@ Theorem Enumerates_from_fun :
     x1 = x2 /\ t1 = t2.
 Proof.
   induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; eauto; subst; try congruence.
-  
+
   (* E_Pair *)
   - erewrite (Pairing_to_l_fun _ _ _ _ _ H1 H9) in *.
     erewrite (Pairing_to_r_fun _ _ _ _ _ H1 H9) in *.
@@ -383,9 +383,9 @@ Proof.
   intros b e x IHe.
   destruct (Bijects_to_dec _ _ b x) as [y B].
   destruct (IHe y) as [[nt IHE] | NIH].
-  
+
   left. exists nt. destruct nt. eauto.
-  
+
   right. intros n t E.
   inversion E. subst n0 x0 t0 inner bi.
   rename H1 into B'. rename H5 into IHE.
@@ -458,7 +458,7 @@ Proof.
   (* E_Sum Left *)
   - destruct (IHe1 x) as [[[ln lt] EL] | LF].
     left. exists (2 * ln, lt). eauto.
-      
+
     right. intros _n _t E. inversion E; subst.
     eapply LF; eauto.
 
@@ -470,14 +470,40 @@ Proof.
     eapply RF; eauto.
 Defined.
 
-Lemma even_odd_eq_dec:
+Lemma even_SS :
   forall n,
-    { l | n = 2 * l } + { r | n = 2 * r + 1 }.
+    { l | n = 2 * l } -> { m | S (S n) = 2 * m }.
 Proof.
- induction n as [|n]; eauto.
- destruct IHn as [[en EQ]|[on EQ]]; subst.
- right. exists en. omega.
- left. exists (S on). omega.
+  intros n P.
+  destruct P.
+  exists ((S x)).
+  omega.
+Defined.
+
+Lemma odd_SS :
+  forall n,
+    { r | n = 2 * r + 1 } -> { m | S (S n) = 2 * m + 1 }.
+Proof.
+  intros n P.
+  destruct P.
+  exists ((S x)).
+  omega.
+Defined.
+
+Fixpoint even_odd_eq_dec n : { l | n = 2 * l } + { r | n = 2 * r + 1 }.
+Proof.
+  refine (match n with
+            | 0 => _
+            | S 0 => _
+            | S (S n') => _
+          end).
+  left;  exists 0; auto.
+  right; exists 0; auto.
+
+  clear n0.
+  destruct (even_odd_eq_dec n').
+  left; apply even_SS; assumption.
+  right; apply odd_SS; assumption.
 Defined.
 
 Definition Enumerates_from_dec:
@@ -513,15 +539,15 @@ Proof.
 
   (* E_Sum *)
   - destruct (even_odd_eq_dec n) as [[ln EQ] | [rn EQ]].
-    
+
     destruct (IHe1 ln) as [[lx lt] EL].
     exists (V_Sum_Left lx, lt).
     eauto.
-    
+
     destruct (IHe2 rn) as [[rx rt] ER].
     exists (V_Sum_Right rx, rt).
     eauto.
-    
+
   (* E_Trace *)
   - rename l into lor.
     destruct (IHe n) as [[x t] E].
@@ -533,19 +559,57 @@ Definition Trace_on (e : Enum) (n : nat) : Trace :=
   let (nt, _) := (Enumerates_from_dec e n) in snd nt.
 
 Fixpoint Trace_less_than (e : Enum) n : Trace :=
-  match n with 
+  match n with
     | 0 => trace_zero
     | S n' => trace_plus (Trace_on e n') (Trace_less_than e n')
   end.
 
 Definition Fair (k : Enum -> Enum -> Enum) :=
   forall n,
-    exists m count,
-      forall e1 e2,
-        n < m /\ Trace_less_than (k (E_Trace lft e1) (E_Trace rght e2)) m = (count, count).
+    exists equilibrium count,
+      n < equilibrium /\ Trace_less_than (k (E_Trace lft E_Nat) (E_Trace rght E_Nat)) equilibrium = (count, count).
 
+Lemma Sum_Parity_Trace :
+  forall n,
+    Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) n
+    = if even_odd_eq_dec n
+      then (1, 0)
+      else (0, 1).
+Proof.
+  intros n.
+  remember (even_odd_eq_dec n) as mH.
+  unfold Trace_on.
+  simpl.
+  destruct mH; rewrite <-HeqmH; destruct s; auto.
+Qed.
+
+(* Proof idea: equilibrium = 2 * n + 2, count = n + 1 *)
 Theorem Sum_Fair : Fair E_Sum.
-Admitted.
+Proof.
+  unfold Fair.
+  intros n.
+  exists (2 * n + 2).
+  exists (S n).
+  split.
+  omega.
+
+  induction n; auto.
+
+  replace (2 * S n + 2) with (S (S (2 * n + 2))) by omega.
+  simpl.
+  replace (n + (n + 0) + 2) with (2 * n + 2) by omega.
+  rewrite IHn.
+  replace (2 * n + 2) with (S (S (2 * n))) in * by omega.
+
+  assert ((Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) = (1, 0)).
+  admit.
+  rewrite H.
+  assert ((Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) = (0, 1)).
+  admit.
+  rewrite H0.
+
+  auto.
+Qed.
 
 Theorem Pair_Fair : Fair E_Pair.
 Admitted.
