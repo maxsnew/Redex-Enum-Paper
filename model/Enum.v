@@ -210,6 +210,12 @@ Definition trace_right n (t : Trace) : Trace :=
   let (l, _) := t
   in (l, n).
 
+Definition trace_at n lor t : Trace :=
+  match lor with
+    | lft  => trace_left n t
+    | rght => trace_right n t
+  end.
+
 Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
 | ES_Nat :
   forall n,
@@ -241,14 +247,10 @@ Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
     n = 2 * rn + 1 ->
     Enumerates r rn rx t ->
     Enumerates (E_Sum l r) n (V_Sum_Right rx) t
-| ES_Trace_Left :
-    forall n e v t,
+| ES_Trace : 
+    forall n lor e v t,
       Enumerates e n v t ->
-      Enumerates (E_Trace lft e) n v (trace_left 1 t)
-| ES_Trace_Right :
-    forall n e v t,
-      Enumerates e n v t ->
-      Enumerates (E_Trace rght e) n v (trace_right 1 t)
+      Enumerates (E_Trace lor e) n v (trace_at 1 lor t)
 .
 Hint Constructors Enumerates.
 
@@ -293,9 +295,6 @@ Proof.
     auto.
 
   (* E_Trace_Left *)
-  - apply IHe with (x := x) (t1 := t) (t2 := t0); assumption.
-
-  (* E_Trace_Right *)
   - apply IHe with (x := x) (t1 := t) (t2 := t0); assumption.
 Qed.
 
@@ -370,9 +369,6 @@ Proof.
   (* E_Trace_Left *)
   - destruct (IHe _ _ _ _ _ H4 H10); subst.
     auto.
-
-  (* E_Trace_Right *)
-  - destruct (IHe _ _ _ _ _ H4 H10); subst; auto.
 Qed.
 
 (* Map/Trace compatibility lemmas *)
@@ -410,9 +406,7 @@ Proof.
   destruct (IHe x) as [[[n t] IHE] | NIH].
 
   left.
-  destruct lor.
-  exists (n, trace_left  1 t); eauto.
-  exists (n, trace_right 1 t); eauto.
+  exists (n, trace_at 1 lor t); eauto.
 
   right.
   intros n t E.
@@ -488,37 +482,51 @@ Defined.
 
 Definition Enumerates_from_dec:
   forall e n,
-    { (x, t) | Enumerates e n x t }.
+    { xt : Value * Trace | let (x, t) := xt in Enumerates e n x t }.
 Proof.
-  induction e; eauto.
+  induction e; intros n; eauto.
 
-  intros n.
-  rename e1 into l. rename e2 into r.
-  remember (Pairing_from n) as PF.
-  destruct PF as [ln rn].
-  destruct (IHe1 ln) as [lx EL].
-  destruct (IHe2 rn) as [rx ER].
-  eauto.
+  (* E_Nat *)
+  - exists (V_Nat n, trace_zero); eauto.
 
-  intros n.
-  destruct (IHe n) as [x IHE].
-  destruct (Bijects_from_dec _ _ b x) as [y B].
-  exists y. eauto.
+  (* E_pair *)
+  - rename e1 into l. rename e2 into r.
+    remember (Pairing_from n) as PF.
+    destruct PF as [ln rn].
+    destruct (IHe1 ln) as [[lx lt] EL].
+    destruct (IHe2 rn) as [[rx rt] ER].
+    exists (V_Pair lx rx, trace_plus lt rt).
+    eauto.
 
-  intros n.
-  rename e into l. rename e0 into f.
-  remember (Pairing_from n) as PF.
-  destruct PF as [ln rn].
-  destruct (IHe ln) as [lx EL].
-  destruct (H lx rn) as [rx ER].
-  exists (V_Pair lx rx). eauto.
+  (* E_Map *)
+  - destruct (IHe n) as [[x t] IHE].
+    destruct (Bijects_from_dec _ _ b x) as [y B].
+    exists (y, t). eauto.
 
-  intros n.
-  destruct (even_odd_eq_dec n) as [[ln EQ] | [rn EQ]].
-  destruct (IHe1 ln) as [lx EL].
-  eauto.
-  destruct (IHe2 rn) as [rx ER].
-  eauto.
+  (* E_Dep *)
+  - rename e into l. rename e0 into f.
+    remember (Pairing_from n) as PF.
+    destruct PF as [ln rn].
+    destruct (IHe ln) as [[lx lt] EL].
+    destruct (H lx rn) as [[rx rt] ER].
+    exists (V_Pair lx rx, trace_plus lt rt). eauto.
+
+  (* E_Sum *)
+  - destruct (even_odd_eq_dec n) as [[ln EQ] | [rn EQ]].
+    
+    destruct (IHe1 ln) as [[lx lt] EL].
+    exists (V_Sum_Left lx, lt).
+    eauto.
+    
+    destruct (IHe2 rn) as [[rx rt] ER].
+    exists (V_Sum_Right rx, rt).
+    eauto.
+    
+  (* E_Trace *)
+  - rename l into lor.
+    destruct (IHe n) as [[x t] E].
+    exists (x, trace_at 1 lor t).
+    eauto.
 Defined.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
