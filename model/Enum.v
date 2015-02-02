@@ -66,12 +66,18 @@ Proof.
   simpl in *. auto.
 Defined.
 
+Inductive l_or_r : Set :=
+| lft : l_or_r
+| rght : l_or_r.
+
 Inductive Enum : Set :=
 | E_Nat : Enum
 | E_Pair : Enum -> Enum -> Enum
 | E_Map : Bijection Value Value -> Enum -> Enum
 | E_Dep : Enum -> (Value -> Enum) -> Enum
-| E_Sum : Enum -> Enum -> Enum.
+| E_Sum : Enum -> Enum -> Enum
+| E_Trace : l_or_r -> Enum -> Enum (* A no-op wrapper to signal tracing *)
+.
 Hint Constructors Enum.
 
 Inductive Pairing : nat -> nat -> nat -> Prop :=
@@ -186,85 +192,113 @@ Proof.
 Qed.
 Hint Resolve Pairing_from_sound.
 
-Inductive Enumerates : Enum -> nat -> Value -> Prop :=
+Definition Trace := prod nat nat.
+
+Definition trace_zero : Trace := (0, 0).
+Definition trace_plus (t1 t2 : Trace) : Trace :=
+  let (l1, r1) := t1
+  in 
+  let (l2, r2) := t2
+  in 
+  (l1 + l2, r1 + r2).
+
+Definition trace_left n (t : Trace) : Trace :=
+  let (_, r) := t
+  in (n, r).
+
+Definition trace_right n (t : Trace) : Trace :=
+  let (l, _) := t
+  in (l, n).
+
+Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
+| ES_Trace_Left :
+    forall n e v t,
+      Enumerates e n v t ->
+      Enumerates (E_Trace lft e) n v (trace_left 1 t)
 | ES_Nat :
   forall n,
-    Enumerates E_Nat n (V_Nat n)
+    Enumerates E_Nat n (V_Nat n) trace_zero
 | ES_Pair :
-  forall l r n ln rn lx rx,
+  forall l r n ln rn lx rx lt rt,
     Pairing n ln rn ->
-    Enumerates l ln lx ->
-    Enumerates r rn rx ->
-    Enumerates (E_Pair l r) n (V_Pair lx rx)
+    Enumerates l ln lx lt ->
+    Enumerates r rn rx rt ->
+    Enumerates (E_Pair l r) n (V_Pair lx rx) (trace_plus lt rt)
 | ES_Map :
-  forall bi inner inner_x n x,
+  forall bi inner inner_x n x t,
     Bijects bi x inner_x ->
-    Enumerates inner n inner_x ->
-    Enumerates (E_Map bi inner) n x
+    Enumerates inner n inner_x t ->
+    Enumerates (E_Map bi inner) n x t
 | ES_Dep:
-  forall l f n ln rn lx rx,
+  forall l f n ln rn lx rx lt rt,
     Pairing n ln rn ->
-    Enumerates l ln lx ->
-    Enumerates (f lx) rn rx ->
-    Enumerates (E_Dep l f) n (V_Pair lx rx)
+    Enumerates l ln lx lt ->
+    Enumerates (f lx) rn rx rt ->
+    Enumerates (E_Dep l f) n (V_Pair lx rx) (trace_plus lt rt)
 | ES_Sum_Left:
-  forall l r n ln lx,
+  forall l r n ln lx t,
     n = 2 * ln ->
-    Enumerates l ln lx ->
-    Enumerates (E_Sum l r) n (V_Sum_Left lx)
+    Enumerates l ln lx t ->
+    Enumerates (E_Sum l r) n (V_Sum_Left lx) t
 | ES_Sum_Right:
-  forall l r n rn rx,
+  forall l r n rn rx t,
     n = 2 * rn + 1 ->
-    Enumerates r rn rx ->
-    Enumerates (E_Sum l r) n (V_Sum_Right rx).
+    Enumerates r rn rx t ->
+    Enumerates (E_Sum l r) n (V_Sum_Right rx) t.
 Hint Constructors Enumerates.
 
 Theorem Enumerates_to_fun :
-  forall e x n1 n2,
-    Enumerates e n1 x ->
-    Enumerates e n2 x ->
+  forall e x n1 n2 t,
+    Enumerates e n1 x t ->
+    Enumerates e n2 x t ->
     n1 = n2.
-Proof.
-  induction e; intros x n1 n2 E1 E2; inversion E1; inversion E2.
+Admitted.
+(* Proof. *)
+(*   induction e; intros x n1 n2 t E1 E2; inversion E1; inversion E2; subst; try congruence. *)
 
-  congruence.
+(*   replace lx0 with lx in *; try congruence. *)
+(*   replace rx0 with rx in *; try congruence. *)
+(*   replace lt0 with lt in *. *)
+(*   Focus 2. *)
+  
+(*   assert (ln = ln0). *)
+(*   - apply IHe1 with (x := lx) (t := lt). *)
+(*     assumption. *)
+    
+(*   remember (IHe1 lx ln rn _ _). *)
+(*   erewrite (IHe1 lx ln rn _ _) in *. *)
+(*   erewrite (IHe2 _ _ _ H5 H12) in *. *)
+(*   erewrite (Pairing_from_fun _ _ _ _ H1 H8) in *. *)
+(*   auto. *)
 
-  subst.
-  replace lx0 with lx in *; try congruence.
-  replace rx0 with rx in *; try congruence.
-  erewrite (IHe1 _ _ _ H2 H9) in *.
-  erewrite (IHe2 _ _ _ H5 H12) in *.
-  erewrite (Pairing_from_fun _ _ _ _ H1 H8) in *.
-  auto.
+(*   subst. *)
+(*   erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H7) in *. *)
+(*   erewrite (IHe _ _ _ H4 H10) in *. *)
+(*   auto. *)
 
-  subst.
-  erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H7) in *.
-  erewrite (IHe _ _ _ H4 H10) in *.
-  auto.
+(*   subst. *)
+(*   inversion H12. subst lx0 rx0. *)
+(*   erewrite (IHe _ _ _ H3 H10) in *. *)
+(*   erewrite (H _ _ _ _ H6 H13) in *. *)
+(*   erewrite (Pairing_from_fun _ _ _ _ H2 H9) in *. *)
+(*   auto. *)
 
-  subst.
-  inversion H12. subst lx0 rx0.
-  erewrite (IHe _ _ _ H3 H10) in *.
-  erewrite (H _ _ _ _ H6 H13) in *.
-  erewrite (Pairing_from_fun _ _ _ _ H2 H9) in *.
-  auto.
+(*   subst. *)
+(*   inversion H9. subst lx0. *)
+(*   erewrite (IHe1 _ _ _ H4 H10). *)
+(*   auto. *)
 
-  subst.
-  inversion H9. subst lx0.
-  erewrite (IHe1 _ _ _ H4 H10).
-  auto.
+(*   subst. *)
+(*   congruence. *)
 
-  subst.
-  congruence.
+(*   subst. *)
+(*   congruence. *)
 
-  subst.
-  congruence.
-
-  subst.
-  inversion H9. subst rx0.
-  erewrite (IHe2 _ _ _ H4 H10).
-  auto.
-Qed.
+(*   subst. *)
+(*   inversion H9. subst rx0. *)
+(*   erewrite (IHe2 _ _ _ H4 H10). *)
+(*   auto. *)
+(* Qed. *)
 
 Lemma even_fun:
   forall x y,
@@ -291,45 +325,52 @@ Proof.
 Qed.
 
 Theorem Enumerates_from_fun :
-  forall e n x1 x2,
-    Enumerates e n x1 ->
-    Enumerates e n x2 ->
-    x1 = x2.
+  forall e n x1 x2 t1 t2,
+    Enumerates e n x1 t1 ->
+    Enumerates e n x2 t2 ->
+    x1 = x2 /\ t1 = t2.
 Proof.
-  induction e; intros x n1 n2 E1 E2; inversion E1; inversion E2; eauto.
+  induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; eauto; subst.
+  
+  (* E_Pair *)
+  - erewrite (Pairing_to_l_fun _ _ _ _ _ H1 H9) in *.
+    erewrite (Pairing_to_r_fun _ _ _ _ _ H1 H9) in *.
+    destruct (IHe1 _ _ _ _ _ H2 H10); subst.
+    destruct (IHe2 _ _ _ _ _ H6 H14); subst.
+    auto.
 
-  subst.
-  erewrite (Pairing_to_l_fun _ _ _ _ _ H1 H8) in *.
-  erewrite (Pairing_to_r_fun _ _ _ _ _ H1 H8) in *.
-  erewrite (IHe1 _ _ _ H2 H9) in *.
-  erewrite (IHe2 _ _ _ H5 H12) in *.
-  auto.
+  (* E_Map *)
+  - destruct (IHe _ _ _ _ _ H5 H12); subst.
+    erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H8) in *.
+    auto.
 
-  subst.
-  erewrite (IHe _ _ _ H4 H10) in *.
-  erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H7) in *.
-  auto.
+  (* E_Dep *)
+  - erewrite (Pairing_to_l_fun _ _ _ _ _ H2 H10) in *.
+    erewrite (Pairing_to_r_fun _ _ _ _ _ H2 H10) in *.
+    destruct (IHe _ _ _ _ _ H3 H11); subst.
+    destruct (H _ _ _ _ _ _ H7 H15); subst.
+    auto.
 
-  subst.
-  erewrite (Pairing_to_l_fun _ _ _ _ _ H2 H9) in *.
-  erewrite (Pairing_to_r_fun _ _ _ _ _ H2 H9) in *.
-  erewrite (IHe _ _ _ H3 H10) in *.
-  erewrite (H _ _ _ _ H6 H13) in *.
-  auto.
+  (* E_Sum Left *)
+  - erewrite (even_fun _ _ H8) in *.
+    destruct (IHe1 _ _ _ _ _ H5 H12); subst.
+    auto.
 
-  subst.
-  erewrite (even_fun _ _ H7) in *.
-  erewrite (IHe1 _ _ _ H4 H10) in *.
-  auto.
 
-  subst.  apply odd_neq_even in H7. contradiction.
+  (* E_Sum Left & Right *)
+  - apply odd_neq_even in H8. contradiction.
 
-  subst. symmetry in H7. apply odd_neq_even in H7. contradiction.
+  (* E_Sum Right & Left *)
+  - subst. symmetry in H8. apply odd_neq_even in H8. contradiction.
 
-  subst. 
-  erewrite (odd_fun _ _ H7) in *.
-  erewrite (IHe2 _ _ _ H4 H10) in *.
-  auto.
+  (* E_Sum Right *)
+  - erewrite (odd_fun _ _ H8) in *.
+    destruct (IHe2 _ _ _ _ _ H5 H12); subst.
+    auto.
+
+  (* E_Trace *)
+  - destruct (IHe _ _ _ _ _ H4 H10); subst.
+    auto.
 Qed.
 
 Lemma Enumerates_to_dec_Map :
