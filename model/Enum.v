@@ -1,6 +1,8 @@
 Require Import Omega.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Div2 Coq.Arith.Even.
+Require Import Coq.Lists.ListSet.
+Require Import Coq.Lists.List.
 
 Inductive Value : Set :=
 | V_Nat : nat -> Value
@@ -194,28 +196,24 @@ Proof.
 Qed.
 Hint Resolve Pairing_from_sound.
 
-Definition Trace := prod nat nat.
+Definition Trace := (prod (set nat) (set nat)).
 
-Definition trace_zero : Trace := (0, 0).
+Definition empty_set' := @empty_set nat.
+Definition set_union' := @set_union nat eq_nat_dec.
+Definition set_add' := @set_add nat eq_nat_dec.
+
+Definition trace_zero : Trace := (empty_set', empty_set').
 Definition trace_plus (t1 t2 : Trace) : Trace :=
   let (l1, r1) := t1
   in
   let (l2, r2) := t2
   in
-  (l1 + l2, r1 + r2).
+  (set_union' l1 l2, set_union' r1 r2).
 
-Definition trace_left n (t : Trace) : Trace :=
-  let (_, r) := t
-  in (n, r).
-
-Definition trace_right n (t : Trace) : Trace :=
-  let (l, _) := t
-  in (l, n).
-
-Definition trace_at n lor t : Trace :=
+Definition trace_one n lor : Trace :=
   match lor with
-    | lft  => trace_left n t
-    | rght => trace_right n t
+    | lft  => (set_add' n empty_set', empty_set')
+    | rght => (empty_set', set_add' n empty_set')
   end.
 
 Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
@@ -249,10 +247,11 @@ Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
     n = 2 * rn + 1 ->
     Enumerates r rn rx t ->
     Enumerates (E_Sum l r) n (V_Sum_Right rx) t
+ (* E_Trace hides traces below it. This makes traces super easily spoofable, but makes it easier to reason about when they're not spoofed *)
 | ES_Trace :
-    forall n lor e v t,
-      Enumerates e n v t ->
-      Enumerates (E_Trace lor e) n v (trace_at 1 lor t)
+    forall n lor e v _t,
+      Enumerates e n v _t ->
+      Enumerates (E_Trace lor e) n v (trace_one n lor)
 .
 Hint Constructors Enumerates.
 
@@ -296,8 +295,8 @@ Proof.
     erewrite (IHe2 _ _ _ _ _ H5 H12).
     auto.
 
-  (* E_Trace_Left *)
-  - apply IHe with (x := x) (t1 := t) (t2 := t0); assumption.
+  (* E_Trace *)
+  - apply IHe with (x := x) (t1 := _t) (t2 := _t0); assumption.
 Qed.
 
 Lemma even_fun:
@@ -368,7 +367,7 @@ Proof.
     destruct (IHe2 _ _ _ _ _ H5 H12); subst.
     auto.
 
-  (* E_Trace_Left *)
+  (* E_Trace *)
   - destruct (IHe _ _ _ _ _ H4 H10); subst.
     auto.
 Qed.
@@ -408,7 +407,7 @@ Proof.
   destruct (IHe x) as [[[n t] IHE] | NIH].
 
   left.
-  exists (n, trace_at 1 lor t); eauto.
+  exists (n, trace_one n lor); eauto.
 
   right.
   intros n t E.
@@ -445,7 +444,7 @@ Proof.
 
   (* E_Dep *)
   - destruct (IHe x1) as [[[ln lt] EL] | LF].
-    destruct (H x1 x2) as [[[rn rt] ER] | RF].
+    destruct (X x1 x2) as [[[rn rt] ER] | RF].
     left.
     destruct (Pairing_to_dec ln rn) as [n P].
     exists (n, trace_plus lt rt).
@@ -536,7 +535,7 @@ Proof.
     remember (Pairing_from n) as PF.
     destruct PF as [ln rn].
     destruct (IHe ln) as [[lx lt] EL].
-    destruct (H lx rn) as [[rx rt] ER].
+    destruct (X lx rn) as [[rx rt] ER].
     exists (V_Pair lx rx, trace_plus lt rt). eauto.
 
   (* E_Sum *)
@@ -556,8 +555,8 @@ Proof.
 
   (* E_Trace *)
   - rename l into lor.
-    destruct (IHe n) as [[x t] E].
-    exists (x, trace_at 1 lor t).
+    destruct (IHe n) as [[x _t] E].
+    exists (x, trace_one n lor).
     eauto.
 Defined.
 
@@ -570,17 +569,85 @@ Fixpoint Trace_less_than (e : Enum) n : Trace :=
     | S n' => trace_plus (Trace_on e n') (Trace_less_than e n')
   end.
 
+Fixpoint subset (s1 s2 : set nat) :=
+  match s1 with
+    | nil => True
+    | x :: more =>
+      set_In x s2 /\ subset more s2
+  end.
+Hint Unfold subset.
+
+Definition set_eq s1 s2 := subset s1 s2 /\ subset s2 s1.
+Hint Unfold set_eq.
+
+Lemma subset_consr s1 s2 n : subset s1 s2 -> subset s1 (cons n s2).
+Proof.
+  generalize dependent s2.
+  generalize dependent n.
+  induction s1.
+  constructor.
+
+  intros n s2 H.
+  unfold subset.
+  unfold subset in H.
+  destruct H.
+  fold subset in *.
+
+  split.
+  constructor 2; auto.
+  apply IHs1; auto.
+Defined.
+
+Definition subset_dec s1 s2 : { subset s1 s2 } + { ~ (subset s1 s2) }.
+Proof.
+  generalize dependent s2.
+  induction s1.
+  left; auto.
+
+  intros s2.
+  destruct (set_In_dec eq_nat_dec a s2).
+
+  destruct (IHs1 s2).
+  left; constructor; auto.
+
+  right.
+  unfold subset; fold subset.
+  intros H; destruct H; contradiction.
+
+  right.
+  intros H; destruct H; contradiction.
+Defined.
+
+Definition set_eq_dec s1 s2 : { set_eq s1 s2 } + { ~ (set_eq s1 s2) }.
+Proof.
+  destruct (subset_dec s1 s2).
+  destruct (subset_dec s2 s1).
+  left; auto.
+  right; intros contra; destruct contra; apply n; auto.
+  right; intros contra; destruct contra; apply n; auto.
+Qed.
+           
+Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 empty_set'))
+                              (set_add' 0 (set_add' 1 empty_set'))).
+Proof.
+  compute.
+  tauto.
+Qed.
+
 Definition Fair (k : Enum -> Enum -> Enum) :=
   forall n,
-    exists equilibrium count,
-      n < equilibrium /\ Trace_less_than (k (E_Trace lft E_Nat) (E_Trace rght E_Nat)) equilibrium = (count, count).
+    exists equilibrium l_uses r_uses,
+      n < equilibrium
+      /\ set_eq l_uses r_uses
+      /\ Trace_less_than (k (E_Trace lft E_Nat) (E_Trace rght E_Nat)) equilibrium = (l_uses, r_uses).
 
 Lemma Sum_Parity_Trace :
   forall n,
     Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) n
-    = if even_odd_dec n
-      then (1, 0)
-      else (0, 1).
+    = trace_one (div2 n)
+                (if even_odd_dec n
+                 then lft
+                 else rght).
 Proof.
   intros n.
   remember (even_odd_dec n) as mH.
@@ -588,13 +655,13 @@ Proof.
   destruct mH; rewrite <-HeqmH; auto.
 Qed.
 
-(* Proof idea: equilibrium = 2 * n + 2, count = n + 1 *)
+(* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
 Theorem Sum_Fair : Fair E_Sum.
 Proof.
   unfold Fair.
   intros n.
   exists (2 * n + 2).
-  exists (S n).
+  exists (set_add' (S n) empty_set').
   split.
   omega.
 
@@ -615,8 +682,8 @@ Proof.
   omega.
 
   
-  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) with (1, 0).
-  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) with (0, 1).
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) with (trace_one 1 lft).
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) with (trace_one 1 rght).
   auto.
 
 
@@ -633,7 +700,12 @@ Proof.
     remember (Sum_Parity_Trace (S (S (S (2 * n))))).
     clear Heqe.
     rewrite <-Heqs in e.
+    unfold trace_one in *.
+    unfold set_add' in *.
+    unfold empty_set' in *.
+    simpl in e.
     auto.
+    
 
   (* Trace (left + right) (2n+2) = (1, 0) *)
   - remember (even_odd_dec (S (S (2 * n)))) as Heo; destruct Heo as [Hev | Hod].
