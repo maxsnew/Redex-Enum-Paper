@@ -1,4 +1,6 @@
 Require Import Omega.
+Require Import Coq.Numbers.Natural.Peano.NPeano.
+Require Import Coq.Arith.Div2 Coq.Arith.Even.
 
 Inductive Value : Set :=
 | V_Nat : nat -> Value
@@ -538,14 +540,18 @@ Proof.
     exists (V_Pair lx rx, trace_plus lt rt). eauto.
 
   (* E_Sum *)
-  - destruct (even_odd_eq_dec n) as [[ln EQ] | [rn EQ]].
-
-    destruct (IHe1 ln) as [[lx lt] EL].
+  - destruct (even_odd_dec n) as [Hev | Hodd].
+    apply even_double in Hev.
+    destruct (IHe1 (div2 n)) as [[lx lt] EL].
     exists (V_Sum_Left lx, lt).
+    rewrite double_twice in Hev.
     eauto.
 
-    destruct (IHe2 rn) as [[rx rt] ER].
+    apply odd_double in Hodd.
+    destruct (IHe2 (div2 n)) as [[rx rt] ER].
     exists (V_Sum_Right rx, rt).
+    rewrite double_twice in Hodd.
+    replace (S (2 * div2 n)) with (2 * div2 n + 1) in Hodd by omega.
     eauto.
 
   (* E_Trace *)
@@ -572,15 +578,14 @@ Definition Fair (k : Enum -> Enum -> Enum) :=
 Lemma Sum_Parity_Trace :
   forall n,
     Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) n
-    = if even_odd_eq_dec n
+    = if even_odd_dec n
       then (1, 0)
       else (0, 1).
 Proof.
   intros n.
-  remember (even_odd_eq_dec n) as mH.
-  unfold Trace_on.
-  simpl.
-  destruct mH; rewrite <-HeqmH; destruct s; auto.
+  remember (even_odd_dec n) as mH.
+  unfold Trace_on; simpl.
+  destruct mH; rewrite <-HeqmH; auto.
 Qed.
 
 (* Proof idea: equilibrium = 2 * n + 2, count = n + 1 *)
@@ -598,17 +603,49 @@ Proof.
   replace (2 * S n + 2) with (S (S (2 * n + 2))) by omega.
   simpl.
   replace (n + (n + 0) + 2) with (2 * n + 2) by omega.
-  rewrite IHn.
+  rewrite IHn; clear IHn.
   replace (2 * n + 2) with (S (S (2 * n))) in * by omega.
 
-  assert ((Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) = (1, 0)).
-  admit.
-  rewrite H.
-  assert ((Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) = (0, 1)).
-  admit.
-  rewrite H0.
+  assert (even (S (S (2 * n)))).
+  (* Goal: even (2n+2)*)
+  apply double_even.
+  replace (S (S (2 * n))) with (2 * (S n)) by omega.
+  rewrite div2_double.
+  unfold double.
+  omega.
 
+  
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) with (1, 0).
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) with (0, 1).
   auto.
+
+
+  (* Trace (left + right) (2n+3) = (0, 1) *)
+  - remember (even_odd_dec (S (S (S (2 * n))))).
+    destruct s.
+
+    (* Contradiction: even (2n + 3)*)
+    assert (odd (S (S (S (2 * n))))).
+    apply odd_S; auto.
+    apply False_ind; eapply not_even_and_odd; eauto.
+
+    (* Correct: odd (2n+3) *)
+    remember (Sum_Parity_Trace (S (S (S (2 * n))))).
+    clear Heqe.
+    rewrite <-Heqs in e.
+    auto.
+
+  (* Trace (left + right) (2n+2) = (1, 0) *)
+  - remember (even_odd_dec (S (S (2 * n)))) as Heo; destruct Heo as [Hev | Hod].
+
+    (* Correct: even (2n+2)*)
+    remember (Sum_Parity_Trace (S (S (2 * n)))) as Hspt; clear HeqHspt.
+    rewrite <-HeqHeo in Hspt.
+    auto.
+
+    (* Contradiction: odd (2n + 2) *)
+    apply False_ind.
+    eapply not_even_and_odd; eauto.
 Qed.
 
 Theorem Pair_Fair : Fair E_Pair.
