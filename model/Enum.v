@@ -577,6 +577,21 @@ Fixpoint subset (s1 s2 : set nat) :=
   end.
 Hint Unfold subset.
 
+Theorem subset_nil : forall s, subset nil s.
+Proof.
+  auto.
+Qed.
+
+Theorem subset_nil_nil : forall s, subset s nil -> s = nil.
+Proof.
+  induction s.
+  auto.
+  intros contra.
+  unfold subset in contra.
+  destruct contra.
+  inversion H.
+Qed.
+
 Definition set_eq s1 s2 := subset s1 s2 /\ subset s2 s1.
 Hint Unfold set_eq.
 
@@ -626,7 +641,21 @@ Proof.
   right; intros contra; destruct contra; apply n; auto.
   right; intros contra; destruct contra; apply n; auto.
 Qed.
-           
+
+Theorem subset_refl s : subset s s.
+Proof.
+  induction s; unfold subset; auto.
+  fold subset.
+  split.
+  constructor 1; auto.
+  apply subset_consr; auto.
+Qed.
+
+Theorem set_eq_refl s : set_eq s s.
+Proof.
+  split; apply subset_refl.
+Qed.
+
 Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 empty_set'))
                               (set_add' 0 (set_add' 1 empty_set'))).
 Proof.
@@ -655,15 +684,92 @@ Proof.
   destruct mH; rewrite <-HeqmH; auto.
 Qed.
 
+(* Lemma union_empty_l : forall s, set_union' empty_set' s = s. *)
+(* Proof. *)
+(*   intros s. *)
+(*   unfold empty_set'. *)
+(*   unfold set_union'. *)
+(*   induction s; auto. *)
+(*   unfold set_union in *; fold set_union. *)
+(*   rewrite IHs. *)
+(* Qed. *)
+
+Fixpoint z_to_n n : set nat :=
+  match n with
+    | 0 => empty_set'
+    | S n' => set_add' n' (z_to_n n')
+  end.
+
+Definition n_to_z n : set nat := rev (z_to_n n).
+
+Lemma subset_app : forall s1 s2 s3, subset s1 s2 -> subset s1 (s2 ++ s3).
+Proof.
+  induction s1; auto.
+  induction s2.
+
+  intros s3 H.
+  inversion H.
+  inversion H0.
+
+  intros s3.
+  simpl.
+  rewrite app_comm_cons.
+  intros H.
+  destruct H.
+  destruct H.
+  subst.
+  split.
+  left; auto.
+  apply IHs1; auto.
+  
+  split.
+  right.
+  unfold set_In.
+  apply in_or_app.
+  left; auto.
+
+  apply IHs1; auto.
+Qed.
+Lemma subset_rev : forall s, subset s (rev s).
+Proof.
+  induction s; auto.
+  constructor.
+  rewrite <-in_rev.
+  constructor; auto.
+  replace (a :: s) with ((a :: nil) ++ s).
+  rewrite rev_app_distr.
+  apply subset_app; auto.
+
+  auto.
+Qed.
+
+Lemma set_eq_rev : forall s, set_eq s (rev s).
+Proof.
+  split; try apply subset_rev.
+  rewrite <-rev_involutive.
+  apply subset_rev.
+Qed.
+
+Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 20).
+Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 21).
+Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 22).
+Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 23).
+Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 24).
+Eval compute in (z_to_n 10).
+Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 20).
+
 (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
 Theorem Sum_Fair : Fair E_Sum.
 Proof.
   unfold Fair.
   intros n.
   exists (2 * n + 2).
-  exists (set_add' (S n) empty_set').
+  exists (z_to_n (S n)).
+  exists (n_to_z (S n)).
   split.
   omega.
+  split.
+  apply set_eq_refl.
 
   induction n; auto.
 
@@ -682,12 +788,12 @@ Proof.
   omega.
 
   
-  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) with (trace_one 1 lft).
-  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) with (trace_one 1 rght).
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) with (trace_one (S n) lft).
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) with (trace_one (S n) rght).
   auto.
 
 
-  (* Trace (left + right) (2n+3) = (0, 1) *)
+  (* Trace (left + right) (2n+3) =  *)
   - remember (even_odd_dec (S (S (S (2 * n))))).
     destruct s.
 
@@ -697,12 +803,17 @@ Proof.
     apply False_ind; eapply not_even_and_odd; eauto.
 
     (* Correct: odd (2n+3) *)
+    simpl.
     remember (Sum_Parity_Trace (S (S (S (2 * n))))).
     clear Heqe.
     rewrite <-Heqs in e.
     unfold trace_one in *.
+
+    
     unfold set_add' in *.
     unfold empty_set' in *.
+    
+    
     simpl in e.
     auto.
     
