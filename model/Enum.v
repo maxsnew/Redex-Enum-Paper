@@ -656,6 +656,36 @@ Proof.
   split; apply subset_refl.
 Qed.
 
+Lemma set_eq_trans : forall s1 s2 s3, set_eq s1 s2 -> set_eq s2 s3 -> set_eq s1 s3.
+Proof.
+Admitted.
+
+Lemma set_eq_symm : forall s1 s2, set_eq s1 s2 -> set_eq s2 s1.
+Proof.
+  intros s1 s2 H; inversion H; split; auto.
+Qed.
+
+Lemma set_union_unitl : forall s, set_eq (set_union' empty_set' s) s.
+Proof.
+Admitted.
+
+(* Lemma set_union_unitr : forall s, set_eq (set_union' s empty_set') s. *)
+(* Proof. *)
+(* Admitted. *)
+
+Lemma set_union_cong : forall sl sr sl' sr',
+                         set_eq sl sl' -> set_eq sr sr' -> set_eq (set_union' sl sr) (set_union' sl' sr').
+Proof.
+Admitted.
+  (*
+     Other useful lemmas:
+     * set_union' is commutative wrt set_eq
+     * set_union' is associative wrt set_eq
+     * set_add' is the same as set_union' a singleton set wrt set_eq
+   *)
+
+
+
 Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 empty_set'))
                               (set_add' 0 (set_add' 1 empty_set'))).
 Proof.
@@ -665,10 +695,10 @@ Qed.
 
 Definition Fair (k : Enum -> Enum -> Enum) :=
   forall n,
-    exists equilibrium l_uses r_uses,
-      n < equilibrium
-      /\ set_eq l_uses r_uses
-      /\ Trace_less_than (k (E_Trace lft E_Nat) (E_Trace rght E_Nat)) equilibrium = (l_uses, r_uses).
+  exists equilibrium,
+    let (l_uses, r_uses) := Trace_less_than (k (E_Trace lft E_Nat) (E_Trace rght E_Nat)) equilibrium
+    in n < equilibrium
+       /\ set_eq l_uses r_uses.
 
 Lemma Sum_Parity_Trace :
   forall n,
@@ -683,16 +713,6 @@ Proof.
   unfold Trace_on; simpl.
   destruct mH; rewrite <-HeqmH; auto.
 Qed.
-
-(* Lemma union_empty_l : forall s, set_union' empty_set' s = s. *)
-(* Proof. *)
-(*   intros s. *)
-(*   unfold empty_set'. *)
-(*   unfold set_union'. *)
-(*   induction s; auto. *)
-(*   unfold set_union in *; fold set_union. *)
-(*   rewrite IHs. *)
-(* Qed. *)
 
 Fixpoint z_to_n n : set nat :=
   match n with
@@ -750,6 +770,10 @@ Proof.
   apply subset_rev.
 Qed.
 
+
+
+
+
 Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 20).
 Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 21).
 Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 22).
@@ -764,71 +788,69 @@ Proof.
   unfold Fair.
   intros n.
   exists (2 * n + 2).
-  exists (z_to_n (S n)).
-  exists (n_to_z (S n)).
+  remember (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (2 * n + 2)).
+  destruct t as [tl tr].
   split.
   omega.
-  split.
-  apply set_eq_refl.
 
-  induction n; auto.
+  generalize dependent tr.
+  generalize dependent tl.
+  induction n.
+  intros tr tl Heqt.
+  inversion Heqt; auto; apply set_eq_refl.
 
-  replace (2 * S n + 2) with (S (S (2 * n + 2))) by omega.
-  simpl.
-  replace (n + (n + 0) + 2) with (2 * n + 2) by omega.
-  rewrite IHn; clear IHn.
-  replace (2 * n + 2) with (S (S (2 * n))) in * by omega.
-
-  assert (even (S (S (2 * n)))).
-  (* Goal: even (2n+2)*)
-  apply double_even.
-  replace (S (S (2 * n))) with (2 * (S n)) by omega.
-  rewrite div2_double.
-  unfold double.
-  omega.
-
+  intros tl tr Htltr.
+  remember (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (2 * n + 2)).
+  replace (2 * S n + 2) with (S (S (2 * n + 2))) in Htltr by omega.
+  simpl in Htltr.
+  replace (n + (n + 0) + 2) with (2 * n + 2) in Htltr by omega.
+  destruct t as [tl' tr'].
+  assert (set_eq tl' tr').
+  apply IHn; auto.
+  rewrite <-Heqt in Htltr.
+  clear Heqt.
+  clear IHn.
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (2 * n + 2))) with (trace_one (S n) rght) in Htltr.
   
-  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (2 * n)))) with (trace_one (S n) lft).
-  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (S (S (2 * n))))) with (trace_one (S n) rght).
-  auto.
+  replace (Trace_on (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) ((2 * n)+2)) with (trace_one (S n) lft) in Htltr.
+  unfold trace_one in Htltr.
+  unfold trace_plus in Htltr.
+  inversion Htltr.
+  clear tl tr Htltr H1 H2.
 
+  - SearchAbout set_eq.
+    apply set_eq_trans with (s2 := set_union' (S n :: nil) tl').
+    apply set_union_unitl.
+    apply set_eq_trans with (s2 := set_union' (S n :: nil) tr').
+    apply set_union_cong; auto.
+    apply set_eq_refl.
+    apply set_union_cong.
+    apply set_eq_refl.
+    apply set_eq_symm.
+    apply set_union_unitl.
 
   (* Trace (left + right) (2n+3) =  *)
-  - remember (even_odd_dec (S (S (S (2 * n))))).
-    destruct s.
-
-    (* Contradiction: even (2n + 3)*)
-    assert (odd (S (S (S (2 * n))))).
-    apply odd_S; auto.
-    apply False_ind; eapply not_even_and_odd; eauto.
-
-    (* Correct: odd (2n+3) *)
-    simpl.
-    remember (Sum_Parity_Trace (S (S (S (2 * n))))).
-    clear Heqe.
-    rewrite <-Heqs in e.
-    unfold trace_one in *.
-
+  - unfold Trace_on.
+    destruct (Enumerates_from_dec (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (2 * n + 2)).
+    assert (Enumerates (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (2 * n + 2) (V_Sum_Left (V_Nat (S n))) (trace_one (S n) lft)).
+    apply ES_Sum_Left with (ln := (S n)).
+    omega.
+    econstructor.
+    constructor.
+    destruct x.
     
-    unfold set_add' in *.
-    unfold empty_set' in *.
-    
-    
-    simpl in e.
-    auto.
-    
-
-  (* Trace (left + right) (2n+2) = (1, 0) *)
-  - remember (even_odd_dec (S (S (2 * n)))) as Heo; destruct Heo as [Hev | Hod].
-
-    (* Correct: even (2n+2)*)
-    remember (Sum_Parity_Trace (S (S (2 * n)))) as Hspt; clear HeqHspt.
-    rewrite <-HeqHeo in Hspt.
+    destruct (Enumerates_from_fun _ _ _ _ _ _ y H0); subst.
     auto.
 
-    (* Contradiction: odd (2n + 2) *)
-    apply False_ind.
-    eapply not_even_and_odd; eauto.
+  - unfold Trace_on.
+    destruct (Enumerates_from_dec (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (2 * n + 2))).
+    assert (Enumerates (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S (2 * n + 2)) (V_Sum_Right (V_Nat (S n))) (trace_one (S n) rght)).
+    apply ES_Sum_Right with (rn := S n).
+    omega.
+    econstructor; constructor.
+    destruct x.
+    destruct (Enumerates_from_fun _ _ _ _ _ _ y H0); subst.
+    auto.
 Qed.
 
 Theorem Pair_Fair : Fair E_Pair.
