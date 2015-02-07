@@ -656,27 +656,361 @@ Proof.
   split; apply subset_refl.
 Qed.
 
+Theorem subset_In : forall x s s', set_In x s -> subset s s' -> set_In x s'.
+Proof.
+  intros x s.
+  generalize dependent x.
+  induction s as [| x s].
+  intros y s contra.
+  inversion contra.
+
+  intros y s' Hyinxs Hsub.
+  destruct Hsub as [Hxins' Hsub].
+  destruct Hyinxs; subst; auto.
+Qed.
+
+Theorem subset_In_def s s' : (forall x, set_In x s -> set_In x s') -> subset s s'.
+Proof.
+  generalize dependent s'.
+  induction s.
+  intros; apply subset_nil.
+  split.
+  apply H; auto.
+  constructor; auto.
+  apply IHs.
+  intros x Hins.
+  apply H.
+  constructor 2; auto.
+Qed.
+
+Theorem In_subset_def s s' : subset s s' -> (forall x, set_In x s -> set_In x s').
+Proof.
+  generalize dependent s'.
+  induction s.
+  intros s' _ x contra.
+  inversion contra.
+
+  intros s' Hsub x Hin.
+  destruct Hin.
+  destruct Hsub; subst.
+  auto.
+
+  apply IHs.
+  destruct Hsub; subst; auto.
+  auto.
+Qed.
+
+Lemma set_subset_weaken : forall s1 s2, set_eq s1 s2 -> subset s1 s2.
+Proof.
+  unfold set_eq.
+  tauto.
+Qed.
+
+Lemma subset_trans : forall s1 s2 s3, subset s1 s2 -> subset s2 s3 -> subset s1 s3.
+Proof.
+  intros s1.
+  induction s1 as [| x s1].
+  intros; apply subset_nil.
+  induction s2 as [| y s2].
+  intros s3 contra.
+  inversion contra.
+  inversion H.
+
+  intros s3 Hxy12 Hy23.
+  unfold subset; fold subset.
+  destruct Hxy12 as [Hxy2 H1y2].
+  split.
+
+  eapply subset_In.
+  apply Hxy2.
+  auto.
+  apply IHs1 with (s2 := (y :: s2)); auto.
+Qed.
+  
+
 Lemma set_eq_trans : forall s1 s2 s3, set_eq s1 s2 -> set_eq s2 s3 -> set_eq s1 s3.
 Proof.
-Admitted.
+  unfold set_eq.
+  intros s1 s2 s3 H1 H2; destruct H1; destruct H2.
+  split; eapply subset_trans; eauto.
+Qed.
 
 Lemma set_eq_symm : forall s1 s2, set_eq s1 s2 -> set_eq s2 s1.
 Proof.
   intros s1 s2 H; inversion H; split; auto.
 Qed.
 
+(* Theorem set_union_or : forall s1 s2, subset s1 (set_union' s1 s2). *)
+
+Lemma set_add_subset : forall x s1 s2, set_In x s2 -> subset s1 s2 -> subset (set_add' x s1) s2.
+Proof.
+  
+  intros y s1.
+  induction s1 as [| x s1].
+  simpl; auto.
+  intros s2 Hy2 Hsub.
+  unfold set_add', set_add.
+  destruct (eq_nat_dec y x); subst; auto.
+  fold set_add.
+  unfold subset.
+  split; auto.
+  destruct Hsub; auto.
+  fold subset.
+  apply IHs1; auto.
+  destruct Hsub; auto.
+Qed.
+
+Lemma set_subset_add : forall x s1 s2, subset s1 s2 -> subset s1 (set_add' x s2).
+Proof.
+  intros x s1 s2.
+  generalize dependent x.
+  generalize dependent s1.
+  induction s2 as [| y s2].
+  intros s1 x contra.
+  apply subset_nil_nil in contra; subst.
+  compute; tauto.
+
+  intros s1 x Hsub.
+  admit.
+Qed.
+
+Lemma subset_cons_swap : forall x y s1 s2, subset s1 s2 -> subset (x :: y :: s1) (y :: x :: s2).
+Proof.
+  intros x y s1 s2.
+  destruct (eq_nat_dec x y).
+  simpl; subst.
+  split.
+  tauto.
+  split.
+  tauto.
+  apply subset_consr.
+  apply subset_consr.
+  assumption.
+
+  simpl.
+  split.
+  tauto.
+  split.
+  tauto.
+  apply subset_consr. apply subset_consr.
+  assumption.
+Qed.
+
+Lemma set_eq_cons_swap : forall x y s1 s2, set_eq s1 s2 -> set_eq (x :: y :: s1) (y :: x :: s2).
+Proof.
+  split; destruct H; apply subset_cons_swap; auto.
+Qed.
+
+Lemma set_cons_cons_subset : forall x s1 s2, subset s1 s2 -> subset (x :: s1) (x :: s2).
+Proof.
+  intros x s1 s2 Hsub.
+  unfold subset. fold subset.
+  split.
+  constructor; auto.
+  apply subset_consr; auto.
+Qed.
+
+Lemma set_add_cons_eq : forall x s, set_eq (x :: s) (set_add' x s).
+Proof.
+  split.
+  generalize dependent x.
+  induction s as [| y s].
+  compute; tauto.
+  intros x.
+  simpl.
+  destruct (eq_nat_dec x y); subst.
+  split.
+  constructor; auto.
+  split.
+  constructor; auto.
+  apply subset_consr.
+  apply subset_refl.
+
+  split.
+  destruct (IHs x).
+  apply in_cons. apply H.
+  split.
+  constructor; auto.
+  apply subset_trans with (s2:= (x :: s)).
+  apply subset_consr; auto.
+  apply subset_refl.
+  apply subset_trans with (s2 := (set_add' x s)).
+  apply IHs.
+  apply subset_consr.
+  apply subset_refl.
+
+  generalize dependent x.
+  induction s as [| y s].
+  compute; tauto.
+  intros x.
+  simpl.
+  destruct (eq_nat_dec x y).
+  apply subset_consr.
+  apply subset_refl.
+  apply subset_trans with (y :: x :: s).
+  apply set_cons_cons_subset.
+  apply IHs.
+  apply subset_cons_swap.
+  apply subset_refl.
+Qed.
+
+Lemma set_add_cons_subset : forall x s1 s2, subset s1 s2 -> subset (x :: s1) (set_add' x s2).
+Proof.
+  intros x s1 s2 Hsub.
+  apply subset_trans with (s2 := (x :: s2)).
+  apply set_cons_cons_subset; auto.
+  apply set_subset_weaken.
+  apply set_add_cons_eq.
+Qed.
+
 Lemma set_union_unitl : forall s, set_eq (set_union' empty_set' s) s.
 Proof.
-Admitted.
+  split.
+  induction s.
+  apply subset_refl.
+  
+  unfold set_union', set_union in *.
+  replace (((fix set_union (x y : set nat) {struct y} : 
+          set nat :=
+            match y with
+            | nil => x
+            | a1 :: y1 => set_add eq_nat_dec a1 (set_union x y1)
+            end) empty_set' s
+           )) with (set_union' empty_set' s) in * by auto.
+  fold set_add'.
+  apply set_add_subset; auto.
+  constructor; auto.
+  apply subset_consr; auto.
 
-(* Lemma set_union_unitr : forall s, set_eq (set_union' s empty_set') s. *)
-(* Proof. *)
-(* Admitted. *)
+  induction s; auto.
+  unfold set_union', set_union.
+  fold set_union.
+  apply set_add_cons_subset; auto.
+Qed.
+
+Lemma set_union_unitr : forall s, set_eq (set_union' s empty_set') s.
+Proof.
+  apply set_eq_refl.
+Qed.
+
+Lemma elem_union :
+  forall s x,
+    set_In x s -> forall s', set_In x (set_union' s' s).
+Proof.
+  induction s.
+  intros H contra.
+  inversion contra.
+
+  intros x Hin s'.
+  simpl.
+  assert (set_In x (a :: (set_union' s' s))).
+  destruct Hin.
+  constructor; auto.
+  eapply In_subset_def.
+  apply subset_consr.
+  apply subset_refl.
+  apply IHs; auto.
+  eapply In_subset_def.
+  apply set_add_cons_subset.
+  apply subset_refl.
+  auto.
+Qed.
+
+Lemma subset_union_cons : forall x s1 s2, subset (set_union' (x::s1) s2) (x :: (set_union' s1 s2)).
+  induction s2.
+  simpl; split.
+  tauto.
+  apply subset_consr; apply subset_refl.
+  simpl.
+  eapply subset_trans.
+  apply set_add_cons_eq.
+  apply subset_trans with (s2 := (x :: a :: (set_union' s1 s2))).
+  eapply subset_trans.
+  apply set_cons_cons_subset.
+  apply IHs2.
+  apply subset_cons_swap.
+  apply subset_refl.
+  apply set_cons_cons_subset.
+  apply set_add_cons_eq.
+Qed.
+
+Theorem subset_union_comm : forall s1 s2, subset (set_union' s1 s2) (set_union' s2 s1).
+Proof.
+  induction s1.
+  intros.
+  apply subset_trans with (s2 := s2).
+  apply set_union_unitl.
+  apply set_union_unitr.
+
+  intros s2.
+  simpl.
+  eapply subset_trans.
+  apply subset_union_cons.
+  apply set_add_cons_subset.
+  apply IHs1.
+Qed.
+
+Lemma subset_union_transr :
+  forall s sl sr,
+    subset s sr ->
+    subset s (set_union' sl sr).
+Proof.
+  intros.
+  apply subset_In_def.
+  intros x Hin.
+  apply elem_union.
+  eapply In_subset_def.
+  apply H.
+  auto.
+Qed.
+
+Lemma subset_union_transl :
+  forall s sl sr,
+    subset s sl ->
+    subset s (set_union' sl sr).
+Proof.
+  intros.
+  eapply subset_trans; [| apply subset_union_comm ].
+  apply subset_union_transr; auto.
+Qed.
+
+
+Lemma set_union_subset_cong :
+  forall sl sr sl' sr',
+    subset sl sl' -> subset sr sr' -> subset (set_union' sl sr) (set_union' sl' sr').
+Proof.
+  induction sr.
+  intros.
+  apply subset_trans with (s2 := sl).
+  apply set_union_unitr.
+  apply subset_union_transl; auto.
+
+  intros sl' sr' Hsubl Hsubr.
+  simpl.
+  apply subset_trans with (s2 := (a :: set_union' sl sr)).
+  apply set_subset_weaken.
+  apply set_eq_symm.
+  apply set_add_cons_eq.
+  simpl.
+  split.
+  apply elem_union.
+  destruct Hsubr; auto.
+  apply IHsr; auto.
+  eapply subset_trans.
+  eapply subset_consr.
+  apply subset_refl.
+  apply Hsubr.
+Qed.
 
 Lemma set_union_cong : forall sl sr sl' sr',
                          set_eq sl sl' -> set_eq sr sr' -> set_eq (set_union' sl sr) (set_union' sl' sr').
 Proof.
-Admitted.
+  intros sl sr sl' sr' Hl Hr.
+  destruct Hl as [Hl Hl'].
+  destruct Hr as [Hr Hr'].
+  split; apply set_union_subset_cong; auto.
+Qed.
+
   (*
      Other useful lemmas:
      * set_union' is commutative wrt set_eq
