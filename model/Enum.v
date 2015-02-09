@@ -190,22 +190,21 @@ Proof.
   exists (rootz, (z - rootz * rootz) - rootz).
   assert (z = rootz * rootz + rootz + ((z - rootz * rootz) - rootz)).
   assert (((z - (rootz * rootz)) - rootz) = z - (rootz * rootz + rootz)).
-  rewrite Heqrootz.
-  omega.
-
-  rewrite H.
-  apply le_plus_minus.
-  (* There doesn't seem to be the right lemma available here.
-     I want the lemma (forall m n p,  p <= n -> m <= n - p -> p + m <= n)
-   *)
-  admit.
+  lia.
+  nia.
   rewrite H at 1.
   constructor 1.
   simpl.
 
   remember (sqrt_spec z).
   rewrite Heqrootz in *.
-
+  (*
+     Lemma needed: 
+       sqrt z <= z - (zqrt z)^2
+       ------------------------
+       z - (sqrt z)^2 - sqrt z <= sqrt z    
+   *)
+  
   admit.
   (* P_XSmall: x < y *)
   exists (z - (rootz * rootz), rootz).
@@ -221,18 +220,18 @@ Proof.
   auto.
 Defined.
 
-Eval compute in (Pairing_from_dec 0).
-Eval compute in (Pairing_from_dec 1).
-Eval compute in (Pairing_from_dec 2).
-Eval compute in (Pairing_from_dec 3).
-Eval compute in (Pairing_from_dec 4).
-Eval compute in (Pairing_from_dec 5).
-Eval compute in (Pairing_from_dec 6).
-Eval compute in (Pairing_from_dec 7).
-Eval compute in (Pairing_from_dec 8).
-Eval compute in (Pairing_from_dec 9).
-Eval compute in (Pairing_from_dec 10).
-Eval compute in (Pairing_from_dec 11).
+(* Eval compute in (Pairing_from_dec 0). *)
+(* Eval compute in (Pairing_from_dec 1). *)
+(* Eval compute in (Pairing_from_dec 2). *)
+(* Eval compute in (Pairing_from_dec 3). *)
+(* Eval compute in (Pairing_from_dec 4). *)
+(* Eval compute in (Pairing_from_dec 5). *)
+(* Eval compute in (Pairing_from_dec 6). *)
+(* Eval compute in (Pairing_from_dec 7). *)
+(* Eval compute in (Pairing_from_dec 8). *)
+(* Eval compute in (Pairing_from_dec 9). *)
+(* Eval compute in (Pairing_from_dec 10). *)
+(* Eval compute in (Pairing_from_dec 11). *)
 
 Definition Pairing_from n : (nat * nat) := proj1_sig (Pairing_from_dec n).
 Corollary Pairing_from_sound :
@@ -1167,6 +1166,7 @@ Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)
 Eval compute in (z_to_n 10).
 Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 20).
 
+
 (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
 Theorem Sum_Fair : Fair E_Sum.
 Proof.
@@ -1238,7 +1238,36 @@ Proof.
     auto.
 Qed.
 
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 0).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 1).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 4).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 9).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 16).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 25).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 36).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 49).
+Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 64).
+
 Theorem Pair_Fair : Fair E_Pair.
+  unfold Fair.
+  intros n.
+  exists ((S n) * (S n)).
+  remember (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S n * S n)) as t.
+  destruct t as [tl tr].
+  split.
+  admit. (* easy: n < (n+1)^2 
+              not easy enough for omega tho :(
+          *)
+  generalize dependent tr.
+  generalize dependent tl.
+  induction n.
+  simpl.
+  intros tl tr H.
+  inversion H.
+  compute.
+  tauto.
+
+  
 Admitted.
 
 (* Cant' prove (cons e1 (cons e2 e3)) is unfair because you need to trace 3 things.. *)
