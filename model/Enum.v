@@ -180,8 +180,59 @@ Theorem Pairing_from_dec:
   forall n,
     { xy | Pairing n (fst xy) (snd xy) }.
 Proof.
-  intros n.
-Admitted.
+  (* (z - rootz^2, rootz)          if z - rootz^2 <  rootz
+     (rootz, (z - rootz^2) -rootz) if z - rootz^2 >= rootz
+   *)
+  intros z.
+  remember (sqrt z) as rootz.
+  destruct (le_lt_dec rootz (z - (rootz * rootz))).
+  (* P_XBig, x >= y: x*x + x + y *)
+  exists (rootz, (z - rootz * rootz) - rootz).
+  assert (z = rootz * rootz + rootz + ((z - rootz * rootz) - rootz)).
+  assert (((z - (rootz * rootz)) - rootz) = z - (rootz * rootz + rootz)).
+  rewrite Heqrootz.
+  omega.
+
+  rewrite H.
+  apply le_plus_minus.
+  (* There doesn't seem to be the right lemma available here.
+     I want the lemma (forall m n p,  p <= n -> m <= n - p -> p + m <= n)
+   *)
+  admit.
+  rewrite H at 1.
+  constructor 1.
+  simpl.
+
+  remember (sqrt_spec z).
+  rewrite Heqrootz in *.
+
+  admit.
+  (* P_XSmall: x < y *)
+  exists (z - (rootz * rootz), rootz).
+  assert (z = (z - rootz * rootz) + rootz * rootz).
+  (* le_plus_minus: forall n m : nat, n <= m -> m = n + (m - n) *)
+  replace (z - rootz * rootz + rootz * rootz) with ((rootz*rootz) + (z - (rootz * rootz))) by omega.
+  apply le_plus_minus.
+  rewrite Heqrootz.
+  apply sqrt_spec.
+  rewrite H at 1.
+  simpl.
+  constructor 2.
+  auto.
+Defined.
+
+Eval compute in (Pairing_from_dec 0).
+Eval compute in (Pairing_from_dec 1).
+Eval compute in (Pairing_from_dec 2).
+Eval compute in (Pairing_from_dec 3).
+Eval compute in (Pairing_from_dec 4).
+Eval compute in (Pairing_from_dec 5).
+Eval compute in (Pairing_from_dec 6).
+Eval compute in (Pairing_from_dec 7).
+Eval compute in (Pairing_from_dec 8).
+Eval compute in (Pairing_from_dec 9).
+Eval compute in (Pairing_from_dec 10).
+Eval compute in (Pairing_from_dec 11).
 
 Definition Pairing_from n : (nat * nat) := proj1_sig (Pairing_from_dec n).
 Corollary Pairing_from_sound :
