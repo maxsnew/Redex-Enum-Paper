@@ -1018,6 +1018,12 @@ Proof.
   apply IHs1.
 Qed.
 
+Theorem set_eq_union_comm : forall s1 s2, set_eq (set_union' s1 s2) (set_union' s2 s1).
+Proof.
+  intros s1 s2.
+  split; apply subset_union_comm.
+Qed.
+
 Lemma subset_union_transr :
   forall s sl sr,
     subset s sr ->
@@ -1087,14 +1093,83 @@ Proof.
   apply subset_consr; auto.
 Qed.
 
-  (*
-     Other useful lemmas:
-     * set_union' is commutative wrt set_eq
-     * set_union' is associative wrt set_eq
-     * set_add' is the same as set_union' a singleton set wrt set_eq
-   *)
+Theorem set_eq_app_cons_comm s1 s2 a : set_eq (a :: (s1 ++ s2)) (s1 ++ a :: s2).
+Proof.
+  induction s1.
+  apply set_eq_refl.
+  rewrite <-app_comm_cons.
+  eapply set_eq_trans.
+  apply set_eq_cons_swap.
+  apply set_eq_refl.
+  replace ((a0 :: s1) ++ a :: s2) with (a0 :: (s1 ++ a :: s2)) by apply app_comm_cons.
+  apply set_eq_cons_cons; auto.
+Qed.
 
+Theorem set_union_app_eq : forall s1 s2, set_eq (set_union' s1 s2) (s1 ++ s2).
+Proof.
+  induction s2.
+  simpl.
+  rewrite app_nil_r.
+  apply set_eq_refl.
 
+  simpl.
+  eapply set_eq_trans.
+  apply set_eq_symm.
+  apply set_add_cons_eq.
+  eapply set_eq_trans; [|   apply set_eq_app_cons_comm].
+  apply set_eq_cons_cons; auto.
+Qed.
+
+Theorem set_union_app_eq_gen : forall s1 s2 s3 s4,
+                                 set_eq s1 s3 ->
+                                 set_eq s2 s4 ->
+                                 set_eq (set_union' s1 s2) (s3 ++ s4).
+Proof.
+  intros s1 s2 s3 s4 H13 H24.
+  eapply set_eq_trans; [| apply set_union_app_eq].
+  apply set_union_cong; auto.
+Qed.
+                                        
+
+Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
+Proof.
+  split; [| apply subset_union_transr; apply subset_refl ].
+  generalize dependent s2.
+  induction s1 as [| x s1].
+  intros s1 Hsubnil.
+  apply subset_trans with (s2 := s1).
+  apply set_union_unitl; apply subset_refl.
+  apply subset_refl.
+
+  intros s2 Hsub.
+  apply subset_trans with (s2 := x :: (set_union' s1 s2)).
+  apply subset_trans with (s2 := (x :: s1 ++ s2)).
+  apply set_union_app_eq.
+  apply set_subset_weaken.
+  apply set_eq_cons_cons.
+  apply set_eq_symm.
+  apply set_union_app_eq.
+
+  simpl.
+  unfold subset in Hsub; fold subset in Hsub.
+  destruct Hsub.
+  split; auto.
+Qed.
+
+Theorem set_union_assoc s1 s2 s3
+: set_eq (set_union' (set_union' s1 s2) s3)
+         (set_union' s1 (set_union' s2 s3)).
+Proof.
+  apply set_eq_trans with (s2 := ((s1 ++ s2) ++ s3)).
+  apply set_union_app_eq_gen.
+  apply set_union_app_eq.
+  apply set_eq_refl.
+  rewrite <-app_assoc.
+  apply set_eq_symm.
+  apply set_union_app_eq_gen.
+  apply set_eq_refl.
+  apply set_union_app_eq.
+Qed.
 
 Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 empty_set'))
                               (set_add' 0 (set_add' 1 empty_set'))).
@@ -1218,6 +1293,21 @@ Proof.
   split; eapply set_eq_trans; eauto.
 Qed.
 
+Theorem trace_plus_comm t1 t2 : trace_eq (trace_plus t1 t2) (trace_plus t2 t1).
+Proof.
+  destruct t1, t2.
+  unfold trace_plus.
+  split; apply set_eq_union_comm.
+Qed.
+
+Theorem trace_plus_assoc t1 t2 t3 : trace_eq (trace_plus t1 (trace_plus t2 t3))
+                                             (trace_plus (trace_plus t1 t2) t3).
+Proof.
+  destruct t1, t2, t3.
+  unfold trace_plus.
+  split; apply set_eq_symm; apply set_union_assoc.
+Qed.
+
 Theorem trace_lt_from_to_0_same e n : trace_eq (Trace_less_than e n) (Trace_from_to e 0 n).
 Proof.
   induction n.
@@ -1235,6 +1325,127 @@ Proof.
   apply set_union_cong; [apply set_eq_refl|]; auto.
 Qed.
 
+Theorem trace_plus_unitl t :
+  trace_eq (trace_plus trace_zero t) t.
+Proof.
+  destruct t; split; apply set_union_unitl.
+Qed.
+
+Theorem trace_plus_unitl_gen t1 t2 :
+  trace_eq t1 t2 -> trace_eq (trace_plus trace_zero t1) t2.
+Proof.
+  intros H.
+  eapply trace_eq_trans; [ apply trace_plus_unitl | auto].
+Qed.
+
+
+Theorem trace_plus_unitr t :
+  trace_eq (trace_plus t trace_zero) t.
+Proof.
+  eapply trace_eq_trans;
+  [apply trace_plus_comm| apply trace_plus_unitl].
+Qed.
+
+
+Theorem trace_plus_unitr_gen t1 t2 :
+  trace_eq t1 t2 -> trace_eq (trace_plus t1 trace_zero) t2.
+Proof.
+  intros H.
+  eapply trace_eq_trans; [ apply trace_plus_unitr | auto].
+Qed.
+
+Theorem trace_from_to_self e m
+: Trace_from_to e m m = trace_zero.
+Proof.
+  destruct m; auto.
+  unfold Trace_from_to.
+  remember (le_lt_dec (S m) (S m)) as l.
+  destruct l; auto.
+  clear Heql.
+  apply lt_irrefl in l.
+  contradiction.
+Qed.
+
+Theorem trace_from_to_split1r e m n
+: m <= n ->
+  trace_eq (Trace_from_to e m (S n))
+           (trace_plus (Trace_from_to e m n) (Trace_on e n)).
+Proof.
+  intros H.
+  unfold Trace_from_to at 1.
+  remember (le_lt_dec (S n) m).
+  destruct s.
+  assert (S n <= n).
+  apply le_trans with (m := m); auto.
+  apply le_Sn_n in H0.
+  contradiction.
+  fold Trace_from_to.
+  apply trace_plus_comm.
+Qed.
+
+Theorem trace_from_to_split1l' e m n
+: trace_eq (Trace_from_to e m (S (m + n)))
+           (trace_plus (Trace_on e m) (Trace_from_to e (S m) (S (m + n)))).
+Proof.
+  generalize dependent m.
+  induction n as [| n].
+  intros m.
+  replace (S (m + 0)) with (S m) by lia.
+  unfold Trace_from_to at 1.
+  remember (le_lt_dec (S m) m) as t.
+  destruct t.
+  clear Heqt.
+  apply le_Sn_n in l.
+  contradiction.
+
+  fold Trace_from_to.
+  rewrite trace_from_to_self.
+  rewrite trace_from_to_self.
+  apply trace_eq_refl.
+  intros m.
+  unfold Trace_from_to.
+  remember (le_lt_dec (S (m + S n)) m) as t.
+  destruct t.
+  assert (m < (S (m + S n))).
+  lia.
+  clear Heqt.
+  apply (le_not_gt) in l.
+  contradiction.
+  fold Trace_from_to.
+  clear l Heqt.
+  remember (le_lt_dec (S (m + S n)) (S m)).
+  destruct s.
+  assert ((S (m + S n)) > S m) by lia.
+  clear Heqs; apply le_not_gt in l; contradiction.
+  replace (m + S n) with (S (m + n)) by lia.
+  eapply trace_eq_trans.
+  apply trace_plus_cong; [apply trace_eq_refl | apply IHn ].
+  eapply trace_eq_trans.
+  apply trace_plus_assoc.
+  eapply trace_eq_trans.
+  apply trace_plus_cong.
+  apply trace_plus_comm.
+  apply trace_eq_refl.
+  eapply trace_eq_trans.
+  apply trace_eq_symm.
+  apply trace_plus_assoc.
+  apply trace_eq_refl.
+Qed.
+
+Theorem trace_from_to_split1l e m n
+: m < n ->
+  trace_eq (Trace_from_to e m n)
+           (trace_plus (Trace_on e m) (Trace_from_to e (S m) n)).
+Proof.
+  intros H.
+  remember (pred (n - m)) as t.
+  assert (n = (S (m + t))).
+  lia.
+  subst n.
+  apply trace_from_to_split1l'.
+Qed.
+
+
 Theorem trace_from_to_split e m n p :
   (m <= n < p)
   -> trace_eq (Trace_from_to e m p)
@@ -1242,25 +1453,37 @@ Theorem trace_from_to_split e m n p :
                           (Trace_from_to e n p)).
 Proof.
   generalize dependent p.
-  generalize dependent n.
-  induction m.
+  generalize dependent m.
+
   induction n.
-  intros p Hpos.
-  unfold Trace_from_to at 2.
-  simpl.
-  destruct (Trace_from_to e 0 p).
-  unfold trace_eq.
-  split; (eapply set_eq_trans; [apply set_eq_refl | apply set_eq_symm; apply set_union_unitl]).
+  intros m p [Hmzero Hppos].
+  apply le_n_0_eq in Hmzero; subst.
+  remember (Trace_from_to e 0 0).
+  simpl in Heqt; subst.
+  apply trace_eq_symm.
+  apply trace_plus_unitl.
 
-  intros p [HSn HSnp].
-  unfold Trace_from_to at 2.
-  destruct (le_lt_dec (S n) 0).
-  inversion l.
-  fold Trace_from_to.
+  intros m p [Hmn Hp].
+  inversion Hmn; subst.
+  clear Hmn.
+  apply trace_eq_symm.
+  rewrite (trace_from_to_self e (S n)).
+  apply trace_plus_unitl_gen.
+  apply trace_eq_refl.
 
-  admit.
-  admit.
-  
+  apply trace_eq_trans with (t2:= (trace_plus (Trace_from_to e m n) (Trace_from_to e n p)));
+    [apply IHn; lia| ].
+  apply trace_eq_trans with (t2 := (trace_plus (Trace_from_to e m n)
+                                               (trace_plus (Trace_on e n)
+                                                           (Trace_from_to e (S n) p)))).
+  apply trace_plus_cong; [apply trace_eq_refl| ].
+  apply trace_from_to_split1l; lia.
+
+  eapply trace_eq_trans.
+  apply trace_plus_assoc.
+  apply trace_plus_cong; [| apply trace_eq_refl].
+  apply trace_eq_symm.
+  apply trace_from_to_split1r; lia.
 Qed.
 
 Theorem trace_from_to_0_split :
@@ -1380,58 +1603,6 @@ Lemma PairNN_layer :
              (z_to_n (S n), z_to_n (S n)).
 Proof.
   admit.
-Qed.
-
-Theorem set_eq_app_cons_comm s1 s2 a : set_eq (a :: (s1 ++ s2)) (s1 ++ a :: s2).
-Proof.
-  induction s1.
-  apply set_eq_refl.
-  rewrite <-app_comm_cons.
-  eapply set_eq_trans.
-  apply set_eq_cons_swap.
-  apply set_eq_refl.
-  replace ((a0 :: s1) ++ a :: s2) with (a0 :: (s1 ++ a :: s2)) by apply app_comm_cons.
-  apply set_eq_cons_cons; auto.
-Qed.
-
-Theorem set_union_app_eq : forall s1 s2, set_eq (set_union' s1 s2) (s1 ++ s2).
-Proof.
-  induction s2.
-  simpl.
-  rewrite app_nil_r.
-  apply set_eq_refl.
-
-  simpl.
-  eapply set_eq_trans.
-  apply set_eq_symm.
-  apply set_add_cons_eq.
-  eapply set_eq_trans; [|   apply set_eq_app_cons_comm].
-  apply set_eq_cons_cons; auto.
-Qed.
-
-Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
-Proof.
-  split; [| apply subset_union_transr; apply subset_refl ].
-  generalize dependent s2.
-  induction s1 as [| x s1].
-  intros s1 Hsubnil.
-  apply subset_trans with (s2 := s1).
-  apply set_union_unitl; apply subset_refl.
-  apply subset_refl.
-
-  intros s2 Hsub.
-  apply subset_trans with (s2 := x :: (set_union' s1 s2)).
-  apply subset_trans with (s2 := (x :: s1 ++ s2)).
-  apply set_union_app_eq.
-  apply set_subset_weaken.
-  apply set_eq_cons_cons.
-  apply set_eq_symm.
-  apply set_union_app_eq.
-
-  simpl.
-  unfold subset in Hsub; fold subset in Hsub.
-  destruct Hsub.
-  split; auto.
 Qed.
 
 (* TODO: cleanup. Why do I need to use PairNN_layer 3 times? *)
