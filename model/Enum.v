@@ -1708,6 +1708,8 @@ Proof.
   apply In_trace'.
 Qed.
 
+Eval compute in Trace_less_than E_PairNN (S (5 * 5)).
+
 Lemma PairNN_layer :
   forall n,
     trace_eq (Trace_from_to E_PairNN (n * n) (S n * S n))
@@ -1720,8 +1722,35 @@ Proof.
   split.
   split.
   apply subset_In_def.
+  assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto).
+  intros x Hin.
+  apply z_to_n_correct.
+  rewrite H in Hin.
+  apply (In_Trace lft) in Hin; [| lia].
+  destruct Hin as [k [Hksize Hin]].
+  admit.
+
+  apply subset_In_def.
+  assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto).
+  intros x Hin.
+  apply z_to_n_correct in Hin.
+  rewrite H.
+  apply (In_Trace lft); [lia|].
+  destruct (Pairing_to_dec x n) as [k Hk].
+  exists k.
+  inversion Hk; subst.
+  split.
+  nia.
   
-  destruct  (Trace_from_to E_PairNN (n * n) (S n * S n)).
+  admit. (* should be easy, just need to unfold the right defnitions *)
+  split.
+  nia.
+  admit. (* same here*)
+
+  (* this half of the proof is exactly the same as above, except with tr instead of tl 
+     should figure how to be less repetitive than repeating all the above tactics.
+     might be less of a problem when we move to a new trace representation
+   *)
   admit.
 Qed.
 
