@@ -1594,14 +1594,134 @@ Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat
 Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 49).
 Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 64).
 
-
 Definition E_PairNN := (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)).
+
+Eval compute in z_to_n 0.
+
+Theorem z_to_n_correct n x
+: In x (z_to_n n) <-> x < n.
+Proof.
+  generalize dependent x.
+  induction n.
+  
+  intros x; compute; split; [apply False_ind | intros contra; inversion contra].
+  intros x.
+  destruct (eq_nat_dec x n).
+  simpl.
+  subst.
+  split; [lia|].
+  intros _.
+  apply set_add_intro2; auto.
+  
+  split.
+  simpl.
+  intros H.
+  assert (In x (z_to_n n)).
+  apply set_add_elim2 with (b := n) (Aeq_dec := eq_nat_dec); auto.
+  assert (x < n).
+  apply IHn.
+  auto.
+  lia.
+
+  intros H.
+  simpl.
+  apply set_add_intro1.
+  apply IHn.
+  lia.
+Qed.
+
+Theorem In_trace' (lor : l_or_r) e x m n :
+  set_In x ((if lor then @fst (set nat) (set nat) else (@snd (set nat) (set nat))) (Trace_from_to e m (S (m + n))))
+  <->
+  (exists k,
+     m <= k < S (m + n) /\ set_In x ((if lor then @fst (set nat) (set nat) else (@snd (set nat) (set nat))) (Trace_on e k))).
+Proof.
+  split.
+  generalize dependent m.
+  induction n; intros m;
+    [
+      replace (S (m + 0)) with (S m) by lia;
+      destruct lor;
+      (intros H; exists m; split; [lia |];
+                        unfold Trace_from_to in H;
+                        destruct (le_lt_dec (S m) m);
+                        [apply le_Sn_n in l; contradiction
+                        |
+                        fold Trace_from_to in H;
+                          rewrite trace_from_to_self in H;
+                          remember (trace_plus (Trace_on e m) trace_zero) as t;
+                          destruct t;
+                          simpl in *;
+                          remember (Trace_on e m) as t';
+                          destruct t';
+                          simpl in *;
+                          inversion Heqt; subst; auto ])
+    | unfold Trace_from_to; fold Trace_from_to;
+      destruct (le_lt_dec (S (m + S n)) m) as [contra | _]; [ assert (~ (S (m + S n)) <= m) by (apply gt_not_le; lia); contradiction|];
+      unfold trace_plus;
+      remember (Trace_on e (m + S n))as t; destruct t as [tl tr];
+      remember (Trace_from_to e m (m + S n)) as t; destruct t as [tl' tr'];
+      replace (m + S n) with (S (m + n)) in * by lia;
+      destruct lor;
+      (simpl; intros Hin_union; unfold set_union' in Hin_union;
+       destruct (set_union_elim eq_nat_dec _ _ _ Hin_union); 
+       [exists (S (m + n)); split; [lia|]; destruct Heqt; auto |]);
+      [ replace tl' with (fst (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
+      | replace tr' with (snd (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)];
+      (destruct (IHn m H) as [k [Hless Hinn]]; exists k; (split; [lia | auto]))].
+
+  intros [k [[Hmk HkSmn] Hin]];
+  induction n as [| n].
+  replace (S (m + 0)) with (S m) in * by lia;
+  unfold Trace_from_to;
+  destruct (le_lt_dec (S m) m); [apply le_Sn_n in l; contradiction|];
+  fold Trace_from_to; rewrite trace_from_to_self; assert (k = m) by lia; subst;
+  destruct lor;
+  remember (trace_plus (Trace_on e m) trace_zero) as t;
+  destruct t; simpl in *;
+  remember (Trace_on e m) as t';
+    destruct t';
+    simpl in *;
+  inversion Heqt; subst; auto.
+
+  replace (S (m + n)) with (m + S n) in * by lia;
+  destruct (eq_nat_dec k (m + S n)); subst;
+  unfold Trace_from_to; fold Trace_from_to;
+  (destruct (le_lt_dec (S (m + S n)) m); [ assert (~ (S (m + S n) <= m)) by (apply le_not_gt; lia); contradiction| ]); (remember (Trace_on e (m + S n)) as t); destruct t as [tl tr];
+   (remember (Trace_from_to e m (m + S n)) as t'); destruct t' as [tl' tr'].
+  destruct lor; (
+      simpl in *; unfold set_union'; apply set_union_intro1; auto).
+
+  destruct lor; simpl in *; unfold set_union'; apply set_union_intro2; apply IHn; lia.
+Qed.
+
+Theorem In_Trace (lor : l_or_r) e x m n :
+  (m < n) ->
+  (In x ((if lor then @fst (set nat) (set nat) else (@snd (set nat) (set nat))) (Trace_from_to e m n)) <->
+   (exists k,
+     m <= k < n /\ In x ((if lor then @fst (set nat) (set nat) else (@snd (set nat) (set nat))) (Trace_on e k)))).
+Proof.
+  intros H.
+  remember (pred (n - m)) as p.
+  assert (n = (S (m + p))) by lia.
+  subst n.
+  apply In_trace'.
+Qed.
 
 Lemma PairNN_layer :
   forall n,
     trace_eq (Trace_from_to E_PairNN (n * n) (S n * S n))
              (z_to_n (S n), z_to_n (S n)).
 Proof.
+  intros n.
+  unfold trace_eq.
+  remember (Trace_from_to E_PairNN (n * n) (S n * S n)) as t.
+  destruct t as [tl tr].
+  split.
+  split.
+  apply subset_In_def.
+  
+  destruct  (Trace_from_to E_PairNN (n * n) (S n * S n)).
   admit.
 Qed.
 
