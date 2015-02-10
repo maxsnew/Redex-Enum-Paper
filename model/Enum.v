@@ -835,20 +835,6 @@ Proof.
   destruct Hsub; auto.
 Qed.
 
-Lemma set_subset_add : forall x s1 s2, subset s1 s2 -> subset s1 (set_add' x s2).
-Proof.
-  intros x s1 s2.
-  generalize dependent x.
-  generalize dependent s1.
-  induction s2 as [| y s2].
-  intros s1 x contra.
-  apply subset_nil_nil in contra; subst.
-  compute; tauto.
-
-  intros s1 x Hsub.
-  admit.
-Qed.
-
 Lemma subset_cons_swap : forall x y s1 s2, subset s1 s2 -> subset (x :: y :: s1) (y :: x :: s2).
 Proof.
   intros x y s1 s2.
@@ -883,6 +869,13 @@ Proof.
   split.
   constructor; auto.
   apply subset_consr; auto.
+Qed.
+
+Lemma set_eq_cons_cons x s1 s2 : set_eq s1 s2 -> set_eq (x :: s1) (x :: s2).
+Proof.
+  intros H.
+  destruct H.
+  split; apply set_cons_cons_subset; auto.
 Qed.
 
 Lemma set_add_cons_eq : forall x s, set_eq (x :: s) (set_add' x s).
@@ -1086,6 +1079,14 @@ Proof.
   split; apply set_union_subset_cong; auto.
 Qed.
 
+
+Lemma set_subset_add : forall x s1 s2, subset s1 s2 -> subset s1 (set_add' x s2).
+Proof.
+  intros x s1 s2 Hsub.
+  eapply subset_trans; [| apply set_add_cons_subset; apply subset_refl ].
+  apply subset_consr; auto.
+Qed.
+
   (*
      Other useful lemmas:
      * set_union' is commutative wrt set_eq
@@ -1256,7 +1257,7 @@ Proof.
   destruct (le_lt_dec (S n) 0).
   inversion l.
   fold Trace_from_to.
-  
+
   admit.
   admit.
   
@@ -1381,9 +1382,57 @@ Proof.
   admit.
 Qed.
 
+Theorem set_eq_app_cons_comm s1 s2 a : set_eq (a :: (s1 ++ s2)) (s1 ++ a :: s2).
+Proof.
+  induction s1.
+  apply set_eq_refl.
+  rewrite <-app_comm_cons.
+  eapply set_eq_trans.
+  apply set_eq_cons_swap.
+  apply set_eq_refl.
+  replace ((a0 :: s1) ++ a :: s2) with (a0 :: (s1 ++ a :: s2)) by apply app_comm_cons.
+  apply set_eq_cons_cons; auto.
+Qed.
+
+Theorem set_union_app_eq : forall s1 s2, set_eq (set_union' s1 s2) (s1 ++ s2).
+Proof.
+  induction s2.
+  simpl.
+  rewrite app_nil_r.
+  apply set_eq_refl.
+
+  simpl.
+  eapply set_eq_trans.
+  apply set_eq_symm.
+  apply set_add_cons_eq.
+  eapply set_eq_trans; [|   apply set_eq_app_cons_comm].
+  apply set_eq_cons_cons; auto.
+Qed.
+
 Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
 Proof.
-Admitted.
+  split; [| apply subset_union_transr; apply subset_refl ].
+  generalize dependent s2.
+  induction s1 as [| x s1].
+  intros s1 Hsubnil.
+  apply subset_trans with (s2 := s1).
+  apply set_union_unitl; apply subset_refl.
+  apply subset_refl.
+
+  intros s2 Hsub.
+  apply subset_trans with (s2 := x :: (set_union' s1 s2)).
+  apply subset_trans with (s2 := (x :: s1 ++ s2)).
+  apply set_union_app_eq.
+  apply set_subset_weaken.
+  apply set_eq_cons_cons.
+  apply set_eq_symm.
+  apply set_union_app_eq.
+
+  simpl.
+  unfold subset in Hsub; fold subset in Hsub.
+  destruct Hsub.
+  split; auto.
+Qed.
 
 (* TODO: cleanup. Why do I need to use PairNN_layer 3 times? *)
 Lemma Pair_Fair_precise :
