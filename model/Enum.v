@@ -176,6 +176,29 @@ Proof.
 Qed.
 Hint Resolve Pairing_to_sound.
 
+Lemma sqrt_lemma z : (z - (sqrt z * sqrt z)) - sqrt z <= sqrt z.
+Proof.
+  induction z as [| z]; auto.
+  (* sqrt_spec: forall n : nat, sqrt n * sqrt n <= n < S (sqrt n) * S (sqrt n) *)
+  (* Nat.sqrt_succ_le: forall a : nat, sqrt (S a) <= S (sqrt a) *)
+  (* Nat.sqrt_succ_or: forall a : nat, sqrt (S a) = S (sqrt a) \/ sqrt (S a) = sqrt a *)
+  destruct (Nat.sqrt_succ_or z); [nia|].
+  inversion IHz; [| nia].
+  clear IHz.
+  apply False_ind.
+  rewrite <-H in H1.
+
+  assert (z - sqrt (S z) * sqrt (S z) - sqrt (S z) = 0).
+  assert (z <= sqrt (S z) * sqrt (S z) + sqrt (S z)).
+  destruct (sqrt_spec z).
+  admit.
+  nia.
+  rewrite H0 in H1.
+  (* sqrt z <= z - sqrt z * sqrt z *)
+  
+  admit.
+Qed.
+
 Theorem Pairing_from_dec:
   forall n,
     { xy | Pairing n (fst xy) (snd xy) }.
@@ -198,14 +221,8 @@ Proof.
 
   remember (sqrt_spec z).
   rewrite Heqrootz in *.
-  (*
-     Lemma needed: 
-       sqrt z <= z - (zqrt z)^2
-       ------------------------
-       z - (sqrt z)^2 - sqrt z <= sqrt z    
-   *)
+  apply sqrt_lemma.
   
-  admit.
   (* P_XSmall: x < y *)
   exists (z - (rootz * rootz), rootz).
   assert (z = (z - rootz * rootz) + rootz * rootz).
@@ -618,6 +635,14 @@ Fixpoint Trace_less_than (e : Enum) n : Trace :=
     | 0 => trace_zero
     | S n' => trace_plus (Trace_on e n') (Trace_less_than e n')
   end.
+
+Fixpoint Trace_from_to e lo hi : Trace :=
+  if le_lt_dec hi lo
+  then trace_zero
+  else match hi with
+         | 0 => trace_zero
+         | S hi' => trace_plus (Trace_on e hi') (Trace_from_to e lo hi')
+       end.
 
 Fixpoint subset (s1 s2 : set nat) :=
   match s1 with
@@ -1154,9 +1179,106 @@ Proof.
   apply subset_rev.
 Qed.
 
+Definition trace_eq (t1 t2 : Trace) : Prop :=
+  let (tl1, tr1) := t1
+  in
+  let (tl2, tr2) := t2
+  in
+  set_eq tl1 tl2 /\ set_eq tr1 tr2.
 
+Theorem trace_plus_cong t1 t2 t3 t4 : trace_eq t1 t3 -> trace_eq t2 t4 -> trace_eq (trace_plus t1 t2) (trace_plus t3 t4).
+  unfold trace_eq.
+  destruct t1; destruct t2; destruct t3; destruct t4.
+  unfold trace_plus.
+  intros H; destruct H.
+  intros H'; destruct H'.
+  split; apply set_union_cong; auto.
+Qed.
 
+Theorem trace_eq_refl t : trace_eq t t.
+Proof.
+  unfold trace_eq; destruct t; split; apply set_eq_refl.
+Qed.
 
+Theorem trace_eq_symm t1 t2 : trace_eq t1 t2 -> trace_eq t2 t1.
+Proof.
+  unfold trace_eq.
+  destruct t1; destruct t2.
+  intros H; destruct H.
+  split; apply set_eq_symm; auto.
+Qed.
+
+Theorem trace_eq_trans t1 t2 t3 : trace_eq t1 t2 -> trace_eq t2 t3 -> trace_eq t1 t3.
+Proof.
+  unfold trace_eq.
+  destruct t1; destruct t2; destruct t3.
+  intros H; destruct H.
+  intros H'; destruct H'.
+  split; eapply set_eq_trans; eauto.
+Qed.
+
+Theorem trace_lt_from_to_0_same e n : trace_eq (Trace_less_than e n) (Trace_from_to e 0 n).
+Proof.
+  induction n.
+  simpl.
+  split; apply set_eq_refl.
+
+  simpl.
+  unfold trace_plus.
+  destruct (Trace_on e n).
+  destruct (Trace_less_than e n).
+  destruct (Trace_from_to e 0 n).
+  destruct IHn.
+  split.
+  apply set_union_cong; [apply set_eq_refl|]; auto.
+  apply set_union_cong; [apply set_eq_refl|]; auto.
+Qed.
+
+Theorem trace_from_to_split e m n p :
+  (m <= n < p)
+  -> trace_eq (Trace_from_to e m p)
+              (trace_plus (Trace_from_to e m n)
+                          (Trace_from_to e n p)).
+Proof.
+  generalize dependent p.
+  generalize dependent n.
+  induction m.
+  induction n.
+  intros p Hpos.
+  unfold Trace_from_to at 2.
+  simpl.
+  destruct (Trace_from_to e 0 p).
+  unfold trace_eq.
+  split; (eapply set_eq_trans; [apply set_eq_refl | apply set_eq_symm; apply set_union_unitl]).
+
+  intros p [HSn HSnp].
+  unfold Trace_from_to at 2.
+  destruct (le_lt_dec (S n) 0).
+  inversion l.
+  fold Trace_from_to.
+  
+  admit.
+  admit.
+  
+Qed.
+
+Theorem trace_from_to_0_split :
+  forall m n e,
+    m < n ->
+    trace_eq (Trace_less_than e n)
+             (trace_plus (Trace_less_than e m)
+                         (Trace_from_to e m n)).
+Proof.
+  intros m n e Hmn.
+  eapply trace_eq_trans.
+  apply trace_lt_from_to_0_same.
+  eapply trace_eq_trans.
+  apply trace_from_to_split with (n := m); split; [lia | assumption].
+  apply trace_plus_cong.
+  apply trace_eq_symm.
+  apply trace_lt_from_to_0_same.
+  apply trace_eq_refl.
+Qed.
 
 Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 20).
 Eval compute in (Trace_less_than (E_Sum (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 21).
@@ -1248,27 +1370,62 @@ Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat
 Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 49).
 Eval compute in (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) 64).
 
+
+Definition E_PairNN := (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)).
+
+Lemma PairNN_layer :
+  forall n,
+    trace_eq (Trace_from_to E_PairNN (n * n) (S n * S n))
+             (z_to_n (S n), z_to_n (S n)).
+Proof.
+  admit.
+Qed.
+
+Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
+Proof.
+Admitted.
+
+(* TODO: cleanup. Why do I need to use PairNN_layer 3 times? *)
+Lemma Pair_Fair_precise :
+  forall n, trace_eq (Trace_less_than E_PairNN (n * n)) (z_to_n n, z_to_n n).
+Proof.
+  induction n.
+  compute; tauto.
+  apply trace_eq_trans
+  with (t2 := (trace_plus (Trace_less_than E_PairNN (n * n))
+                          (Trace_from_to E_PairNN (n * n) (S n * S n)))).
+  apply trace_from_to_0_split; lia.
+  apply trace_eq_trans with (t2 := (Trace_from_to E_PairNN (n * n) (S n * S n))).
+  apply trace_eq_trans with (t2 := (trace_plus (z_to_n n, z_to_n n) (z_to_n (S n), z_to_n (S n)))).
+  apply trace_plus_cong.
+  auto.
+  apply PairNN_layer.
+  apply trace_eq_trans with (t2 := (z_to_n (S n), z_to_n (S n))).
+  split; (apply subset_union_eq; unfold z_to_n at 2; fold z_to_n; apply set_subset_add; apply subset_refl).
+  apply trace_eq_symm.
+  apply PairNN_layer.
+  apply PairNN_layer.
+Qed.
+  
 Theorem Pair_Fair : Fair E_Pair.
   unfold Fair.
   intros n.
   exists ((S n) * (S n)).
-  remember (Trace_less_than (E_Pair (E_Trace lft E_Nat) (E_Trace rght E_Nat)) (S n * S n)) as t.
+  
+  fold E_PairNN.
+  remember (Trace_less_than E_PairNN (S n * S n)) as t.
   destruct t as [tl tr].
   split.
-  admit. (* easy: n < (n+1)^2 
-              not easy enough for omega tho :(
-          *)
-  generalize dependent tr.
-  generalize dependent tl.
-  induction n.
-  simpl.
-  intros tl tr H.
-  inversion H.
-  compute.
-  tauto.
-
-  
-Admitted.
+  nia.
+  remember (Pair_Fair_precise (S n)) as Hteq; clear HeqHteq.
+  unfold trace_eq in Hteq.
+  remember (Trace_less_than E_PairNN (S n * S n)) as t'.
+  destruct t'.
+  inversion Heqt; subst s s0.
+  destruct Hteq.
+  eapply set_eq_trans; eauto.
+  apply set_eq_symm; auto.
+Qed.
 
 (* Cant' prove (cons e1 (cons e2 e3)) is unfair because you need to trace 3 things.. *)
 
