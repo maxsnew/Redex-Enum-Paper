@@ -206,6 +206,12 @@ Proof.
   remember (sqrt_spec z); omega.
 Qed.
 
+Lemma sqrt_lemma'' k n :
+  (n * n <= k < S n * S n) -> k - sqrt k * sqrt k - sqrt k < S n.
+Proof.
+  intros H; rewrite (Nat.sqrt_unique k n); lia.
+Qed.
+
 Theorem Pairing_from_dec:
   forall n,
     { xy | Pairing n (fst xy) (snd xy) }.
@@ -1715,30 +1721,31 @@ Lemma PairNN_layer :
     trace_eq (Trace_from_to E_PairNN (n * n) (S n * S n))
              (z_to_n (S n), z_to_n (S n)).
 Proof.
-  intros n.
-  unfold trace_eq.
-  remember (Trace_from_to E_PairNN (n * n) (S n * S n)) as t.
-  destruct t as [tl tr].
-  split.
-  split.
-  apply subset_In_def.
-  assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto).
-  intros x Hin.
-  apply z_to_n_correct.
-  rewrite H in Hin.
-  apply (In_Trace lft) in Hin; [| lia].
-  destruct Hin as [k [Hksize Hin]].
-  clear Heqt H.
-  unfold Trace_on in Hin.
-  destruct (Enumerates_from_dec E_PairNN k) as [[v t] Henum].
-  destruct (le_lt_dec (sqrt k) (k - (sqrt k * sqrt k))).
+  intros n;
+    unfold trace_eq;
+    remember (Trace_from_to E_PairNN (n * n) (S n * S n)) as t;
+    destruct t as [tl tr];
+    split; split.
 
+  (* Case 1: trace_left pair n^2 (n+1)^2 < 0..n+1 *)
+  apply subset_In_def;
+    assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto);
+    intros x Hin;
+    apply z_to_n_correct;
+    rewrite H in Hin;
+    (apply (In_Trace lft) in Hin; [| lia]);
+    destruct Hin as [k [Hksize Hin]];
+    clear Heqt H;
+    unfold Trace_on in Hin;
+    destruct (Enumerates_from_dec E_PairNN k) as [[v t] Henum];
+    destruct (le_lt_dec (sqrt k) (k - (sqrt k * sqrt k))).
   assert (Enumerates E_PairNN
                      k
                      (V_Pair (V_Nat (sqrt k)) (V_Nat ((k - sqrt k * sqrt k) - sqrt k)))
                      (trace_plus (trace_one (sqrt k)                         lft)
                                  (trace_one ((k - sqrt k * sqrt k) - sqrt k) rght)
                      )).
+  
   apply ES_Pair with (ln := (sqrt k)) (rn := ((k - sqrt k * sqrt k) - sqrt k));
     [| econstructor; constructor
      | econstructor; constructor
@@ -1763,16 +1770,17 @@ Proof.
   destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H); subst;
     destruct Hin; [nia | contradiction].
 
-  apply subset_In_def.
-  intros x Hin.
-  apply z_to_n_correct in Hin.
-  assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto).
-  rewrite H.
-  apply (In_Trace lft); [lia| ].
+  (* Case 2: 0..n+1 < trace_left pair n^2 (n+1)^2 *)
+  apply subset_In_def;
+    intros x Hin;
+    apply z_to_n_correct in Hin;
+    assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto);
+    rewrite H;
+    (apply (In_Trace lft); [lia| ]);
   (* our k is (unpair x n)
    *)
-  destruct (le_lt_dec n x).
-
+    destruct (le_lt_dec n x).
+  
   exists (x*x + x + n); split; [nia|];
     unfold Trace_on;
     destruct (Enumerates_from_dec E_PairNN (x * x + x + n)) as [[v t] Henum];
@@ -1800,13 +1808,60 @@ Proof.
     | econstructor; constructor ].
   destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
 
-  
   (* this half of the proof is almost exactly the same as above,
      except with tr instead of tl should figure how to be less
      repetitive than repeating all the above tactics.  might be less
      of a problem when we move to a new trace representation
    *)
-  admit.
+  (* Case 3: trace_right pair n^2 (n+1)^2 < 0..n+1 *)
+  apply subset_In_def;
+    assert (tr = (snd (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto);
+    intros x Hin;
+    apply z_to_n_correct;
+    rewrite H in Hin;
+    (apply (In_Trace rght) in Hin; [| lia]);
+    destruct Hin as [k [Hksize Hin]];
+    clear Heqt H;
+    unfold Trace_on in Hin;
+    destruct (Enumerates_from_dec E_PairNN k) as [[v t] Henum].
+    destruct (le_lt_dec (sqrt k) (k - (sqrt k * sqrt k))).
+  assert (Enumerates E_PairNN
+                     k
+                     (V_Pair (V_Nat (sqrt k)) (V_Nat ((k - sqrt k * sqrt k) - sqrt k)))
+                     (trace_plus (trace_one (sqrt k)                         lft)
+                                 (trace_one ((k - sqrt k * sqrt k) - sqrt k) rght)
+                     )).
+  
+  apply ES_Pair with (ln := (sqrt k)) (rn := ((k - sqrt k * sqrt k) - sqrt k));
+    [| econstructor; constructor
+     | econstructor; constructor
+    ];
+    assert (k = (sqrt k * sqrt k) + sqrt k + ((k - sqrt k * sqrt k) - sqrt k)) as Hk by nia;
+    rewrite Hk at 1;
+    constructor;
+    apply sqrt_lemma.
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H); subst;
+    destruct Hin;
+    [ rewrite <- H0; apply sqrt_lemma''; auto
+    | contradiction].
+
+  assert (Enumerates E_PairNN
+                     k
+                     (V_Pair (V_Nat (k - (sqrt k * sqrt k)))
+                             (V_Nat (sqrt k)))
+                     (trace_plus (trace_one (k - (sqrt k * sqrt k)) lft)
+                                 (trace_one (sqrt k)                rght))).
+  apply ES_Pair with (ln := (k - (sqrt k * sqrt k))) (rn := sqrt k);
+    [ rewrite (sqrt_lemma' k) at 1; [constructor; auto | auto]
+    | econstructor; constructor
+    | econstructor; constructor ].
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H); subst;
+  destruct Hin;
+  [ rewrite <-H0; rewrite (Nat.sqrt_unique k n); lia
+  | contradiction
+  ].
+  
+    
 Qed.
 
 (* TODO: cleanup. Why do I need to use PairNN_layer 3 times? *)
