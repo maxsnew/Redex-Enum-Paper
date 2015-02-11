@@ -199,6 +199,13 @@ Proof.
   admit.
 Qed.
 
+Lemma sqrt_lemma' z :
+  (z - (sqrt z) * (sqrt z) < (sqrt z))
+  -> z = z - (sqrt z * sqrt z) + (sqrt z * sqrt z).
+Proof.
+  remember (sqrt_spec z); omega.
+Qed.
+
 Theorem Pairing_from_dec:
   forall n,
     { xy | Pairing n (fst xy) (snd xy) }.
@@ -223,18 +230,11 @@ Proof.
   rewrite Heqrootz in *.
   apply sqrt_lemma.
   
-  (* P_XSmall: x < y *)
+  (* P_XSmall: x < y: x + y*y *)
   exists (z - (rootz * rootz), rootz).
-  assert (z = (z - rootz * rootz) + rootz * rootz).
-  (* le_plus_minus: forall n m : nat, n <= m -> m = n + (m - n) *)
-  replace (z - rootz * rootz + rootz * rootz) with ((rootz*rootz) + (z - (rootz * rootz))) by omega.
-  apply le_plus_minus.
-  rewrite Heqrootz.
-  apply sqrt_spec.
-  rewrite H at 1.
-  simpl.
-  constructor 2.
-  auto.
+  subst.
+  rewrite sqrt_lemma' at 1; [| auto].
+  simpl; constructor 2; auto.
 Defined.
 
 (* Eval compute in (Pairing_from_dec 0). *)
@@ -1728,28 +1728,83 @@ Proof.
   rewrite H in Hin.
   apply (In_Trace lft) in Hin; [| lia].
   destruct Hin as [k [Hksize Hin]].
-  admit.
+  clear Heqt H.
+  unfold Trace_on in Hin.
+  destruct (Enumerates_from_dec E_PairNN k) as [[v t] Henum].
+  destruct (le_lt_dec (sqrt k) (k - (sqrt k * sqrt k))).
+
+  assert (Enumerates E_PairNN
+                     k
+                     (V_Pair (V_Nat (sqrt k)) (V_Nat ((k - sqrt k * sqrt k) - sqrt k)))
+                     (trace_plus (trace_one (sqrt k)                         lft)
+                                 (trace_one ((k - sqrt k * sqrt k) - sqrt k) rght)
+                     )).
+  apply ES_Pair with (ln := (sqrt k)) (rn := ((k - sqrt k * sqrt k) - sqrt k));
+    [| econstructor; constructor
+     | econstructor; constructor
+    ];
+    assert (k = (sqrt k * sqrt k) + sqrt k + ((k - sqrt k * sqrt k) - sqrt k)) as Hk by nia;
+    rewrite Hk at 1;
+    constructor;
+    apply sqrt_lemma.
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H); subst;
+    destruct Hin; [nia | contradiction].
+
+  assert (Enumerates E_PairNN
+                     k
+                     (V_Pair (V_Nat (k - (sqrt k * sqrt k)))
+                             (V_Nat (sqrt k)))
+                     (trace_plus (trace_one (k - (sqrt k * sqrt k)) lft)
+                                 (trace_one (sqrt k)                rght))).
+  apply ES_Pair with (ln := (k - (sqrt k * sqrt k))) (rn := sqrt k);
+    [ rewrite (sqrt_lemma' k) at 1; [constructor; auto | auto]
+    | econstructor; constructor
+    | econstructor; constructor ].
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H); subst;
+    destruct Hin; [nia | contradiction].
 
   apply subset_In_def.
-  assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto).
   intros x Hin.
   apply z_to_n_correct in Hin.
+  assert (tl = (fst (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto).
   rewrite H.
-  apply (In_Trace lft); [lia|].
-  destruct (Pairing_to_dec x n) as [k Hk].
-  exists k.
-  inversion Hk; subst.
-  split.
-  nia.
-  
-  admit. (* should be easy, just need to unfold the right defnitions *)
-  split.
-  nia.
-  admit. (* same here*)
+  apply (In_Trace lft); [lia| ].
+  (* our k is (unpair x n)
+   *)
+  destruct (le_lt_dec n x).
 
-  (* this half of the proof is exactly the same as above, except with tr instead of tl 
-     should figure how to be less repetitive than repeating all the above tactics.
-     might be less of a problem when we move to a new trace representation
+  exists (x*x + x + n); split; [nia|];
+    unfold Trace_on;
+    destruct (Enumerates_from_dec E_PairNN (x * x + x + n)) as [[v t] Henum];
+    assert (Enumerates E_PairNN
+                     (x * x + x + n)
+                     (V_Pair (V_Nat x) (V_Nat n))
+                     (trace_plus (trace_one x lft) (trace_one n rght))).
+  econstructor;
+    [ constructor 1; auto
+    | econstructor; constructor
+    | econstructor; constructor
+    ].
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
+
+  exists (x + n * n); split; [lia|];
+    unfold Trace_on;
+    destruct (Enumerates_from_dec E_PairNN (x + n * n)) as [[v t] Henum];
+    assert (Enumerates E_PairNN
+                       (x + n * n)
+                       (V_Pair (V_Nat x) (V_Nat n))
+                       (trace_plus (trace_one x lft) (trace_one n rght))).
+  econstructor;
+    [ constructor 2; auto
+    | econstructor; constructor
+    | econstructor; constructor ].
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
+
+  
+  (* this half of the proof is almost exactly the same as above,
+     except with tr instead of tl should figure how to be less
+     repetitive than repeating all the above tactics.  might be less
+     of a problem when we move to a new trace representation
    *)
   admit.
 Qed.
