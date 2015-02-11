@@ -1861,7 +1861,41 @@ Proof.
   | contradiction
   ].
   
-    
+  (* Case 4: 0..n+1 < trace_right pair n^2 (n+1)^2 *)
+  apply subset_In_def;
+    intros x Hin;
+    apply z_to_n_correct in Hin;
+    assert (tr = (snd (Trace_from_to E_PairNN (n * n) (S n * S n)))) by (rewrite <-Heqt; auto);
+    rewrite H;
+    (apply (In_Trace rght); [lia| ]);
+    destruct (le_lt_dec x n).
+  exists (n * n + n + x); split; [nia | ];
+    unfold Trace_on;
+    destruct (Enumerates_from_dec E_PairNN (n * n + n + x)) as [[v t] Henum];
+    assert (Enumerates E_PairNN
+                     (n * n + n + x)
+                     (V_Pair (V_Nat n) (V_Nat x))
+                     (trace_plus (trace_one n lft) (trace_one x rght))).
+  econstructor;
+    [ constructor 1; auto
+    | econstructor; constructor
+    | econstructor; constructor
+    ].
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
+
+  exists (n + x * x); split; [nia| ];
+    unfold Trace_on;
+    destruct (Enumerates_from_dec E_PairNN (n + x * x)) as [[v t] Henum];
+    assert (Enumerates E_PairNN
+                     (n + x * x)
+                     (V_Pair (V_Nat n) (V_Nat x))
+                     (trace_plus (trace_one n lft) (trace_one x rght))).
+  econstructor;
+    [ constructor 2; auto
+    | econstructor; constructor
+    | econstructor; constructor
+    ].
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
 Qed.
 
 (* TODO: cleanup. Why do I need to use PairNN_layer 3 times? *)
