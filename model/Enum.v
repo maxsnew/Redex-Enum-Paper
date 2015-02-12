@@ -114,12 +114,9 @@ Lemma Pairing_to_incompat:
     False.
 Proof.
   intros.
-  destruct (eq_nat_decide r2 l1) as [EQ | NEQ].
-  apply eq_nat_eq in EQ.
-  subst r2.
+  destruct (eq_nat_dec r2 l1) as [EQ | NEQ]; subst.
   lia.
   apply NEQ.
-  apply eq_eq_nat.
   nia.
 Qed.
 
