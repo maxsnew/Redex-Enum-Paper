@@ -113,7 +113,15 @@ Lemma Pairing_to_incompat:
     l2 + r2 * r2 = l1 * l1 + l1 + r1 ->
     False.
 Proof.
-Admitted.
+  intros.
+  destruct (eq_nat_decide r2 l1) as [EQ | NEQ].
+  apply eq_nat_eq in EQ.
+  subst r2.
+  lia.
+  apply NEQ.
+  apply eq_eq_nat.
+  nia.
+Qed.
 
 Theorem Pairing_to_fun :
   forall n l1 l2 r1 r2,
