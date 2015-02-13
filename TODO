@@ -1,20 +1,6 @@
-DONE rewrite introduction [robby]
-
-DONE move comments on specific papers from intro into related work
-(and perhaps shrink them up a bit). [robby]
-
-TODO make edits suggested by "small comments" sections of OOPSLA reviews  [jay?]
-
-DONE add a new section between the current 2 and 3 that discusses
-fairness and the euler/boxy pairing function (edit 2 to match that new
-one) [max]
-
-DONE re-run the benchmarks [burke]
-
-TODO maybe discuss other applications (games)
-
-DONE add to the related work with that Scala enumeration paper.
-
-DONE look into whether to change emphasis to enum vs redex benchmark [robby]
-
-DONE revise intro-to-combinators to be the actual intro
+1. Model extension for trinary combinators  (Max)
+2. writeup of bounded-list/e                (Max)
+3. redex ambiguity                          (Robby)
+4. write the dang paper                     (Max + everyone)
+5. port coq model back to redex             (Robby)
+6. automated testing of coq = redex = data/enumerate (Max + Robby)
