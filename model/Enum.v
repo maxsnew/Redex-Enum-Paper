@@ -2048,5 +2048,114 @@ Theorem Pair_Fair : Fair2 E_Pair.
 Qed.
 
 (* Next: prove (cons e1 (cons e2 e3)) is unfair *)
+Definition NaivePair3 e1 e2 e3 :=
+  E_Pair e1 (E_Pair e2 e3).
+
+Definition AltUnfair3 k :=
+  exists threshold,
+    forall eq_cand,
+      eq_cand > threshold ->
+      match Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
+        | Tracing use0 use1 use2 _ =>
+          (~ (set_eq use0 use1)) \/ (~ (set_eq use1 use2)) \/ (~ (set_eq use0 use2))
+      end.
+
+Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k).
+Proof.
+  unfold AltUnfair3, Fair3, not.
+  intros [thresh Halt] Hunf.
+  destruct (Hunf thresh) as [eq_cand Hblah].
+  clear Hunf.
+  remember (Halt eq_cand).
+  clear Halt Heqy.
+  destruct (Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
+                            eq_cand) as [t0 t1 t2 t3] in *.
+  intuition.
+  assert (set_eq t0 t2) by (eapply set_eq_trans; eauto); contradiction.
+Qed.
+
+Definition traceNP3 := Trace_less_than (NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
+Eval compute in traceNP3 0.
+Eval compute in traceNP3 1.
+Eval compute in traceNP3 2.
+Eval compute in traceNP3 3.
+Eval compute in traceNP3 4.
+Eval compute in traceNP3 5.
+Eval compute in traceNP3 6.
+Eval compute in traceNP3 7.
+Eval compute in traceNP3 8.
+Eval compute in traceNP3 9.
+Eval compute in traceNP3 10.
+Eval compute in traceNP3 11.
+Eval compute in traceNP3 12.
+Eval compute in traceNP3 13.
+Eval compute in traceNP3 14.
+Eval compute in traceNP3 15.
+Eval compute in traceNP3 16.
+Eval compute in traceNP3 17.
+Eval compute in traceNP3 18.
+Eval compute in traceNP3 19.
+Eval compute in traceNP3 20.
+
+Lemma z_to_n_nosubS m : ~ subset (z_to_n (S m)) (z_to_n m).
+Proof.
+  intros H.
+  assert (set_In m (z_to_n m)).
+  eapply In_subset_def; eauto.
+  apply z_to_n_correct; nliamega.
+  rewrite z_to_n_correct in H0.
+  nliamega.
+Qed.
+
+Lemma z_to_n_nosub' m n : ~ subset (z_to_n (S (m + n))) (z_to_n m).
+Proof.
+  induction n.
+  replace (m + 0) with m by nliamega.
+  apply z_to_n_nosubS.
+  unfold z_to_n; fold z_to_n.
+  replace (m + S n) with (S (m + n)) by nliamega.
+  intros H.
+  apply IHn.
+  apply subset_In_def.
+  intros x.
+  rewrite z_to_n_correct.
+  intros Hlt.
+  assert (set_In x (set_add' (S (m + n)) (z_to_n (S (m + n))))).
+  replace (set_add' (S (m + n)) (z_to_n (S (m + n)))) with (z_to_n (S (S (m + n)))).
+  apply z_to_n_correct; nliamega.
+  trivial.
+  eapply In_subset_def.
+  apply H.
+  auto.
+Qed.
+
+Lemma z_to_n_nosub m n : m < n -> ~ subset (z_to_n n) (z_to_n m).
+Proof.
+  
+  revert n.
+  intros H.
+  
+Qed.
+
+Theorem PairPairUnFair : ~ (Fair3 NaivePair3).
+Proof.
+  apply AltUnfair3Suff.
+  unfold AltUnfair3.
+  exists 6.
+  intros n H.
+  remember (Trace_less_than (NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat)
+                                        (E_Trace two E_Nat))
+                            n).
+  destruct t as [t0 t1 t2 t3].
+  left.
+  assert (~ subset t0 t1); [ | intros []; contradiction].
+  assert (subset t1 (z_to_n (sqrt (sqrt n)))).
+  admit.
+  assert (subset (z_to_n (sqrt n)) t0).
+  admit.
+
+  
+  rewrite Heqt.
+Qed.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
