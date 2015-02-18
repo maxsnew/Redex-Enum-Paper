@@ -745,6 +745,11 @@ Proof.
   intros H; destruct H; contradiction.
 Defined.
 
+Definition subset_nn s1 s2 : ~~(subset s1 s2) -> subset s1 s2.
+Proof.
+  destruct (subset_dec s1 s2); tauto.
+Qed.
+
 Definition set_eq_dec s1 s2 : { set_eq s1 s2 } + { ~ (set_eq s1 s2) }.
 Proof.
   destruct (subset_dec s1 s2).
@@ -2131,10 +2136,18 @@ Qed.
 
 Lemma z_to_n_nosub m n : m < n -> ~ subset (z_to_n n) (z_to_n m).
 Proof.
-  
-  revert n.
-  intros H.
-  
+  intros H1 H2.
+  destruct n; [nliamega|].
+  assert (n < m); [| nliamega].
+  apply z_to_n_correct.
+  eapply In_subset_def.
+  eapply subset_trans; eauto.
+  apply subset_In_def.
+  unfold set_In.
+  intros x.
+  rewrite !z_to_n_correct; auto.
+  apply z_to_n_correct.
+  nliamega.
 Qed.
 
 Theorem PairPairUnFair : ~ (Fair3 NaivePair3).
@@ -2153,9 +2166,14 @@ Proof.
   admit.
   assert (subset (z_to_n (sqrt n)) t0).
   admit.
-
-  
-  rewrite Heqt.
+  intros Hsub01.
+  apply z_to_n_nosub with (m := (sqrt (sqrt n))) (n := (sqrt n)).
+  apply Nat.sqrt_lt_lin.
+  assert (2 <= sqrt n); [| nliamega].
+  apply le_trans with (m := sqrt 6).
+  compute; nliamega.
+  apply Nat.sqrt_le_mono; nliamega.
+  repeat (eapply subset_trans; eauto).
 Qed.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
