@@ -2341,6 +2341,12 @@ Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace 
 Eval compute in Trace_lt NP3T 14.
 Eval compute in sqrt (sqrt 7).
 
+Lemma weird_lemma n :
+  4 <= n ->
+  (S (sqrt (S n))) < n.
+Proof.
+Admitted.
+
 (* What a property! *)
 Lemma sqrt_spec_2 n :
   16 <= n ->
@@ -2351,10 +2357,16 @@ Proof.
   exists (S (S (sqrt (S (sqrt n))))).
   exists (S (sqrt (S (sqrt n)))).
   split; [| nliamega].
-Admitted.
-  (* (S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n)))) *)
-  (* <= n < *)
-  (* ((S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n))))) * ((S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n))))). *)
+  split; [| destruct (sqrt_spec n); destruct (sqrt_spec (S (sqrt n))); nliamega ].
+  destruct (sqrt_spec n).
+  apply le_trans with (m := sqrt n * sqrt n); auto.
+  assert (S (S (sqrt (S (sqrt n)))) <= sqrt n) as Hperf; [|(apply mult_le_compat; apply Hperf)].
+  assert (4 <= sqrt n).
+  replace 4 with (sqrt 16) .
+  apply Nat.sqrt_le_mono; auto.
+  compute; trivial.
+  apply weird_lemma; auto.
+Qed.
 
 Lemma nat_le_iff : forall m p, (forall q : nat, q <= m -> q <= p) <-> m <= p.
 Proof.
