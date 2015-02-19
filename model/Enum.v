@@ -2323,6 +2323,20 @@ Proof.
   destruct tg; compute; tauto.
 Qed.
 
+Theorem trace_lt_Nat_off n tg1 tg2
+: tg1 <> tg2 ->
+  (trace_proj tg1 (Trace_lt (E_Trace tg2 E_Nat) n)) = empty_set'.
+Proof.
+  intros Hdiff.
+  induction n.
+  destruct tg1; auto.
+  unfold Trace_lt; fold Trace_lt.
+  rewrite trace_proj_plus_distrl.
+  rewrite trace_off.
+  rewrite IHn; compute; auto.
+  auto.
+Qed.
+
 Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
 Eval compute in Trace_lt NP3T 14.
 Eval compute in sqrt (sqrt 7).
@@ -2333,6 +2347,10 @@ Lemma sqrt_spec_2 n :
   exists m p,
     m * m <= n < (p * p) * (p * p) /\ p * p < m * m.
 Proof.
+  intros H.
+  exists (S (S (sqrt (S (sqrt n))))).
+  exists (S (sqrt (S (sqrt n)))).
+  split; [| nliamega].
 Admitted.
   (* (S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n)))) *)
   (* <= n < *)
@@ -2374,95 +2392,74 @@ Proof.
   assert (16 <= n) as H' by nliamega ; clear H.
   remember (Trace_lt NP3T n) as t; destruct t as [t0 t1 t2 t3].
   destruct (sqrt_spec_2 n) as [m [p [[Hmn Hnp] Hppmm]]]; auto.
-  remember (Trace_lt NP3T (m * m)) as t; destruct t as [mm0 mm1 mm2 mm3].
   
   left.
   assert (~ subset t0 t1); [ | intros []; contradiction].
 
   assert (subset (z_to_n m) t0).
-  assert (sub_trace (Trace_lt NP3T (m * m)) (Trace_lt NP3T n))
-    by (apply Trace_lt_sub; auto).
-  unfold sub_trace in H.
-  rewrite <-Heqt in H.
-  rewrite <-Heqt0 in H.
-  destruct4 H.
-  eapply subset_trans; try eassumption.
-  clear H H0 H1 H2; clear dependent t0; clear t1 t2 t3.
-  unfold NP3T, NaivePair3 in *.
-  remember (Pair_precise m (E_Trace zero E_Nat) (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))).
-  clear Heqt.
-  rewrite <-Heqt0 in t.
-  remember ((trace_plus (Trace_lt (E_Trace zero E_Nat) m) (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
-  destruct t0.
-  replace mm0 with (trace_proj zero (Tracing mm0 mm1 mm2 mm3)) by auto.
-  eapply subset_trans; [| apply trace_eq_proj; apply trace_eq_weakenl; apply trace_eq_symm; eassumption].
-  rewrite Heqt1.
-  rewrite trace_proj_plus_distrl.
-  apply subset_union_transl.
-  apply trace_lt_Nat.
+  - remember (Trace_lt NP3T (m * m)) as t; destruct t as [mm0 mm1 mm2 mm3].
+    assert (sub_trace (Trace_lt NP3T (m * m)) (Trace_lt NP3T n))
+      by (apply Trace_lt_sub; auto).
+    unfold sub_trace in H.
+    rewrite <-Heqt in H.
+    rewrite <-Heqt0 in H.
+    destruct4 H.
+    eapply subset_trans; try eassumption.
+    clear H H0 H1 H2; clear dependent t0; clear t1 t2 t3.
+    unfold NP3T, NaivePair3 in *.
+    remember (Pair_precise m (E_Trace zero E_Nat) (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))).
+    clear Heqt.
+    rewrite <-Heqt0 in t.
+    remember ((trace_plus (Trace_lt (E_Trace zero E_Nat) m) (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
+    destruct t0.
+    replace mm0 with (trace_proj zero (Tracing mm0 mm1 mm2 mm3)) by auto.
+    eapply subset_trans; [| apply trace_eq_proj; apply trace_eq_weakenl; apply trace_eq_symm; eassumption].
+    rewrite Heqt1.
+    rewrite trace_proj_plus_distrl.
+    apply subset_union_transl.
+    apply trace_lt_Nat.
   
-  assert (subset t1 (z_to_n p)) by admit.
-  
-  
-  intros Hcontra; assert (forall q, q < m -> q < p).
-  intros q; rewrite <-z_to_n_correct; rewrite <-z_to_n_correct;
-    apply In_subset_def; repeat (eapply subset_trans; try eassumption).
-  assert (m <= p); [apply nat_lt_iff; auto | nliamega].
-Qed.
-  apply nat_lt_iff.
-  
-  apply z_to_n_correct.
-  
-  assert (trace_eq (Trace_lt NP3T (sqrt n * sqrt n))
-                   (trace_plus (Trace_lt (E_Trace zero E_Nat) (sqrt n))
-                               (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) (sqrt n))))
-    by apply Pair_precise.
-  unfold trace_eq in H0.
-  remember (Trace_lt NP3T (sqrt n * sqrt n)) as roott; destruct roott as [rt0 rt1 rt2 rt3];
-  remember (trace_plus (Trace_lt (E_Trace zero E_Nat) (sqrt n))
-                       (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) (sqrt n))) as pt;
-    destruct pt as [pt0 pt1 pt2 pt3].
-  assert (sub_trace (Trace_lt NP3T (sqrt n * sqrt n))
-                    (Trace_lt NP3T n))
-    by (apply Trace_lt_sub; remember (sqrt_spec n); nliamega).
-
-  apply not_subset_In_def with (x := sqrt (sqrt n)).
-  apply In_subset_def with (s := z_to_n (sqrt n)).
-  Focus 2.
-  apply z_to_n_correct.
-  apply Nat.sqrt_lt_lin.
-  assert (2 <= sqrt n); [| nliamega].
-  apply le_trans with (m := sqrt 6).
-  compute; nliamega.
-  apply Nat.sqrt_le_mono; nliamega.
-
-  unfold sub_trace in H1; rewrite <- Heqt in H1; rewrite <-Heqroott in H1.
-  destruct4 H1.
-  eapply subset_trans; [| eassumption].
-  eapply subset_trans; [| destruct4 H0; apply set_subset_weaken; apply set_eq_symm; eassumption].
-  clear dependent t0; clear dependent t1; clear dependent t2; clear dependent t3.
-  clear dependent rt0; clear rt1 rt2 rt3.
-  apply subset_trans with (s2 := (trace_proj zero (Trace_lt (E_Trace zero E_Nat) (sqrt n)))).
-  apply set_subset_weaken.
-  apply trace_lt_Nat.
-
-  replace pt0 with (trace_proj zero (trace_plus (Trace_lt (E_Trace zero E_Nat) (sqrt n))
-                                                (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))
-                                                          (sqrt n)))).
-  rewrite trace_proj_plus_distrl.
-  apply subset_union_transl.
-  apply subset_refl.
-  rewrite <-Heqpt; reflexivity.
-
-  intros Hin.
-  assert (subset t1 (z_to_n (sqrt (sqrt n)))).
-  admit. (* snd (trace pair) < 0 .. sqrt (sqrt n) *)
-  
-  assert (set_In (sqrt (sqrt n)) (z_to_n (sqrt (sqrt n)))).
-  eapply In_subset_def; eauto.
-  assert (sqrt (sqrt n) < sqrt (sqrt n)); [| nliamega].
-  apply z_to_n_correct; auto.
-
+  - assert (subset t1 (z_to_n p)).
+    remember (Trace_lt NP3T ((p * p) * (p * p))) as p4t.
+    assert (sub_trace (Trace_lt NP3T n) p4t) by (subst; apply Trace_lt_sub; auto; nliamega).
+    destruct p4t as [pt0 pt1 pt2 pt3].
+    unfold sub_trace in H0.
+    rewrite <-Heqt in H0.
+    destruct4 H0.
+    eapply subset_trans; try eassumption.
+    clear H0 H1 H2 H3; clear dependent t0; clear t1 t2 t3; clear dependent m; clear dependent n.
+    unfold NP3T in Heqp4t.
+    unfold NaivePair3 in Heqp4t.
+    remember (PairPair_precise p (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
+    clear Heqt.
+    rewrite <-Heqp4t in t.
+    apply set_subset_weaken.
+    replace pt1 with (trace_proj one (Tracing pt0 pt1 pt2 pt3)) by trivial.
+    clear Heqp4t.
+    eapply set_eq_trans.
+    apply sub_trace_proj.
+    apply t.
+    apply set_eq_symm.
+    eapply set_eq_trans.
+    apply trace_lt_Nat with (tg := one).
+    rewrite trace_proj_plus_distrl.
+    rewrite trace_proj_plus_distrl.
+    rewrite trace_lt_Nat_off with (tg2 := zero); [| discriminate].
+    rewrite trace_lt_Nat_off with (tg2 := two); [| discriminate].
+    apply set_eq_symm.
+    eapply set_eq_trans; [apply set_union_unitl|].
+    eapply set_eq_trans; [apply set_union_unitr|].
+    apply set_eq_refl.
+    intros Hsub01.
+    assert (subset (z_to_n m) (z_to_n p)).
+    eapply subset_trans; try eassumption.
+    eapply subset_trans; try eassumption.
+    assert (m <= p); [| nliamega].
+    apply nat_lt_iff.
+    intros q.
+    rewrite <-z_to_n_correct.
+    rewrite <-z_to_n_correct.
+    apply In_subset_def; assumption.
 Qed.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
