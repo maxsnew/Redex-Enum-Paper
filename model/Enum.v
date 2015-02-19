@@ -2341,13 +2341,26 @@ Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace 
 Eval compute in Trace_lt NP3T 14.
 Eval compute in sqrt (sqrt 7).
 
-Lemma weird_lemma n :
+Lemma sqrt_slower_than_id' n :
+  (S (sqrt (S (4 + n)))) < 4 + n.
+Proof.
+  induction n.
+  compute; reflexivity.
+  assert (sqrt (S (4 + S n)) <= (S (S (S n)))); [| nliamega].
+  eapply le_trans; [apply Nat.sqrt_succ_le|].
+  replace (4 + S n) with (S (4 + n)) by nliamega.
+  nliamega.
+Qed.
+
+Lemma sqrt_slower_than_id n :
   4 <= n ->
   (S (sqrt (S n))) < n.
 Proof.
-Admitted.
+  intros H.
+  replace n with (4 + (n - 4)) by nliamega.
+  apply sqrt_slower_than_id'.
+Qed.
 
-(* What a property! *)
 Lemma sqrt_spec_2 n :
   16 <= n ->
   exists m p,
@@ -2365,7 +2378,7 @@ Proof.
   replace 4 with (sqrt 16) .
   apply Nat.sqrt_le_mono; auto.
   compute; trivial.
-  apply weird_lemma; auto.
+  apply sqrt_slower_than_id; auto.
 Qed.
 
 Lemma nat_le_iff : forall m p, (forall q : nat, q <= m -> q <= p) <-> m <= p.
