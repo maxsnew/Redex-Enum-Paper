@@ -1818,6 +1818,16 @@ Proof.
   apply set_In_trace'.
 Qed.
 
+Theorem set_In_Trace_lt tg e x n :
+set_In x (trace_proj tg (Trace_lt e (S n)))
+<->
+exists k,
+  k < S n /\ set_In x (trace_proj tg (Trace_on e k)).
+Proof.
+  admit.
+Qed.
+Eval compute in Trace_lt E_PairNN (S (5 * 5)).
+
 Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
 Proof.
   unfold Trace_on.
