@@ -667,10 +667,10 @@ Defined.
 Definition Trace_on (e : Enum) (n : nat) : Trace :=
   let (nt, _) := (Enumerates_from_dec e n) in snd nt.
 
-Fixpoint Trace_less_than (e : Enum) n : Trace :=
+Fixpoint Trace_lt (e : Enum) n : Trace :=
   match n with
     | 0 => trace_zero
-    | S n' => trace_plus (Trace_on e n') (Trace_less_than e n')
+    | S n' => trace_plus (Trace_on e n') (Trace_lt e n')
   end.
 
 Fixpoint Trace_from_to e lo hi : Trace :=
@@ -827,6 +827,11 @@ Lemma set_subset_weaken : forall s1 s2, set_eq s1 s2 -> subset s1 s2.
 Proof.
   unfold set_eq.
   tauto.
+Qed.
+
+Theorem not_subset_In_def s s' x : set_In x s -> ~(set_In x s') -> ~ subset s s'.
+Proof.
+  intros; eauto.
 Qed.
 
 Lemma subset_trans : forall s1 s2 s3, subset s1 s2 -> subset s2 s3 -> subset s1 s3.
@@ -1229,7 +1234,7 @@ Qed.
 Definition Fair2 (k : Enum -> Enum -> Enum) :=
   forall n,
   exists equilibrium,
-    match Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
+    match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
       | Tracing l_uses r_uses _ _ =>
         n < equilibrium /\ set_eq  l_uses r_uses
     end.
@@ -1237,7 +1242,7 @@ Definition Fair2 (k : Enum -> Enum -> Enum) :=
 Definition Fair3 (k : Enum -> Enum -> Enum -> Enum) :=
   forall n,
   exists equilibrium,
-    match Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
+    match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
       | Tracing z_uses o_uses t_uses _ =>
         n < equilibrium /\ set_eq z_uses o_uses /\ set_eq o_uses t_uses
     end.
@@ -1245,7 +1250,7 @@ Definition Fair3 (k : Enum -> Enum -> Enum -> Enum) :=
 Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) :=
   forall n,
   exists equilibrium,
-    match Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with
+    match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with
       | Tracing z_uses o_uses tw_uses th_uses =>
         n < equilibrium /\ set_eq z_uses o_uses /\ set_eq o_uses tw_uses /\ set_eq tw_uses th_uses
     end.
@@ -1329,8 +1334,57 @@ Definition trace_eq (t1 t2 : Trace) : Prop :=
       /\ set_eq l3 r3
   end.
 
+Definition sub_trace (t1 t2 : Trace) : Prop :=
+  match (t1, t2) with
+    | (Tracing l0 l1 l2 l3, Tracing r0 r1 r2 r3) =>
+      subset l0 r0
+      /\ subset l1 r1
+      /\ subset l2 r2
+      /\ subset l3 r3
+  end.
+
 Ltac split4 := split; [| split; [| split]].
-Ltac destruct4 H := destruct H as [[] [[] []]].
+Ltac destruct4 H := destruct H as [? [? [? ?]]].
+
+Theorem sub_trace_refl t : sub_trace t t.
+Proof.
+  unfold sub_trace; destruct t; split4; apply subset_refl.
+Qed.
+
+Theorem sub_trace_trans t1 t2 t3 : sub_trace t1 t2 -> sub_trace t2 t3 -> sub_trace t1 t3.
+Proof.
+  unfold sub_trace; destruct t1, t2, t3.
+  intros H1 H2; destruct4 H1; destruct4 H2.
+  split4; eapply subset_trans; eauto.
+Qed.
+
+Theorem sub_trace_proj t1 t2 tg : trace_eq t1 t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
+Proof.
+  admit.
+Qed.
+
+Theorem trace_eq_proj t1 t2 tg : sub_trace t1 t2 -> subset (trace_proj tg t1) (trace_proj tg t2).
+Proof.
+  admit.
+Qed.
+
+Definition trace_eq' t1 t2 : Prop :=
+  sub_trace t1 t2 /\ sub_trace t2 t1.
+Theorem trace_eq'_weakenl t1 t2 : trace_eq' t1 t2 -> sub_trace t1 t2.
+Proof. unfold trace_eq'; intuition. Qed.
+Theorem trace_eq'_weakenr t1 t2 : trace_eq' t1 t2 -> sub_trace t2 t1.
+Proof. unfold trace_eq'; intuition. Qed.
+Theorem trace_eq_eq'_equiv t1 t2 : trace_eq t1 t2 <-> trace_eq' t1 t2.
+Proof.
+  unfold trace_eq, trace_eq', sub_trace, set_eq;
+    destruct t1; destruct t2; intuition.
+Qed.
+
+Theorem trace_eq_weakenl t1 t2 : trace_eq t1 t2 -> sub_trace t1 t2.
+Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenl. Qed.
+
+Theorem trace_eq_weakenr t1 t2 : trace_eq t1 t2 -> sub_trace t2 t1.
+Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenr. Qed.
 
 Theorem trace_plus_cong t1 t2 t3 t4 : trace_eq t1 t3 -> trace_eq t2 t4 -> trace_eq (trace_plus t1 t2) (trace_plus t3 t4).
   unfold trace_eq.
@@ -1379,7 +1433,7 @@ Proof.
   split4; apply set_eq_symm; apply set_union_assoc.
 Qed.
 
-Theorem trace_lt_from_to_0_same e n : trace_eq (Trace_less_than e n) (Trace_from_to e 0 n).
+Theorem trace_lt_from_to_0_same e n : trace_eq (Trace_lt e n) (Trace_from_to e 0 n).
 Proof.
   induction n.
   simpl.
@@ -1388,7 +1442,7 @@ Proof.
   simpl.
   unfold trace_plus.
   destruct (Trace_on e n).
-  destruct (Trace_less_than e n).
+  destruct (Trace_lt e n).
   destruct (Trace_from_to e 0 n).
   destruct4 IHn.
   split4; (apply set_union_cong; [apply set_eq_refl|]; auto).
@@ -1556,8 +1610,8 @@ Qed.
 Theorem trace_from_to_0_split :
   forall m n e,
     m < n ->
-    trace_eq (Trace_less_than e n)
-             (trace_plus (Trace_less_than e m)
+    trace_eq (Trace_lt e n)
+             (trace_plus (Trace_lt e m)
                          (Trace_from_to e m n)).
 Proof.
   intros m n e Hmn.
@@ -1571,13 +1625,13 @@ Proof.
   apply trace_eq_refl.
 Qed.
 
-Eval compute in (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 20).
-Eval compute in (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 21).
-Eval compute in (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 22).
-Eval compute in (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 23).
-Eval compute in (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 24).
+Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 20).
+Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 21).
+Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 22).
+Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 23).
+Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 24).
 Eval compute in (z_to_n 10).
-Eval compute in (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 20).
+Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 20).
 
 
 (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
@@ -1586,7 +1640,7 @@ Proof.
   unfold Fair2.
   intros n.
   exists (2 * n + 2).
-  remember (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
+  remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
   destruct t as [tz to ttw tth].
   split; [nliamega| ].
 
@@ -1599,7 +1653,7 @@ Proof.
   inversion Heqt; auto; apply set_eq_refl.
 
   intros tz to ttw tth Htzto.
-  remember (Trace_less_than (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
+  remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
   replace (2 * S n + 2) with (S (S (2 * n + 2))) in Htzto by nliamega.
   simpl in Htzto.
   replace (n + (n + 0) + 2) with (2 * n + 2) in Htzto by nliamega.
@@ -1649,15 +1703,15 @@ Proof.
     auto.
 Qed.
 
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 0).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 1).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 4).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 9).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 16).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 25).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 36).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 49).
-Eval compute in (Trace_less_than (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 64).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 0).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 1).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 4).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 9).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 16).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 25).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 36).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 49).
+Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 64).
 
 Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
 
@@ -1696,8 +1750,8 @@ Proof.
   nliamega.
 Qed.
 
-Theorem Trace_less_than_correct n tg x e
-: set_In x (trace_proj tg (Trace_less_than e n))
+Theorem Trace_lt_correct n tg x e
+: set_In x (trace_proj tg (Trace_lt e n))
   <-> exists n, set_In x (trace_proj tg (Trace_on e n)).
 
 Theorem set_In_trace' (tg : tag) e x m n :
@@ -1781,15 +1835,15 @@ Proof.
   apply set_In_trace'.
 Qed.
 
-Theorem set_In_Trace_less_than tg e x n :
-set_In x (trace_proj tg (Trace_less_than e (S n)))
+Theorem set_In_Trace_lt tg e x n :
+set_In x (trace_proj tg (Trace_lt e (S n)))
 <->
 exists k,
   k < S n /\ set_In x (trace_proj tg (Trace_on e k)).
 Proof.
   admit.
 Qed.
-Eval compute in Trace_less_than E_PairNN (S (5 * 5)).
+Eval compute in Trace_lt E_PairNN (S (5 * 5)).
 
 Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
 Proof.
@@ -1838,16 +1892,63 @@ Qed.
 
 Lemma EPair_ft_cong n e1 e2 :
     trace_eq (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n))
-             (trace_plus (Trace_less_than e1 (S n))
-                         (Trace_less_than e2 (S n))).
+             (trace_plus (Trace_lt e1 (S n))
+                         (Trace_lt e2 (S n))).
 Proof.
   unfold trace_eq;
   remember (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n)) as t;
   destruct t as [t0 t1 t2 t3].
-  remember (trace_plus (Trace_less_than e1 (S n)) (Trace_less_than e2 (S n))) as t';
+  remember (trace_plus (Trace_lt e1 (S n)) (Trace_lt e2 (S n))) as t';
     destruct t' as [t0' t1' t2' t3'].
   split4; split.
 Admitted.
+
+Theorem sub_trace_plus_introl t1 t2 t3
+: sub_trace t1 t2 -> sub_trace t1 (trace_plus t2 t3).
+Proof.
+  unfold sub_trace, trace_plus; destruct t1, t2, t3.
+  intros H; destruct H as [H1 [H2 [H3 H4]]].
+  Local Hint Resolve subset_union_transl.
+  split4; auto.
+Qed.
+
+Theorem sub_trace_plus_intror t1 t2 t3
+: sub_trace t1 t3 -> sub_trace t1 (trace_plus t2 t3).
+Proof.
+  unfold sub_trace, trace_plus; destruct t1, t2, t3.
+  intros H; destruct H as [H1 [H2 [H3 H4]]].
+  Local Hint Resolve subset_union_transr.
+  split4; auto.
+Qed.
+
+Theorem Trace_from_to_sub' e m n p : sub_trace (Trace_from_to e m n) (Trace_from_to e m (n + p)).
+Proof.
+  induction p.
+  replace (n + 0) with n by nliamega; apply sub_trace_refl.
+  replace (n + S p) with (S (n + p)) by nliamega.
+  unfold Trace_from_to at 2; fold Trace_from_to.
+  destruct (le_lt_dec (S (n + p))).
+  replace (Trace_from_to e m n) with trace_zero; [apply sub_trace_refl|].
+  unfold Trace_from_to.
+  destruct n.
+  destruct (le_lt_dec 0 m); auto.
+  destruct (le_lt_dec (S n) m); auto; nliamega.
+  apply sub_trace_plus_intror; auto.
+Qed.
+
+Theorem Trace_from_to_sub e m n p : n <= p -> sub_trace (Trace_from_to e m n) (Trace_from_to e m p).
+Proof.
+  Local Hint Resolve Trace_from_to_sub'.
+  intros; replace p with (n + (p - n)) by nliamega; auto.
+Qed.
+
+Theorem Trace_lt_sub e m n : m <= n -> sub_trace (Trace_lt e m) (Trace_lt e n).
+Proof.
+  intros H.
+  eapply sub_trace_trans; [apply trace_eq_weakenl; apply trace_lt_from_to_0_same| ].
+  eapply sub_trace_trans; [| apply trace_eq_weakenr; apply trace_lt_from_to_0_same].
+  apply Trace_from_to_sub; auto.
+Qed.  
 
 Lemma PairNN_layer :
   forall n,
@@ -2038,18 +2139,64 @@ Qed.
 
 Lemma Pair_precise 
 : forall n e1 e2,
-    trace_eq (Trace_less_than (E_Pair e1 e2) (n * n))
-             (trace_plus (Trace_less_than e1 n)
-                         (Trace_less_than e2 n)).
+    trace_eq (Trace_lt (E_Pair e1 e2) (n * n))
+             (trace_plus (Trace_lt e1 n)
+                         (Trace_lt e2 n)).
 Admitted.
 
+Lemma PairPair_precise
+: forall n e1 e2 e3,
+    trace_eq (Trace_lt (E_Pair e1 (E_Pair e2 e3)) ((n * n) * (n * n)))
+             (trace_plus (Trace_lt e1 (n * n))
+                         (trace_plus (Trace_lt e2 n)
+                                     (Trace_lt e3 n))).
+Proof.
+  intros n e1 e2 e3.
+  eapply trace_eq_trans; [apply Pair_precise|].
+  apply trace_plus_cong; [apply trace_eq_refl| ].
+  apply Pair_precise.
+Qed.
+
+Definition foobar n := ((S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n))))) * ((S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n))))).
+Definition qux n := S (S (sqrt (S (sqrt n)))) * S (S (sqrt (S (sqrt n)))).
+Definition baz n := (qux n, n, foobar n).
+Eval compute in baz 0.
+Eval compute in baz 1.
+Eval compute in baz 2.
+Eval compute in baz 3.
+Eval compute in baz 4.
+Eval compute in baz 5.
+Eval compute in baz 6.
+Eval compute in baz 7.
+Eval compute in baz 8.
+Eval compute in baz 9.
+Eval compute in baz 10.
+Eval compute in baz 11.
+Eval compute in baz 12.
+Eval compute in baz 13.
+Eval compute in baz 14.
+Eval compute in baz 15.
+Eval compute in baz 16.
+Eval compute in baz 17.
+Eval compute in baz 25.
+Eval compute in baz 36.
+Eval compute in baz 49.
+Eval compute in baz 100.
+
+
+Lemma mult_lt_compat : forall m n p q, m < p -> n < q -> m * n < p * q.
+Proof.
+  intros; nliamega.
+Qed.
+
+
 Lemma Pair_Fair_precise :
-  forall n, trace_eq (Trace_less_than E_PairNN (n * n)) (Tracing (z_to_n n) (z_to_n n) empty_set' empty_set').
+  forall n, trace_eq (Trace_lt E_PairNN (n * n)) (Tracing (z_to_n n) (z_to_n n) empty_set' empty_set').
 Proof.
   induction n.
   compute; tauto.
   apply trace_eq_trans
-  with (t2 := (trace_plus (Trace_less_than E_PairNN (n * n))
+  with (t2 := (trace_plus (Trace_lt E_PairNN (n * n))
                           (Trace_from_to E_PairNN (n * n) (S n * S n)))).
   apply trace_from_to_0_split; nliamega.
   apply trace_eq_trans with (t2 := (trace_plus (Tracing (z_to_n n) (z_to_n n) empty_set' empty_set')
@@ -2073,16 +2220,16 @@ Theorem Pair_Fair : Fair2 E_Pair.
   exists ((S n) * (S n)).
   
   fold E_PairNN.
-  remember (Trace_less_than E_PairNN (S n * S n)) as t.
+  remember (Trace_lt E_PairNN (S n * S n)) as t.
   destruct t as [t0 t1 t2 t3].
   split; [nliamega|].
   remember (Pair_Fair_precise (S n)) as Hteq; clear HeqHteq.
   unfold trace_eq in Hteq.
-  remember (Trace_less_than E_PairNN (S n * S n)) as t'.
+  remember (Trace_lt E_PairNN (S n * S n)) as t'.
   destruct t'.
   inversion Heqt; subst s s0.
   destruct4 Hteq.
-  eapply set_eq_trans; eauto.
+  eapply set_eq_trans; [| apply set_eq_symm]; eauto.
 Qed.
 
 (* Next: prove (cons e1 (cons e2 e3)) is unfair *)
@@ -2093,7 +2240,7 @@ Definition AltUnfair3 k :=
   exists threshold,
     forall eq_cand,
       eq_cand > threshold ->
-      match Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
+      match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
         | Tracing use0 use1 use2 _ =>
           (~ (set_eq use0 use1)) \/ (~ (set_eq use1 use2)) \/ (~ (set_eq use0 use2))
       end.
@@ -2106,13 +2253,13 @@ Proof.
   clear Hunf.
   remember (Halt eq_cand).
   clear Halt Heqy.
-  destruct (Trace_less_than (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
+  destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
                             eq_cand) as [t0 t1 t2 t3] in *.
   intuition.
   assert (set_eq t0 t2) by (eapply set_eq_trans; eauto); contradiction.
 Qed.
 
-Definition traceNP3 := Trace_less_than (NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
+Definition traceNP3 := Trace_lt (NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
 
 Lemma z_to_n_nosubS m : ~ subset (z_to_n (S m)) (z_to_n m).
 Proof.
@@ -2158,38 +2305,164 @@ Proof.
   rewrite !z_to_n_correct; auto.
 Qed.
 
+Theorem trace_lt_Nat n tg
+: set_eq (z_to_n n)
+     (trace_proj tg (Trace_lt (E_Trace tg E_Nat) n)).
+Proof.
+  induction n as [| n IHn]; [destruct tg; compute; tauto|].
+  unfold Trace_lt. fold Trace_lt.
+  unfold z_to_n. fold z_to_n.
+  rewrite trace_proj_plus_distrl.
+  rewrite Trace_nat.
+  eapply set_eq_trans.
+  apply set_eq_symm. apply set_add_cons_eq.
+  eapply set_eq_trans.
+  replace (n :: z_to_n n) with ((n :: nil) ++ z_to_n n) by reflexivity.
+  apply set_eq_symm; apply set_union_app_eq.
+  apply set_union_cong; auto.
+  destruct tg; compute; tauto.
+Qed.
+
 Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
+Eval compute in Trace_lt NP3T 14.
+Eval compute in sqrt (sqrt 7).
+
+(* What a property! *)
+Lemma sqrt_spec_2 n :
+  16 <= n ->
+  exists m p,
+    m * m <= n < (p * p) * (p * p) /\ p * p < m * m.
+Proof.
+Admitted.
+  (* (S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n)))) *)
+  (* <= n < *)
+  (* ((S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n))))) * ((S (sqrt (S (sqrt n)))) * (S (sqrt (S (sqrt n))))). *)
+
+Lemma nat_le_iff : forall m p, (forall q : nat, q <= m -> q <= p) <-> m <= p.
+Proof.
+  split.
+  intros H. apply (H m); auto.
+  intros H q; nliamega.
+Qed.
+
+Lemma nat_lt_iff : forall m p, (forall q : nat, q < m -> q < p) <-> m <= p.
+Proof.
+  destruct m.
+  intros p; split; [nliamega| intros _ q contra; inversion contra].
+  destruct p.
+  split.
+  intros contra; assert (m < 0) by (apply contra; auto); nliamega.
+  intros contra; inversion contra.
+  split.
+  intros H.
+  assert (m <= p); [| nliamega].
+  apply nat_le_iff.
+  intros q Hqm.
+  assert (q < S p); [| nliamega].
+  apply H; nliamega.
+  intros; nliamega.
+Qed.
+
 Theorem PairPairUnFair : ~ (Fair3 NaivePair3).
 Proof.
 
   apply AltUnfair3Suff.
   unfold AltUnfair3.
   fold NP3T.
-  exists 6.
+  exists 15.
   intros n H.
-  remember (Trace_less_than NP3T n) as t.
-  destruct t as [t0 t1 t2 t3].
-  left.
+  assert (16 <= n) as H' by nliamega ; clear H.
+  remember (Trace_lt NP3T n) as t; destruct t as [t0 t1 t2 t3].
+  destruct (sqrt_spec_2 n) as [m [p [[Hmn Hnp] Hppmm]]]; auto.
+  remember (Trace_lt NP3T (m * m)) as t; destruct t as [mm0 mm1 mm2 mm3].
   
+  left.
   assert (~ subset t0 t1); [ | intros []; contradiction].
-  assert (subset t1 (z_to_n (sqrt (sqrt n)))).
-  assert (trace_eq (Trace_less_than NP3T n)
-                   (trace_plus (Trace_less_than (E_Trace zero E_Nat) n)
-                               (Trace_less_than (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) n))).
-  unfold NP3T, NaivePair3.
-  apply Pair_precise.
 
-    by admit.
-  assert (subset (z_to_n (sqrt n)) t0) by admit.
+  assert (subset (z_to_n m) t0).
+  assert (sub_trace (Trace_lt NP3T (m * m)) (Trace_lt NP3T n))
+    by (apply Trace_lt_sub; auto).
+  unfold sub_trace in H.
+  rewrite <-Heqt in H.
+  rewrite <-Heqt0 in H.
+  destruct4 H.
+  eapply subset_trans; try eassumption.
+  clear H H0 H1 H2; clear dependent t0; clear t1 t2 t3.
+  unfold NP3T, NaivePair3 in *.
+  remember (Pair_precise m (E_Trace zero E_Nat) (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))).
+  clear Heqt.
+  rewrite <-Heqt0 in t.
+  remember ((trace_plus (Trace_lt (E_Trace zero E_Nat) m) (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
+  destruct t0.
+  replace mm0 with (trace_proj zero (Tracing mm0 mm1 mm2 mm3)) by auto.
+  eapply subset_trans; [| apply trace_eq_proj; apply trace_eq_weakenl; apply trace_eq_symm; eassumption].
+  rewrite Heqt1.
+  rewrite trace_proj_plus_distrl.
+  apply subset_union_transl.
+  apply trace_lt_Nat.
+  
+  assert (subset t1 (z_to_n p)) by admit.
+  
+  
+  intros Hcontra; assert (forall q, q < m -> q < p).
+  intros q; rewrite <-z_to_n_correct; rewrite <-z_to_n_correct;
+    apply In_subset_def; repeat (eapply subset_trans; try eassumption).
+  assert (m <= p); [apply nat_lt_iff; auto | nliamega].
+Qed.
+  apply nat_lt_iff.
+  
+  apply z_to_n_correct.
+  
+  assert (trace_eq (Trace_lt NP3T (sqrt n * sqrt n))
+                   (trace_plus (Trace_lt (E_Trace zero E_Nat) (sqrt n))
+                               (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) (sqrt n))))
+    by apply Pair_precise.
+  unfold trace_eq in H0.
+  remember (Trace_lt NP3T (sqrt n * sqrt n)) as roott; destruct roott as [rt0 rt1 rt2 rt3];
+  remember (trace_plus (Trace_lt (E_Trace zero E_Nat) (sqrt n))
+                       (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) (sqrt n))) as pt;
+    destruct pt as [pt0 pt1 pt2 pt3].
+  assert (sub_trace (Trace_lt NP3T (sqrt n * sqrt n))
+                    (Trace_lt NP3T n))
+    by (apply Trace_lt_sub; remember (sqrt_spec n); nliamega).
 
-  intros Hsub01.
-  apply z_to_n_nosub with (m := (sqrt (sqrt n))) (n := (sqrt n)).
+  apply not_subset_In_def with (x := sqrt (sqrt n)).
+  apply In_subset_def with (s := z_to_n (sqrt n)).
+  Focus 2.
+  apply z_to_n_correct.
   apply Nat.sqrt_lt_lin.
   assert (2 <= sqrt n); [| nliamega].
   apply le_trans with (m := sqrt 6).
   compute; nliamega.
   apply Nat.sqrt_le_mono; nliamega.
-  repeat (eapply subset_trans; eauto).
+
+  unfold sub_trace in H1; rewrite <- Heqt in H1; rewrite <-Heqroott in H1.
+  destruct4 H1.
+  eapply subset_trans; [| eassumption].
+  eapply subset_trans; [| destruct4 H0; apply set_subset_weaken; apply set_eq_symm; eassumption].
+  clear dependent t0; clear dependent t1; clear dependent t2; clear dependent t3.
+  clear dependent rt0; clear rt1 rt2 rt3.
+  apply subset_trans with (s2 := (trace_proj zero (Trace_lt (E_Trace zero E_Nat) (sqrt n)))).
+  apply set_subset_weaken.
+  apply trace_lt_Nat.
+
+  replace pt0 with (trace_proj zero (trace_plus (Trace_lt (E_Trace zero E_Nat) (sqrt n))
+                                                (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))
+                                                          (sqrt n)))).
+  rewrite trace_proj_plus_distrl.
+  apply subset_union_transl.
+  apply subset_refl.
+  rewrite <-Heqpt; reflexivity.
+
+  intros Hin.
+  assert (subset t1 (z_to_n (sqrt (sqrt n)))).
+  admit. (* snd (trace pair) < 0 .. sqrt (sqrt n) *)
+  
+  assert (set_In (sqrt (sqrt n)) (z_to_n (sqrt (sqrt n)))).
+  eapply In_subset_def; eauto.
+  assert (sqrt (sqrt n) < sqrt (sqrt n)); [| nliamega].
+  apply z_to_n_correct; auto.
+
 Qed.
 
 Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
