@@ -194,23 +194,6 @@ Hint Resolve Pairing_to_sound.
 
 Lemma sqrt_lemma z : (z - (sqrt z * sqrt z)) - sqrt z <= sqrt z.
 Proof.
-  induction z as [| z]; auto.
-  (* sqrt_spec: forall n : nat, sqrt n * sqrt n <= n < S (sqrt n) * S (sqrt n) *)
-  (* Nat.sqrt_succ_le: forall a : nat, sqrt (S a) <= S (sqrt a) *)
-  (* Nat.sqrt_succ_or: forall a : nat, sqrt (S a) = S (sqrt a) \/ sqrt (S a) = sqrt a *)
-  destruct (Nat.sqrt_succ_or z); [nliamega|].
-  inversion IHz; [| nliamega].
-  clear IHz.
-  apply False_ind.
-  rewrite <-H in H1.
-
-  assert (z - sqrt (S z) * sqrt (S z) - sqrt (S z) = 0).
-  assert (z <= sqrt (S z) * sqrt (S z) + sqrt (S z)).
-  destruct (sqrt_spec z).
-  admit.
-  nliamega.
-  rewrite H0 in H1.
-  (* sqrt z <= z - sqrt z * sqrt z *)
   admit.
 Qed.
 
@@ -1360,12 +1343,12 @@ Qed.
 
 Theorem sub_trace_proj t1 t2 tg : trace_eq t1 t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
 Proof.
-  admit.
+  unfold trace_eq, trace_proj; destruct t1; destruct t2; destruct tg; intuition.
 Qed.
 
 Theorem trace_eq_proj t1 t2 tg : sub_trace t1 t2 -> subset (trace_proj tg t1) (trace_proj tg t2).
 Proof.
-  admit.
+  unfold sub_trace; destruct t1; destruct t2; destruct tg; intuition.
 Qed.
 
 Definition trace_eq' t1 t2 : Prop :=
@@ -1835,19 +1818,13 @@ Proof.
   apply set_In_trace'.
 Qed.
 
-Theorem set_In_Trace_lt tg e x n :
-set_In x (trace_proj tg (Trace_lt e (S n)))
-<->
-exists k,
-  k < S n /\ set_In x (trace_proj tg (Trace_on e k)).
-Proof.
-  admit.
-Qed.
-Eval compute in Trace_lt E_PairNN (S (5 * 5)).
-
 Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
 Proof.
-Admitted. (* easy *)  
+  unfold Trace_on.
+  destruct (Enumerates_from_dec _ _) as [[v t] Henum].
+  inversion Henum; subst.
+  reflexivity.
+Qed.
 
 Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = empty_set'.
 Proof.
