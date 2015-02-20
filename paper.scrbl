@@ -63,7 +63,7 @@
  and practical. They are efficient because most
  of the combinators produce enumerations that
  support indexing in time proportional to the
- log of the given index. In practical terms, this
+ log of the given index. In concrete terms, this
  means that we can typically compute the 
  @raw-latex{$2^{100,000}$}th element of an enumeration 
  in a few milliseconds.
@@ -73,8 +73,8 @@
  does not index disproportionally
  far into just a subset of the given enumerators. For example, 
  this means that enumeration of the
- @raw-latex{$n$}th element of a product
- indexes about @raw-latex{$\sqrt{n}$} elements into each
+ @raw-latex{$n$}th element of an enumeration of three-tuples
+ indexes about @raw-latex{$\sqrt[3]{n}$} elements into each
  of its components.
  
  Our combinators are practical because they support the
@@ -83,7 +83,10 @@
  on an empirical comparison between enumeration-based 
  property generation and ad hoc random generation, showing
  that enumeration is more effective than ad hoc random
- generation in short time-frames.
+ generation in short time-frames. While Redex is our main 
+ application of enumeration, our enumerators also support
+ a video-game programming engine and give us the opportunity
+ for some new game mechanics.
 }
 
 @include-section["intro.scrbl"]
