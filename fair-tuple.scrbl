@@ -3,7 +3,7 @@
 @(require pict
           scribble/manual
           racket/draw
-          redex/private/enumerator
+          data/enumerate/lib
           plot
           scriblib/figure
           "unfairness-hist.rkt"

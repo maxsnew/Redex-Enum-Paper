@@ -4,7 +4,7 @@
           scribble/manual
           redex
           redex/reduction-semantics
-          redex/private/enumerator
+          data/enumerate/lib
           racket/list
           racket/pretty)
 
@@ -50,15 +50,12 @@ the list.
 Generating a list without duplicates requires the @racket[dep/e] combinator
 and the @racket[except/e] combinator. For example, to generate lists of distinct naturals, we first define a helper function that takes as an argument a list of numbers to exclude
 @racketblock/define[(define (no-dups-without eles)
-                      (fix/e (λ (lon/e)
-                               (disj-sum/e 
-                                (cons (fin/e null) null?)
-                                (cons (dep/e 
-                                       (except/e* nat/e eles)
-                                       (λ (new)
-                                         (no-dups-without
-                                          (cons new eles))))
-                                      cons?)))))]
+                      (or/e (fin/e null)
+                            (dep/e 
+                             (except/e* nat/e eles)
+                             (λ (new)
+                               (no-dups-without
+                                (cons new eles))))))]
 @(define no-dups/e (no-dups-without '()))
 where @racket[except/e*] simply calls @racket[except/e] for each element of
 its input list. We can then define @racket[(define no-dups/e (no-dups-without '()))]

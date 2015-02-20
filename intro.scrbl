@@ -4,8 +4,9 @@
           scribble/eval
           racket/list
           racket/pretty
+          racket/contract
           redex/reduction-semantics
-          redex/private/enumerator
+          data/enumerate/lib
           scribble/core
           "util.rkt"
           "enum-util.rkt"
@@ -65,10 +66,10 @@ the float above, which contains a Redex program that defines
 the grammar of a simply-typed calculus plus numeric
 constants. With only this much written down, a Redex programmer can ask for
 first nine terms:
-@enum-example[(map/e (λ (i)
+@enum-example[(pam/e (λ (i)
                        (generate-term L e #:i-th i))
-                     (λ (x) (error 'intro.scrbl "ack; dont' call this!"))
-                     nat/e)
+                     nat/e
+                     #:contract any/c)
               9]
 or the @(add-commas example-term-index)th term:
 @(apply typeset-code

@@ -1,5 +1,5 @@
 #lang racket
-(require redex/private/enumerator
+(require data/enumerate/lib
          pict
          plot)
 
@@ -30,7 +30,7 @@
 (define (build-hashes enumerator)
   (define hashes (vector (make-hash) (make-hash) (make-hash)))
   (for ([x (in-range total-size)])
-    (for/list ([x (in-list (flatten (decode enumerator x)))]
+    (for/list ([x (in-list (flatten (from-nat enumerator x)))]
                [i (in-naturals)])
       (define ht (vector-ref hashes i))
       (hash-set! ht x (+ 1 (hash-ref ht x 0)))))

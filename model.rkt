@@ -1,14 +1,14 @@
 #lang racket
 (require redex
          pict
-         (prefix-in : data/enumerate))
+         (prefix-in : data/enumerate/lib))
 
 (provide semantics-figure sr)
 
 (define-language L
   (e ::= 
      nat/e
-     (sum/e e e)
+     (or/e e e)
      (cons/e e e)
      (map/e f f e)
      (dep/e e f))
@@ -34,11 +34,11 @@
   
   [(even n) (from-nat e_1 (ae-interp (/ n 2)) v)
    ---------------------------------------------  "+l"
-   (from-nat (sum/e e_1 e_2) n (cons 0 v))]
+   (from-nat (or/e e_1 e_2) n (cons 0 v))]
   
   [(odd n) (from-nat e_2 (ae-interp (/ (- n 1) 2)) v)
    -------------------------------------------------- "+r"
-   (from-nat (sum/e e_1 e_2) n (cons 1 v))]
+   (from-nat (or/e e_1 e_2) n (cons 1 v))]
   
   [(side-condition (ae-interp
                     (< (- (+ (* 2 n) 1)
@@ -114,15 +114,17 @@
 
 (define-metafunction L
   to-enum : e -> any
-  [(to-enum (sum/e e_1 e_2))
-   ,(:disj-sum/e (cons (:map/e (λ (x) (cons 0 x))
-                               cdr
-                               (term (to-enum e_1))) 
-                       (λ (x) (equal? (car x) 0)))
-                 (cons (:map/e (λ (x) (cons 1 x))
-                               cdr
-                               (term (to-enum e_2))) 
-                       (λ (x) (equal? (car x) 1))))]
+  [(to-enum (or/e e_1 e_2))
+   ,(let ([e1 (term (to-enum e_1))]
+          [e2 (term (to-enum e_2))])
+      (:or/e (:map/e (λ (x) (cons 0 x))
+                     cdr
+                     e1
+                     #:contract (cons/c 0 (:enum-contract e2)))
+             (:map/e (λ (x) (cons 1 x))
+                     cdr
+                     e2
+                     #:contact (cons/c 1 (:enum-contract e2)))))]
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
@@ -343,8 +345,8 @@
   
   (try-many (term nat/e))
   (try-many (term (cons/e nat/e nat/e)))
-  (try-many (term (sum/e nat/e (cons/e nat/e nat/e))))
-  (try-many (term (sum/e (cons/e nat/e nat/e) nat/e)))
+  (try-many (term (or/e nat/e (cons/e nat/e nat/e))))
+  (try-many (term (or/e (cons/e nat/e nat/e) nat/e)))
   (try-many (term (map/e (add 1) (add -1) nat/e)))
   
   ;; test dep/e
@@ -367,8 +369,8 @@
   (for ([x (in-range 1000)])
     (define l
       (judgment-holds 
-       (from-nat (sum/e (map/e (mult 2) (mult 1/2) nat/e)
-                        (map/e (add 1) (add -1) (map/e (mult 2) (mult 1/2) nat/e)))
+       (from-nat (or/e (map/e (mult 2) (mult 1/2) nat/e)
+                       (map/e (add 1) (add -1) (map/e (mult 2) (mult 1/2) nat/e)))
                  ,x
                  v)
        (to-val v)))
@@ -376,7 +378,7 @@
                    (null? (cdr l))
                    ;; above checks we got one result from the judgment
                    (let ([v (car l)])
-                     ;; here we drop the sum/e injection
+                     ;; here we drop the or/e injection
                      (cdr v))))
     (define passed? (equal? n x))
     (test-log! passed?)

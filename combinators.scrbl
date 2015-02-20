@@ -3,7 +3,8 @@
 @(require scribble/manual
           scribble/eval
           racket/list
-          redex/private/enumerator
+          racket/contract
+          data/enumerate/lib
           scribble/core
           "util.rkt"
           "enum-util.rkt")
@@ -69,8 +70,7 @@ through each of the enumerations every @racket[n] positions.
 For example, the following is the beginning of the disjoint
 sum of an enumeration of natural numbers and an enumeration
 of strings
-@enum-example[(disj-sum/e (cons nat/e number?)
-                          (cons string/e string?))
+@enum-example[(or/e nat/e string/e)
               18]
 We generalize this combinator and describe it in detail in
 @secref["sec:fair"] as well.
@@ -83,12 +83,14 @@ For example, we can construct an enumerator
 for lists of numbers:
 @racketblock[
 (fix/e (λ (lon/e)
-         (disj-sum/e (cons (fin/e null) null?)
-                     (cons (cons/e nat/e lon/e) cons?))))]
+         (or/e (fin/e null)
+               (cons/e nat/e lon/e))))]
 and here are its first @racket[15] elements:
-@enum-example[(fix/e (λ (lon/e)
-                       (disj-sum/e (cons (fin/e null) null?)
-                                   (cons (cons/e nat/e lon/e) cons?))))
+@enum-example[(letrec ([lon/e
+                        (delay/e
+                         (or/e (fin/e null)
+                               (cons/e nat/e lon/e)))])
+                lon/e)
                15]
 A call like @racket[(fix/e f)] enumerator 
 calls @racket[(f (fix/e f))] to build the enumerator,
@@ -116,7 +118,8 @@ enumerations of natural numbers that start at some point beyond zero:
 @racketblock/define[(define (nats-above/e i)
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
-                             nat/e))]
+                             nat/e
+                             #:contract (and/c exact-integer? (>=/c i))))]
 
 Also, we can exploit the bidirectionality of our enumerators to define
 the @racket[except/e] enumerator. It accepts an element and an

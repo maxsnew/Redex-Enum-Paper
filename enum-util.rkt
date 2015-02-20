@@ -1,10 +1,8 @@
 #lang racket
-(require redex/private/enumerator
+(require data/enumerate/lib
          pict
          scribble/manual
          rackunit)
-
-(require/expose redex/private/enumerator (float/e char/e))
 
 (provide pair-pict cantor-cons-pict
          disj-sum-pict/good disj-sum-pict/bad
@@ -17,23 +15,18 @@
          fin/e)
 
 (define (disj-sum-pict/good)
-  (gen-table disj-sum/e 8 24 40 12 #:arrows? #t))
+  (gen-table or/e 8 24 40 12 #:arrows? #t))
 
 (define (disj-sum-pict/bad)
   (define (bad-disj-sum/e a b c)
-    (disj-sum/e a
-                (cons (disj-sum/e b c)
-                      (λ (x) (or (char? x) (flonum? x))))))
+    (or/e a (or/e b c)))
   (gen-table bad-disj-sum/e 8 16 40 6 #:arrows? #t))
 
 (define (gen-table disj-sum/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows?)
   (define x-count 3)
   (define width (* size-per-cell x-count))
   (define height (* size-per-cell y-count))
-  (define prs 
-    (disj-sum/e (cons nat/e exact-integer?) 
-                (cons char/e char?)
-                (cons float/e flonum?)))
+  (define prs (or/e nat/e char/e flonum/e))
   (define base
     (dc (λ (dc dx dy)
           #;
@@ -85,13 +78,13 @@
                [(? flonum?) 2]))
            (define j
              (match v
-               [(? exact-integer?) (encode nat/e v)]
-               [(? char?) (encode char/e v)]
-               [(? flonum?) (encode float/e v)]))
+               [(? exact-integer?) (to-nat nat/e v)]
+               [(? char?) (to-nat char/e v)]
+               [(? flonum?) (to-nat flonum/e v)]))
            (values (* (+ i .5) size-per-cell)
                    (* (+ j .5) size-per-cell)))
-         (define this (decode prs i))
-         (define next (decode prs (+ i 1)))
+         (define this (from-nat prs i))
+         (define next (from-nat prs (+ i 1)))
          (define-values (x1 y1) (i->xy this i))
          (define-values (x2 y2) (i->xy next (+ i 1)))
          (define this-p 
@@ -123,9 +116,7 @@
 (define (cantor-cons-pict) (grid cantor-cons/e 5 14 200 12))
 
 (define (cantor-cons/e e1 e2)
-  (map/e (λ (xy) (cons (first xy) (second xy)))
-         (λ (x-y) (list (car x-y) (cdr x-y)))
-         (cantor-list/e e1 e2)))
+  (cons/e e1 e2 #:ordering 'diagonal))
 
 (define (square x)(x . * . x))
 (define (weird-cons/e e1 e2)
@@ -140,7 +131,7 @@
 (define (search-invert f)
   (λ (n)
     (let/ec k
-      (for ([t (to-stream (cons/e nat/e nat/e))])
+      (for ([t (in-enum (cons/e nat/e nat/e))])
         (when (equal? n (f t))
           (k t))))))
 (define (exp-cons/e e1 e2)
@@ -206,8 +197,8 @@
          (define (ij->xy i j)
            (values (* (+ i .5) (/ size count))
                    (* (+ j .5) (/ size count))))
-         (define this (decode prs i))
-         (define next (decode prs (+ i 1)))
+         (define this (from-nat prs i))
+         (define next (from-nat prs (+ i 1)))
          (define-values (x1 y1) (ij->xy (car this) (cdr this)))
          (define-values (x2 y2) (ij->xy (car next) (cdr next)))
          (define index (text (format "~a" i)))
@@ -251,7 +242,7 @@
 (define num-enumerated 4000)
 (define (count-em enum)
   (map (λ (x) (apply max x)) 
-       (transpose (map flatten (approximate enum num-enumerated)))))
+       (transpose (map flatten (enum->list enum num-enumerated)))))
 (define (transpose l) (apply map list l))
 (define unfair-cons (count-em unfair/e))
 (define fair-cons (count-em fair/e))
@@ -308,7 +299,7 @@
 
 (define-syntax-rule 
   (enum-example stx count)
-  (render-enumerations (approximate stx count)))
+  (render-enumerations (enum->list stx count)))
 
 (define (except/e* enum lst)
   (let loop ([lst lst]

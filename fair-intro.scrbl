@@ -4,7 +4,8 @@
           scribble/manual
           racket/draw
           racket/list
-          redex/private/enumerator
+          racket/contract
+          data/enumerate/lib
           plot
           scriblib/figure
           "unfairness-hist.rkt"
@@ -25,7 +26,9 @@
                  (cons (list-ref l 4) (list-ref l 3))))
     (cons/e
      (cons/e nat/e nat/e)
-     (cons/e nat/e nat/e))))
+     (cons/e nat/e nat/e))
+    #:contract (list/c exact-nonnegative-integer? exact-nonnegative-integer?
+                       exact-nonnegative-integer? exact-nonnegative-integer?)))
 
 A fair enumeration combinator is one that indexes into its
 given enumerators roughly equally, instead of indexing
@@ -37,16 +40,16 @@ of length 4. This enumerator is one way to build it:
                (fin/e null)))))]
 Unfortunately, it is not fair. The @(add-commas one-billion)th element is
 @code{@(format "~v"
-             (decode (cons/e
-                      nat/e
-                      (cons/e
-                       nat/e
-                       (cons/e
-                        nat/e
-                        (cons/e
-                         nat/e
-                         (fin/e null)))))
-                     one-billion))}
+               (from-nat (cons/e
+                          nat/e
+                          (cons/e
+                           nat/e
+                           (cons/e
+                            nat/e
+                            (cons/e
+                             nat/e
+                             (fin/e null)))))
+                         one-billion))}
 and, as you can see, it has indexed far more deeply into the first
 @racket[nat/e] than the others. In contrast, if we balance the @racket[cons/e]
 expressions like this:
@@ -56,7 +59,7 @@ expressions like this:
 (and then were to use @racket[map/e] to adjust the elements of
 the enumeration to actually be lists), then the
 @(add-commas one-billion) element is
-@code{@(format "~v" (decode fair-four-tuple one-billion))},
+@code{@(format "~v" (from-nat fair-four-tuple one-billion))},
 which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using
@@ -97,7 +100,7 @@ As an example, consider the fair nested @racket[cons/e]
 from the beginning of the section. As we saw, at the point @(add-commas one-billion),
 it was not at equilibrium. But at @(add-commas (- fair-number-past-one-billion 1)),
 it produces 
-@code{@(format "~v" (decode fair-four-tuple (- fair-number-past-one-billion 1)))},
+@code{@(format "~v" (from-nat fair-four-tuple (- fair-number-past-one-billion 1)))},
 and indeed it has indexed into each of the four @racket[nat/e] enumerations
 with each of the first @(add-commas (sqrt (sqrt fair-number-past-one-billion))) natural numbers.
 

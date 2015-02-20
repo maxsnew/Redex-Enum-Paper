@@ -3,7 +3,7 @@
 @(require pict
           scribble/manual
           racket/draw
-          redex/private/enumerator
+          data/enumerate/lib
           plot
           scriblib/figure
           "unfairness-hist.rkt"
@@ -23,10 +23,8 @@ using untagged union types. We will denote a call to
 @racket[(disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?))]
 where given that @racket[x] is in one of the @racket[e_i], @racket[(1? x)] is true if there is some index @racket[i] such that @racket[(decode e_1 i)] is @racket[x].
 
-@(define symbol/e (except/e var/e '||))
 @racket[disj-sum/e] is relatively easy to define fairly. Given two infinite argument enumerations, we can simply alternate between one and the other, so the first ten elements of @racket[(disj-sum/e (nat/e nat?) (symbol/e sym?))] are simply the first five elements of @racket[nat/e] and @racket[string/e] interleaved, where @racket[symbol/e] is some enumeration of all Racket symbols:
-@enum-example[(disj-sum/e (cons nat/e number?)
-                          (cons symbol/e symbol?)) 10]
+@enum-example[(or/e nat/e symbol/e) 10]
 
 Again, to achieve fairness we cannot simply use the binary version of
 @racket[disj-sum/e] arbitrarily. For example, if we defined
@@ -36,7 +34,7 @@ Again, to achieve fairness we cannot simply use the binary version of
    (define e_3 (car ep_3))
    (define 3?  (cdr ep_3))
    (define (2-or-3? x) (or (2? x) (3? x)))
-   (disj-sum/e ep_1 (cons (disj-sum/e ep_2 ep_3) 2-or-3?)))
+   (or/e ep_1 (cons (or/e ep_2 ep_3) 2-or-3?)))
 @racketblock[(define (union-three/e ep_1 ep_2 ep_3)
                (define e_2 (car ep_2))
                (define 2?  (cdr ep_2))
@@ -74,9 +72,9 @@ enumeration:
 cycles through its two finite enumeration arguments until they
 are exhausted before producing the rest of the natural
 numbers:
-@enum-example[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) symbol?)
-                          (cons nat/e number?)
-                          (cons (fin/e "x" "y") string?))
+@enum-example[(or/e (fin/e 'a 'b 'c 'd)
+                    nat/e
+                    (fin/e "x" "y"))
               14]
 This means that @racket[disj-sum/e] must track the
 ranges of natural numbers when each finite enumeration is exhausted
