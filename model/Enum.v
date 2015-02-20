@@ -194,8 +194,68 @@ Hint Resolve Pairing_to_sound.
 
 Lemma sqrt_lemma z : (z - (sqrt z * sqrt z)) - sqrt z <= sqrt z.
 Proof.
-  admit.
+  induction z; try nliamega.
+  SearchAbout "le_".
+  destruct (Nat.sqrt_succ_or z).
+  nliamega.
+  remember (Nat.sqrt_succ_le z).
+  clear Heql.
+  rewrite H at 1 2 3.
+  assert (z - sqrt z * sqrt z - sqrt z < sqrt z). admit.
+  clear IHz l.
+  nliamega.
 Qed.
+
+
+Lemma sqrt_lemma' z :
+  ((z - (sqrt z * sqrt z)) - sqrt z <= sqrt z /\ sqrt (S z) = S (sqrt z))
+  \/ ((z - (sqrt z * sqrt z)) - sqrt z < sqrt z /\ sqrt (S z) = sqrt z)
+.
+Proof.
+  induction z; [compute; intuition|].
+  destruct IHz as [[? ?] | [? ?]].
+  right; split.
+  nliamega.
+  admit.
+
+  destruct (eq_nat_dec (sqrt (S (S z))) (sqrt (S z))).
+  right; split.
+  
+  (* right; split. *)
+  (* remember (Nat.sqrt_succ_le z). *)
+  (* clear Heql. *)
+  (* rewrite H0 at 1 2 3. *)
+(*  H : sqrt (S z) = sqrt z
+  H0 : z - sqrt z * sqrt z - sqrt z < sqrt z
+  ============================
+   S z - sqrt z * sqrt z - sqrt z <= sqrt (S z)
+ *)  
+(*   z : nat
+  IHz : z - sqrt z * sqrt z - sqrt z <= sqrt z
+  H : sqrt (S z) = sqrt z
+  l : sqrt (S z) <= S (sqrt z)
+  H0 : z - sqrt z * sqrt z - sqrt z < sqrt z
+  ============================
+   S z - sqrt z * sqrt z - sqrt z <= sqrt (S z)
+*)
+  (* left; split. *)
+  (* nliamega. *)
+  
+  (* left. *)
+  (* split. *)
+  (* nliamega. *)
+  (* rewrite H0. *)
+  (* admit. (* sqrt (n+1) = (sqrt n)+1 -> sqrt (n+2) = (sqrt) *) *)
+  (* right. *)
+  (* split. *)
+
+  (* admit. *)
+  (* nliamega. *)
+  (* remember (Nat.sqrt_succ_le z). *)
+  (* remember (Nat.sqrt_succ_le (S z)). *)
+  (* nliamega. *)
+  (* nliamega. *)
+Abort.
 
 Lemma sqrt_lemma' z :
   (z - (sqrt z) * (sqrt z) < (sqrt z))
@@ -232,7 +292,7 @@ Proof.
   remember (sqrt_spec z).
   rewrite Heqrootz in *.
   apply sqrt_lemma.
-  
+
   (* P_XSmall: x < y: x + y*y *)
   exists (z - (rootz * rootz), rootz).
   subst.
@@ -837,7 +897,7 @@ Proof.
   auto.
   apply IHs1 with (s2 := (y :: s2)); auto.
 Qed.
-  
+
 
 Lemma set_eq_trans : forall s1 s2 s3, set_eq s1 s2 -> set_eq s2 s3 -> set_eq s1 s3.
 Proof.
@@ -855,7 +915,7 @@ Qed.
 
 Lemma set_add_subset : forall x s1 s2, set_In x s2 -> subset s1 s2 -> subset (set_add' x s1) s2.
 Proof.
-  
+
   intros y s1.
   induction s1 as [| x s1].
   simpl; auto.
@@ -972,9 +1032,9 @@ Proof.
   split.
   induction s.
   apply subset_refl.
-  
+
   unfold set_union', set_union in *.
-  replace (((fix set_union (x y : set nat) {struct y} : 
+  replace (((fix set_union (x y : set nat) {struct y} :
           set nat :=
             match y with
             | nil => x
@@ -1165,7 +1225,7 @@ Proof.
   eapply set_eq_trans; [| apply set_union_app_eq].
   apply set_union_cong; auto.
 Qed.
-                                        
+
 
 Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
 Proof.
@@ -1279,7 +1339,7 @@ Proof.
   split.
   left; auto.
   apply IHs1; auto.
-  
+
   split.
   right.
   unfold set_In.
@@ -1340,6 +1400,9 @@ Proof.
   intros H1 H2; destruct4 H1; destruct4 H2.
   split4; eapply subset_trans; eauto.
 Qed.
+
+Theorem sub_trace_zero t : sub_trace trace_zero t.
+Proof. destruct t; compute; tauto. Qed.
 
 Theorem sub_trace_proj t1 t2 tg : trace_eq t1 t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
 Proof.
@@ -1416,6 +1479,24 @@ Proof.
   split4; apply set_eq_symm; apply set_union_assoc.
 Qed.
 
+Theorem sub_trace_plus_transl t tl tr
+: sub_trace t tl -> sub_trace t (trace_plus tl tr).
+Proof.
+  intros H; destruct t; destruct tl; destruct tr;
+  destruct4 H; split4; apply subset_union_transl; auto.
+Qed.
+
+Theorem sub_trace_plus_transr t tl tr
+: sub_trace t tr -> sub_trace t (trace_plus tl tr).
+Proof.
+  intros H.
+  eapply sub_trace_trans.
+  Focus 2.
+  apply trace_eq_weakenl.
+  apply trace_plus_comm.
+  apply sub_trace_plus_transl; auto.
+Qed.
+
 Theorem trace_lt_from_to_0_same e n : trace_eq (Trace_lt e n) (Trace_from_to e 0 n).
 Proof.
   induction n.
@@ -1460,17 +1541,20 @@ Proof.
   eapply trace_eq_trans; [ apply trace_plus_unitr | auto].
 Qed.
 
-Theorem trace_from_to_self e m
-: Trace_from_to e m m = trace_zero.
+Theorem trace_from_to_ge e m n
+: n <= m ->
+  Trace_from_to e m n = trace_zero.
 Proof.
-  destruct m; auto.
+  intros H.
   unfold Trace_from_to.
-  remember (le_lt_dec (S m) (S m)) as l.
-  destruct l; auto.
-  clear Heql.
-  apply lt_irrefl in l.
-  contradiction.
+  remember (le_lt_dec n m) as l.
+  destruct l; [| apply False_ind; nliamega ].
+  destruct n; rewrite <-Heql; reflexivity.
 Qed.
+
+Theorem trace_from_to_self e m 
+: Trace_from_to e m m = trace_zero.
+Proof. apply trace_from_to_ge; nliamega. Qed.
 
 Theorem trace_from_to_split1r e m n
 : m <= n ->
@@ -1608,6 +1692,118 @@ Proof.
   apply trace_eq_refl.
 Qed.
 
+
+Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
+Proof.
+  unfold Trace_on.
+  destruct (Enumerates_from_dec _ _) as [[v t] Henum].
+  inversion Henum; subst.
+  reflexivity.
+Qed.
+
+Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = empty_set'.
+Proof.
+  rewrite Trace_nat.
+  compute.
+  destruct tg1; destruct tg2; intuition.
+Qed.
+
+Theorem trace_proj_plus_distrl tg t1 t2
+: trace_proj tg (trace_plus t1 t2) = (set_union' (trace_proj tg t1) (trace_proj tg t2)).
+Proof.
+  destruct t1; destruct t2; destruct tg; auto.
+Qed.
+
+Theorem Trace_on_correct e n x t : Enumerates e n x t -> Trace_on e n = t.
+Proof.
+  intros H.
+  unfold Trace_on.
+  destruct (Enumerates_from_dec e n) as [[v tgaf] Henum].
+  simpl.
+  destruct (Enumerates_from_fun _ _ _ _ _ _ H Henum); auto.
+Qed.
+
+Theorem trace_lt_Nat n tg
+: set_eq (z_to_n n)
+     (trace_proj tg (Trace_lt (E_Trace tg E_Nat) n)).
+Proof.
+  induction n as [| n IHn]; [destruct tg; compute; tauto|].
+  unfold Trace_lt. fold Trace_lt.
+  unfold z_to_n. fold z_to_n.
+  rewrite trace_proj_plus_distrl.
+  rewrite Trace_nat.
+  eapply set_eq_trans.
+  apply set_eq_symm. apply set_add_cons_eq.
+  eapply set_eq_trans.
+  replace (n :: z_to_n n) with ((n :: nil) ++ z_to_n n) by reflexivity.
+  apply set_eq_symm; apply set_union_app_eq.
+  apply set_union_cong; auto.
+  destruct tg; compute; tauto.
+Qed.
+
+Theorem trace_lt_Nat_off n tg1 tg2
+: tg1 <> tg2 ->
+  (trace_proj tg1 (Trace_lt (E_Trace tg2 E_Nat) n)) = nil.
+Proof.
+  intros Hdiff.
+  induction n.
+  destruct tg1; auto.
+  unfold Trace_lt; fold Trace_lt.
+  rewrite trace_proj_plus_distrl.
+  rewrite trace_off.
+  rewrite IHn; compute; auto.
+  auto.
+Qed.
+
+Lemma sub_trace_from_tol l m n e
+: l <= m
+  -> sub_trace (Trace_from_to e m n) (Trace_from_to e l n).
+Proof.
+  intros H; remember (m - l) as k; replace m with (l + k) by nliamega; clear dependent m.
+  induction k.
+  replace (l + 0) with l by nliamega; apply sub_trace_refl.
+  eapply sub_trace_trans; [| apply IHk].
+  destruct (le_dec n (l + S k)).
+  rewrite trace_from_to_ge by assumption;
+    apply sub_trace_zero.
+  eapply sub_trace_trans;
+    [| apply trace_eq_weakenl; apply trace_eq_symm; apply trace_from_to_split with (n := l + S k); nliamega ];
+    apply sub_trace_plus_transr; apply sub_trace_refl.
+Qed.
+
+Theorem sub_trace_from_to l m n p e
+: l <= m
+  -> n <= p
+  -> sub_trace (Trace_from_to e m n) (Trace_from_to e l p).
+Proof.
+  intros Hlm Hnp.
+  remember (p - n) as k; replace p with (n + k) by nliamega; clear dependent p.
+  induction k.
+  replace (n+0) with n by nliamega; apply sub_trace_from_tol; auto.
+  replace (n + S k) with (S (n + k)) by nliamega.
+  unfold Trace_from_to at 2.
+  remember (le_lt_dec (S (n + k)) l) as Hlelt.
+  destruct Hlelt.
+  replace (Trace_from_to e l (n + k)) with trace_zero in IHk; auto.
+  symmetry.
+  apply trace_from_to_ge; nliamega.
+  fold Trace_from_to.
+  apply sub_trace_plus_transr; auto.
+Qed.
+
+Theorem trace_from_to_Nat_off m n tg1 tg2
+: tg1 <> tg2 ->
+  (trace_proj tg1 (Trace_from_to (E_Trace tg2 E_Nat) m n)) = empty_set'.
+Proof.
+  intros Hdiff.
+  assert (sub_trace (Trace_from_to (E_Trace tg2 E_Nat) m n) (Trace_lt (E_Trace tg2 E_Nat) n)).
+  eapply sub_trace_trans.
+  apply sub_trace_from_to with (l := 0) (p := n); try nliamega.
+  apply trace_eq_weakenl; apply trace_eq_symm; apply trace_lt_from_to_0_same.
+  apply subset_nil_nil.
+  erewrite <-trace_lt_Nat_off; [ apply trace_eq_proj|]; eauto.
+Qed.
+
 Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 20).
 Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 21).
 Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 22).
@@ -1647,7 +1843,7 @@ Proof.
   clear Heqt.
   clear IHn.
   replace (Trace_on (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (S (2 * n + 2))) with (trace_one (S n) one) in Htzto.
-  
+
   replace (Trace_on (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) ((2 * n)+2)) with (trace_one (S n) zero) in Htzto.
   unfold trace_one in Htzto.
   unfold trace_plus in Htzto.
@@ -1672,7 +1868,7 @@ Proof.
     econstructor.
     constructor.
     destruct x.
-    
+
     destruct (Enumerates_from_fun _ _ _ _ _ _ y H0); subst.
     auto.
 
@@ -1700,13 +1896,12 @@ Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
 
 Eval compute in z_to_n 0.
 
-
 Theorem z_to_n_correct n x
 : set_In x (z_to_n n) <-> x < n.
 Proof.
   generalize dependent x.
   induction n.
-  
+
   intros x; compute; split; [apply False_ind | intros contra; inversion contra].
   intros x.
   destruct (eq_nat_dec x n).
@@ -1715,7 +1910,7 @@ Proof.
   split; [nliamega|].
   intros _.
   apply set_add_intro2; auto.
-  
+
   split.
   simpl.
   intros H.
@@ -1732,10 +1927,6 @@ Proof.
   apply IHn.
   nliamega.
 Qed.
-
-Theorem Trace_lt_correct n tg x e
-: set_In x (trace_proj tg (Trace_lt e n))
-  <-> exists n, set_In x (trace_proj tg (Trace_on e n)).
 
 Theorem set_In_trace' (tg : tag) e x m n :
   set_In x (trace_proj tg (Trace_from_to e m (S (m + n))))
@@ -1771,7 +1962,7 @@ Proof.
       replace (m + S n) with (S (m + n)) in * by nliamega;
       destruct tg;
       (simpl; intros Hin_union; unfold set_union' in Hin_union;
-       destruct (set_union_elim eq_nat_dec _ _ _ Hin_union); 
+       destruct (set_union_elim eq_nat_dec _ _ _ Hin_union);
        [exists (S (m + n)); split; [nliamega|]; destruct Heqt; auto |]);
       [ replace t0' with (trace_proj zero  (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
       | replace t1' with (trace_proj one   (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
@@ -1824,58 +2015,15 @@ set_In x (trace_proj tg (Trace_lt e (S n)))
 exists k,
   k < S n /\ set_In x (trace_proj tg (Trace_on e k)).
 Proof.
+  destruct (set_In_Trace_from_to tg e x 0 (S n)) as [Hl Hr]; try nliamega.
   admit.
 Qed.
 Eval compute in Trace_lt E_PairNN (S (5 * 5)).
 
-Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
+Definition PairNN2 (k : nat)
+: trace_proj two (Trace_on E_PairNN k) = empty_set'.
 Proof.
-  unfold Trace_on.
-  destruct (Enumerates_from_dec _ _) as [[v t] Henum].
-  inversion Henum; subst.
-  reflexivity.
-Qed.
-
-Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = empty_set'.
-Proof.
-  rewrite Trace_nat.
-  compute.
-  destruct tg1; destruct tg2; intuition.
-Qed.
-
-Theorem trace_proj_plus_distrl tg t1 t2
-: trace_proj tg (trace_plus t1 t2) = (set_union' (trace_proj tg t1) (trace_proj tg t2)).
-Proof.
-  destruct t1; destruct t2; destruct tg; auto.
-Qed.
-
-Theorem Trace_on_correct e n x t : Enumerates e n x t -> Trace_on e n = t.
-Proof.
-  intros H.
-  unfold Trace_on.
-  destruct (Enumerates_from_dec e n) as [[v tgaf] Henum].
-  simpl.
-  destruct (Enumerates_from_fun _ _ _ _ _ _ H Henum); auto.
-Qed.
-
-Definition PairNN2 (k : nat) (j : nat)
-: (k <= j) -> trace_proj two (Trace_on E_PairNN k) = empty_set'.
-  generalize dependent k.
-  induction j.
-  intros k H.
-  replace k with 0 by nliamega.
-  auto.
-  intros k H.
-  unfold Trace_on.
-  destruct (Enumerates_from_dec E_PairNN k) as [[v t] Henum].
-  inversion Henum; subst.
-  simpl.
-  rewrite trace_proj_plus_distrl.
-  assert (trace_proj two (Trace_on E_PairNN ln) = empty_set').
-  apply IHj.
-  admit.
-  admit.
-Qed.
+Admitted.
 
 Lemma EPair_ft_cong n e1 e2 :
     trace_eq (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n))
@@ -1935,7 +2083,7 @@ Proof.
   eapply sub_trace_trans; [apply trace_eq_weakenl; apply trace_lt_from_to_0_same| ].
   eapply sub_trace_trans; [| apply trace_eq_weakenr; apply trace_lt_from_to_0_same].
   apply Trace_from_to_sub; auto.
-Qed.  
+Qed.
 
 Lemma PairNN_layer :
   forall n,
@@ -1966,7 +2114,7 @@ Proof.
                      (trace_plus (trace_one (sqrt k)                         zero)
                                  (trace_one ((k - sqrt k * sqrt k) - sqrt k) one)
                      )).
-  
+
   apply ES_Pair with (ln := (sqrt k)) (rn := ((k - sqrt k * sqrt k) - sqrt k));
     [| econstructor; constructor
      | econstructor; constructor
@@ -2001,7 +2149,7 @@ Proof.
   (* our k is (unpair x n)
    *)
     destruct (le_lt_dec n x).
-  
+
   exists (x*x + x + n); split; [nliamega|];
     unfold Trace_on;
     destruct (Enumerates_from_dec E_PairNN (x * x + x + n)) as [[v t] Henum];
@@ -2052,7 +2200,7 @@ Proof.
                      (trace_plus (trace_one (sqrt k)                         zero)
                                  (trace_one ((k - sqrt k * sqrt k) - sqrt k) one)
                      )).
-  
+
   apply ES_Pair with (ln := (sqrt k)) (rn := ((k - sqrt k * sqrt k) - sqrt k));
     [| econstructor; constructor
      | econstructor; constructor
@@ -2081,7 +2229,7 @@ Proof.
   [ rewrite <-H0; rewrite (Nat.sqrt_unique k n); nliamega
   | contradiction
   ].
-  
+
   (* Case 4: 0..n+1 < trace_right pair n^2 (n+1)^2 *)
   apply subset_In_def;
     intros x Hin;
@@ -2118,13 +2266,15 @@ Proof.
     ].
   destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
 
+  assert (t2 = empty_set'); [| subst; apply subset_refl].
+  unfold E_PairNN in *.
   admit. (* easy *)
   apply subset_nil.
   admit.
   apply subset_nil.
 Qed.
 
-Lemma Pair_precise 
+Lemma Pair_precise
 : forall n e1 e2,
     trace_eq (Trace_lt (E_Pair e1 e2) (n * n))
              (trace_plus (Trace_lt e1 n)
@@ -2200,12 +2350,12 @@ Proof.
 
   apply trace_eq_refl.
 Qed.
-  
+
 Theorem Pair_Fair : Fair2 E_Pair.
   unfold Fair2.
   intros n.
   exists ((S n) * (S n)).
-  
+
   fold E_PairNN.
   remember (Trace_lt E_PairNN (S n * S n)) as t.
   destruct t as [t0 t1 t2 t3].
@@ -2292,38 +2442,6 @@ Proof.
   rewrite !z_to_n_correct; auto.
 Qed.
 
-Theorem trace_lt_Nat n tg
-: set_eq (z_to_n n)
-     (trace_proj tg (Trace_lt (E_Trace tg E_Nat) n)).
-Proof.
-  induction n as [| n IHn]; [destruct tg; compute; tauto|].
-  unfold Trace_lt. fold Trace_lt.
-  unfold z_to_n. fold z_to_n.
-  rewrite trace_proj_plus_distrl.
-  rewrite Trace_nat.
-  eapply set_eq_trans.
-  apply set_eq_symm. apply set_add_cons_eq.
-  eapply set_eq_trans.
-  replace (n :: z_to_n n) with ((n :: nil) ++ z_to_n n) by reflexivity.
-  apply set_eq_symm; apply set_union_app_eq.
-  apply set_union_cong; auto.
-  destruct tg; compute; tauto.
-Qed.
-
-Theorem trace_lt_Nat_off n tg1 tg2
-: tg1 <> tg2 ->
-  (trace_proj tg1 (Trace_lt (E_Trace tg2 E_Nat) n)) = empty_set'.
-Proof.
-  intros Hdiff.
-  induction n.
-  destruct tg1; auto.
-  unfold Trace_lt; fold Trace_lt.
-  rewrite trace_proj_plus_distrl.
-  rewrite trace_off.
-  rewrite IHn; compute; auto.
-  auto.
-Qed.
-
 Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
 Eval compute in Trace_lt NP3T 14.
 Eval compute in sqrt (sqrt 7).
@@ -2404,7 +2522,7 @@ Proof.
   assert (16 <= n) as H' by nliamega ; clear H.
   remember (Trace_lt NP3T n) as t; destruct t as [t0 t1 t2 t3].
   destruct (sqrt_spec_2 n) as [m [p [[Hmn Hnp] Hppmm]]]; auto.
-  
+
   left.
   assert (~ subset t0 t1); [ | intros []; contradiction].
 
@@ -2430,7 +2548,7 @@ Proof.
     rewrite trace_proj_plus_distrl.
     apply subset_union_transl.
     apply trace_lt_Nat.
-  
+
   - assert (subset t1 (z_to_n p)).
     remember (Trace_lt NP3T ((p * p) * (p * p))) as p4t.
     assert (sub_trace (Trace_lt NP3T n) p4t) by (subst; apply Trace_lt_sub; auto; nliamega).
