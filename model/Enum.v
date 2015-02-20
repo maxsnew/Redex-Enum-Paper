@@ -1227,6 +1227,18 @@ Proof.
 Qed.
 
 
+Theorem subset_union_both s sl sr
+: subset sl s -> subset sr s -> subset (set_union' sl sr) s.
+Proof.
+  intros Hls Hrs.
+  apply subset_In_def.
+  intros x Hin.
+  destruct (set_union_elim eq_nat_dec x sl sr).
+  apply Hin.
+  apply In_subset_def with sl; auto.
+  apply In_subset_def with sr; auto.
+Qed.
+
 Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
 Proof.
   split; [| apply subset_union_transr; apply subset_refl ].
@@ -1404,12 +1416,12 @@ Qed.
 Theorem sub_trace_zero t : sub_trace trace_zero t.
 Proof. destruct t; compute; tauto. Qed.
 
-Theorem sub_trace_proj t1 t2 tg : trace_eq t1 t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
+Theorem trace_eq_proj t1 t2 tg : trace_eq t1 t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
 Proof.
   unfold trace_eq, trace_proj; destruct t1; destruct t2; destruct tg; intuition.
 Qed.
 
-Theorem trace_eq_proj t1 t2 tg : sub_trace t1 t2 -> subset (trace_proj tg t1) (trace_proj tg t2).
+Theorem sub_trace_proj t1 t2 tg : sub_trace t1 t2 -> subset (trace_proj tg t1) (trace_proj tg t2).
 Proof.
   unfold sub_trace; destruct t1; destruct t2; destruct tg; intuition.
 Qed.
@@ -1801,7 +1813,40 @@ Proof.
   apply sub_trace_from_to with (l := 0) (p := n); try nliamega.
   apply trace_eq_weakenl; apply trace_eq_symm; apply trace_lt_from_to_0_same.
   apply subset_nil_nil.
-  erewrite <-trace_lt_Nat_off; [ apply trace_eq_proj|]; eauto.
+  erewrite <-trace_lt_Nat_off; [ apply sub_trace_proj|]; eauto.
+Qed.
+
+Theorem trace_on_Pair_off tg e1 e2 m
+: (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
+  -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
+  -> trace_proj tg (Trace_on (E_Pair e1 e2) m) = empty_set'.
+Proof.
+  intros.
+  unfold Trace_on.
+  destruct (Enumerates_from_dec _ _) as [[v t] Henum].
+  inversion Henum; subst.
+  apply Trace_on_correct in H4.
+  apply Trace_on_correct in H8.
+  simpl.
+  subst.
+  rewrite trace_proj_plus_distrl.
+  rewrite H, H0.
+  trivial.
+Qed.
+
+Theorem trace_lt_Pair_off tg e1 e2 m
+: (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
+  -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
+  -> trace_proj tg (Trace_lt (E_Pair e1 e2) m) = empty_set'.
+Proof.
+  induction m; [intros; destruct tg; reflexivity|].
+  intros H1 H2.
+  unfold Trace_lt; fold Trace_lt.
+  rewrite trace_proj_plus_distrl.
+  apply subset_nil_nil.
+  apply subset_union_both.
+  rewrite trace_on_Pair_off; [apply subset_refl| |]; auto.
+  rewrite IHm; auto.
 Qed.
 
 Eval compute in (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) 20).
@@ -2266,11 +2311,30 @@ Proof.
     ].
   destruct (Enumerates_from_fun _ _ _ _ _ _ Henum H0); subst; simpl; tauto.
 
-  assert (t2 = empty_set'); [| subst; apply subset_refl].
-  unfold E_PairNN in *.
-  admit. (* easy *)
+  unfold empty_set', empty_set, E_PairNN in *;
+    replace t2 with (trace_proj two (Trace_from_to (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat))
+                                                 (n * n) (S n * S n)))
+    by (rewrite <-Heqt; trivial);
+    apply subset_trans with (s2 := (trace_proj two (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat))
+                                                             (S n * S n)))).
+  (eapply subset_trans;
+    [|apply set_subset_weaken; apply trace_eq_proj; apply trace_eq_symm; apply trace_lt_from_to_0_same]);
+  apply sub_trace_proj; apply sub_trace_from_to; nliamega.
+  rewrite trace_lt_Pair_off; auto.
+  
   apply subset_nil.
-  admit.
+
+  unfold empty_set', empty_set, E_PairNN in *;
+    replace t3 with (trace_proj three (Trace_from_to (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat))
+                                                 (n * n) (S n * S n)))
+    by (rewrite <-Heqt; trivial);
+    apply subset_trans with (s2 := (trace_proj three (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat))
+                                                             (S n * S n)))).
+  (eapply subset_trans;
+    [|apply set_subset_weaken; apply trace_eq_proj; apply trace_eq_symm; apply trace_lt_from_to_0_same]);
+  apply sub_trace_proj; apply sub_trace_from_to; nliamega.
+  rewrite trace_lt_Pair_off; auto.
+
   apply subset_nil.
 Qed.
 
@@ -2279,6 +2343,7 @@ Lemma Pair_precise
     trace_eq (Trace_lt (E_Pair e1 e2) (n * n))
              (trace_plus (Trace_lt e1 n)
                          (Trace_lt e2 n)).
+  (* TODO *)
 Admitted.
 
 Lemma PairPair_precise
