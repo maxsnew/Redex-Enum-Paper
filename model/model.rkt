@@ -11,7 +11,8 @@
      (or/e e e)
      (cons/e e e)
      (map/e f f e)
-     (dep/e e f))
+     (dep/e e f)
+     (trace/e e))
   (v ::= (cons v v) n)
   (n ::= integer)
   
@@ -20,58 +21,81 @@
       (< ae ae) (>= ae ae)
       n)
   
+  (T ::= ∅ (n ↦ (n n ...) T))
+  
   (f ::= 
      (add integer)
      (mult real)
      produce-map/e-nat/e-with-add-of-given-int))
 
 (define-judgment-form L
-  #:mode (from-nat I I O)
-  #:contract (from-nat e natural v)
+  #:mode (@ I I O O)
+  #:contract (@ e natural v T)
   
   [-------------------- "nat/e"
-   (from-nat nat/e n n)]
+   (@ nat/e n n ∅)]
   
-  [(even n) (from-nat e_1 (ae-interp (/ n 2)) v)
-   ---------------------------------------------  "+l"
-   (from-nat (or/e e_1 e_2) n (cons 0 v))]
+  [(even n) (@ e_1 (ae-interp (/ n 2)) v T)
+   ---------------------------------------------  "or l"
+   (@ (or/e e_1 e_2) n (cons 0 v) T)]
   
-  [(odd n) (from-nat e_2 (ae-interp (/ (- n 1) 2)) v)
-   -------------------------------------------------- "+r"
-   (from-nat (or/e e_1 e_2) n (cons 1 v))]
+  [(odd n) (@ e_2 (ae-interp (/ (- n 1) 2)) v T)
+   -------------------------------------------------- "or r"
+   (@ (or/e e_1 e_2) n (cons 1 v) T)]
   
   [(side-condition (ae-interp
                     (< (- (+ (* 2 n) 1)
                           (sqr (integer-sqrt n)))
-                       (sqr (+ (integer-sqrt n) 1)))))
-   (from-nat e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1) (from-nat e_2 (ae-interp (integer-sqrt n)) v_2)
+                       (sqr (+ (integer-sqrt n) 1))))) (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
+   (@ e_2 (ae-interp (integer-sqrt n)) v_2 T_2)
    ----------------------------------------------------------- "cons/e x"
-   (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))]
+   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (∪ T_1 T_2))]
   
   [(side-condition (ae-interp
                     (>= (- (+ (* 2 n) 1)
                            (sqr (integer-sqrt n)))
-                        (sqr (+ (integer-sqrt n) 1))))) (from-nat e_1 (ae-interp (integer-sqrt n)) v_1)
-   (from-nat e_2 (ae-interp (- n (sqr (integer-sqrt n)) (/ (- (sqr (+ (integer-sqrt n) 1))
+                        (sqr (+ (integer-sqrt n) 1))))) (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
+   (@ e_2 (ae-interp (- n (sqr (integer-sqrt n)) (/ (- (sqr (+ (integer-sqrt n) 1))
                                                               (sqr (integer-sqrt n))
                                                               1)
-                                                           2))) v_2)
+                                                           2))) v_2 T_2)
    ---------------------------------------------------------------------------------------- "cons/e y"
-   (from-nat (cons/e e_1 e_2) n (cons v_1 v_2))]
+   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (∪ T_1 T_2))]
   
   
-  [(from-nat e n v)
+  [(@ e n v T)
    -------------------------------------------------  "map in"
-   (from-nat (map/e f_1 f_2 e) n (Eval-num (f_1 v)))]
+   (@ (map/e f_1 f_2 e) n (Eval-num (f_1 v)) T)]
   
-  [(from-nat e n (Eval-num (f_2 v)))
+  [(@ e n (Eval-num (f_2 v)) T)
    ---------------------------------  "map out"
-   (from-nat (map/e f_1 f_2 e) n v)]
+   (@ (map/e f_1 f_2 e) n v T)]
   
-  [(from-nat (cons/e e nat/e) n_1 (cons v_1 n_2))
-   (from-nat (Eval-enum (f v_1)) n_2 v_2)
+  [(@ (cons/e e nat/e) n_1 (cons v_1 n_2) T_1)
+   (@ (Eval-enum (f v_1)) n_2 v_2 T_2)
    ----------------------------------------------  "dep/e"
-   (from-nat (dep/e e f) n_1 (cons v_1 v_2))])
+   (@ (dep/e e f) n_1 (cons v_1 v_2) (∪ T_1 T_2))]
+  
+  [(@ e n_2 v T)
+   ----------------------------------------------  "trace/e"
+   (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
+
+(define-metafunction L
+  ∪ : T T -> T
+  [(∪ ∅ T) T]
+  [(∪ (n_1 ↦ (n_2 ...) T_1) T_2) (∪ T_1 (join n_1 (n_2 ...) T_2))])
+
+(define-metafunction L
+  join : n (n ...) T -> T
+  [(join n_1 (n_2 ...) ∅) (n_1 ↦ (n_2 ...) ∅)]
+  [(join n_1 (n_2 ...) (n_1 ↦ (n_3 ...) T))
+   (n_1 ↦ ,(sort (remove-duplicates (term (n_2 ... n_3 ...))) <) T)]
+  [(join n_1 (n_2 ...) (n_3 ↦ (n_4 ...) T))
+   (n_3 ↦ (n_4 ...) (join n_1 (n_2 ...) T))])
+
+(define-metafunction L
+  singleton : n n -> T
+  [(singleton n_1 n_2) (n_1 ↦ (n_2) ∅)])
 
 (define-metafunction L
   Eval-num : (f any) -> any
@@ -124,7 +148,7 @@
              (:map/e (λ (x) (cons 1 x))
                      cdr
                      e2
-                     #:contact (cons/c 1 (:enum-contract e2)))))]
+                     #:contract (cons/c 1 (:enum-contract e2)))))]
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
@@ -136,11 +160,13 @@
   [(to-enum (map/e (add integer) any e))
    ,(:map/e (λ (x) (if (integer? x) (+ x (term integer)) x))
             (λ (x) (if (integer? x) (- x (term integer)) x))
-            (term (to-enum e)))]
+            (term (to-enum e))
+            #:contract (and/c exact-integer? (>=/c (term integer))))]
   [(to-enum (map/e (mult real) any e))
    ,(:map/e (λ (x) (if (integer? x) (* x (term real)) x))
             (λ (x) (if (integer? x) (/ x (term real)) x))
-            (term (to-enum e)))]
+            (term (to-enum e))
+            #:contract (and/c exact-integer? (λ (x) (zero? (modulo x (term integer))))))]
   [(to-enum (map/e any any e)) (to-enum e)]
   [(to-enum (dep/e e produce-map/e-nat/e-with-add-of-given-int))
    ,(:dep/e (term (to-enum e))
@@ -157,7 +183,7 @@
 
 (define (try-one e n)
   (define enum (term (to-enum ,e)))
-  (define ans (judgment-holds (from-nat ,e ,n v) (to-val v)))
+  (define ans (judgment-holds (@ ,e ,n v T) (to-val v)))
   (and (pair? ans) 
        (null? (cdr ans))
        (equal? (car ans) (:from-nat enum n))))
@@ -265,13 +291,24 @@
   (define (it str) (text str '(italic . roman)))
   
   (with-compound-rewriters
-   (['from-nat
+   (['@
      (λ (lws)
        (define fn (list-ref lws 1))
        (define enum (list-ref lws 2))
        (define n (list-ref lws 3))
        (define v (list-ref lws 4))
-       (list "" enum " @ " n " = " v ""))]
+       (define T (list-ref lws 5))
+       (list "" enum " @ " n " = " v " | " T ""))]
+    ['∪
+     (λ (lws)
+       (define arg1 (list-ref lws 2))
+       (define arg2 (list-ref lws 3))
+       (list "" arg1 " ∪ " arg2 ""))]
+    ['singleton
+     (λ (lws)
+       (define n1 (list-ref lws 2))
+       (define n2 (list-ref lws 3))
+       (list "{" n1 " ↦ {" n2 "}}"))]
     ['ae-interp
      (λ (lws)
        (list (ae->pict (to-sexp (lw-e (caddr lws))))))]
@@ -290,11 +327,12 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases
-  '(("+l" "+r")
+  '(("or l" "or r")
     ("cons/e x")
     ("cons/e y")
     ("map in" "map out")
-    ("nat/e" "dep/e")))
+    ("nat/e" "dep/e")
+    ("trace/e")))
 
 (define (semantics-figure)
   (w/rewriters
@@ -307,7 +345,7 @@
        30
        (for/list ([name (in-list line)])
          (parameterize ([judgment-form-cases (list name)])
-           (render-judgment-form from-nat))))))))
+           (render-judgment-form @))))))))
 
 (define-syntax-rule 
   (sr e)
@@ -337,11 +375,14 @@
      (equal? (n->nn x) (n->nn/e x))))
   
   (define (try-many e)
-    (for ([x (in-range 1000)])
-      (define trial (try-one e x))
-      (test-log! trial)
-      (unless trial
-        (eprintf "try-many: failed for ~s at ~s\n" e x))))
+    (with-handlers ([exn:fail? (λ (x) 
+                                 (printf "exn raised while trying ~s\n" e)
+                                 (raise x))])
+      (for ([x (in-range 1000)])
+        (define trial (try-one e x))
+        (test-log! trial)
+        (unless trial
+          (eprintf "try-many: failed for ~s at ~s\n" e x)))))
   
   (try-many (term nat/e))
   (try-many (term (cons/e nat/e nat/e)))
@@ -353,9 +394,10 @@
   (for ([x (in-range 1000)])
     (define l
       (judgment-holds 
-       (from-nat (dep/e nat/e produce-map/e-nat/e-with-add-of-given-int)
-                 ,x
-                 v)
+       (@ (dep/e nat/e produce-map/e-nat/e-with-add-of-given-int)
+          ,x
+          v
+          T)
        (to-val v)))
     (define passes (and (pair? l)
                         (null? (cdr l))
@@ -369,10 +411,11 @@
   (for ([x (in-range 1000)])
     (define l
       (judgment-holds 
-       (from-nat (or/e (map/e (mult 2) (mult 1/2) nat/e)
-                       (map/e (add 1) (add -1) (map/e (mult 2) (mult 1/2) nat/e)))
-                 ,x
-                 v)
+       (@ (or/e (map/e (mult 2) (mult 1/2) nat/e)
+                (map/e (add 1) (add -1) (map/e (mult 2) (mult 1/2) nat/e)))
+          ,x
+          v
+          T)
        (to-val v)))
     (define n (and (pair? l) 
                    (null? (cdr l))

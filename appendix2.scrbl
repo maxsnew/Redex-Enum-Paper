@@ -1,6 +1,6 @@
 #lang scribble/base
 @(require scribble/core scriblib/figure
-          "model.rkt")
+          "model/model.rkt")
 
 @title[#:tag "sec:appendix2"]{Appendix 2: Formal Semantics}
 
