@@ -2343,8 +2343,13 @@ Lemma Pair_precise
     trace_eq (Trace_lt (E_Pair e1 e2) (n * n))
              (trace_plus (Trace_lt e1 n)
                          (Trace_lt e2 n)).
-  (* TODO *)
-Admitted.
+  intros n.
+  induction n as [| n IHn]; [  intros; compute; tauto| ].
+  intros e1 e2.
+  eapply trace_eq_trans.
+  apply trace_from_to_0_split with (m := n * n) (n := S n * S n); nliamega.
+  admit.
+Qed.
 
 Lemma PairPair_precise
 : forall n e1 e2 e3,
