@@ -2608,7 +2608,7 @@ Proof.
     remember ((trace_plus (Trace_lt (E_Trace zero E_Nat) m) (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
     destruct t0.
     replace mm0 with (trace_proj zero (Tracing mm0 mm1 mm2 mm3)) by auto.
-    eapply subset_trans; [| apply trace_eq_proj; apply trace_eq_weakenl; apply trace_eq_symm; eassumption].
+    eapply subset_trans; [| apply trace_eq_proj;  eassumption].
     rewrite Heqt1.
     rewrite trace_proj_plus_distrl.
     apply subset_union_transl.
@@ -2632,7 +2632,7 @@ Proof.
     replace pt1 with (trace_proj one (Tracing pt0 pt1 pt2 pt3)) by trivial.
     clear Heqp4t.
     eapply set_eq_trans.
-    apply sub_trace_proj.
+    apply trace_eq_proj.
     apply t.
     apply set_eq_symm.
     eapply set_eq_trans.
