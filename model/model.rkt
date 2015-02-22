@@ -12,7 +12,7 @@
      (cons/e e e)
      (map/e f f e)
      (dep/e e f)
-     (trace/e e))
+     (trace/e n e))
   (v ::= (cons v v) n)
   (n ::= integer)
   
@@ -25,7 +25,8 @@
   
   (f ::= 
      (add integer)
-     (mult real)
+     (mult natural)
+     (mult (/ natural))
      produce-map/e-nat/e-with-add-of-given-int))
 
 (define-judgment-form L
@@ -100,7 +101,8 @@
 (define-metafunction L
   Eval-num : (f any) -> any
   [(Eval-num ((add integer) n)) ,(+ (term integer) (term n))]
-  [(Eval-num ((mult real) n)) ,(* (term real) (term n))]
+  [(Eval-num ((mult natural) n)) ,(* (term natural) (term n))]
+  [(Eval-num ((mult (/ natural)) n)) ,(* (/ (term natural)) (term n))]
   [(Eval-num (f any)) any])
 
 (define-metafunction L
@@ -144,7 +146,7 @@
       (:or/e (:map/e (λ (x) (cons 0 x))
                      cdr
                      e1
-                     #:contract (cons/c 0 (:enum-contract e2)))
+                     #:contract (cons/c 0 (:enum-contract e1)))
              (:map/e (λ (x) (cons 1 x))
                      cdr
                      e2
@@ -158,23 +160,32 @@
   ;; collapse into less interesting enumerations when
   ;; we step outside of the useful area.
   [(to-enum (map/e (add integer) any e))
-   ,(:map/e (λ (x) (if (integer? x) (+ x (term integer)) x))
-            (λ (x) (if (integer? x) (- x (term integer)) x))
-            (term (to-enum e))
-            #:contract (and/c exact-integer? (>=/c (term integer))))]
-  [(to-enum (map/e (mult real) any e))
-   ,(:map/e (λ (x) (if (integer? x) (* x (term real)) x))
-            (λ (x) (if (integer? x) (/ x (term real)) x))
-            (term (to-enum e))
-            #:contract (and/c exact-integer? (λ (x) (zero? (modulo x (term integer))))))]
+   ,(let ([e (term (to-enum e))])
+      (:map/e (λ (x) (if (integer? x) (+ x (term integer)) x))
+              (λ (x) (if (integer? x) (- x (term integer)) x))
+              e
+              #:contract (or/c (and/c exact-integer? (>=/c (term integer)))
+                               (:enum-contract e))))]
+  [(to-enum (map/e (mult any) any e))
+   ,(let ([e (term (to-enum e))]
+          [factor (if (pair? (term any))
+                      (/ (second (term any)))
+                      (term any))])
+      (:map/e (λ (x) (if (integer? x) (* x factor) x))
+              (λ (x) (if (integer? x) (/ x factor) x))
+              e
+              #:contract (or/c rational?
+                               (:enum-contract e))))]
   [(to-enum (map/e any any e)) (to-enum e)]
   [(to-enum (dep/e e produce-map/e-nat/e-with-add-of-given-int))
    ,(:dep/e (term (to-enum e))
             (λ (x) 
               (if (integer? x)
-                  (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :nat/e)
+                  (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :nat/e
+                          #:contract (and/c exact-integer? (>=/c x)))
                   :nat/e)))]
-  [(to-enum (dep/e e any)) (to-enum (cons/e e nat/e))])
+  [(to-enum (dep/e e any)) (to-enum (cons/e e nat/e))]
+  [(to-enum (trace/e n e)) (to-enum e)])
 
 (define-metafunction L
   to-val : v -> any
@@ -201,8 +212,6 @@
          (for/list ([lw (in-list (cdr (reverse (cdr (reverse lws)))))])
            (loop (lw-e lw)))]
         [else (error 'to-sexp "unk ~s\n" lws)])))
-  
-  
   
   (define (ae->pict ae)
     (let loop ([needs-parens? #f]
@@ -385,10 +394,47 @@
           (eprintf "try-many: failed for ~s at ~s\n" e x)))))
   
   (try-many (term nat/e))
-  (try-many (term (cons/e nat/e nat/e)))
   (try-many (term (or/e nat/e (cons/e nat/e nat/e))))
   (try-many (term (or/e (cons/e nat/e nat/e) nat/e)))
+  (try-many (term (cons/e nat/e nat/e)))
   (try-many (term (map/e (add 1) (add -1) nat/e)))
+  (try-many (term (dep/e nat/e produce-map/e-nat/e-with-add-of-given-int)))
+  (try-many (term (trace/e 0 nat/e)))
+  
+  (define (get-trace e i)
+    (define trs (judgment-holds (@ ,e ,i v T) T))
+    (unless (and (pair? trs) (= 1 (length trs)))
+      (error 'get-trace "got bad judgment-form result ~s" trs))
+    (define ht (make-hash))
+    (let loop ([T (car trs)])
+      (match T
+        [`∅ (hash)]
+        [`(,n1 ↦ (,n2 ...) ,T)
+         (when (hash-ref ht n1 #f)
+           (error 'get-trace "got multiple mappings of ~a for ~s" n1 e))
+         (unless (equal? (remove-duplicates n2) n2)
+           (error 'get-trace "not a set @ ~a for ~s" n1 e))
+         (hash-set (loop T) n1 (apply set n2))])))
+  
+  (check-equal? (get-trace (term nat/e) 0) (hash))
+  (check-equal? (get-trace (term (trace/e 0 nat/e)) 0) (hash 0 (set 0)))
+  (check-equal? (get-trace (term (cons/e (trace/e 0 nat/e)
+                                         (trace/e 1 nat/e)))
+                           0)
+                (hash 1 (set 0) 0 (set 0)))
+  (check-equal? (get-trace (term (or/e (trace/e 0 nat/e)
+                                       (trace/e 1 (cons/e nat/e nat/e))))
+                           100)
+                (hash 0 (set 50)))
+  (check-equal? (get-trace (term (or/e (trace/e 0 nat/e)
+                                       (trace/e 1 (cons/e nat/e nat/e))))
+                           101)
+                (hash 1 (set 50)))
+  (check-equal? (get-trace (term (cons/e (trace/e 0 nat/e)
+                                         (cons/e (trace/e 1 nat/e)
+                                                 (trace/e 2 nat/e))))
+                           100)
+                (hash 0 (set 0) 1 (set 1) 2 (set 3)))
   
   ;; test dep/e
   (for ([x (in-range 1000)])
@@ -411,8 +457,8 @@
   (for ([x (in-range 1000)])
     (define l
       (judgment-holds 
-       (@ (or/e (map/e (mult 2) (mult 1/2) nat/e)
-                (map/e (add 1) (add -1) (map/e (mult 2) (mult 1/2) nat/e)))
+       (@ (or/e (map/e (mult 2) (mult (/ 2)) nat/e)
+                (map/e (add 1) (add -1) (map/e (mult 2) (mult (/ 2)) nat/e)))
           ,x
           v
           T)
@@ -426,11 +472,4 @@
     (define passed? (equal? n x))
     (test-log! passed?)
     (unless passed?
-      (eprintf "nat/e recombination didn't work for ~s, got ~s" x l)))
-  
-  ;; this doesn't pass because dep/e does a different 
-  ;; order than the implementation in data/enumerate
-  #;
-  (redex-check 
-   L (e natural_maybe-too-big)
-   (try-one (term e) (term natural_maybe-too-big))))
+      (eprintf "nat/e recombination didn't work for ~s, got ~s" x l))))
