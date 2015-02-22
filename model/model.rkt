@@ -3,7 +3,7 @@
          pict
          (prefix-in : data/enumerate/lib))
 
-(provide semantics-figure sr)
+(provide semantics-figure sr L)
 
 (define-language L
   (e ::= 
@@ -345,21 +345,27 @@
 
 (define (semantics-figure)
   (w/rewriters
-   (apply
-    vc-append
-    20
-    (for/list ([line (in-list linebreaking-with-cases)])
-      (apply 
-       hb-append
-       30
-       (for/list ([name (in-list line)])
-         (parameterize ([judgment-form-cases (list name)])
-           (render-judgment-form @))))))))
+   (ht-append
+    40
+    (inset (frame (inset (render-language L #:nts '(e)) 4)) 4)
+    (apply
+     vc-append
+     20
+     (for/list ([line (in-list linebreaking-with-cases)])
+       (apply 
+        hb-append
+        30
+        (for/list ([name (in-list line)])
+          (parameterize ([judgment-form-cases (list name)])
+            (render-judgment-form @)))))))))
 
 (define-syntax-rule 
   (sr e)
   (sr/proc (λ () (render-term L e))))
-(define (sr/proc t) (parameterize ([default-font-size 11]) (t)))
+(define (sr/proc t) 
+  (parameterize ([default-font-size 11])
+    (w/rewriters
+     (t))))
 
 (module+ main (semantics-figure))
 

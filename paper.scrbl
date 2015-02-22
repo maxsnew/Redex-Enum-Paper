@@ -107,5 +107,3 @@
 
 @include-section["appendix.scrbl"]
 
-@include-section["appendix2.scrbl"]
-
