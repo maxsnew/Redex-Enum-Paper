@@ -321,6 +321,14 @@ Section Pairing.
     destruct vlr as [[l' r'] P]. simpl in *.
     intros EQ. congruence.
   Qed.
+
+  Theorem Pairing_bound l r k n
+  : k < S n * S n 
+    -> Pairing k l r
+    -> l <= S n /\ r <= S n.
+  Proof.
+  Admitted.
+
 End Pairing.
 (* TODO: find out how to make hints go out of their section *)
 Hint Constructors Pairing.
@@ -1192,6 +1200,12 @@ Section Traces.
     apply sub_trace_plus_transl; auto.
   Qed.
 
+  Theorem sub_trace_plus_eq : forall t1 t2, sub_trace t1 t2 -> trace_eq (trace_plus t1 t2) t2.
+  Proof.
+    intros t1 t2 H; destruct t1; destruct t2;
+      destruct4 H; split4; apply subset_union_eq; auto.
+  Qed.
+
   Theorem trace_plus_unitl t :
     trace_eq (trace_plus trace_zero t) t.
   Proof.
@@ -1221,6 +1235,24 @@ Section Traces.
     eapply trace_eq_trans; [ apply trace_plus_unitr | auto].
   Qed.
 
+  Theorem sub_trace_plus_cong tl1 tr1 tl2 tr2 : 
+  sub_trace tl1 tl2
+  -> sub_trace tr1 tr2
+  -> sub_trace (trace_plus tl1 tr1) (trace_plus tl2 tr2).
+  Proof.
+    unfold sub_trace, trace_plus.
+    destruct tl1; destruct tl2; destruct tr1; destruct tr2.
+    intros Hl; destruct4 Hl.
+    intros Hr; destruct4 Hr.
+    split4; apply set_union_subset_cong; auto.
+  Qed.
+
+  Theorem sub_trace_In_equiv t1 t2
+  : sub_trace t1 t2 
+    <-> 
+    (forall x tg, set_In x (trace_proj tg t1) -> set_In x (trace_proj tg t2)).
+  Proof.
+  Admitted.
 End Traces.
 Hint Resolve trace_eq_refl.
 Hint Resolve sub_trace_refl.
@@ -2039,6 +2071,14 @@ Section EnumTrace.
     apply Trace_from_to_sub; auto.
   Qed.
 
+  Theorem Trace_lt_Enumerates m n e v t 
+  : m <= n
+    -> Enumerates e m v t
+    -> sub_trace t (Trace_lt e n).
+  Proof.
+  Admitted.
+
+
 End EnumTrace.
 
 Section Fairness.
@@ -2363,18 +2403,33 @@ Section Fairness.
       apply subset_nil.
     Qed.
 
-    Lemma EPair_ft_cong n e1 e2 :
-      trace_eq (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n))
-               (trace_plus (Trace_lt e1 (S n))
-                           (Trace_lt e2 (S n))).
+    Lemma Pair_layer e1 e2 n
+    : trace_eq (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n))
+               (trace_plus (Trace_lt e1 (S n)) (Trace_lt e2 (S n))).
     Proof.
-      unfold trace_eq;
-      remember (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n)) as t;
-      destruct t as [t0 t1 t2 t3].
-      remember (trace_plus (Trace_lt e1 (S n)) (Trace_lt e2 (S n))) as t';
-        destruct t' as [t0' t1' t2' t3'].
-      split4; split.
-    Admitted.
+      apply trace_eq_eq'_equiv; split.
+      (* trace (e1 x e2) n^2 (n+1)^2 < (trace ) *)
+      (* This one needs some serious infrastructure *)
+      - apply sub_trace_In_equiv; intros x tg Hin;
+        rewrite set_In_Trace_from_to in Hin by nliamega; destruct Hin as [k [[Hnnk HkSnSn] Hin]].
+        unfold Trace_on in Hin.
+        destruct (Enumerates_from_dec (E_Pair e1 e2) k) as [[v t] Henum].
+        inversion Henum; subst.
+        simpl in Hin.
+        destruct (sub_trace_In_equiv (trace_plus lt rt)
+                                     (trace_plus (Trace_lt e1 (S n)) (Trace_lt e2 (S n)))).
+        apply H; [| assumption].
+        clear H H0.
+        apply sub_trace_plus_cong; 
+          eapply Trace_lt_Enumerates; [| eassumption | | eassumption];
+          destruct (Pairing_bound ln rn k n); auto.
+      - eapply sub_trace_trans; [|apply trace_eq_weakenl; apply sub_trace_plus_eq; apply sub_trace_refl];
+        apply sub_trace_plus_cong.
+        (* trace e1 0..n+1 < trace (e1 x e2) n^2 (n+1)^2 *)
+        admit.
+        (* trace e2 0..n+1 < trace (e1 x e2) n^2 (n+1)^2 *)
+        admit.
+    Qed.
 
     Lemma Pair_precise
     : forall n e1 e2,
@@ -2386,7 +2441,10 @@ Section Fairness.
       intros e1 e2.
       eapply trace_eq_trans.
       apply trace_from_to_0_split with (m := n * n) (n := S n * S n); nliamega.
-      admit.
+      eapply trace_eq_trans; [apply sub_trace_plus_eq| apply Pair_layer].
+      eapply sub_trace_trans; [| apply trace_eq_weakenl; apply trace_eq_symm; apply Pair_layer ].
+      eapply sub_trace_trans; [apply trace_eq_weakenl; apply IHn|].
+      apply sub_trace_plus_cong; apply Trace_lt_sub; nliamega.
     Qed.
 
     Lemma PairPair_precise
