@@ -2158,8 +2158,7 @@ Section Fairness.
       inversion Htzto.
       clear  Htzto H1 H2.
 
-      - SearchAbout set_eq.
-        apply set_eq_trans with (s2 := set_union' (S n :: nil) tz').
+      - apply set_eq_trans with (s2 := set_union' (S n :: nil) tz').
         apply set_union_unitl.
         apply set_eq_trans with (s2 := set_union' (S n :: nil) to').
         apply set_union_cong; auto.
@@ -2190,7 +2189,6 @@ Section Fairness.
         auto.
     Qed.
 
-    Eval compute in (Trace_lt (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 64).
   End SumFair.
 
   Section PairFair.
@@ -2534,8 +2532,6 @@ Section Fairness.
     Definition traceNP3 := Trace_lt (NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
 
     Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
-    Eval compute in Trace_lt NP3T 14.
-    Eval compute in sqrt (sqrt 7).
 
     Theorem NaivePairUnFair : ~ (Fair3 NaivePair3).
     Proof.
@@ -2619,4 +2615,3 @@ Section Fairness.
     Qed.
   End NaivePairUnfair.
 End Fairness.
-Recursive Extraction Enumerates_to_dec Enumerates_from_dec.
