@@ -322,7 +322,7 @@ Section Pairing.
   Theorem Pairing_bound l r k n
   : k < S n * S n 
     -> Pairing k l r
-    -> l <= S n /\ r <= S n.
+    -> l < S n /\ r < S n.
   Proof.
     intros H Hp; inversion Hp; subst; nliamega.
   Qed.
@@ -2093,11 +2093,21 @@ Section EnumTrace.
   Qed.
 
   Theorem Trace_lt_Enumerates m n e v t 
-  : m <= n
+  : m < n
     -> Enumerates e m v t
     -> sub_trace t (Trace_lt e n).
   Proof.
-  Admitted.
+    intros Hmn Enum.
+    destruct n; [ nliamega|].
+    apply sub_trace_In_equiv.
+    intros x tg Hin.
+    apply set_In_Trace_lt.
+    exists m; split; auto.
+    unfold Trace_on.
+    destruct (Enumerates_from_dec _ _) as [[v' t'] Henum].
+    simpl.
+    destruct (Enumerates_from_fun _ _ _ _ _ _ Enum Henum); subst; assumption.
+  Qed.
 
 End EnumTrace.
 
@@ -2230,7 +2240,7 @@ Section Fairness.
                                      (trace_plus (Trace_lt e1 (S n)) (Trace_lt e2 (S n)))).
         apply H; [| assumption].
         clear H H0.
-        apply sub_trace_plus_cong; 
+        apply sub_trace_plus_cong;
           eapply Trace_lt_Enumerates; [| eassumption | | eassumption];
           destruct (Pairing_bound ln rn k n); auto.
       - eapply sub_trace_trans; [|apply trace_eq_weakenl; apply sub_trace_plus_eq; apply sub_trace_refl];
