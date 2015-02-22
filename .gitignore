@@ -11,3 +11,7 @@ refute/dart-authors-conjecture
 refute/dart-authors-conjecture.hi
 refute/dart-authors-conjecture.o
 compiled/
+*.vo
+*.glob
+lia.cache
+nlia.cache
