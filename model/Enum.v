@@ -196,16 +196,7 @@ Section Pairing.
   Section Sqrt.
     Lemma sqrt_lemma z : (z - (sqrt z * sqrt z)) - sqrt z <= sqrt z.
     Proof.
-      induction z; try nliamega.
-      SearchAbout "le_".
-      destruct (Nat.sqrt_succ_or z).
-      nliamega.
-      remember (Nat.sqrt_succ_le z).
-      clear Heql.
-      rewrite H at 1 2 3.
-      assert (z - sqrt z * sqrt z - sqrt z < sqrt z). admit.
-      clear IHz l.
-      nliamega.
+      destruct (sqrt_spec z); nliamega.
     Qed.
 
     Lemma sqrt_lemma' z :
