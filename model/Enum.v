@@ -327,7 +327,8 @@ Section Pairing.
     -> Pairing k l r
     -> l <= S n /\ r <= S n.
   Proof.
-  Admitted.
+    intros H Hp; inversion Hp; subst; nliamega.
+  Qed.
 
 End Pairing.
 (* TODO: find out how to make hints go out of their section *)
@@ -1247,12 +1248,22 @@ Section Traces.
     split4; apply set_union_subset_cong; auto.
   Qed.
 
+  Theorem trace_proj_reconstruct t 
+  : t = Tracing (trace_proj zero t) (trace_proj one t) (trace_proj two t) (trace_proj three t).
+  Proof.
+    destruct t; reflexivity.
+  Qed.
+
   Theorem sub_trace_In_equiv t1 t2
   : sub_trace t1 t2 
     <-> 
     (forall x tg, set_In x (trace_proj tg t1) -> set_In x (trace_proj tg t2)).
   Proof.
-  Admitted.
+    destruct t1; destruct t2; split.
+    intros Hst x tg Hin; destruct4 Hst; destruct tg; eapply subset_In; eassumption.
+    intros H; rewrite trace_proj_reconstruct; rewrite trace_proj_reconstruct at 1;
+    split4; apply subset_In_def; intros; apply H; assumption.
+  Qed.
 
   Theorem sub_trace_In_util t1 t2 x tg
   : sub_trace t1 t2 
@@ -1263,12 +1274,6 @@ Section Traces.
     generalize x tg.
     generalize Hsub.
     apply sub_trace_In_equiv.
-  Qed.
-
-  Theorem trace_proj_reconstruct t 
-  : t = Tracing (trace_proj zero t) (trace_proj one t) (trace_proj two t) (trace_proj three t).
-  Proof.
-    destruct t; reflexivity.
   Qed.
 
 End Traces.
