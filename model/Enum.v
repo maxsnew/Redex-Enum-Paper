@@ -2042,7 +2042,20 @@ Section EnumTrace.
       k < S n /\ set_In x (trace_proj tg (Trace_on e k)).
   Proof.
     destruct (set_In_Trace_from_to tg e x 0 (S n)) as [Hl Hr]; try nliamega.
-    admit.
+    split; [clear Hr|clear Hl].
+    intros Hin.
+    assert (set_In x (trace_proj tg (Trace_from_to e 0 (S n)))).
+    apply In_subset_def with (trace_proj tg (Trace_lt e (S n))); [| assumption].
+    apply sub_trace_proj; apply trace_eq_weakenl; apply trace_lt_from_to_0_same.
+    destruct (Hl H) as [k [? Hink]].
+    exists k; split; [nliamega| assumption].
+    
+    intros Hex; destruct Hex as [k [Hbound Hink]].
+    assert (set_In x (trace_proj tg (Trace_from_to e 0 (S n)))).
+    apply Hr.
+    exists k; split; [nliamega| assumption].
+    apply In_subset_def with (trace_proj tg (Trace_from_to e 0 (S n))); [| assumption].
+    apply sub_trace_proj; apply trace_eq_weakenr; apply trace_lt_from_to_0_same.
   Qed.
 
   Theorem sub_trace_plus_introl t1 t2 t3
