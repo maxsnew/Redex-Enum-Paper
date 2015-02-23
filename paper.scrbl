@@ -39,57 +39,51 @@
                  #"{\\end{wrapfigure}}\n"))
 
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
-  Practical, Fair, and Efficient Enumeration for Algebraic Data-Structures
+  Ffeat: Fair Functional Enumeration of Algebraic Types
 }
 @authorinfo["Max New"
-	    "Northwestern University"
-	    "max.new@eecs.northwestern.edu"]
+            "Northwestern University"
+            "max.new@eecs.northwestern.edu"]
 
 @authorinfo["Burke Fetscher"
-	    "Northwestern University"
-	    "burke.fetscher@eecs.northwestern.edu"]
+            "Northwestern University"
+            "burke.fetscher@eecs.northwestern.edu"]
 
 @authorinfo["Jay McCarthy"
-	    "Vassar College"
-	    "TODO@vassar_I_guess.edu"]
+            "Vassar College"
+            "TODO@vassar_I_guess.edu"]
 
 @authorinfo["Robert Bruce Findler"
-	    "Northwestern University"
-	    "robby@eecs.northwestern.edu"]
+            "Northwestern University"
+            "robby@eecs.northwestern.edu"]
 
 @abstract{
- This paper reports on the design of a set of
- enumeration combinators that are efficient, fair, 
- and practical. They are efficient because most
- of the combinators produce enumerations that
- support indexing in time proportional to the
- log of the given index. In concrete terms, this
- means that we can typically compute the 
- @raw-latex{$2^{100,000}$}th element of an enumeration 
- in a few milliseconds.
- 
- Fairness means that when the combinators build a new result
- enumeration out of other ones, indexing into the result enumerator
- does not index disproportionally
- far into just a subset of the given enumerators. For example, 
- this means that enumeration of the
- @raw-latex{$n$}th element of an enumeration of three-tuples
- indexes about @raw-latex{$\sqrt[3]{n}$} elements into each
- of its components.
- 
- Our combinators are practical because they support the
- entire language of Redex models, providing a new generator
- for Redex's property-based testing. The paper reports
- on an empirical comparison between enumeration-based 
- property generation and ad hoc random generation, showing
- that enumeration is more effective than ad hoc random
- generation in short time-frames. While Redex is our main 
- application of enumeration, our enumerators also support
- a video-game programming engine and give us the opportunity
- for some new game mechanics.
+  This paper reports on the design of combinators
+  for building efficient bijections between the 
+  naturals numbers (or a prefix of them) and algebraic
+  datatypes constructed by sums, recursion, and (possibly
+  dependent) pairs.
+  
+  Our enumeration combinators support a new property
+  we call fairness. Intuitively the result of fair combinator 
+  indexes into its argument combinators equally when constructing
+  its result. For example, extracting the
+  @raw-latex{$n$}th element from our enumeration of three-tuples
+  indexes about @raw-latex{$\sqrt[3]{n}$} elements into each
+  of its components instead of, say, indexing @raw-latex{$n/2$}
+  into one and @raw-latex{$n/4$} into the other two as you would 
+  if you build a three-tuple out of nested pairs. The paper
+  develops the theory of fairness and contains proofs establishing
+  fairness of our combinators and a proof that some combinations of 
+  fair combinators are not fair.
+  
+  The design of our combinators is driven by our primary
+  application, property-based testing in Redex. The paper also
+  reports on how our combinators can support enumeration for arbitrary
+  Redex models and an empirical comparison between enumeration-based 
+  property generation and ad hoc random generation, showing
+  that the strategies are complementary. 
 }
-
-@include-section["intro.scrbl"]
 
 @include-section["combinators.scrbl"]
 

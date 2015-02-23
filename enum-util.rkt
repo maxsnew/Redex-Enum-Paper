@@ -263,7 +263,7 @@
     (error 'render-enumerations "one of the strings is wider than a line"))
   (define columns (+ 1 (floor
                         (/ (- rendered-enumeration-width max-str-w)
-                           (+ max-str-w 3)))))
+                           (+ max-str-w (string-length column-gap))))))
   (define (take/min lst pos) 
     (if (< (length lst) pos) lst (take lst pos)))
   (define (drop/min lst pos)
@@ -279,7 +279,7 @@
                                (add-between
                                 (for/list ([ele (in-list this-line)])
                                   (pad-to max-str-w ele))
-                                "    "))
+                                column-gap))
                               "\n")
                (loop (drop/min strs columns)))])))
   
@@ -295,7 +295,8 @@
                                       (λ (_) #\space)))]
     [else str]))
 
-(define rendered-enumeration-width 55)
+(define column-gap "    ")
+(define rendered-enumeration-width 50)
 
 (define-syntax-rule 
   (enum-example stx count)
