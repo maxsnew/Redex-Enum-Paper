@@ -54,8 +54,9 @@ and the @racket[except/e] combinator. For example, to generate lists of distinct
                             (dep/e 
                              (except/e* natural/e eles)
                              (λ (new)
-                               (no-dups-without
-                                (cons new eles))))))]
+                               (delay/e
+                                (no-dups-without
+                                 (cons new eles)))))))]
 @(define no-dups/e (no-dups-without '()))
 where @racket[except/e*] simply calls @racket[except/e] for each element of
 its input list. We can then define @racket[(define no-dups/e (no-dups-without '()))]
