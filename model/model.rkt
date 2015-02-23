@@ -7,7 +7,7 @@
 
 (define-language L
   (e ::= 
-     nat/e
+     natural/e
      (or/e e e)
      (cons/e e e)
      (map/e f f e)
@@ -17,7 +17,9 @@
   (n ::= integer)
   
   (ae ::=
-      (+ ae ae) (- ae ae) (/ ae ae) (* ae ae) (- ae ae ae) (integer-sqrt ae) (sqr ae)
+      (+ ae ae) (/ ae ae) (* ae ae)
+      (- ae ae) (- ae ae ae)
+      (integer-sqrt ae) (sqr ae)
       (< ae ae) (>= ae ae)
       n)
   
@@ -27,14 +29,14 @@
      (add integer)
      (mult natural)
      (mult (/ natural))
-     produce-map/e-nat/e-with-add-of-given-int))
+     produce-map/e-natural/e-with-add-of-given-int))
 
 (define-judgment-form L
   #:mode (@ I I O O)
   #:contract (@ e natural v T)
   
-  [-------------------- "nat/e"
-   (@ nat/e n n ∅)]
+  [-------------------- "natural/e"
+   (@ natural/e n n ∅)]
   
   [(even n) (@ e_1 (ae-interp (/ n 2)) v T)
    ---------------------------------------------  "or l"
@@ -50,7 +52,7 @@
                        (sqr (+ (integer-sqrt n) 1))))) (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
    (@ e_2 (ae-interp (integer-sqrt n)) v_2 T_2)
    ----------------------------------------------------------- "cons/e x"
-   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (∪ T_1 T_2))]
+   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(side-condition (ae-interp
                     (>= (- (+ (* 2 n) 1)
@@ -61,7 +63,7 @@
                                                               1)
                                                            2))) v_2 T_2)
    ---------------------------------------------------------------------------------------- "cons/e y"
-   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (∪ T_1 T_2))]
+   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
   
   [(@ e n v T)
@@ -72,19 +74,19 @@
    ---------------------------------  "map out"
    (@ (map/e f_1 f_2 e) n v T)]
   
-  [(@ (cons/e e nat/e) n_1 (cons v_1 n_2) T_1)
+  [(@ (cons/e e natural/e) n_1 (cons v_1 n_2) T_1)
    (@ (Eval-enum (f v_1)) n_2 v_2 T_2)
    ----------------------------------------------  "dep/e"
-   (@ (dep/e e f) n_1 (cons v_1 v_2) (∪ T_1 T_2))]
+   (@ (dep/e e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(@ e n_2 v T)
    ----------------------------------------------  "trace/e"
    (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
 
 (define-metafunction L
-  ∪ : T T -> T
-  [(∪ ∅ T) T]
-  [(∪ (n_1 ↦ (n_2 ...) T_1) T_2) (∪ T_1 (join n_1 (n_2 ...) T_2))])
+  ⊕ : T T -> T
+  [(⊕ ∅ T) T]
+  [(⊕ (n_1 ↦ (n_2 ...) T_1) T_2) (⊕ T_1 (join n_1 (n_2 ...) T_2))])
 
 (define-metafunction L
   join : n (n ...) T -> T
@@ -107,9 +109,9 @@
 
 (define-metafunction L
   Eval-enum : (f any) -> any
-  [(Eval-enum (produce-map/e-nat/e-with-add-of-given-int integer))
-   (map/e (add integer) (add ,(- (term integer))) nat/e)]
-  [(Eval-enum (f any)) nat/e])
+  [(Eval-enum (produce-map/e-natural/e-with-add-of-given-int integer))
+   (map/e (add integer) (add ,(- (term integer))) natural/e)]
+  [(Eval-enum (f any)) natural/e])
 
 (define-judgment-form L
   #:mode (odd I)
@@ -154,7 +156,7 @@
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
-  [(to-enum nat/e) ,:nat/e]
+  [(to-enum natural/e) ,:natural/e]
   
   ;; these don't handle all of the cases, but instead
   ;; collapse into less interesting enumerations when
@@ -177,14 +179,14 @@
               #:contract (or/c rational?
                                (:enum-contract e))))]
   [(to-enum (map/e any any e)) (to-enum e)]
-  [(to-enum (dep/e e produce-map/e-nat/e-with-add-of-given-int))
+  [(to-enum (dep/e e produce-map/e-natural/e-with-add-of-given-int))
    ,(:dep/e (term (to-enum e))
             (λ (x) 
               (if (integer? x)
-                  (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :nat/e
+                  (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :natural/e
                           #:contract (and/c exact-integer? (>=/c x)))
-                  :nat/e)))]
-  [(to-enum (dep/e e any)) (to-enum (cons/e e nat/e))]
+                  :natural/e)))]
+  [(to-enum (dep/e e any)) (to-enum (cons/e e natural/e))]
   [(to-enum (trace/e n e)) (to-enum e)])
 
 (define-metafunction L
@@ -308,16 +310,16 @@
        (define v (list-ref lws 4))
        (define T (list-ref lws 5))
        (list "" enum " @ " n " = " v " | " T ""))]
-    ['∪
+    ['⊕
      (λ (lws)
        (define arg1 (list-ref lws 2))
        (define arg2 (list-ref lws 3))
-       (list "" arg1 " ∪ " arg2 ""))]
+       (list "λx. " arg1 "(x) ∪ " arg2 "(x)"))]
     ['singleton
      (λ (lws)
        (define n1 (list-ref lws 2))
        (define n2 (list-ref lws 3))
-       (list "{" n1 " ↦ {" n2 "}}"))]
+       (list "λx. " n1 "=x ? {" n2 "} : ∅"))]
     ['ae-interp
      (λ (lws)
        (list (ae->pict (to-sexp (lw-e (caddr lws))))))]
@@ -340,7 +342,7 @@
     ("cons/e x")
     ("cons/e y")
     ("map in" "map out")
-    ("nat/e" "dep/e")
+    ("natural/e" "dep/e")
     ("trace/e")))
 
 (define (semantics-figure)
@@ -383,7 +385,7 @@
        (cons level (- distance mid-level))]))
   
   (define (n->nn/e n)
-    (:from-nat (:cons/e :nat/e :nat/e) n))
+    (:from-nat (:cons/e :natural/e :natural/e) n))
   
   (check-true
    (for/and ([x (in-range 1000)])
@@ -399,13 +401,13 @@
         (unless trial
           (eprintf "try-many: failed for ~s at ~s\n" e x)))))
   
-  (try-many (term nat/e))
-  (try-many (term (or/e nat/e (cons/e nat/e nat/e))))
-  (try-many (term (or/e (cons/e nat/e nat/e) nat/e)))
-  (try-many (term (cons/e nat/e nat/e)))
-  (try-many (term (map/e (add 1) (add -1) nat/e)))
-  (try-many (term (dep/e nat/e produce-map/e-nat/e-with-add-of-given-int)))
-  (try-many (term (trace/e 0 nat/e)))
+  (try-many (term natural/e))
+  (try-many (term (or/e natural/e (cons/e natural/e natural/e))))
+  (try-many (term (or/e (cons/e natural/e natural/e) natural/e)))
+  (try-many (term (cons/e natural/e natural/e)))
+  (try-many (term (map/e (add 1) (add -1) natural/e)))
+  (try-many (term (dep/e natural/e produce-map/e-natural/e-with-add-of-given-int)))
+  (try-many (term (trace/e 0 natural/e)))
   
   (define (get-trace e i)
     (define trs (judgment-holds (@ ,e ,i v T) T))
@@ -422,23 +424,23 @@
            (error 'get-trace "not a set @ ~a for ~s" n1 e))
          (hash-set (loop T) n1 (apply set n2))])))
   
-  (check-equal? (get-trace (term nat/e) 0) (hash))
-  (check-equal? (get-trace (term (trace/e 0 nat/e)) 0) (hash 0 (set 0)))
-  (check-equal? (get-trace (term (cons/e (trace/e 0 nat/e)
-                                         (trace/e 1 nat/e)))
+  (check-equal? (get-trace (term natural/e) 0) (hash))
+  (check-equal? (get-trace (term (trace/e 0 natural/e)) 0) (hash 0 (set 0)))
+  (check-equal? (get-trace (term (cons/e (trace/e 0 natural/e)
+                                         (trace/e 1 natural/e)))
                            0)
                 (hash 1 (set 0) 0 (set 0)))
-  (check-equal? (get-trace (term (or/e (trace/e 0 nat/e)
-                                       (trace/e 1 (cons/e nat/e nat/e))))
+  (check-equal? (get-trace (term (or/e (trace/e 0 natural/e)
+                                       (trace/e 1 (cons/e natural/e natural/e))))
                            100)
                 (hash 0 (set 50)))
-  (check-equal? (get-trace (term (or/e (trace/e 0 nat/e)
-                                       (trace/e 1 (cons/e nat/e nat/e))))
+  (check-equal? (get-trace (term (or/e (trace/e 0 natural/e)
+                                       (trace/e 1 (cons/e natural/e natural/e))))
                            101)
                 (hash 1 (set 50)))
-  (check-equal? (get-trace (term (cons/e (trace/e 0 nat/e)
-                                         (cons/e (trace/e 1 nat/e)
-                                                 (trace/e 2 nat/e))))
+  (check-equal? (get-trace (term (cons/e (trace/e 0 natural/e)
+                                         (cons/e (trace/e 1 natural/e)
+                                                 (trace/e 2 natural/e))))
                            100)
                 (hash 0 (set 0) 1 (set 1) 2 (set 3)))
   
@@ -446,7 +448,7 @@
   (for ([x (in-range 1000)])
     (define l
       (judgment-holds 
-       (@ (dep/e nat/e produce-map/e-nat/e-with-add-of-given-int)
+       (@ (dep/e natural/e produce-map/e-natural/e-with-add-of-given-int)
           ,x
           v
           T)
@@ -463,8 +465,8 @@
   (for ([x (in-range 1000)])
     (define l
       (judgment-holds 
-       (@ (or/e (map/e (mult 2) (mult (/ 2)) nat/e)
-                (map/e (add 1) (add -1) (map/e (mult 2) (mult (/ 2)) nat/e)))
+       (@ (or/e (map/e (mult 2) (mult (/ 2)) natural/e)
+                (map/e (add 1) (add -1) (map/e (mult 2) (mult (/ 2)) natural/e)))
           ,x
           v
           T)
@@ -478,4 +480,4 @@
     (define passed? (equal? n x))
     (test-log! passed?)
     (unless passed?
-      (eprintf "nat/e recombination didn't work for ~s, got ~s" x l))))
+      (eprintf "natural/e recombination didn't work for ~s, got ~s" x l))))

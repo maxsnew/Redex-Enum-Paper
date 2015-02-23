@@ -6,8 +6,8 @@
 (provide unfairness-histograms)
 (define total-size 1000)
 
-(define unfair (cons/e nat/e (cons/e nat/e nat/e)))
-(define fair (list/e nat/e nat/e nat/e))
+(define unfair (cons/e natural/e (cons/e natural/e natural/e)))
+(define fair (list/e natural/e natural/e natural/e))
 
 (define (unfairness-histograms)
   (define unfair-hashes (build-hashes unfair))

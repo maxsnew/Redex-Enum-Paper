@@ -26,7 +26,7 @@
   (define x-count 3)
   (define width (* size-per-cell x-count))
   (define height (* size-per-cell y-count))
-  (define prs (or/e nat/e char/e flonum/e))
+  (define prs (or/e natural/e char/e flonum/e))
   (define base
     (dc (λ (dc dx dy)
           #;
@@ -78,7 +78,7 @@
                [(? flonum?) 2]))
            (define j
              (match v
-               [(? exact-integer?) (to-nat nat/e v)]
+               [(? exact-integer?) (to-nat natural/e v)]
                [(? char?) (to-nat char/e v)]
                [(? flonum?) (to-nat flonum/e v)]))
            (values (* (+ i .5) size-per-cell)
@@ -126,12 +126,12 @@
            (cons p1
                  (flroot . - . (quotient (p1 . + . 1) 2))))
          (λ (n)(error 'weird-cons-undefined))
-         nat/e))
+         natural/e))
 
 (define (search-invert f)
   (λ (n)
     (let/ec k
-      (for ([t (in-enum (cons/e nat/e nat/e))])
+      (for ([t (in-enum (cons/e natural/e natural/e))])
         (when (equal? n (f t))
           (k t))))))
 (define (exp-cons/e e1 e2)
@@ -141,12 +141,12 @@
     (((expt 2 x) . * . ((2 . * . y) . + . 1)) . - . 1))
   (map/e (search-invert exp-pair)
          exp-pair
-         nat/e))
+         natural/e))
 (define (grid cons/e count num-points size arrow-head-size)
   (gen-grid cons/e count num-points size arrow-head-size #:arrows? #t))
 
 (define (gen-grid cons/e count num-points size arrow-head-size #:arrows? arrows?)
-  (define prs (cons/e nat/e nat/e))
+  (define prs (cons/e natural/e natural/e))
   (define base
     (dc (λ (dc dx dy)
           (for ([i (in-range 1 count)])
@@ -227,17 +227,17 @@
   (get-output-string sp))
 
 (define-values (fair-exp fair/e)
-  (to-count (cons/e (cons/e nat/e nat/e)
-                    (cons/e nat/e nat/e))))
+  (to-count (cons/e (cons/e natural/e natural/e)
+                    (cons/e natural/e natural/e))))
 
 (define-values (unfair-exp unfair/e)
   (to-count (cons/e 
-             nat/e
+             natural/e
              (cons/e 
-              nat/e
+              natural/e
               (cons/e
-               nat/e
-               nat/e)))))
+               natural/e
+               natural/e)))))
 
 (define num-enumerated 4000)
 (define (count-em enum)

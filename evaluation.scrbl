@@ -80,7 +80,7 @@ constants. With only this much written down, a Redex programmer can ask for
 first nine terms:
 @enum-example[(pam/e (λ (i)
                        (generate-term L e #:i-th i))
-                     nat/e
+                     natural/e
                      #:contract any/c)
               9]
 or the @(add-commas example-term-index)th term:

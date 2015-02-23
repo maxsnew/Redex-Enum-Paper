@@ -100,7 +100,7 @@ integer list length @racket[k] and a natural number bound
 @racket[layer] and returns an enumeration of lists of length
 @racket[k] that have a maximal value of @racket[layer]. For example the values of @racket[(bounded-list/e 3 2)] are
 
-@enum-example[(slice/e (list/e nat/e nat/e nat/e) 8 10000000000) 19]
+@enum-example[(slice/e (list/e natural/e natural/e natural/e) 8 10000000000) 19]
 
 Since the elements of the enumerated lists are bounded by a specific
 number, @racket[bounded-list/e] always returns a finite enumeration,

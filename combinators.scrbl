@@ -38,7 +38,7 @@ enumerated.@note{Our library also supports one-way enumerations as
                  they can be useful in practice, but we do not talk
                  about them here.}
 
-The most basic enumerator is @racket[nats/e]. Its @racket[to-nat]
+The most basic enumerator is @racket[natural/e]. Its @racket[to-nat]
 and @racket[from-nat] functions are simply the identity function
 and its size is @racket[+inf.0]. The combinator @racket[fin/e]
 builds a finite enumeration 
@@ -61,9 +61,9 @@ imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening
 squares to enumerate all pairs:
 @centered{@pair-pict[]}
-which means that @racket[(cons/e nat/e nat/e)]'s
+which means that @racket[(cons/e natural/e natural/e)]'s
 first 12 elements are
-@enum-example[(cons/e nat/e nat/e) 12]
+@enum-example[(cons/e natural/e natural/e) 12]
 
 The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
@@ -80,7 +80,7 @@ through each of the enumerations every @racket[n] positions.
 For example, the following is the beginning of the disjoint
 sum of an enumeration of natural numbers and an enumeration
 of strings:
-@enum-example[(or/e nat/e string/e)
+@enum-example[(or/e natural/e string/e)
               14]
 We generalize this combinator and describe it in detail in
 @secref["sec:fair"] as well.
@@ -93,12 +93,12 @@ for lists of numbers:
 @racketblock[
 (letrec ([lon/e
           (or/e (fin/e null)
-                (cons/e nat/e (delay/e lon/e)))])
+                (cons/e natural/e (delay/e lon/e)))])
   lon/e)]
 and here are its first 12 elements:
 @enum-example[(letrec ([lon/e
                         (or/e (fin/e null)
-                              (cons/e nat/e (delay/e lon/e)))])
+                              (cons/e natural/e (delay/e lon/e)))])
                 lon/e)
                12]
 An expression like @racket[(delay/e lon/e)] returns
@@ -125,10 +125,10 @@ adjust the elements of an existing enumeration. We use @racket[map/e]
 which composes a bijection between any two
 sets with the bijection in an enumeration, so we can, for example, construct 
 enumerations of natural numbers that start at some natural @racket[i] beyond zero:
-@racketblock/define[(define (nats-above/e i)
+@racketblock/define[(define (naturals-above/e i)
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
-                             nat/e
+                             natural/e
                              #:contract (and/c exact-integer? (>=/c i))))]
 The first two arguments to @racket[map/e] are functions that
 form a bijection between the values in the enumeration argument
@@ -141,8 +141,8 @@ when passed through the two functions.
 We exploit the bidirectionality of our enumerators to define
 the @racket[except/e] enumerator. It accepts an element and an
 enumeration, and returns an enumeration that doesn't have the given element. For
-example, the first 8 elements of @racket[(except/e nat/e 4)] are
-@enum-example[(except/e nat/e 4) 8] 
+example, the first 8 elements of @racket[(except/e natural/e 4)] are
+@enum-example[(except/e natural/e 4) 8] 
 The @racket[from-nat] function for @racket[except/e] simply
 uses the original enumerator's @racket[to-nat] on the given
 element and then either subtracts one before passing the
@@ -163,13 +163,13 @@ It builds enumerations of pairs, but where the enumeration on one
 side of the pair depends on the element in the other side of the pair.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
-@racketblock[(cons/de [hd nat/e] [tl (hd) (nats-above/e hd)])]
-A @racket[cons/de] has two subexpressions (@racket[nat/e] and @racket[(nats-above/e i)]
+@racketblock[(cons/de [hd natural/e] [tl (hd) (naturals-above/e hd)])]
+A @racket[cons/de] has two subexpressions (@racket[natural/e] and @racket[(naturals-above/e i)]
 in this example), each of which is named (@racket[hd] and @racket[tl] in this example).
 And one of the expressions may refer to the other's variable by putting it
 into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd]).
 Here are the first 12 elements of the enumeration:
-@enum-example[(cons/de [hd nat/e] [tl (hd) (nats-above/e hd)])
+@enum-example[(cons/de [hd natural/e] [tl (hd) (naturals-above/e hd)])
               12]
 The implementation of @racket[dep/e] has three different
 cases, depending on the cardinality of the enumerators it

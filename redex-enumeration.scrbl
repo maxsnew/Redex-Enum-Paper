@@ -52,7 +52,7 @@ and the @racket[except/e] combinator. For example, to generate lists of distinct
 @racketblock/define[(define (no-dups-without eles)
                       (or/e (fin/e null)
                             (dep/e 
-                             (except/e* nat/e eles)
+                             (except/e* natural/e eles)
                              (λ (new)
                                (no-dups-without
                                 (cons new eles))))))]

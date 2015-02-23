@@ -23,12 +23,12 @@
    (error 'ack! "not fair!"))
 @(define fair-four-tuple 
    (map/e
-    (λ (x) (list (caar x) (cadr x) (cdar x) (cddr x)))
+    (λ (x) (list (caar x) (cdar x) (cadr x) (cddr x)))
     (λ (l) (cons (cons (list-ref l 0) (list-ref l 1))
-                 (cons (list-ref l 4) (list-ref l 3))))
+                 (cons (list-ref l 2) (list-ref l 3))))
     (cons/e
-     (cons/e nat/e nat/e)
-     (cons/e nat/e nat/e))
+     (cons/e natural/e natural/e)
+     (cons/e natural/e natural/e))
     #:contract (list/c exact-nonnegative-integer? exact-nonnegative-integer?
                        exact-nonnegative-integer? exact-nonnegative-integer?)))
 
@@ -37,27 +37,27 @@ given enumerators roughly equally, instead of indexing
 deeply into one and shallowly into a different one. For
 example, imagine we waned to build an enumerator for lists
 of length 4. This enumerator is one way to build it:
-@racketblock[(cons/e nat/e (cons/e nat/e 
-              (cons/e nat/e (cons/e nat/e 
+@racketblock[(cons/e natural/e (cons/e natural/e 
+              (cons/e natural/e (cons/e natural/e 
                (fin/e null)))))]
 Unfortunately, it is not fair. The @(add-commas one-billion)th element is
 @code{@(format "~v"
                (from-nat (cons/e
-                          nat/e
+                          natural/e
                           (cons/e
-                           nat/e
+                           natural/e
                            (cons/e
-                            nat/e
+                            natural/e
                             (cons/e
-                             nat/e
+                             natural/e
                              (fin/e null)))))
                          one-billion))}
 and, as you can see, it has indexed far more deeply into the first
-@racket[nat/e] than the others. In contrast, if we balance the @racket[cons/e]
+@racket[natural/e] than the others. In contrast, if we balance the @racket[cons/e]
 expressions like this:
 @racketblock[(cons/e
-              (cons/e nat/e nat/e)
-              (cons/e nat/e nat/e))]
+              (cons/e natural/e natural/e)
+              (cons/e natural/e natural/e))]
 (and then were to use @racket[map/e] to adjust the elements of
 the enumeration to actually be lists), then the
 @(add-commas one-billion) element is
@@ -65,8 +65,8 @@ the enumeration to actually be lists), then the
 which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using
-the unfair @racket[(cons/e nat/e (cons/e nat/e nat/e))]
-and when using a fair tupling that combines three @racket[nat/e] 
+the unfair @racket[(cons/e natural/e (cons/e natural/e natural/e))]
+and when using a fair tupling that combines three @racket[natural/e] 
 enumerators. The x-coordinates of the plot correspond to the different
 values that appear in the tuples and the height of each bar is
 the number of times that particular number appeared when enumerating
@@ -86,7 +86,7 @@ The subtle point about fairness is that we cannot restrict
 the combinators to work completely in lock-step on their argument
 enumerations, or else we would not admit @emph{any} pairing operation
 as fair. After all, a combinator that builds the pair
-of @racket[nat/e] with itself we must eventually produce the pair
+of @racket[natural/e] with itself we must eventually produce the pair
 @racket['(1 . 4)], and that pair must come either before or
 after the pair @racket['(4 . 1)]. So if we insist that at
 every point in the enumeration that the combinator's result enumeration
@@ -103,21 +103,21 @@ from the beginning of the section. As we saw, at the point @(add-commas one-bill
 it was not at equilibrium. But at @(add-commas (- fair-number-past-one-billion 1)),
 it produces 
 @code{@(format "~v" (from-nat fair-four-tuple (- fair-number-past-one-billion 1)))},
-and indeed it has indexed into each of the four @racket[nat/e] enumerations
+and indeed it has indexed into each of the four @racket[natural/e] enumerations
 with each of the first @(add-commas (sqrt (sqrt fair-number-past-one-billion))) natural numbers.
 
 In general, that fair four-tuple reaches an equilibrium point at every
-@texmath{n^4} and @racket[(cons/e nat/e nat/e)]
+@texmath{n^4} and @racket[(cons/e natural/e natural/e)]
 reaches an equilibrium point at every perfect square. The
 diagonal in the square diagram from @secref["sec:enum"] illustrates
-the first few equilibrium points for @racket[(cons nat/e nat/e)].
+the first few equilibrium points for @racket[(cons natural/e natural/e)].
 
 As an example of an unfair combinator consider
 @racket[triple/e]:
 @racketblock[(define (triple/e e_1 e_2 e_3)
                (cons/e e_1 (cons/e e_2 e_3)))]
 and the first 25 elements of its enumeration:
-@enum-example[(cons/e nat/e (cons/e nat/e nat/e)) 24]
+@enum-example[(cons/e natural/e (cons/e natural/e natural/e)) 24]
 The first argument enumeration has been called with
 @racket[3] before the other arguments have been called with @racket[2]
 and the first argument is called with @racket[4] before the others are
@@ -170,7 +170,7 @@ of fairness; ignore it for now. The
 @sr[|@|] by treating either the value or
 index argument as given and computing the other one.
 
-The @sr[nat/e] enumeration is in the bottom left; it is
+The @sr[natural/e] enumeration is in the bottom left; it is
 just the identity. The two rules in the top of the figure
 show how @sr[or/e] works; if the number is even we use the
 left enumeration and if it is odd, we use the right one. The two @sr[cons/e]

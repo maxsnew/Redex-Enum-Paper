@@ -23,8 +23,12 @@ using untagged union types. We will denote a call to
 @racket[(disj-sum/e (cons e_1 1?) (cons e_2 2?) ... (cons e_k k?))]
 where given that @racket[x] is in one of the @racket[e_i], @racket[(1? x)] is true if there is some index @racket[i] such that @racket[(decode e_1 i)] is @racket[x].
 
-@racket[disj-sum/e] is relatively easy to define fairly. Given two infinite argument enumerations, we can simply alternate between one and the other, so the first ten elements of @racket[(disj-sum/e (nat/e nat?) (symbol/e sym?))] are simply the first five elements of @racket[nat/e] and @racket[string/e] interleaved, where @racket[symbol/e] is some enumeration of all Racket symbols:
-@enum-example[(or/e nat/e symbol/e) 10]
+@racket[disj-sum/e] is relatively easy to define fairly. Given two infinite argument enumerations, 
+we can simply alternate between one and the other, so the first ten elements of 
+@racket[(disj-sum/e (natural/e nat?) (symbol/e sym?))] are simply the first five elements 
+of @racket[natural/e] and @racket[string/e] interleaved, where @racket[symbol/e] 
+is some enumeration of all Racket symbols:
+@enum-example[(or/e natural/e symbol/e) 10]
 
 Again, to achieve fairness we cannot simply use the binary version of
 @racket[disj-sum/e] arbitrarily. For example, if we defined
@@ -43,7 +47,7 @@ Again, to achieve fairness we cannot simply use the binary version of
                (define (2-or-3? x) (or (2? x) (3? x)))
                (disj-sum/e ep_1 (cons (disj-sum/e ep_2 ep_3) 2-or-3?)))]
 then enumerating the first 10 elements of               
-@racket[(union-three/e (cons nat/e nat?) (cons symbol/e sym?) (cons float/e float?))]
+@racket[(union-three/e (cons natural/e nat?) (cons symbol/e sym?) (cons float/e float?))]
 is unfairly weighted to the first argument, as shown on the left in @figure-ref["fig:disj-sum"].
 
 @figure["fig:disj-sum" "Unfair (left) and fair (right) disjoint sum enumerations"]{
@@ -60,20 +64,20 @@ see that, like @racket[list/e], we have a notion of "layers", if we
 think of the input enumerations as infinitely tall columns side by
 side, each layer is a horizontal slice of the columns. 
 So using the same enumerations as before, 
-@racket[(disj-sum/e (cons nat/e exact-integer?) (cons symbol/e sym?) (cons float/e float?))] 
+@racket[(disj-sum/e (cons natural/e exact-integer?) (cons symbol/e sym?) (cons float/e float?))] 
 looks like the right-hand side of @figure-ref["fig:disj-sum"].
               
 Unlike @racket[list/e], @racket[disj-sum/e] enumerator also has an
 intuitive notion of fairness for finite enumerations. For example this
 enumeration:
 @racketblock[(disj-sum/e (cons (fin/e 'a 'b 'c 'd) sym?)
-                         (cons nat/e number?)
+                         (cons natural/e number?)
                          (cons (fin/e "x" "y") string?))]
 cycles through its two finite enumeration arguments until they
 are exhausted before producing the rest of the natural
 numbers:
 @enum-example[(or/e (fin/e 'a 'b 'c 'd)
-                    nat/e
+                    natural/e
                     (fin/e "x" "y"))
               14]
 This means that @racket[disj-sum/e] must track the
