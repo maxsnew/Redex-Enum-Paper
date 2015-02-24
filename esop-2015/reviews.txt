@@ -1,0 +1,510 @@
+Dear authors,
+
+The 24th European Symposium on Programming (ESOP15) program committee is
+sorry to inform you that your paper #71 was rejected, and will not appear
+in the conference.
+
+       Title: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+     Authors: Max New (Northwestern University)
+              Burke Fetscher (Northwestern University)
+              Jay McCarthy (Vassar College)
+              Robby Findler (Northwestern University)
+  Paper site: https://esop15.hotcrp.com/paper/71?cap=071a8HVWkvA_vU4
+
+33 papers were accepted out of 115 submissions.
+
+Reviews and comments on your paper are appended to this email.
+
+Please note that guardians reviews were updated after the PC meeting.
+
+The submissions site also has the paper's reviews and comments, as well as
+more information about review scores.
+
+Contact j.vitek@neu.edu with any questions or concerns.
+
+- ESOP15 Submissions
+
+===========================================================================
+                            ESOP15 Review #71A
+                     Updated 24 Nov 2014 7:08:33pm EST
+---------------------------------------------------------------------------
+   Paper #71: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 2. Some familiarity
+
+                      ===== Comments for author =====
+
+This paper presents a combinator library for "enumeration" of
+algebraic data structures, for use in test-case generation with PLT
+Redex.  Enumeration-based test generation encodes algebraic data
+structures as natural numbers; this paper extends previous techniques
+by implementing enumeration combinators that are not only efficient
+but "fair", meaning roughly that the enumerators composed from other
+enumerators do not depend disproportionately on some of their
+arguments.  It is argued that this is important when compiling Redex
+models into applications of the enumeration library.
+
+The authors tested their framework on a Redex benchmark suite and
+found that testing based on the enumeration combinators was more
+effective (by about 50%) when run on short time-scales, and less
+effective when run on long time-scales, than the previously
+implemented ad-hoc random testing.
+
+Let me first admit that while I'm familiar with some prior work on
+random testing and Redex, I am basically an outsider.  My judgment
+here is therefore mostly about the paper itself, and less about the
+technical contribution.  I am willing to defer to an expert opinion on
+the importance of the contribution.
+
+Regarding the paper: On the one hand, it is a fairly breezy read, and
+I was able to get a general sense of what the authors did without much
+difficulty.  But on the other hand, when I tried to drill down to some
+details, I found that the paper came up short.
+
+The main problems I had were the following:
+
+- The paper does not clearly define the semantics of the enumeration
+  combinators.  In several cases, some confusing explanation is given,
+  followed by an example, and after several attempts, I could not
+  reconstruct what the formal definition was supposed to be.  The
+  authors would be much better off giving some formal definitions up
+  front, so that the reader does not need to guess (wrong).
+
+- The paper does not clearly explain how Redex models are compiled
+  into applications of the enumeration combinators, but the details of
+  how this is done seem central to the paper.  In particular, the
+  major contribution of this paper over prior work on
+  enumeration-based testing appears to be the fact that the authors'
+  combinators are (mostly) "fair" and support dependent pairing.  But
+  the virtue of this is only *suggested* by the paper.
+
+  In particular, there is a somewhat mysterious paragraph at the end
+  of Section 3.0, which says that fair enumeration is not always a win
+  over unfair enumeration, and so the compilation of Redex patterns
+  has to judiciously use some fair and some unfair enumeration.  I
+  found this too vague to be useful.
+
+  And as for dependent pairing, it is mentioned in Section 4 that this
+  feature is only used in one place in Redex, namely in the
+  implementation of the "no-dups-without" enumerator.  So this does
+  not provide strong evidence that it is a generally important
+  feature.
+
+What I would really like to see in the paper is a clear explanation of
+the formal semantics of enumeration combinators, as well as a detailed
+(if not formal) explanation of how Redex is compiled to enumeration
+combinators.  Without understanding this, it is impossible (for me at
+least) to really judge the merits of the authors' combinator library.
+
+
+Low-level comments:
+
+- "first nine terms" -> "the first nine terms"
+
+- "naturals in order" -> "naturals in the order"
+
+- the paragraph starting "The from-nat function for except/e"
+was very confusing.  Why does from-nat use the original enumerator's
+"to-nat"?  Again, I think some formal semantics would clarify
+everything.
+
+- I was mystified by the semantics of dep/e.
+
+- "The troublesome case is when the second enumerations are all
+finite."  Aren't you defining the semantics here?  Can't you pick a
+less troublesome definition?
+
+- "can be win" -> "can be a win"
+
+- Section 3.2 got pretty technical.  It was hard for me to follow
+why we care about both list/e and cantor-list/e.
+
+- "and a predicate to" -> "and a predicate"
+
+- Theorem 5: why do we care about union-three/e?
+
+- "Haskell random testing" -> "Haskell's random testing"
+
+- "the the enumeration" -> "the enumeration"
+
+===========================================================================
+                            ESOP15 Review #71B
+                     Updated 27 Nov 2014 9:42:35pm EST
+---------------------------------------------------------------------------
+   Paper #71: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+---------------------------------------------------------------------------
+
+                      Overall merit: 4. Strong accept -- I will champion
+                                        this paper
+                 Reviewer expertise: 4. Expert
+
+                      ===== Comments for author =====
+
+The paper describes a novel method for generating random terms based on a Redex specification, using a bijection from N. While not size-proportionate both ways,
+the bijection ensures that terms corresponding to numbers like 2^10000000 are generated in miliseconds.
+
+The paper is well written, clear and covers related work extensively.
+
+Important properties, critical for test generation like fairness and efficiency of the enumeration are ensured by clever choices of (un)pairing and (un)tupling bijections to NxN and N*.
+
+By defining combinators that cover fairly arbitrary Redex definitions, the authors provide a convenient way to the programmer to quickly and declaratively specify random tests in a way similar to QuickCheck.
+
+As a possible future extension, it would be interesting to explore the use of size-proportionate bijections based on hereditary numbering systems like the one given for term algebras in
+
+@inproceedings{ppdp14tarau,
+        Address = {New York, NY, USA},
+        Author = {Tarau, Paul},
+        Booktitle = {{PPDP '14: Proceedings of the 16th international ACM SIGPLAN Symposium on Principles and Practice of Declarative Programming}},
+        Location = {Canterburry, U.K.},
+        Publisher = {ACM},
+        Title = {{ Bijective Collection Encodings and Boolean Operations with Hereditarily Binary Natural Numbers}},
+        Year = {2014}}
+
+Such tree-based numbering systems would ensure size-proportionate bijective encoding of significantly deeper terms that might be useful for generating large programs.
+
+
+Typos:
+
+box_pair on p.9: replace x by n and y by m to match the arguments
+
+===========================================================================
+                            ESOP15 Review #71C
+                     Updated 12 Dec 2014 5:38:15am EST
+---------------------------------------------------------------------------
+   Paper #71: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+---------------------------------------------------------------------------
+
+                      Overall merit: 1. Reject -- I will argue for
+                                        rejection
+                 Reviewer expertise: 4. Expert
+
+                      ===== Comments for author =====
+
+In (property) testing, it is important to generate test data for a
+program so as to obtain a level of coverage of code that would enable
+finding the cases in which the (property) program fails.  In software
+engineering this is called code coverage and has been studied
+extensively.
+
+This paper has a similar aim: it reports on the design of a set of
+enumuration combinators, specifically aimed at generating Redex terms,
+which are generated by a grammar written by the programmer.  The goal
+is to use this generator as a way to test properties of Redex terms by
+generating the terms and testing that they satisfy the desired
+property.
+
+In order to test a property in the most effective way, the test cases
+(Redex terms) should be chosen so that all control flow paths in the
+code testing the property are fired up, as much as possible, and as
+quickly as possible.  This would require analyzing the property and
+generating testing data accordingly.  For example, if we are testing
+an is-empty subroutine that returns whether a list is empty or not, by
+analyzing the conditional in the is-empty subroutine, we can determine
+that we should generate and empty list and a non-empty list at the
+very least.  Generating lots of non-empty lists do not lead to better
+coverage.
+
+This paper comes up with a property insensitive method to generate
+test cases (Redex expressions) for property testing.  They propose a
+"fairness" property that balances the structure of the input being
+generated so that not any single component in sampled in an unbalanced
+fashion.  The authors claim that this method is preferable because it
+strikes a balance, because creating unbalanced test cases would be,
+well unbalanced.
+
+This approach is flawed.  The best testing data is property dependent:
+if you are testing an is-empty subroutine, you don't need to generate
+balanced data.  If one is testing a predicate that checks whether a
+tree is balanced or not, one should not generate balanced data.  This
+paper somehow claims that the balanced/fair generation is better.
+
+So it should not come as a surprise that there is no substantiation of
+this claim.  There is no proof in the paper that this way of
+generating Redex terms is indeed better than doing something smarter
+such as generating the terms by using knowledge of the property being
+tested as in the is-empty example.  There is also no proof that it is
+better than doing something more or less trivial: just generating data
+in an ad hoc, arbitrary fashion, or uniformly randomly.
+
+The authors implement their design and find no significant difference
+with ad hoc data generation, which actually beats the fair or balanced
+data generation for moderately long test cases.  In fact, a
+combination of in order and ad hoc outperforms the fair technique in
+all cases.  This is not surprising, as there is no fundamental reason
+for why the claimed technique will work better.
+
+There might be some value to the approach used for generating the
+Redex terms.  The authors claim for example that they are fast.  But
+there is not enough detail in the paper to evaluate these claims.  The
+generation methods are not explained in sufficient detail for a reader
+to understand, implement, and use them.
+
+Note after response:
+My advise to the authors would be to carefully formulate the problem that they are working on and consider its significance.  The authors should also familiarize themselves with prior work on this problem; some pointers are provided in other reviews.
+
+(The claim that I am making a technical error is misleading.  The bug-finding behavior of the two techniques used in combination is independent of how data is generated.)
+
+===========================================================================
+                            ESOP15 Review #71D
+                     Updated 12 Dec 2014 7:21:19am EST
+---------------------------------------------------------------------------
+   Paper #71: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 3. Knowledgeable
+
+                      ===== Comments for author =====
+
+This paper focuses on the problem of enumerating algebraic data-structures. The main purpose of this is testing, but it seems this could have applications for other settings such as synthesis or probabilistic programming. The goal is to be able to generate a mapping from integers to data-structures such that the data-structure corresponding to a given index can be produced in time proportional to the log of the index, and to have a mapping that is fair, so that  it does not disproportionately favor one part of the space over another.
+
+The high-level idea is to construct complex enumerators from a set of simple enumerators and a set of combinators that allow us to build more complex enumerators from simpler ones. The simplest enumerators involve generating either integers or enumerating elements from finite sets. The enumerator that generates tuples given a set of enumerators is interesting because instead of the expected cantor construction to enumerate pairs of elements (and its generalization to larger tuples), it uses a "boxy" pairing that can be shown to be significantly more efficient in mapping from integers to tuples. The construction itself comes from prior work, but the paper seems to claim that the observation about efficiency in higher dimensions and the proof of fairness is new (QUESTION: is this the claim?). The formalization of the notion of fairness itself is claimed as a contribution of the paper. The high-level idea behind fairness is that if you build an enumerator from multiple enumerat!
+
+ ors, you do not want the values of one enumerator to be overrepresented in the result.  However, the formalization is not very intuitive. The way I interpreted the definition is that at any point in the combined enumeration you can look at how many times you have used each element in the contributing enumerations up to that point, and infinitely often, you will get to a point where those counts will be the same for all the contributing enumerations.
+
+The system also provides a fixpoint enumerator fix/e that is necessary in order to enumerate recursive data structures. I felt that the idea of fairness for this enumerator was not sufficiently explored. At least I couldn't find a mention of it in section 3.
+
+Finally, one piece of related work that would be worth looking at. Recently, the synthesis community has been exploring enumeration-based techniques to synthesize expressions (see [1] for an overview). One of the major concerns there in addition to fairness and efficiency is avoiding enumerating redundant expressions (e.g you don't want to generate a+b and b+a as separate expressions). It would be useful to see if there is any overlap between the techniques presented here and the techniques used in the synthesis setting.
+
+[1] Rajeev Alur, Rastislav Bodík, Garvit Juniwal, Milo M. K. Martin, Mukund Raghothaman, Sanjit A. Seshia, Rishabh Singh, Armando Solar-Lezama, Emina Torlak, Abhishek Udupa: Syntax-guided synthesis. FMCAD 2013: 1-17
+
+
+Minutia:
+        • Page 3, "computes takes fixed points"
+        • In the definition of nats-above/e, I was initially confused by why you need to pass \lambda x. x - i. On further thought I realized that it is because it needs to be able to support the to-nat function and that's why it needs both the function and its inverse. This should be stated more explicitly.
+
+
+=====================================
+
+Below are additional concerns that arose after further dicusion about the paper:
+
+The enumerators and combinators presented here represent a subset of concepts introduced in (1) Duregård et al. (2012), (2) Runciman et al. (2008) and (3) Kuraj and Kuncak (2014). Mapping (adjustment), combination and disjoint combinators are introduced in (1) for finite enumerations, while in (3) extends the notion for infinite enumerators. dep/e and except/e is covered in (3) (former is subsumed and can be implemented by the dependent combinator). Moreover, dependent combinator as a function in (3) exactly matches the fixpoint/e combinator. Fairness of enumeration is addressed in both (1) and (2) with cost.
+
+The subtleties and benefits of new combinators would be clearer to grasp if the paper introduced previously known concepts and differences between them. The authors use Szudzik's pairing function and extend it to multiple dimensions as shown in (4) Szudzik (2006). It is not clear how the newly introduced generalized pairing function differs from work presented in (4). It would be helpful for the reader if the authors started with a definition of Szudzik's pairing function and present their own extension that differs from the one presented in (3).
+
+Other enumeration works, including (1), (2) and (3) use pairing functions that are also presented in this paper --- the paper fails to explain which and how are the newly introduces pairing functions different.
+The evaluation seems to miss an analysis of why are some bugs harder to find than others. Whether it is because of the term size, the particular form or the combination of the two. Moreover, some bugs were not found with any strategy --- it would be good why this is the case, considering the in-order enumeration is quite fast and the time limit was 24h.
+
+It is not clear how are some complex terms enumerated (e.g. rbtree benchmark) --- is dep/e combinator used (and how) or is generate-and-test strategy used. E.g. approach from (1) Duregård et al. (2012) can enumerate efficiently if there is bijection between natural numbers and terms. On the other hand in (2) Kuraj and Kuncak (2014), general dependent combinators were introduced, to allow enumeration of complex terms. Although the question of fairness is not addressed in (1) and (2), it is addressed in Runciman et al. (2008) --- this paper should comment on that. All the finite operators except dep/e and except/e are introduced in (1). (2) goes further by introducing infinite domains and dependent enumeration that covers all combinators given here.
+
+===========================================================================
+                            ESOP15 Review #71E
+                     Updated 6 Dec 2014 12:18:46pm EST
+---------------------------------------------------------------------------
+   Paper #71: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 3. Knowledgeable
+
+                      ===== Comments for author =====
+
+The paper describes an implementation of enumeration combinators for
+PLT Redex: They provide a bijection between the terms of a given Redex
+grammar and the natural numbers.  They can either be used for
+exhaustive enumeration, but also allow efficiently mapping from
+arbitrary - even very large - integers to the corresponding enumerant.
+The resulting facility can be used for property-based random testing.
+
+The topic itself is relevant for ESOP, and relevant for programmers
+where property-based testing is playing an increasingly important
+role.
+
+However, I found the presentation lacking - both wrt. motivation, and
+in clearly explaining the technical content.  I suspect this could be
+fixed, but the conference format does not make me sufficiently
+confident that it will actually happen.
+
+The major issue I have with the paper is that it doesn't say clearly
+what the problem is it's trying to solve - and correspondingly it does
+not state what its significant contribution is.  I gather it's
+the whole fairness business, but this only becomes clear indirectly.
+Moreover, while the paper argues that fairness is good in principle,
+it doesn't really say anything about how fairness affects the process
+of actually finding bugs.  (It does say a bit about counterexamples
+(see below), which seems inconclusive.)  On the surface, the paper
+seems very close to the Feat paper wrt. intention, so the difference
+should be clearly explained.  What does Feat not do that you need?
+
+Also, the presentation uses natural language almost pervasively
+to describe the algorithms and functions designed.  This makes the
+presentation (much) less clear than it could be.
+
+The paper uses the word "bug" to mean "counterexample", and this is
+jarringly confusing to the reader.  Moreover, it never relates
+counterexamples to actual bugs, which makes it difficult to gauge how
+useful it is to generate many counterexamples.
+
+Detailed comments:
+
+2 Enumeration Combinators
+
+- "loops through the finite enumeration": What you mean is that it
+  "loops repeatedly" - I had to read this a few times to find out that
+  you don't mean "loop once".
+
+- In what way does "list/e" generalize "cons/e"? (Given that not every
+  cons - not even every cons in the paper - is a list.)
+
+- The terms "encoding" and "decoding" are used often but never
+  explicitly defined.
+
+3 Fairness
+
+- The section starts out saying that fairness is a property of
+  *combinators* but then says that a particular *enumerator* is not
+  fair - you should write it as a combinator to make your point
+  clearly.
+
+3.1 Formal Definition of Fairness
+
+I found the presentation here difficult to follow, mainly because it
+provides some pieces with no clear connection to the definitions that
+came before.  I figured it out eventually, but came across the
+following issues:
+
+- The text should state explicitly that a combinator might draw
+  *several* samples from its argument enumerators, and that this is
+  the reason for the lists in the types.
+
+- I think it would be clearer if you wrote an equation (sketch) saying
+  how the enumerator can be built using args and build.
+
+- It shows how to enumerate ("decode"), but how does encoding work?
+
+- I find this "you apply" (later "we") inappropriate.  Again, maths or
+  code would make this clearer.
+
+3.2 Fair Tupling
+
+- "note that most combinatorics [...]": Why is this important to
+  anything the paper is trying to say?
+
+- How exactly does the "box-untuple" function fit in the grand scheme
+  of things?
+
+- "the decoding function the boxy bijection": Huh?
+
+- "With this lemma in hand": What exactly is "this lemma"? I can't
+  find it.
+
+- The presentation proofs are very difficult to follow,, as they're
+  full of "we proceed" etc., ambiguous language and too little math or
+  code (take your pick)
+
+- You don't use "cantor-list/e" (and you argue convincingly that you
+  don't) - why show that it's fair?
+
+- "{arg_c}ons" typesetting issue on p.12, also "for alli>9"
+
+- "A fair generalization is fairly obvious": No.
+
+- "Unlike "list/e", "disj-sum/e" enumerator also has an intuitive notion of fairness"
+                    ^the
+
+  I missed how you made the point that list/e doesn't.
+
+
+- p. 14: "soevery"
+
+4 Enumerating Redex Patterns
+
+- Earlier you make the point that you don't exhaustively enumerate
+  identifiers, but that point is absent here.  What does Redex do
+  wrt. identifiers?
+
+- Generally, you say early in the paper that unfair biasing may be
+  beneficial.  What does Redex do exactly that's unfairly biased and
+  how is it done?
+
+5 Empirical Evaluation
+
+- "uncertainty in the average becomes acceptably small": average of
+  *what*?
+
+6 Related Work
+
+- The Heidegger/Thiemann reference does not really seem relevant.
+
+
+===========================================================================
+                  Response by Max New <maxsnew@gmail.com>
+   Paper #71: Practical, Fair, and Efficient Enumeration for Algebraic
+              Data-Structures
+---------------------------------------------------------------------------
+==== Review E ===
+
+Much of your review matches Review A, so we won't repeat those
+comments here. But yes: our more general set of combinators and the
+notion of fairness are the main contributions, in our opinion.
+
+As for Feat, the two main differences are our support for n-ary fair
+combinators and our support for dependency. Redex currently uses
+dependency only a little (because dependency is more expensive than
+other combinators, so we work hard to avoid it when possible for
+Redex) but it is necessary to support certain Redex programs
+(discussed at the bottom of page 15 and the top of 16).
+
+Dependency is, generally speaking, very natural. As one example, it is
+needed to support enumeration of well-typed terms, or even closed
+ones. The Redex enumerators currently generate all possible variable
+names because Redex doesn't have special support for binding
+forms. That support is currently being implemented, however, and part
+of that effort is to change the how enumeration works (using
+dependency more).
+
+Dependent enumeration is also used in the game Tally Maze (included in
+"PLT Games" in the Racket distribution:
+http://docs.racket-lang.org/games/tally-maze.html) to enumerate mazes.
+
+
+[ content above the line added after review E appeared ]
+-------------------------------------------------------------------
+
+==== Review A ===
+
+After reading your review and reflecting on it, we completely agree
+that the clarifying power of a formal semantics would be a huge help
+to readers. We plan to include one in future versions of this paper
+(and indeed have already started working on it). Explaining the
+translation to Redex more carefully is similarly important and we plan
+to improve that too.
+
+=== Review C ===
+
+You seem to be asking us to work on a different problem that the one
+we chose to work on. Yes, taking the property into account can be more
+productive when there is information that's easily accessible, but
+that information is not always going to be accessible for a variety of
+reasons. Furthermore, fair enumerators are "best-effort" to ensure
+that the generator is not biased in ways bad for testing. A more
+experienced user can then use the enumeration system as a library for
+constructing generators that are biased towards generating more useful
+inputs as they choose without having to worry about a bias that cannot
+be overcome because it is part of the core enumeration library.
+
+Meanwhile, you seem to have made a technical error in your comments.
+The "in-order" and "uniform random" are both using the enumeration
+system and the fact that "a combination of in order and ad hoc
+outperforms the fair technique in all cases" is to be expected since
+it combines our technique with a complementary one.
+
+=== Reviewer D ===
+
+re "QUESTION": yes, that is our claim.
+
+
+
+
+A special thanks to reviewers B and D for pointing out those
+papers. We agree that they could be useful in extensions of our work.
+
+
