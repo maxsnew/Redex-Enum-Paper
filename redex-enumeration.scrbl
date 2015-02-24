@@ -1,17 +1,96 @@
 #lang scribble/base
 @(require "util.rkt"
           "enum-util.rkt"
+          "cite.rkt"
+          racket/pretty
+          racket/pretty
+          racket/contract
           scribble/manual
-          redex
+          scribble/core
           redex/reduction-semantics
-          data/enumerate/lib
-          racket/list
-          racket/pretty)
+          data/enumerate/lib)
+
+@(define (paralabel . args)
+   (elem #:style (style "paragraph" '()) args))
 
 @title[#:tag "sec:redex-enum"]{Enumerating Redex Patterns}
 
-There are three patterns in Redex that require special care when enumerating.
-The first is repeated names. If the same meta-variable is used twice
+The inspiration for our enumeration library is bringing the success of
+Lazy Small Check@~cite[small-check] and FEAT@~cite[feat], 
+to property-based testing for Redex programs. This section
+gives an information overview of how Redex programs are compiled
+into calls to the enumeration library in preparation for
+the evaluation in @secref["sec:evaluation"].
+
+Redex programmers write down a high-level specification of a grammar, reduction
+rules, type systems, etc., and properties that should hold for
+all programs in these languages that relate, say, the reduction
+semantics to the type system. Redex can then generate example
+programs and test the property, looking for counterexamples. 
+
+@(compound-paragraph (style "wrapfigure" '())
+                     (list
+                      (paragraph (style #f '()) 
+                                 (list (element (style #f '(exact-chars)) '("{r}{1.7in}"))))
+                      #;
+                      (paragraph (style "vspace*" '()) 
+                                 (list (element (style #f '(exact-chars)) '("-.8in"))))
+                      @racketblock[(define-language L
+                                     (e ::= 
+                                        (e e)
+                                        (λ (x : τ) e)
+                                        x
+                                        +
+                                        natural)
+                                     (τ ::= ℕ (τ → τ))
+                                     (x ::= variable))]
+                      #;
+                      (paragraph (style "vspace*" '()) 
+                                 (list (element (style #f '(exact-chars)) '("-.5in"))))))
+
+@(define example-term-index 100000000)
+
+@(define-language L
+   (e ::= 
+      (e e)
+      (λ (x : τ) e)
+      x
+      +
+      natural)
+   (τ ::= ℕ (τ → τ))
+   (x ::= variable))
+
+
+To give a flavor for the new capability in Redex, consider
+the language to the right, which contains a Redex program that defines
+the grammar of a simply-typed calculus, plus numeric
+constants. With only this much written down, a Redex programmer can ask for
+first nine terms:
+@enum-example[(pam/e (λ (i)
+                       (generate-term L e #:i-th i))
+                     natural/e
+                     #:contract any/c)
+              9]
+or the @(add-commas example-term-index)th term:
+@(apply typeset-code
+        (let ([sp (open-output-string)])
+          (define example (generate-term L e #:i-th example-term-index))
+          (parameterize ([pretty-print-columns 40])
+            (pretty-write example sp))
+          (for/list ([line (in-lines (open-input-string
+                                      (get-output-string sp)))])
+            (string-append (regexp-replace #rx"\u0012" line "r") "\n"))))
+which takes only 10 or 20 milliseconds to compute.
+
+Our extensions to Redex map each different pattern that can appear
+in a grammar definition into Redex. At a high-level, the correspondence
+between Redex patterns and our combinators is clear, namely recursive non-terminals map
+into uses of @racket[dep/e], alternatives map into @racket[or/e] and 
+sequences map into @racket[list/e]. Redex's pattern language is more
+general, however, and there are three forms patterns in Redex that require
+special care when enumerating.
+
+@paralabel{Patterns with repeated names} If the same meta-variable is used twice
 when defining a metafunction, reduction relation, or judgment form in Redex,
 then the same term must appear in both places. For example, a substitution
 function will have a case with a pattern like this:
@@ -30,9 +109,12 @@ first component is an environment mapping the found variables to terms
 and the second component is the rest of the term where the variables
 are replaced with constant enumerations that serve as placeholders. Once
 a term has been enumerated, Redex makes a pass over the term, replacing
-the placeholders with the appropriate entry in the environment.
+the placeholders with the appropriate entry in the environment. This strategy
+also ensures that we generate a fair enumeration of each pattern, rather
+than introducing unwanted nesting.
 
-In addition to a pattern that insists on duplicate terms,
+@paralabel{Patterns with inequalities}
+Second, in addition to patterns that insists on duplicate terms,
 Redex also has a facility for insisting that two terms are
 different from each other. For example, if we write a subscript
 with @racket[__!_] in it, like this:
@@ -48,7 +130,8 @@ with the actual terms, each placeholder gets a different element of
 the list.
 
 Generating a list without duplicates requires the @racket[dep/e] combinator
-and the @racket[except/e] combinator. For example, to generate lists of distinct naturals, we first define a helper function that takes as an argument a list of numbers to exclude
+and the @racket[except/e] combinator. For example, to generate lists of distinct naturals, 
+we first define a helper function that takes as an argument a list of numbers to exclude
 @racketblock/define[(define (no-dups-without eles)
                       (or/e (fin/e null)
                             (dep/e 
@@ -68,11 +151,11 @@ Redex enumeration library, and the patterns used
 are almost always infinite, so we have not encountered degenerate performance
 with dependent generation in practice.
 
-The final pattern is a variation on Kleene star that
-requires that two distinct sub-sequences in a term have the
-same length. 
+@paralabel{List patterns with length constraints}
+The third complex aspect of Redex patterns is Redex's variation on Kleene star that
+requires that two distinct sub-sequences in a term have the same length. 
 
-To explain the need for this pattern, first consider the Redex pattern
+To explain these kinds of patterns, first consider the Redex pattern
 @racketblock[((λ (x ...) e) v ...)]
 which matches application expressions where the function position
 has a lambda expression with some number of variables and
@@ -116,3 +199,28 @@ pattern.
 This is the strategy that our enumerator implementation uses. Of course,
 ellipses can be nested, so the full implementation is more complex,
 but rearrangement is the key idea.
+
+@paralabel{Ambiguous patterns}
+And finally, there is one relatively uncommon use of Redex's patterns 
+that we cannot enumerate. It is a bit technical and explaining requires
+first explaining ambiguity in matching Redex patterns. There are
+several different ways that a Redex grammar definition can be ambiguous.
+The simplest one is when a single non-terminal has overlapping productions,
+but it can occur due to multiple uses of ellipses in a single sequence or
+when matching @racket[in-hole]. Because of the way our enumerator compilation 
+works, we are not technically building a bijection between the naturals
+and terms in a Redex pattern; it is more accurate to say we are building
+a bijection between the naturals and the one might parse a Redex pattern.
+In our implementation, of course, we construct a concrete term from the
+parse, but when a pattern is ambiguous there may be a single term
+that corresponds to multiple parses and thus our enumeration is not bijective.
+Usually, this is not a problem, as we ultimately need only the mapping
+from naturals to Redex patterns, not the inverse. There is one situation,
+however, where we need the inverse, namely to handle patterns with 
+inequalities, as discussed above. Determining if a pattern is ambiguous
+in the general case is a computationally difficult task, so we approximate
+it in a way that works well for Redex models we encounter in practice 
+(since few Redex languages are intentionally ambiguous), but if we cannot
+determine that a pattern is unambiguous and it is combined with a
+@racket[_!_] pattern, Redex will signal an error instead of enumerating
+the pattern.

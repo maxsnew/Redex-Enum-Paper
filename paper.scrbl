@@ -33,6 +33,9 @@
                  #"\\hskip1.5em plus0em minus0.5em \\fi \\nobreak\n"
                  #"\\vrule height0.75em width0.5em depth0.25em\\fi}\n"
 
+                 ;; map the ℕ character
+                 #"\\DeclareUnicodeCharacter{2115}{$\\mathbb{N}$}\n"
+                 
                  ;; used for the table of the bugs
                  #"\\newenvironment{IntroWrapFigure}"
                  #"{\\begin{wrapfigure}{r}{4in}}"

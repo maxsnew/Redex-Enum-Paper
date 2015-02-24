@@ -169,7 +169,8 @@ in this example), each of which is named (@racket[hd] and @racket[tl] in this ex
 And one of the expressions may refer to the other's variable by putting it
 into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd]).
 Here are the first 12 elements of the enumeration:
-@enum-example[(cons/de [hd natural/e] [tl (hd) (naturals-above/e hd)])
+@enum-example[(cons/de [hd natural/e] 
+                       [tl (hd) (naturals-above/e hd)])
               12]
 The implementation of @racket[dep/e] has three different
 cases, depending on the cardinality of the enumerators it

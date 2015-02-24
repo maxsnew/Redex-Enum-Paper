@@ -296,7 +296,7 @@
     [else str]))
 
 (define column-gap "    ")
-(define rendered-enumeration-width 50)
+(define rendered-enumeration-width 55)
 
 (define-syntax-rule 
   (enum-example stx count)
