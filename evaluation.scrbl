@@ -106,9 +106,9 @@ distribution is different.
 
 @Figure-ref["fig:benchmark-lines"] shows a high-level view
 of our results. Along its x-axis is time in seconds in a log
-scale, and along the y-axis is the total number of bugs
+scale, and along the y-axis is the total number of counterexamples
 found for each point in time. There are three lines on the
-plot showing how the total number of bugs found changes as
+plot showing how the total number of counterexamples found changes as
 time passes.
 
 The red dashed line shows the performance of in-order
