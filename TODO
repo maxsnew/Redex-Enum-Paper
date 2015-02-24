@@ -15,3 +15,13 @@
         Publisher = {ACM},
         Title = {{ Bijective Collection Encodings and Boolean Operations with Hereditarily Binary Natural Numbers}},
         Year = {2014}}
+
+- figure out what to do with fairness for dep/e. Viable options seem to be:
+
+  1. say nothing
+
+  2.  explain how to make what appears to be fair enumeration of lists.
+      => explain no proofs
+      => explain it is sloooow
+      => back things up with graphs
+      => explain that we don't yet use this technique in Redex
