@@ -29,20 +29,20 @@ positions in the enumeration.
 
 @citet[feat]'s Feat is a system for enumeration that distinguishes
 itself from ``list'' perspectives on enumeration by focusing on the
-``function'' perspective. We use the ``function'' perspective as
-well. While our approach is closer to Tarau's, we share support for
+``function'' perspective. We also use the ``function'' perspective. 
+While our approach is closer to Tarau's, we share support for
 finite sets with Feat, but are distinct from Feat in our support for
 dependent pairing and fairness. Also, Feat has only one half of the
 bijection and thus cannot support @racket[except/e] (and thus cannot
 easily support identifiers that contain all strings, except without a
-small set of keywords).  @citet[scife] is similar to Feat, but with
+small set of keywords like we need for Redex).  @citet[scife] is similar to Feat, but with
 the addition of a dependent combinator. Like Feat, it does not support
 @racket[except/e] or fairness.
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages
 responding to an interactive question-and-answer game. This method also 
-allows them to define an analagous dependent combinator.
+allows them to define an analogous dependent combinator.
 However, details of their system show that it is not well suited to
 using large indexes. In particular, the strongest proof they have is that if a
 game is total and proper, then ``every bitstring encodes some value or
@@ -100,27 +100,23 @@ to find bugs in unix utilities.
 
 Despite an early, convincing study on the value of random
 testing@~cite[an-evaluation-of-random-testing]
-and an early influential paper@~cite[fuzzing-unix-utils], there are other papers that
-suggest that random testing is a poor choice for
+and an early influential paper@~cite[fuzzing-unix-utils], there 
+seems to be a general impression that random testing is a poor choice for
 bug-finding. For example, 
-@citet[contract-driven-testing-of-javascript-code] write:
-@a-quote{
-“Spotting this defect requires the test case generator to 
-guess a value for x such that x * 2 == x + 10 holds, 
-but a random integer solves this equation with probability 
-@raw-latex|{\(2^{-32}\)}|.”
-}
-
-When we run this example in 
+@citet[dart] and
+@citet[contract-driven-testing-of-javascript-code] 
+both dismiss random testing using the relatively simple example:
+@raw-latex{$\forall x, x * 2 \neq x + 10$} as support, suggesting that
+it is hard for random testing to find a counterexample to
+this property. When we run this example in 
 Quickcheck@~cite[quickcheck]
 giving it 1000 attempts to find a counterexample, it finds it
 about half of the time, taking on average about 400 attempts 
 when it succeeds.
 Redex's random generator does a little bit better, finding it
 nearly every time, typically in about 150 attempts.
-
-Not to single out a single paper, @citet[dart] use the same
-example and @citet[isabelle-testing] discuss this buggy
+Not to single out a single example 
+@citet[isabelle-testing] discuss this buggy
 property (the last @racket[xs] should be @racket[ys]):
 @racketblock[nth (append xs ys) (length xs+n) = nth xs n]
 saying that
@@ -137,15 +133,3 @@ Of course, the reason Quickcheck and Redex find these bugs
 is because the distribution they use for integers is biased
 towards small integers, which is natural as those integers
 are usually more likely to be interesting during testing.
-
-This paper is one of two papers submitted to ESOP that
-discusses random testing in the context of Redex. The other
-is entitled @italic{Making Random Judgments: Automatically
- Generating Well-Typed Terms from the Definition of a
- Type-System}. This paper has a less effective generator,
-but one that applies to all Redex models, unlike the other paper
-which applies only to models with type systems. The technical
-content is otherwise completely different, specifically the
-the enumeration in this paper and the
-goal-directed search in the other paper
-are independent and complementary.
