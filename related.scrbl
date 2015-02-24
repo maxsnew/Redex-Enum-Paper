@@ -35,7 +35,20 @@ finite sets with Feat, but are distinct from Feat in our support for
 dependent pairing and fairness. Also, Feat has only one half of the
 bijection and thus cannot support @racket[except/e] (and thus cannot
 easily support identifiers that contain all strings, except without a
-small set of keywords like we need for Redex).  @citet[scife] is similar to Feat, but with
+small set of keywords like we need for Redex).  
+
+It is tempting to think of Feat as supporting fairness because of the
+way it partitions the values to be enumerated into finite subsets,
+in such a way that the element of each finite subset has a fixed number
+of constructor. Unfortunately, this is not the same as fairness because
+Feat inserts ``dummy'' constructors in a way that makes all pairing
+operations be binary pairs. Put another way, it is not possible to 
+fairly enumerate a three-tuple of natural numbers using Feat. Feat
+can enumerate such tuples, but it effectively
+gives you an enumeration of nested pairs which is, as discussed in 
+@secref["sec:fair"], unfair.
+
+@citet[scife] is similar to Feat, but with
 the addition of a dependent combinator. Like Feat, it does not support
 @racket[except/e] or fairness.
 
@@ -55,7 +68,7 @@ elements of the set being encoded.
 context of logic programming, but talk about it in the specific cases
 of fair disjunction and fair conjunction, but they do not have a
 unification of these two different types of fairness, nor do they have
-a concept of n-ary fair operators, only binary.
+a concept of n-ary fair operators for n > 2.
 
 @section{Testing Studies}
 
