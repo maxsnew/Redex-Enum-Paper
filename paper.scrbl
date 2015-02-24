@@ -51,7 +51,7 @@
 
 @authorinfo["Jay McCarthy"
             "Vassar College"
-            "TODO@vassar_I_guess.edu"]
+            "jay.mccarthy@gmail.com"]
 
 @authorinfo["Robert Bruce Findler"
             "Northwestern University"
