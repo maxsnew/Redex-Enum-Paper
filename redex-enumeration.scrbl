@@ -86,9 +86,17 @@ Our extensions to Redex map each different pattern that can appear
 in a grammar definition into Redex. At a high-level, the correspondence
 between Redex patterns and our combinators is clear, namely recursive non-terminals map
 into uses of @racket[dep/e], alternatives map into @racket[or/e] and 
-sequences map into @racket[list/e]. Redex's pattern language is more
-general, however, and there are three forms patterns in Redex that require
-special care when enumerating.
+sequences map into @racket[list/e]. We also take care to exploit
+our library's fairness. In particular, when enumerating the pattern, 
+@racket[(λ (x : τ) e)], we do not generate list and pair patterns
+following the precise structure, which would lead to an unfair nesting.
+Instead, we generate the pattern @racket[(list/e x/e τ/e e/e)] (where
+@racket[x/e], @racket[τ/e] and @racket[e/e] correspond to the enumerators
+for those non-terminals) and then use @racket[map/e] to construct the
+actual term.
+
+Redex's pattern language is more general, however, and there are four
+issues in Redex patterns that require special care when enumerating.
 
 @paralabel{Patterns with repeated names} If the same meta-variable is used twice
 when defining a metafunction, reduction relation, or judgment form in Redex,
