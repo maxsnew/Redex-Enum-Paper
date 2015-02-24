@@ -4,3 +4,14 @@
 4. write the dang paper                     (Max + everyone)
 5. port coq model back to redex             (Robby)
 6. automated testing of coq = redex = data/enumerate (Max + Robby)
+
+- figure out what to do with this cite:
+
+@inproceedings{ppdp14tarau,
+        Address = {New York, NY, USA},
+        Author = {Tarau, Paul},
+        Booktitle = {{PPDP '14: Proceedings of the 16th international ACM SIGPLAN Symposium on Principles and Practice of Declarative Programming}},
+        Location = {Canterburry, U.K.},
+        Publisher = {ACM},
+        Title = {{ Bijective Collection Encodings and Boolean Operations with Hereditarily Binary Natural Numbers}},
+        Year = {2014}}
