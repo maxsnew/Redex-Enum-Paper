@@ -73,8 +73,8 @@
   its result. For example, extracting the
   @raw-latex{$n$}th element from our enumeration of three-tuples
   indexes about @raw-latex{$\sqrt[3]{n}$} elements into each
-  of its components instead of, say, indexing @raw-latex{$n/2$}
-  into one and @raw-latex{$n/4$} into the other two as you would 
+  of its components instead of, say, indexing @raw-latex{$\sqrt[2]{n}$}
+  into one and @raw-latex{$\sqrt[4]{n}$} into the other two as you would 
   if you build a three-tuple out of nested pairs. The paper
   develops the theory of fairness and contains proofs establishing
   fairness of our combinators and a proof that some combinations of 
