@@ -1,6 +1,7 @@
+Unset Printing Notations.
+Set Printing Depth 10000.
+
 Require Import Enum.
-Require Import String.
-Open Scope string_scope.
 
 Fixpoint show_all' (e : Enum) (hi : nat) : list Value * Trace.
   refine (match hi with
@@ -14,12 +15,15 @@ Defined.
 Definition show_all e h :=
   let (l, t) := show_all' e h
   in (List.rev l, t).
-Print show_all.
-Print show_all'.
 
-Eval compute in "trace 0 nat/e".
-Eval compute in show_all (E_Trace zero E_Nat) 25.
+Definition show_one (e : Enum) (n : nat) : Value * Trace :=
+  proj1_sig (Enumerates_from_dec e n).
 
+Eval compute in show_one (E_Trace zero E_Nat) 5.
+(*
+Eval compute in show_all (E_Pair E_Nat E_Nat) 25.
+*)
+(*
 Eval compute in "cons/e (trace 0 nat/e) (trace 1 nat/e)".
 Eval compute in show_all (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) 25.
 
@@ -39,3 +43,5 @@ Eval compute in show_all (E_Dep (E_Trace zero E_Nat)
                                        else (E_Trace two E_Nat)
                                      | _ => (E_Trace three E_Nat) (* never happens *)
                                    end)) 25.
+
+*)
