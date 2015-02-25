@@ -219,6 +219,7 @@ in the complete trace of @raw-latex{$c^k$} applied to @sr[(trace/e 1 enum_1)]
 to @sr[enum_k], is a function that maps each number between @sr[1] and @sr[k]
 to exactly the same set of numbers. Any other combinator is unfair.
 
+@include-section["fair-union.scrbl"]
+
 @include-section["fair-tuple.scrbl"]
 
-@include-section["fair-union.scrbl"]
