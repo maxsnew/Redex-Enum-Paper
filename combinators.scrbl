@@ -69,21 +69,20 @@ The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
 n-dimensional grid. We discuss this in detail in @secref["sec:fair"].
 
-The disjoint union enumerator, @racket[disj-sum/e], takes two or more
-pairs of enumerators and predicates. The predicates
-must distinguish the elements of the enumerations from
-each other. The
-resulting enumeration alternates between the input
-enumerations, so that if given @racket[n] infinite
-enumerations, the resulting enumeration will alternate
-through each of the enumerations every @racket[n] positions.
-For example, the following is the beginning of the disjoint
-sum of an enumeration of natural numbers and an enumeration
-of strings:
+The disjoint union enumerator, @racket[or/e], takes two or more
+enumerators. The resulting enumeration alternates between the input
+enumerations, so that if given @racket[n] infinite enumerations, the
+resulting enumeration will alternate through each of the enumerations
+every @racket[n] positions.  For example, the following is the
+beginning of the disjoint union of an enumeration of natural numbers
+and an enumeration of strings:
+
 @enum-example[(or/e natural/e string/e)
               14]
-We generalize this combinator and describe it in detail in
-@secref["sec:fair"] as well.
+
+The contracts associated with the enumerators are used to determine
+which enumeration a value came from.  We describe the ordering
+in detail in @secref["sec:fair"].
               
 The combinator
 @racket[delay/e] facilitates fixed points of enumerators,
