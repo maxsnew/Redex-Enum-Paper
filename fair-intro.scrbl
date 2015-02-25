@@ -148,7 +148,7 @@ spend lots of time trying out different variables because most
 models are sensitive only to when variables differ from 
 each other, not their exact spelling. Accordingly unfairly
 biasing our enumerators away from different variables 
-can be win for finding bugs. Overall, however, it is important
+can be a win for finding bugs. Overall, however, it is important
 that we do have a fair set of combinators that correspond
 to the way that Redex programs are constructed and then when
 Redex programs are compiled into the combinators, the compilation

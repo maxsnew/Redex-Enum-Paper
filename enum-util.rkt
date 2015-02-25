@@ -22,7 +22,7 @@
     (or/e a (or/e b c)))
   (gen-table bad-disj-sum/e 8 16 40 6 #:arrows? #t))
 
-(define (gen-table disj-sum/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows?)
+(define (gen-table or/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows?)
   (define x-count 3)
   (define width (* size-per-cell x-count))
   (define height (* size-per-cell y-count))

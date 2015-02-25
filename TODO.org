@@ -7,7 +7,7 @@
      1. [ ] writeup of bounded-list/e                (Max)
      2. [ ] rewrite fairness section                 (Max)
      3. [X] redex ambiguity                          (Robby)
-     4. [ ] Fix Figure 3 (both sides are fair)
+     4. [X] Fix Figure 3 (both sides are fair)
      5. [ ] figure out what to do with this cite:
 
 @inproceedings{ppdp14tarau,
