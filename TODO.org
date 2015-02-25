@@ -1,11 +1,14 @@
-1. Model extension for trinary combinators  (Max)
-2. writeup of bounded-list/e                (Max)
-3. redex ambiguity                          (Robby)
-4. write the dang paper                     (Max + everyone)
-5. port coq model back to redex             (Robby)
-6. automated testing of coq = redex = data/enumerate (Max + Robby)
-
-- figure out what to do with this cite:
+* TODO
+  1. [X] Model extension for trinary combinators
+  2. [X] port coq model back to redex             (Robby)
+  3. [ ] automated testing of coq = redex = data/enumerate (Max + Robby)
+  4. [ ] New benchmarks (Burke)
+  5. [-] write the dang paper                     (Max + everyone)
+     1. [ ] writeup of bounded-list/e                (Max)
+     2. [ ] rewrite fairness section                 (Max)
+     3. [X] redex ambiguity                          (Robby)
+     4. [ ] Fix Figure 3 (both sides are fair)
+     5. [ ] figure out what to do with this cite:
 
 @inproceedings{ppdp14tarau,
         Address = {New York, NY, USA},
