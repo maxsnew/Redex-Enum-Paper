@@ -14,7 +14,7 @@
 @title{Fair Tupling}
 @;{TODO: talk about finite vs infinite}
 
-The combinatorically-inclined reader may have noticed in our
+The combinatorially-inclined reader may have noticed in our
 description of @racket[cons/e] that we did not use the classic Cantor
 pairing function for our bijection, which can be interpreted as a more
 triangular grid walk:@centered{@cantor-cons-pict[]}
