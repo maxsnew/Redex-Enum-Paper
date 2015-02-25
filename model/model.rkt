@@ -3,7 +3,11 @@
          pict
          (prefix-in : data/enumerate/lib))
 
-(provide semantics-figure sr L)
+(provide semantics-figure
+         sr L to-enum
+         (contract-out
+          [from-nat+trace
+           (-> e? exact-nonnegative-integer? (values v? T?))]))
 
 (define-language L
   (e ::= 
@@ -30,6 +34,9 @@
      (mult natural)
      (mult (/ natural))
      produce-map/e-natural/e-with-add-of-given-int))
+(define e? (redex-match L e))
+(define T? (redex-match L T))
+(define v? (redex-match L v))
 
 (define-judgment-form L
   #:mode (@ I I O O)
@@ -194,12 +201,37 @@
   [(to-val n) n]
   [(to-val (cons v_1 v_2)) ,(cons (term (to-val v_1)) (term (to-val v_2)))])
 
+(define (to-trace orig-T)
+  (let loop ([T orig-T])
+    (match T
+      [`∅ (hash)]
+      [`(,n1 ↦ (,n2 ...) ,T)
+       (define ht (loop T))
+       (when (hash-ref ht n1 #f)
+         (error 'get-trace "got multiple mappings of ~a for ~s" n1 orig-T))
+       (unless (equal? (remove-duplicates n2) n2)
+         (error 'get-trace "not a set @ ~a for ~s" n1 orig-T))
+       (hash-set ht n1 (apply set n2))])))
+
 (define (try-one e n)
   (define enum (term (to-enum ,e)))
   (define ans (judgment-holds (@ ,e ,n v T) (to-val v)))
   (and (pair? ans) 
        (null? (cdr ans))
        (equal? (car ans) (:from-nat enum n))))
+
+(define (from-nat+trace e i)
+  (define trs (judgment-holds (@ ,e ,i v T) (v T)))
+  (unless (and (pair? trs) (= 1 (length trs)))
+    (error 'get-trace "got bad judgment-form result ~s" trs))
+  (define ht (make-hash))
+  (define T (cadr (car trs)))
+  (define v (car (car trs)))
+  (values (term (to-val ,v)) (to-trace T)))
+
+(define (get-trace e i)
+  (define-values (val trace) (from-nat+trace e i))
+  trace)
 
 (define (w/rewriters/proc thunk)
   
@@ -408,21 +440,6 @@
   (try-many (term (map/e (add 1) (add -1) natural/e)))
   (try-many (term (dep/e natural/e produce-map/e-natural/e-with-add-of-given-int)))
   (try-many (term (trace/e 0 natural/e)))
-  
-  (define (get-trace e i)
-    (define trs (judgment-holds (@ ,e ,i v T) T))
-    (unless (and (pair? trs) (= 1 (length trs)))
-      (error 'get-trace "got bad judgment-form result ~s" trs))
-    (define ht (make-hash))
-    (let loop ([T (car trs)])
-      (match T
-        [`∅ (hash)]
-        [`(,n1 ↦ (,n2 ...) ,T)
-         (when (hash-ref ht n1 #f)
-           (error 'get-trace "got multiple mappings of ~a for ~s" n1 e))
-         (unless (equal? (remove-duplicates n2) n2)
-           (error 'get-trace "not a set @ ~a for ~s" n1 e))
-         (hash-set (loop T) n1 (apply set n2))])))
   
   (check-equal? (get-trace (term natural/e) 0) (hash))
   (check-equal? (get-trace (term (trace/e 0 natural/e)) 0) (hash 0 (set 0)))
