@@ -37,6 +37,7 @@
       [((test-case redex-e orig-n val) 
         (coq-pair (coq-pair coq-v coq-trace)
                   (coq-pair coq-n _coq-backwards-trace)))
+       (define-values (redex-v redex-trace) (m:from-nat+trace redex-e orig-n))
        (define (fail fmt-str . args)
          (eprintf "FAILED:\n enum: ~s\n n: ~s\n val: ~s\n ~a\n\n"
                   redex-e 
@@ -46,7 +47,13 @@
        (unless (equal? orig-n coq-n)
          (fail "different nats; coq-n ~a" coq-n))
        (unless (equal? coq-v val)
-         (fail "different values; coq-v ~a" coq-v))])))
+         (fail "different values; coq-v ~a" coq-v))
+       (unless (equal? redex-v val)
+         (fail "different values; redex-v ~a" redex-v))
+       (unless (equal? coq-trace redex-trace)
+         (fail "different traces:\n    coq ~s\n  redex ~s" 
+               coq-trace
+               redex-trace))])))
 
 (define coq-prefix
   @list{Unset Printing Notations.
@@ -86,10 +93,30 @@
             (o "(E_Map ")
             (match* (f1 f2)
               [(`(add ,i1) `(add ,i1)) 1]
-              [(_ _) 2])]))
-       
+              [(_ _) 2])]
+           [`(trace/e ,i ,e)
+            (o "(E_Trace ")
+            (o (match i
+                 [0 "zero"]
+                 [1 "one"]
+                 [2 "two"]
+                 [3 "three"]))
+            (o " ")
+            (o-enum e)
+            (o ")")]))
+
        (define (o-v e v)
          (match* (e v)
+           [(`natural/e (? number?))
+            (o (format "(V_Nat ~a)" v))]
+           [(`(cons/e ,e1 ,e2) (cons a b))
+            (o "(V_Pair ")
+            (o-v e1 a)
+            (o " ")
+            (o-v e2 b)
+            (o ")")]
+           ;; map goes here
+           ;; dep goes here
            [(`(or/e ,e1 ,e2) (cons 0 b))
             (o "(V_Sum_Left ")
             (o-v e1 b)
@@ -98,14 +125,8 @@
             (o "(V_Sum_Right ")
             (o-v e2 b)
             (o ")")]
-           [(`(cons/e ,e1 ,e2) (cons a b))
-            (o "(V_Pair ")
-            (o-v e1 a)
-            (o " ")
-            (o-v e2 b)
-            (o ")")]
-           [(`natural/e (? number?))
-            (o (format "(V_Nat ~a)" v))]))
+           [(`(trace/e ,i ,e) v)
+            (o-v e v)]))
        
        (for ([a-run (in-list test-cases)])
          (match a-run
@@ -187,7 +208,11 @@
        (for/hash ([t (in-list ts)]
                   [i (in-naturals)]
                   #:unless (coq-null? t))
-         (values i (loop t)))]
+         (define nums (loop t))
+         (values i
+                 (if (list? nums)
+                     (apply set nums)
+                     nums)))]
       [`(S ,n) (+ (loop n) 1)]
       [`O 0]
       [`(Some ,v) (loop v)]
@@ -205,4 +230,11 @@
 (run-tests
  (build-test-cases 'natural/e 100)
  (build-test-cases '(cons/e natural/e natural/e) 100)
- (build-test-cases '(or/e natural/e natural/e) 100))
+ (build-test-cases '(or/e natural/e natural/e) 100)
+ (build-test-cases '(cons/e (cons/e (trace/e 0 natural/e)
+                                    (trace/e 1 natural/e))
+                            (cons/e (trace/e 2 natural/e)
+                                    (trace/e 3 natural/e)))
+                   100))
+
+    ;; missing map/e, dep/e ...

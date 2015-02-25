@@ -8,7 +8,10 @@
          e? T? v?
          (contract-out
           [from-nat+trace
-           (-> e? exact-nonnegative-integer? (values v? T?))]))
+           (-> e? exact-nonnegative-integer? 
+               (values any/c
+                       (hash/c exact-nonnegative-integer?
+                               (set/c exact-nonnegative-integer?))))]))
 
 (define-language L
   (e ::= 
