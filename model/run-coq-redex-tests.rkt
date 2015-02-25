@@ -1,9 +1,9 @@
 #lang at-exp racket
 
-(require "model.rkt" 
+(require (prefix-in m: "model.rkt" )
          racket/runtime-path
          redex/reduction-semantics
-         (prefix-in : data/enumerate/lib))
+         (prefix-in d: data/enumerate/lib))
 
 ;; this file gets overwritten
 (define-runtime-path scratch.v "scratch.v")
@@ -18,15 +18,15 @@
 
 (struct test-case (e n v) #:transparent)
 
-;; build-test-cases : enum[redex-model-term] nat -> (listof test-case?)
 ;; builds a list of test cases for the nats up to `n'
-(define (build-test-cases e n)
+(define/contract (build-test-cases e n)
+  (-> m:e? exact-nonnegative-integer? (listof test-case?))
   (for/list ([i (in-range n)])
     (build-test-case e i)))
 
   ;; build-test-case : enum[redex-model-term] nat -> test-case?
 (define (build-test-case e n)
-  (test-case e n (:from-nat (term (to-enum ,e)) n)))
+  (test-case e n (d:from-nat (term (m:to-enum ,e)) n)))
 
 (define (run-tests . arg-test-cases) 
   (define test-cases (flatten arg-test-cases))
@@ -90,11 +90,11 @@
        
        (define (o-v e v)
          (match* (e v)
-           [(`(sum/e ,e1 ,e2) (cons 0 b))
+           [(`(or/e ,e1 ,e2) (cons 0 b))
             (o "(V_Sum_Left ")
             (o-v e1 b)
             (o ")")]
-           [(`(sum/e ,e1 ,e2) (cons 1 b))
+           [(`(or/e ,e1 ,e2) (cons 1 b))
             (o "(V_Sum_Right ")
             (o-v e2 b)
             (o ")")]
@@ -204,4 +204,5 @@
 
 (run-tests
  (build-test-cases 'natural/e 100)
- (build-test-cases '(cons/e natural/e natural/e) 100))
+ (build-test-cases '(cons/e natural/e natural/e) 100)
+ (build-test-cases '(or/e natural/e natural/e) 100))

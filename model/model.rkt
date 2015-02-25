@@ -5,6 +5,7 @@
 
 (provide semantics-figure
          sr L to-enum
+         e? T? v?
          (contract-out
           [from-nat+trace
            (-> e? exact-nonnegative-integer? (values v? T?))]))
