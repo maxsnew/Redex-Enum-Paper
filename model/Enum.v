@@ -334,7 +334,7 @@ Hint Resolve Pairing_to_sound.
 Hint Resolve Pairing_from_sound.
 
 Notation set' := (set nat).
-Notation empty_set' := (@empty_set nat).
+Notation "∅" := (@empty_set nat).
 Notation set_union' := (@set_union nat eq_nat_dec).
 Notation set_add' := (@set_add nat eq_nat_dec).
 Section Sets.
@@ -641,7 +641,7 @@ Section Sets.
     apply set_add_cons_eq.
   Qed.
 
-  Lemma set_union_unitl : forall s, set_eq (set_union' empty_set' s) s.
+  Lemma set_union_unitl : forall s, set_eq (set_union' ∅ s) s.
   Proof.
     split.
     induction s.
@@ -653,8 +653,8 @@ Section Sets.
                  match y with
                    | nil => x
                    | a1 :: y1 => set_add eq_nat_dec a1 (set_union x y1)
-                 end) empty_set' s
-            )) with (set_union' empty_set' s) in * by auto.
+                 end) ∅ s
+            )) with (set_union' ∅ s) in * by auto.
     fold set_add'.
     apply set_add_subset; auto.
     constructor; auto.
@@ -666,7 +666,7 @@ Section Sets.
     apply set_add_cons_subset; auto.
   Qed.
 
-  Lemma set_union_unitr : forall s, set_eq (set_union' s empty_set') s.
+  Lemma set_union_unitr : forall s, set_eq (set_union' s ∅) s.
   Proof.
     apply set_eq_refl.
   Qed.
@@ -893,8 +893,8 @@ Section Sets.
     apply set_union_app_eq.
   Qed.
 
-  Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 empty_set'))
-                                (set_add' 0 (set_add' 1 empty_set'))).
+  Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 ∅))
+                                (set_add' 0 (set_add' 1 ∅))).
   Proof.
     compute.
     tauto.
@@ -950,7 +950,7 @@ Section Sets.
   
   Fixpoint z_to_n n : set nat :=
     match n with
-      | 0 => empty_set'
+      | 0 => ∅
       | S n' => set_add' n' (z_to_n n')
     end.
 
@@ -1055,7 +1055,7 @@ Section Traces.
     end.
 
 
-  Definition trace_zero : Trace := Tracing empty_set' empty_set' empty_set' empty_set'.
+  Definition trace_zero : Trace := Tracing ∅ ∅ ∅ ∅.
   Definition trace_plus (t1 t2 : Trace) : Trace :=
     match (t1, t2) with
       | (Tracing l1 l2 l3 l4, Tracing r1 r2 r3 r4) =>
@@ -1068,10 +1068,10 @@ Section Traces.
 
   Definition trace_one n t : Trace :=
     match t with
-      | zero  => Tracing (set_add' n empty_set') empty_set' empty_set' empty_set'
-      | one   => Tracing empty_set' (set_add' n empty_set') empty_set' empty_set'
-      | two   => Tracing empty_set' empty_set' (set_add' n empty_set') empty_set'
-      | three => Tracing empty_set' empty_set' empty_set' (set_add' n empty_set')
+      | zero  => Tracing (set_add' n ∅) ∅ ∅ ∅
+      | one   => Tracing ∅ (set_add' n ∅) ∅ ∅
+      | two   => Tracing ∅ ∅ (set_add' n ∅) ∅
+      | three => Tracing ∅ ∅ ∅ (set_add' n ∅)
     end.
 
   Definition trace_eq (t1 t2 : Trace) : Prop :=
@@ -1817,7 +1817,7 @@ Section EnumTrace.
     reflexivity.
   Qed.
 
-  Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = empty_set'.
+  Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = ∅.
   Proof.
     rewrite Trace_nat.
     compute.
@@ -1909,7 +1909,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_Nat_off m n tg1 tg2
   : tg1 <> tg2 ->
-    (trace_proj tg1 (Trace_from_to (E_Trace tg2 E_Nat) m n)) = empty_set'.
+    (trace_proj tg1 (Trace_from_to (E_Trace tg2 E_Nat) m n)) = ∅.
   Proof.
     intros Hdiff.
     assert (sub_trace (Trace_from_to (E_Trace tg2 E_Nat) m n) (Trace_lt (E_Trace tg2 E_Nat) n)).
@@ -1921,9 +1921,9 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_on_Pair_off tg e1 e2 m
-  : (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
-    -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
-    -> trace_proj tg (Trace_on (E_Pair e1 e2) m) = empty_set'.
+  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+    -> trace_proj tg (Trace_on (E_Pair e1 e2) m) = ∅.
   Proof.
     intros.
     unfold Trace_on.
@@ -1939,9 +1939,9 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_lt_Pair_off tg e1 e2 m
-  : (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
-    -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
-    -> trace_proj tg (Trace_lt (E_Pair e1 e2) m) = empty_set'.
+  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+    -> trace_proj tg (Trace_lt (E_Pair e1 e2) m) = ∅.
   Proof.
     induction m; [intros; destruct tg; reflexivity|].
     intros H1 H2.
@@ -1954,9 +1954,9 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_on_Sum_off tg e1 e2 m
-  : (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
-    -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
-    -> trace_proj tg (Trace_on (E_Sum e1 e2) m) = empty_set'.
+  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+    -> trace_proj tg (Trace_on (E_Sum e1 e2) m) = ∅.
   Proof.
     intros Hl Hr; unfold Trace_on;
     remember (Enumerates_from_dec _ _) as x; destruct x as [[v t] Henum]; simpl;
@@ -1964,9 +1964,9 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_lt_Sum_off tg e1 e2 m
-  : (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
-    -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
-    -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = empty_set'.
+  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+    -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = ∅.
   Proof.
     induction m; [intros; compute; destruct tg; trivial|];
     intros; unfold Trace_lt; fold Trace_lt; rewrite trace_proj_plus_distrl;
@@ -2491,14 +2491,14 @@ Section Fairness.
     Lemma PairNN_layer :
       forall n,
         trace_eq (Trace_from_to E_PairNN (n * n) (S n * S n))
-                 (Tracing (z_to_n (S n)) (z_to_n (S n)) empty_set' empty_set').
+                 (Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅).
     Proof.
       intros n.
       eapply trace_eq_trans.
       unfold E_PairNN; apply Pair_layer.
       apply trace_eq_symm.
-      apply trace_eq_trans with ((Tracing (z_to_n (S n)) empty_set' empty_set' empty_set')
-                                   +++ (Tracing empty_set' (z_to_n (S n)) empty_set' empty_set')).
+      apply trace_eq_trans with ((Tracing (z_to_n (S n)) ∅ ∅ ∅)
+                                   +++ (Tracing ∅ (z_to_n (S n)) ∅ ∅)).
       remember (S n) as k; unfold trace_plus; split4; auto; apply set_eq_symm; apply set_union_unitl.
       apply trace_plus_cong; rewrite trace_proj_reconstruct.
       split4; [ apply trace_lt_Nat | | | ]; rewrite trace_lt_Nat_off by discriminate; auto.
@@ -2532,18 +2532,18 @@ Section Fairness.
     Qed.
 
     Lemma Pair_Fair_precise :
-      forall n, trace_eq (Trace_lt E_PairNN (n * n)) (Tracing (z_to_n n) (z_to_n n) empty_set' empty_set').
+      forall n, trace_eq (Trace_lt E_PairNN (n * n)) (Tracing (z_to_n n) (z_to_n n) ∅ ∅).
     Proof.
       induction n.
       compute; tauto.
       apply trace_eq_trans
       with (t2 := ((Trace_lt E_PairNN (n * n)) +++ (Trace_from_to E_PairNN (n * n) (S n * S n)))).
       apply trace_from_to_0_split; nliamega.
-      apply trace_eq_trans with (t2 := ((Tracing (z_to_n n) (z_to_n n) empty_set' empty_set')
-                                        +++ (Tracing (z_to_n (S n)) (z_to_n (S n)) empty_set' empty_set'))).
+      apply trace_eq_trans with (t2 := ((Tracing (z_to_n n) (z_to_n n) ∅ ∅)
+                                        +++ (Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅))).
       apply trace_plus_cong; auto.
       apply PairNN_layer.
-      apply trace_eq_trans with (t2 := (Tracing (z_to_n (S n)) (z_to_n (S n))) empty_set' empty_set').
+      apply trace_eq_trans with (t2 := (Tracing (z_to_n (S n)) (z_to_n (S n))) ∅ ∅).
       unfold trace_eq.
       split4;
         [ (apply subset_union_eq; unfold z_to_n at 2; fold z_to_n; apply set_subset_add; apply subset_refl)
