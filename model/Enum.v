@@ -15,7 +15,7 @@ Sets
 
 Traces
 ε \epsilon
-⊕ \oplus
+⊔ \sqcup
 ⊏ \sqsubset
 ≡ \equiv
 *)
@@ -1067,14 +1067,14 @@ Section Traces.
         end
     end.
 
-
   Definition trace_zero : Trace := Tracing ∅ ∅ ∅ ∅.
+  Notation ε := trace_zero.
   Definition trace_plus (t1 t2 : Trace) : Trace :=
     match (t1, t2) with
       | (Tracing l1 l2 l3 l4, Tracing r1 r2 r3 r4) =>
         Tracing (l1 ∪ r1) (l2 ∪ r2) (l3 ∪ r3) (l4 ∪ r4)
     end.
-  Notation "x ⊕ y" := (trace_plus x y) (at level 50).
+  Notation "x ⊔ y" := (trace_plus x y) (at level 50).
 
   Definition trace_one n t : Trace :=
     match t with
@@ -1099,20 +1099,21 @@ Section Traces.
       | (Tracing l0 l1 l2 l3, Tracing r0 r1 r2 r3) =>
         l0 ⊂ r0 /\ l1 ⊂ r1 /\ l2 ⊂ r2 /\ l3 ⊂ r3
     end.
+  Notation "t1 ⊏ t2" := (sub_trace t1 t2) (at level 70, no associativity).
 
-  Theorem sub_trace_refl t : sub_trace t t.
+  Theorem sub_trace_refl t : t ⊏ t.
   Proof.
     unfold sub_trace; destruct t; split4; apply subset_refl.
   Qed.
 
-  Theorem sub_trace_trans t1 t2 t3 : sub_trace t1 t2 -> sub_trace t2 t3 -> sub_trace t1 t3.
+  Theorem sub_trace_trans t1 t2 t3 : t1 ⊏ t2 -> t2 ⊏ t3 -> t1 ⊏ t3.
   Proof.
     unfold sub_trace; destruct t1, t2, t3.
     intros H1 H2; destruct4 H1; destruct4 H2.
     split4; eapply subset_trans; eauto.
   Qed.
 
-  Theorem sub_trace_zero t : sub_trace trace_zero t.
+  Theorem sub_trace_zero t : ε ⊏ t.
   Proof. destruct t; compute; tauto. Qed.
 
   Theorem trace_eq_proj t1 t2 tg : t1 ≡ t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
@@ -1120,16 +1121,16 @@ Section Traces.
     unfold trace_eq, trace_proj; destruct t1; destruct t2; destruct tg; intuition.
   Qed.
 
-  Theorem sub_trace_proj t1 t2 tg : sub_trace t1 t2 -> (trace_proj tg t1) ⊂ (trace_proj tg t2).
+  Theorem sub_trace_proj t1 t2 tg : t1 ⊏ t2 -> (trace_proj tg t1) ⊂ (trace_proj tg t2).
   Proof.
     unfold sub_trace; destruct t1; destruct t2; destruct tg; intuition.
   Qed.
 
   Definition trace_eq' t1 t2 : Prop :=
-    sub_trace t1 t2 /\ sub_trace t2 t1.
-  Theorem trace_eq'_weakenl t1 t2 : trace_eq' t1 t2 -> sub_trace t1 t2.
+    t1 ⊏ t2 /\ t2 ⊏ t1.
+  Theorem trace_eq'_weakenl t1 t2 : trace_eq' t1 t2 -> t1 ⊏ t2.
   Proof. unfold trace_eq'; intuition. Qed.
-  Theorem trace_eq'_weakenr t1 t2 : trace_eq' t1 t2 -> sub_trace t2 t1.
+  Theorem trace_eq'_weakenr t1 t2 : trace_eq' t1 t2 -> t2 ⊏ t1.
   Proof. unfold trace_eq'; intuition. Qed.
   Theorem trace_eq_eq'_equiv t1 t2 : t1 ≡ t2 <-> trace_eq' t1 t2.
   Proof.
@@ -1137,13 +1138,13 @@ Section Traces.
     destruct t1; destruct t2; intuition.
   Qed.
 
-  Theorem trace_eq_weakenl t1 t2 : t1 ≡ t2 -> sub_trace t1 t2.
+  Theorem trace_eq_weakenl t1 t2 : t1 ≡ t2 -> t1 ⊏ t2.
   Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenl. Qed.
 
-  Theorem trace_eq_weakenr t1 t2 : t1 ≡ t2 -> sub_trace t2 t1.
+  Theorem trace_eq_weakenr t1 t2 : t1 ≡ t2 -> t2 ⊏ t1.
   Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenr. Qed.
 
-  Theorem trace_plus_cong t1 t2 t3 t4 : t1 ≡ t3 -> t2 ≡ t4 -> (t1 ⊕ t2) ≡ (t3 ⊕ t4).
+  Theorem trace_plus_cong t1 t2 t3 t4 : t1 ≡ t3 -> t2 ≡ t4 -> (t1 ⊔ t2) ≡ (t3 ⊔ t4).
     unfold trace_eq.
     destruct t1; destruct t2; destruct t3; destruct t4.
     unfold trace_plus.
@@ -1175,15 +1176,14 @@ Section Traces.
     split4; eapply set_eq_trans; eauto.
   Qed.
 
-  Theorem trace_plus_comm t1 t2 : (t1 ⊕ t2) ≡ (t2 ⊕ t1).
+  Theorem trace_plus_comm t1 t2 : (t1 ⊔ t2) ≡ (t2 ⊔ t1).
   Proof.
     destruct t1, t2.
     unfold trace_plus.
     split4; apply set_eq_union_comm.
   Qed.
 
-  Theorem trace_plus_assoc t1 t2 t3 : (t1 ⊕ (t2 ⊕ t3)) ≡
-                                               ((t1 ⊕ t2) ⊕ t3).
+  Theorem trace_plus_assoc t1 t2 t3 : (t1 ⊔ (t2 ⊔ t3)) ≡ ((t1 ⊔ t2) ⊔ t3).
   Proof.
     destruct t1, t2, t3.
     unfold trace_plus.
@@ -1191,14 +1191,14 @@ Section Traces.
   Qed.
 
   Theorem sub_trace_plus_transl t tl tr
-  : sub_trace t tl -> sub_trace t (tl ⊕ tr).
+  : t ⊏ tl -> t ⊏ (tl ⊔ tr).
   Proof.
     intros H; destruct t; destruct tl; destruct tr;
     destruct4 H; split4; apply subset_union_transl; auto.
   Qed.
 
   Theorem sub_trace_plus_transr t tl tr
-  : sub_trace t tr -> sub_trace t (tl ⊕ tr).
+  : t ⊏ tr -> t ⊏ (tl ⊔ tr).
   Proof.
     intros H.
     eapply sub_trace_trans.
@@ -1208,20 +1208,18 @@ Section Traces.
     apply sub_trace_plus_transl; auto.
   Qed.
 
-  Theorem sub_trace_plus_eq : forall t1 t2, sub_trace t1 t2 -> (t1 ⊕ t2) ≡ t2.
+  Theorem sub_trace_plus_eq : forall t1 t2, t1 ⊏ t2 -> (t1 ⊔ t2) ≡ t2.
   Proof.
     intros t1 t2 H; destruct t1; destruct t2;
       destruct4 H; split4; apply subset_union_eq; auto.
   Qed.
 
-  Theorem trace_plus_unitl t :
-    (trace_zero ⊕ t) ≡ t.
+  Theorem trace_plus_unitl t : (ε ⊔ t) ≡ t.
   Proof.
     destruct t; split4; apply set_union_unitl.
   Qed.
 
-  Theorem trace_plus_unitl_gen t1 t2 :
-    t1 ≡ t2 -> (trace_zero ⊕ t1) ≡ t2.
+  Theorem trace_plus_unitl_gen t1 t2 : t1 ≡ t2 -> (ε ⊔ t1) ≡ t2.
   Proof.
     intros H.
     eapply trace_eq_trans; [ apply trace_plus_unitl | auto].
@@ -1229,24 +1227,23 @@ Section Traces.
 
 
   Theorem trace_plus_unitr t :
-    (t ⊕ trace_zero) ≡ t.
+    (t ⊔ ε) ≡ t.
   Proof.
     eapply trace_eq_trans;
     [apply trace_plus_comm| apply trace_plus_unitl].
   Qed.
 
 
-  Theorem trace_plus_unitr_gen t1 t2 :
-    t1 ≡ t2 -> (t1 ⊕ trace_zero) ≡ t2.
+  Theorem trace_plus_unitr_gen t1 t2 : t1 ≡ t2 -> (t1 ⊔ ε) ≡ t2.
   Proof.
     intros H.
     eapply trace_eq_trans; [ apply trace_plus_unitr | auto].
   Qed.
 
   Theorem sub_trace_plus_cong tl1 tr1 tl2 tr2 : 
-  sub_trace tl1 tl2
-  -> sub_trace tr1 tr2
-  -> sub_trace (tl1 ⊕ tr1) (tl2 ⊕ tr2).
+  tl1 ⊏ tl2
+  -> tr1 ⊏ tr2
+  -> (tl1 ⊔ tr1) ⊏ (tl2 ⊔ tr2).
   Proof.
     unfold sub_trace, trace_plus.
     destruct tl1; destruct tl2; destruct tr1; destruct tr2.
@@ -1262,7 +1259,7 @@ Section Traces.
   Qed.
 
   Theorem sub_trace_In_equiv t1 t2
-  : sub_trace t1 t2 
+  : t1 ⊏ t2 
     <-> 
     (forall x tg, set_In x (trace_proj tg t1) -> set_In x (trace_proj tg t2)).
   Proof.
@@ -1273,7 +1270,7 @@ Section Traces.
   Qed.
 
   Theorem sub_trace_In_util t1 t2 x tg
-  : sub_trace t1 t2 
+  : t1 ⊏ t2 
     -> set_In x (trace_proj tg t1)
     -> set_In x (trace_proj tg t2).
   Proof.
@@ -1284,8 +1281,10 @@ Section Traces.
   Qed.
 
 End Traces.
-Notation "x ⊕ y" := (trace_plus x y) (at level 50).
+Notation ε := trace_zero.
+Notation "x ⊔ y" := (trace_plus x y) (at level 50).
 Notation "t1 ≡ t2" := (trace_eq t1 t2) (at level 70, no associativity).
+Notation "t1 ⊏ t2" := (sub_trace t1 t2) (at level 70, no associativity).
 Hint Resolve trace_eq_refl.
 Hint Resolve sub_trace_refl.
 
@@ -1293,13 +1292,13 @@ Section Enumerates.
   Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
   | ES_Nat :
       forall n,
-        Enumerates E_Nat n (V_Nat n) trace_zero
+        Enumerates E_Nat n (V_Nat n) ε
   | ES_Pair :
       forall l r n ln rn lx rx lt rt,
         Pairing n ln rn ->
         Enumerates l ln lx lt ->
         Enumerates r rn rx rt ->
-        Enumerates (E_Pair l r) n (V_Pair lx rx) (lt ⊕ rt)
+        Enumerates (E_Pair l r) n (V_Pair lx rx) (lt ⊔ rt)
   | ES_Map :
       forall bi inner inner_x n x t,
         Bijects bi x inner_x ->
@@ -1310,7 +1309,7 @@ Section Enumerates.
         Pairing n ln rn ->
         Enumerates l ln lx lt ->
         Enumerates (f lx) rn rx rt ->
-        Enumerates (E_Dep l f) n (V_Pair lx rx) (lt ⊕ rt)
+        Enumerates (E_Dep l f) n (V_Pair lx rx) (lt ⊔ rt)
   | ES_Sum_Left:
       forall l r n ln lx t,
         n = 2 * ln ->
@@ -1496,7 +1495,7 @@ Section Enumerates.
     try ( right; intros _n _t E; inversion E; fail ).
 
     (* E_Nat *)
-    - left; exists (n, trace_zero); constructor.
+    - left; exists (n, ε); constructor.
 
     (* E_Pair *)
     - rename x1 into lx. rename x2 into rx.
@@ -1505,7 +1504,7 @@ Section Enumerates.
       destruct (IHe2 rx) as [[[rn rt] ER] | RF].
       left.
       destruct (Pairing_to_dec ln rn) as [n P].
-      exists (n, lt ⊕ rt).
+      exists (n, lt ⊔ rt).
       eauto.
 
       right. intros _n _t E; inversion E; subst.
@@ -1519,7 +1518,7 @@ Section Enumerates.
       destruct (X x1 x2) as [[[rn rt] ER] | RF].
       left.
       destruct (Pairing_to_dec ln rn) as [n P].
-      exists (n, lt ⊕ rt).
+      exists (n, lt ⊔ rt).
       eauto.
 
       right. intros _n _t E; inversion E; subst.
@@ -1586,7 +1585,7 @@ Section Enumerates.
     induction e; intros n; eauto.
 
     (* E_Nat *)
-    - exists (V_Nat n, trace_zero); eauto.
+    - exists (V_Nat n, ε); eauto.
 
     (* E_pair *)
     - rename e1 into l. rename e2 into r.
@@ -1594,7 +1593,7 @@ Section Enumerates.
       destruct PF as [ln rn].
       destruct (IHe1 ln) as [[lx lt] EL].
       destruct (IHe2 rn) as [[rx rt] ER].
-      exists (V_Pair lx rx, lt ⊕ rt).
+      exists (V_Pair lx rx, lt ⊔ rt).
       eauto.
 
     (* E_Map *)
@@ -1608,7 +1607,7 @@ Section Enumerates.
       destruct PF as [ln rn].
       destruct (IHe ln) as [[lx lt] EL].
       destruct (X lx rn) as [[rx rt] ER].
-      exists (V_Pair lx rx, lt ⊕ rt). eauto.
+      exists (V_Pair lx rx, lt ⊔ rt). eauto.
 
     (* E_Sum *)
     - destruct (even_odd_dec n) as [Hev | Hodd].
@@ -1643,16 +1642,16 @@ Section EnumTrace.
 
   Fixpoint Trace_lt (e : Enum) n : Trace :=
     match n with
-      | 0 => trace_zero
-      | S n' => (Trace_on e n') ⊕ (Trace_lt e n')
+      | 0 => ε
+      | S n' => (Trace_on e n') ⊔ (Trace_lt e n')
     end.
 
   Fixpoint Trace_from_to e lo hi : Trace :=
     if le_lt_dec hi lo
-    then trace_zero
+    then ε
     else match hi with
-           | 0 => trace_zero
-           | S hi' => (Trace_on e hi') ⊕ (Trace_from_to e lo hi')
+           | 0 => ε
+           | S hi' => (Trace_on e hi') ⊔ (Trace_from_to e lo hi')
          end.
 
   Theorem trace_lt_from_to_0_same e n : (Trace_lt e n) ≡ (Trace_from_to e 0 n).
@@ -1672,7 +1671,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_ge e m n
   : n <= m ->
-    Trace_from_to e m n = trace_zero.
+    Trace_from_to e m n = ε.
   Proof.
     intros H.
     unfold Trace_from_to.
@@ -1682,12 +1681,12 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_from_to_self e m 
-  : Trace_from_to e m m = trace_zero.
+  : Trace_from_to e m m = ε.
   Proof. apply trace_from_to_ge; nliamega. Qed.
 
   Theorem trace_from_to_split1r e m n
   : m <= n ->
-    (Trace_from_to e m (S n)) ≡ ((Trace_from_to e m n) ⊕ (Trace_on e n)).
+    (Trace_from_to e m (S n)) ≡ ((Trace_from_to e m n) ⊔ (Trace_on e n)).
   Proof.
     intros H.
     unfold Trace_from_to at 1.
@@ -1702,7 +1701,7 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_from_to_split1l' e m n
-  : (Trace_from_to e m (S (m + n))) ≡ ((Trace_on e m) ⊕ (Trace_from_to e (S m) (S (m + n)))).
+  : (Trace_from_to e m (S (m + n))) ≡ ((Trace_on e m) ⊔ (Trace_from_to e (S m) (S (m + n)))).
   Proof.
     generalize dependent m.
     induction n as [| n].
@@ -1750,7 +1749,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_split1l e m n
   : m < n ->
-    Trace_from_to e m n ≡ (Trace_on e m) ⊕ (Trace_from_to e (S m) n).
+    Trace_from_to e m n ≡ (Trace_on e m) ⊔ (Trace_from_to e (S m) n).
   Proof.
     intros H.
     remember (pred (n - m)) as t.
@@ -1762,7 +1761,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_split e m n p :
     (m <= n < p)
-    -> Trace_from_to e m p ≡ (Trace_from_to e m n) ⊕ (Trace_from_to e n p).
+    -> Trace_from_to e m p ≡ (Trace_from_to e m n) ⊔ (Trace_from_to e n p).
   Proof.
     generalize dependent p.
     generalize dependent m.
@@ -1783,10 +1782,10 @@ Section EnumTrace.
     apply trace_plus_unitl_gen.
     apply trace_eq_refl.
 
-    apply trace_eq_trans with ((Trace_from_to e m n) ⊕ (Trace_from_to e n p));
+    apply trace_eq_trans with ((Trace_from_to e m n) ⊔ (Trace_from_to e n p));
       [apply IHn; nliamega| ].
     apply trace_eq_trans with ((Trace_from_to e m n)
-                                 ⊕ ((Trace_on e n) ⊕ (Trace_from_to e (S n) p))).
+                                 ⊔ ((Trace_on e n) ⊔ (Trace_from_to e (S n) p))).
     apply trace_plus_cong; [apply trace_eq_refl| ].
     apply trace_from_to_split1l; nliamega.
 
@@ -1800,7 +1799,7 @@ Section EnumTrace.
   Theorem trace_from_to_0_split :
     forall m n e,
       m < n ->
-      Trace_lt e n ≡ (Trace_lt e m) ⊕ (Trace_from_to e m n).
+      Trace_lt e n ≡ (Trace_lt e m) ⊔ (Trace_from_to e m n).
   Proof.
     intros m n e Hmn.
     eapply trace_eq_trans.
@@ -1829,7 +1828,7 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_proj_plus_distrl tg t1 t2
-  : trace_proj tg (t1 ⊕ t2) = ((trace_proj tg t1) ∪ (trace_proj tg t2)).
+  : trace_proj tg (t1 ⊔ t2) = ((trace_proj tg t1) ∪ (trace_proj tg t2)).
   Proof.
     destruct t1; destruct t2; destruct tg; auto.
   Qed.
@@ -1877,7 +1876,7 @@ Section EnumTrace.
 
   Lemma sub_trace_from_tol l m n e
   : l <= m
-    -> sub_trace (Trace_from_to e m n) (Trace_from_to e l n).
+    -> (Trace_from_to e m n) ⊏ (Trace_from_to e l n).
   Proof.
     intros H; remember (m - l) as k; replace m with (l + k) by nliamega; clear dependent m.
     induction k.
@@ -1894,7 +1893,7 @@ Section EnumTrace.
   Theorem sub_trace_from_to l m n p e
   : l <= m
     -> n <= p
-    -> sub_trace (Trace_from_to e m n) (Trace_from_to e l p).
+    -> (Trace_from_to e m n) ⊏ (Trace_from_to e l p).
   Proof.
     intros Hlm Hnp.
     remember (p - n) as k; replace p with (n + k) by nliamega; clear dependent p.
@@ -1904,7 +1903,7 @@ Section EnumTrace.
     unfold Trace_from_to at 2.
     remember (le_lt_dec (S (n + k)) l) as Hlelt.
     destruct Hlelt.
-    replace (Trace_from_to e l (n + k)) with trace_zero in IHk; auto.
+    replace (Trace_from_to e l (n + k)) with ε in IHk; auto.
     symmetry.
     apply trace_from_to_ge; nliamega.
     fold Trace_from_to.
@@ -1916,7 +1915,7 @@ Section EnumTrace.
     (trace_proj tg1 (Trace_from_to (E_Trace tg2 E_Nat) m n)) = ∅.
   Proof.
     intros Hdiff.
-    assert (sub_trace (Trace_from_to (E_Trace tg2 E_Nat) m n) (Trace_lt (E_Trace tg2 E_Nat) n)).
+    assert ((Trace_from_to (E_Trace tg2 E_Nat) m n) ⊏ (Trace_lt (E_Trace tg2 E_Nat) n)).
     eapply sub_trace_trans.
     apply sub_trace_from_to with (l := 0) (p := n); try nliamega.
     apply trace_eq_weakenl; apply trace_eq_symm; apply trace_lt_from_to_0_same.
@@ -1996,7 +1995,7 @@ Section EnumTrace.
                         |
                         fold Trace_from_to in H;
                           rewrite trace_from_to_self in H;
-                          remember ((Trace_on e m) ⊕ trace_zero) as t;
+                          remember ((Trace_on e m) ⊔ ε) as t;
                           destruct t;
                           simpl in *;
                           remember (Trace_on e m) as t';
@@ -2027,7 +2026,7 @@ Section EnumTrace.
       destruct (le_lt_dec (S m) m); [apply le_Sn_n in l; contradiction|];
       fold Trace_from_to; rewrite trace_from_to_self; assert (k = m) by nliamega; subst;
 
-      remember ((Trace_on e m) ⊕ trace_zero) as t;
+      remember ((Trace_on e m) ⊔ ε) as t;
       destruct t; simpl in *;
       remember (Trace_on e m) as t';
       destruct t';
@@ -2082,7 +2081,7 @@ Section EnumTrace.
   Qed.
 
   Theorem sub_trace_plus_introl t1 t2 t3
-  : sub_trace t1 t2 -> sub_trace t1 (t2 ⊕ t3).
+  : t1 ⊏ t2 -> t1 ⊏ (t2 ⊔ t3).
   Proof.
     unfold sub_trace, trace_plus; destruct t1, t2, t3.
     intros H; destruct H as [H1 [H2 [H3 H4]]].
@@ -2091,7 +2090,7 @@ Section EnumTrace.
   Qed.
 
   Theorem sub_trace_plus_intror t1 t2 t3
-  : sub_trace t1 t3 -> sub_trace t1 (t2 ⊕ t3).
+  : t1 ⊏ t3 -> t1 ⊏ (t2 ⊔ t3).
   Proof.
     unfold sub_trace, trace_plus; destruct t1, t2, t3.
     intros H; destruct H as [H1 [H2 [H3 H4]]].
@@ -2099,14 +2098,14 @@ Section EnumTrace.
     split4; auto.
   Qed.
 
-  Theorem Trace_from_to_sub' e m n p : sub_trace (Trace_from_to e m n) (Trace_from_to e m (n + p)).
+  Theorem Trace_from_to_sub' e m n p : (Trace_from_to e m n) ⊏ (Trace_from_to e m (n + p)).
   Proof.
     induction p.
     replace (n + 0) with n by nliamega; apply sub_trace_refl.
     replace (n + S p) with (S (n + p)) by nliamega.
     unfold Trace_from_to at 2; fold Trace_from_to.
     destruct (le_lt_dec (S (n + p))).
-    replace (Trace_from_to e m n) with trace_zero; [apply sub_trace_refl|].
+    replace (Trace_from_to e m n) with ε; [apply sub_trace_refl|].
     unfold Trace_from_to.
     destruct n.
     destruct (le_lt_dec 0 m); auto.
@@ -2114,13 +2113,13 @@ Section EnumTrace.
     apply sub_trace_plus_intror; auto.
   Qed.
 
-  Theorem Trace_from_to_sub e m n p : n <= p -> sub_trace (Trace_from_to e m n) (Trace_from_to e m p).
+  Theorem Trace_from_to_sub e m n p : n <= p -> (Trace_from_to e m n) ⊏ (Trace_from_to e m p).
   Proof.
     Local Hint Resolve Trace_from_to_sub'.
     intros; replace p with (n + (p - n)) by nliamega; auto.
   Qed.
 
-  Theorem Trace_lt_sub e m n : m <= n -> sub_trace (Trace_lt e m) (Trace_lt e n).
+  Theorem Trace_lt_sub e m n : m <= n -> (Trace_lt e m) ⊏ (Trace_lt e n).
   Proof.
     intros H.
     eapply sub_trace_trans; [apply trace_eq_weakenl; apply trace_lt_from_to_0_same| ].
@@ -2131,7 +2130,7 @@ Section EnumTrace.
   Theorem Trace_lt_Enumerates m n e v t 
   : m < n
     -> Enumerates e m v t
-    -> sub_trace t (Trace_lt e n).
+    -> t ⊏ (Trace_lt e n).
   Proof.
     intros Hmn Enum.
     destruct n; [ nliamega|].
@@ -2198,7 +2197,7 @@ Section Fairness.
   Section SumFair.
     Lemma Sum_precise
     : forall n e1 e2,
-        Trace_lt (E_Sum e1 e2) (double n) ≡ (Trace_lt e1 n) ⊕ (Trace_lt e2 n).
+        Trace_lt (E_Sum e1 e2) (double n) ≡ (Trace_lt e1 n) ⊔ (Trace_lt e2 n).
     Proof.
       intros n e1 e2.
       induction n.
@@ -2362,7 +2361,7 @@ Section Fairness.
     Lemma SumSum_precise
     : forall n e1 e2 e3,
         Trace_lt (E_Sum e1 (E_Sum e2 e3)) (double (double n))
-        ≡ (Trace_lt e1 (double n)) ⊕ ((Trace_lt e2 n) ⊕ (Trace_lt e3 n)).
+        ≡ (Trace_lt e1 (double n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
     Proof.
       intros.
       eapply trace_eq_trans; [apply Sum_precise|].
@@ -2441,7 +2440,7 @@ Section Fairness.
     Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
     Lemma Pair_layer e1 e2 n
     : Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n)
-      ≡ (Trace_lt e1 (S n)) ⊕ (Trace_lt e2 (S n)).
+      ≡ (Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n)).
     Proof.
       apply trace_eq_eq'_equiv; split.
       (* trace (e1 x e2) n^2 (n+1)^2 < (trace ) *)
@@ -2452,8 +2451,8 @@ Section Fairness.
         destruct (Enumerates_from_dec (E_Pair e1 e2) k) as [[v t] Henum].
         inversion Henum; subst.
         simpl in Hin.
-        destruct (sub_trace_In_equiv (lt ⊕ rt)
-                                     ((Trace_lt e1 (S n)) ⊕ (Trace_lt e2 (S n)))).
+        destruct (sub_trace_In_equiv (lt ⊔ rt)
+                                     ((Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n)))).
         apply H; [| assumption].
         clear H H0.
         apply sub_trace_plus_cong;
@@ -2501,7 +2500,7 @@ Section Fairness.
       unfold E_PairNN; apply Pair_layer.
       apply trace_eq_symm.
       apply trace_eq_trans with ((Tracing (z_to_n (S n)) ∅ ∅ ∅)
-                                   ⊕ (Tracing ∅ (z_to_n (S n)) ∅ ∅)).
+                                   ⊔ (Tracing ∅ (z_to_n (S n)) ∅ ∅)).
       remember (S n) as k; unfold trace_plus; split4; auto; apply set_eq_symm; apply set_union_unitl.
       apply trace_plus_cong; rewrite trace_proj_reconstruct.
       split4; [ apply trace_lt_Nat | | | ]; rewrite trace_lt_Nat_off by discriminate; auto.
@@ -2510,7 +2509,7 @@ Section Fairness.
 
     Lemma Pair_precise
     : forall n e1 e2,
-        (Trace_lt (E_Pair e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊕ (Trace_lt e2 n)).
+        (Trace_lt (E_Pair e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊔ (Trace_lt e2 n)).
       intros n.
       induction n as [| n IHn]; [  intros; compute; tauto| ].
       intros e1 e2.
@@ -2525,7 +2524,7 @@ Section Fairness.
     Lemma PairPair_precise
     : forall n e1 e2 e3,
         Trace_lt (E_Pair e1 (E_Pair e2 e3)) ((n * n) * (n * n))
-        ≡ (Trace_lt e1 (n * n)) ⊕ ((Trace_lt e2 n) ⊕ (Trace_lt e3 n)).
+        ≡ (Trace_lt e1 (n * n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
     Proof.
       intros n e1 e2 e3.
       eapply trace_eq_trans; [apply Pair_precise|].
@@ -2539,10 +2538,10 @@ Section Fairness.
       induction n.
       compute; tauto.
       apply trace_eq_trans
-      with (t2 := ((Trace_lt E_PairNN (n * n)) ⊕ (Trace_from_to E_PairNN (n * n) (S n * S n)))).
+      with (t2 := ((Trace_lt E_PairNN (n * n)) ⊔ (Trace_from_to E_PairNN (n * n) (S n * S n)))).
       apply trace_from_to_0_split; nliamega.
       apply trace_eq_trans with (t2 := ((Tracing (z_to_n n) (z_to_n n) ∅ ∅)
-                                        ⊕ (Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅))).
+                                        ⊔ (Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅))).
       apply trace_plus_cong; auto.
       apply PairNN_layer.
       apply trace_eq_trans with (t2 := (Tracing (z_to_n (S n)) (z_to_n (S n))) ∅ ∅).
@@ -2601,7 +2600,7 @@ Section Fairness.
 
       assert ((z_to_n m) ⊂ t0).
       - remember (Trace_lt NP3T (m * m)) as t; destruct t as [mm0 mm1 mm2 mm3].
-        assert (sub_trace (Trace_lt NP3T (m * m)) (Trace_lt NP3T n))
+        assert ((Trace_lt NP3T (m * m)) ⊏ (Trace_lt NP3T n))
           by (apply Trace_lt_sub; auto).
         unfold sub_trace in H.
         rewrite <-Heqt in H.
@@ -2613,7 +2612,7 @@ Section Fairness.
         remember (Pair_precise m (E_Trace zero E_Nat) (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))).
         clear Heqt.
         rewrite <-Heqt0 in t.
-        remember (((Trace_lt (E_Trace zero E_Nat) m) ⊕ (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
+        remember (((Trace_lt (E_Trace zero E_Nat) m) ⊔ (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
         destruct t0.
         replace mm0 with (trace_proj zero (Tracing mm0 mm1 mm2 mm3)) by auto.
         eapply subset_trans; [| apply trace_eq_proj;  eassumption].
@@ -2624,7 +2623,7 @@ Section Fairness.
 
       - assert (t1 ⊂ (z_to_n p)).
         remember (Trace_lt NP3T ((p * p) * (p * p))) as p4t.
-        assert (sub_trace (Trace_lt NP3T n) p4t) by (subst; apply Trace_lt_sub; auto; nliamega).
+        assert ((Trace_lt NP3T n) ⊏ p4t) by (subst; apply Trace_lt_sub; auto; nliamega).
         destruct p4t as [pt0 pt1 pt2 pt3].
         unfold sub_trace in H0.
         rewrite <-Heqt in H0.
