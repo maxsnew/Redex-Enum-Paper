@@ -2188,6 +2188,23 @@ Section Fairness.
       destruct mH; rewrite <-HeqmH; auto.
     Qed.
 
+    Lemma Sum_precise
+    : forall n e1 e2,
+        trace_eq (Trace_lt (E_Sum e1 e2) (double n))
+                 (trace_plus (Trace_lt e1 n)
+                             (Trace_lt e2 n)).
+    Proof.
+      intros n e1 e2.
+      induction n.
+      compute; tauto.
+      rewrite double_S.
+      unfold Trace_lt at 1; fold Trace_lt.
+      unfold Trace_on.
+      remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er].
+      remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El].
+    Admitted.
+    
+
     (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
     Theorem Sum_Fair : Fair2 E_Sum.
     Proof.
@@ -2359,28 +2376,64 @@ Section Fairness.
       - admit.
       - admit.
     Qed.
-    
+
+    Lemma SumSum_precise
+    : forall n e1 e2 e3,
+        trace_eq (Trace_lt (E_Sum e1 (E_Sum e2 e3)) (double (double n)))
+                 (trace_plus (Trace_lt e1 (double n))
+                             (trace_plus (Trace_lt e2 n)
+                                         (Trace_lt e3 n))).
+    Admitted.
+
     Definition NS3T := NaiveSum3 (E_Trace zero E_Nat)
                                  (E_Trace one  E_Nat)
                                  (E_Trace two  E_Nat).
+
+    Lemma NS3Tl_precise
+    : forall n,
+        set_eq (trace_proj zero (Trace_lt NS3T (double n)))
+               (z_to_n n).
+    Proof.
+    Admitted.
+
+    Lemma NS3Tr_precise
+    : forall n,
+        set_eq (trace_proj one (Trace_lt NS3T (double (double n))))
+               (z_to_n n).
+    Admitted.
+
     Theorem NaiveSumUnfair : ~ (Fair3 NaiveSum3).
     Proof.
       apply AltUnfair3Suff; unfold AltUnfair3; fold NS3T.
-      exists 3.
+      exists 7.
       intros n H.
       remember (Trace_lt NS3T n) as t; destruct t as [s0 s1 s2 s4].
-      assert (exists m p, 2 * m <= n < 4 * p /\ p < m) as [m [p [[Hmn Hnp] Hpn]]] by admit.
-      
+      assert (exists m p, 2 * m <= n < 4 * p /\ p < m) as [m [p [[Hmn Hnp] Hpn]]] by (apply div2div4; nliamega).
       left.
+      
       assert (~ subset s0 s1); [| intros [? ?]; contradiction ].
-      assert (subset (z_to_n m) s0) by admit.
-      assert (subset s1 (z_to_n p)) by admit.
+
+      assert (subset (z_to_n m) s0).
+      rewrite <-double_twice in *.
+      replace s0 with (trace_proj zero (Trace_lt NS3T n)) by (rewrite <-Heqt; trivial).
+      eapply subset_trans; [| apply sub_trace_proj; apply Trace_lt_sub; apply Hmn ].
+      apply set_subset_weaken; apply set_eq_symm; apply NS3Tl_precise.
+      
+      assert (subset s1 (z_to_n p)).
+      replace (4 * p) with (double (double p)) in * by (simpl; unfold double; nliamega).
+      replace s1 with (trace_proj one (Trace_lt NS3T n)) by (rewrite <-Heqt; trivial).
+      eapply subset_trans.
+      apply sub_trace_proj.
+      apply Trace_lt_sub with (n := double (double p)); nliamega.
+      apply set_subset_weaken.
+      apply NS3Tr_precise.
+      
       intros Hcontra.
       eapply z_to_n_nosub; [apply Hpn|].
       repeat (eapply subset_trans; [eassumption|]); apply subset_refl.
     Qed.
-
   End NaiveSumUnfair.
+
   Section PairFair.
     Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
     Lemma Pair_layer e1 e2 n
