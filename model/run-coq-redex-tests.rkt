@@ -65,9 +65,29 @@
           
         Definition to_nat e v :=
           match (Enumerates_to_dec e v) with
-           | inleft x => Some (proj1_sig x)
-           | inright _ => None
-          end.})
+          | inleft x => Some (proj1_sig x)
+          | inright _ => None
+          end.
+          
+        Definition SwapPair (v : Value) :=
+          match v with
+          | V_Pair a b => V_Pair b a
+          | _ => v
+          end.
+
+          Lemma SwapPair_Swaps : forall a : Value, SwapPair (SwapPair a) = a.
+          Proof.
+            intro.
+            unfold SwapPair.
+            destruct a; reflexivity.
+          Qed.
+
+          Definition SwapBijection : Bijection Value Value.
+          Proof.
+            refine (exist _ (SwapPair,SwapPair) _).
+            unfold fst, snd.
+            split;apply SwapPair_Swaps.
+          Defined.})
 
 (define (run-some-in-coq test-cases)
   (define results
@@ -89,11 +109,10 @@
             (o " ")
             (o-enum e2)
             (o ")")]
-           [`(map/e ,f1 ,f2 ,e)
-            (o "(E_Map ")
-            (match* (f1 f2)
-              [(`(add ,i1) `(add ,i1)) 1]
-              [(_ _) 2])]
+           [`(map/e swap-cons swap-cons ,e)
+            (o "(E_Map SwapBijection ")
+            (o-enum e)
+            (o ")")]
            [`(trace/e ,i ,e)
             (o "(E_Trace ")
             (o (match i
@@ -115,7 +134,8 @@
             (o " ")
             (o-v e2 b)
             (o ")")]
-           ;; map goes here
+           [(`(map/e ,f-in ,f-out ,e) v)
+            (o-v e v)]
            ;; dep goes here
            [(`(or/e ,e1 ,e2) (cons 0 b))
             (o "(V_Sum_Left ")
@@ -165,11 +185,16 @@
              scratch.v))
   (define resultsp (open-input-string (get-output-string sp)))
   (define raw-results
-    (let loop ()
-      (define r (read resultsp))
-      (if (eof-object? r)
-          '()
-          (cons r (loop)))))
+    (with-handlers ([exn:fail:read? (λ (x)
+                                      (eprintf "failed to read:\n")
+                                      (display (get-output-string sp) (current-error-port))
+                                      (newline (current-error-port))
+                                      (raise x))])
+      (let loop ()
+        (define r (read resultsp))
+        (if (eof-object? r)
+            '()
+            (cons r (loop))))))
   (properly-parenthesize-and-convert-results raw-results))
 
 (define (properly-parenthesize-and-convert-results lst)
@@ -227,6 +252,8 @@
        ;; left sums in the Coq model match up to the `or l' rule in the Redex model
        (cons 0 (loop v))])))
 
+
+
 (run-tests
  (build-test-cases 'natural/e 100)
  (build-test-cases '(cons/e natural/e natural/e) 100)
@@ -235,6 +262,8 @@
                                     (trace/e 1 natural/e))
                             (cons/e (trace/e 2 natural/e)
                                     (trace/e 3 natural/e)))
+                   100)
+ (build-test-cases '(map/e swap-cons swap-cons (cons/e natural/e natural/e))
                    100))
 
-    ;; missing map/e, dep/e ...
+;; missing dep/e

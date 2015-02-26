@@ -34,6 +34,7 @@
   (T ::= ∅ (n ↦ (n n ...) T))
   
   (f ::= 
+     swap-cons
      (add integer)
      (mult natural)
      (mult (/ natural))
@@ -79,9 +80,9 @@
   
   [(@ e n v T)
    -------------------------------------------------  "map in"
-   (@ (map/e f_1 f_2 e) n (Eval-num (f_1 v)) T)]
+   (@ (map/e f_1 f_2 e) n (Eval-bij (f_1 v)) T)]
   
-  [(@ e n (Eval-num (f_2 v)) T)
+  [(@ e n (Eval-bij (f_2 v)) T)
    ---------------------------------  "map out"
    (@ (map/e f_1 f_2 e) n v T)]
   
@@ -112,11 +113,12 @@
   [(singleton n_1 n_2) (n_1 ↦ (n_2) ∅)])
 
 (define-metafunction L
-  Eval-num : (f any) -> any
-  [(Eval-num ((add integer) n)) ,(+ (term integer) (term n))]
-  [(Eval-num ((mult natural) n)) ,(* (term natural) (term n))]
-  [(Eval-num ((mult (/ natural)) n)) ,(* (/ (term natural)) (term n))]
-  [(Eval-num (f any)) any])
+  Eval-bij : (f any) -> any
+  [(Eval-bij ((add integer) n)) ,(+ (term integer) (term n))]
+  [(Eval-bij ((mult natural) n)) ,(* (term natural) (term n))]
+  [(Eval-bij ((mult (/ natural)) n)) ,(* (/ (term natural)) (term n))]
+  [(Eval-bij (swap-cons (cons v_1 v_2))) (cons v_2 v_1)]
+  [(Eval-bij (f any)) any])
 
 (define-metafunction L
   Eval-enum : (f any) -> any
@@ -189,6 +191,12 @@
               e
               #:contract (or/c rational?
                                (:enum-contract e))))]
+  [(to-enum (map/e swap-cons swap-cons e)) 
+   ,(let ([e (term (to-enum e))]
+          [swap (λ (x) (if (pair? x) (cons (cdr x) (car x)) x))])
+      (:map/e swap swap
+              e
+              #:contract any/c))]
   [(to-enum (map/e any any e)) (to-enum e)]
   [(to-enum (dep/e e produce-map/e-natural/e-with-add-of-given-int))
    ,(:dep/e (term (to-enum e))
@@ -368,7 +376,7 @@
        (define arg (list-ref lws 2))
        (list "" arg " is odd"))]
     ['Eval-enum (λ (lws) (list "" (list-ref lws 2) ""))]
-    ['Eval-num (λ (lws) (list "" (list-ref lws 2) ""))])
+    ['Eval-bij (λ (lws) (list "" (list-ref lws 2) ""))])
    (thunk)))
 
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
@@ -437,11 +445,21 @@
         (unless trial
           (eprintf "try-many: failed for ~s at ~s\n" e x)))))
   
+  (check-equal? 
+   (:from-nat (term (to-enum (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
+              1)
+   '(1 . 0))
+  (check-equal? 
+   (:from-nat (term (to-enum (cons/e natural/e natural/e)))
+              1)
+   '(0 . 1))
+  
   (try-many (term natural/e))
   (try-many (term (or/e natural/e (cons/e natural/e natural/e))))
   (try-many (term (or/e (cons/e natural/e natural/e) natural/e)))
   (try-many (term (cons/e natural/e natural/e)))
   (try-many (term (map/e (add 1) (add -1) natural/e)))
+  (try-many (term (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
   (try-many (term (dep/e natural/e produce-map/e-natural/e-with-add-of-given-int)))
   (try-many (term (trace/e 0 natural/e)))
   
