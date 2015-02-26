@@ -3,6 +3,7 @@
 (require (prefix-in m: "model.rkt" )
          racket/runtime-path
          redex/reduction-semantics
+         rackunit/log
          (prefix-in d: data/enumerate/lib))
 
 ;; this file gets overwritten
@@ -38,27 +39,26 @@
         (coq-pair (coq-pair coq-v coq-trace)
                   (coq-pair coq-n _coq-backwards-trace)))
        (define-values (redex-v redex-trace) (m:from-nat+trace redex-e orig-n))
-       (define (fail fmt-str . args)
-         (eprintf "FAILED:\n enum: ~s\n n: ~s\n val: ~s\n ~a\n\n"
-                  redex-e 
-                  orig-n 
-                  val
-                  (apply format fmt-str args)))
-       (unless (equal? orig-n coq-n)
-         (fail "different nats; coq-n ~a" coq-n))
-       (unless (equal? coq-v val)
-         (fail "different values; coq-v ~a" coq-v))
-       (unless (equal? redex-v val)
-         (fail "different values; redex-v ~a" redex-v))
-       (unless (equal? coq-trace redex-trace)
-         (fail "different traces:\n    coq ~s\n  redex ~s" 
-               coq-trace
-               redex-trace))])))
+       (define (check-it failed? fmt-str . args)
+         (test-log! (not failed?))
+         (unless failed?
+           (eprintf "FAILED:\n enum: ~s\n n: ~s\n val: ~s\n ~a\n\n"
+                    redex-e 
+                    orig-n 
+                    val
+                    (apply format fmt-str args))))
+       (check-it (equal? orig-n coq-n) "different nats; coq-n ~a" coq-n)
+       (check-it (equal? coq-v val) "different values; coq-v ~a" coq-v)
+       (check-it (equal? redex-v val) "different values; redex-v ~a" redex-v)
+       (check-it (equal? coq-trace redex-trace)
+                 "different traces:\n    coq ~s\n  redex ~s" 
+                 coq-trace
+                 redex-trace)])))
 
 (define coq-prefix
   @list{Unset Printing Notations.
         Set Printing Depth 10000.
-        Require Import Enum.
+        Require Import Enum Arith.
         
         Definition from_nat e n := 
           proj1_sig (Enumerates_from_dec e n).
@@ -87,7 +87,51 @@
             refine (exist _ (SwapPair,SwapPair) _).
             unfold fst, snd.
             split;apply SwapPair_Swaps.
-          Defined.})
+          Defined.
+          
+          Definition SwapWithZero n1 v :=
+           match v with
+             | V_Nat n2 => 
+               V_Nat (if (eq_nat_dec n2 0) 
+                           then n1
+                           else if (eq_nat_dec n2 n1)
+                                then 0
+                                else n2)
+             | _ => v
+           end.
+
+           Lemma SwapWithZero_Swaps : forall n a, (SwapWithZero n) ((SwapWithZero n) a) = a.
+           Proof.
+             intros n a.
+             unfold SwapWithZero.
+             destruct a; try reflexivity.
+             destruct (eq_nat_dec n0 0); subst; auto.
+             destruct (eq_nat_dec n 0); auto.
+             destruct (eq_nat_dec n n); subst; auto.
+             intuition.
+             destruct (eq_nat_dec n0 n).
+             destruct (eq_nat_dec 0 0); subst; auto.
+             intuition.
+             destruct (eq_nat_dec n0 0); subst; auto.
+             intuition.
+             destruct (eq_nat_dec n0 n); subst.
+             intuition.
+             auto.
+           Qed.
+
+           Definition SwapWithZeroBijection : forall n:nat, Bijection Value Value.
+           Proof.
+             intros n.
+             refine (exist _ (SwapWithZero n,SwapWithZero n) _).
+             unfold fst, snd.
+             split;apply (SwapWithZero_Swaps n).
+           Defined.
+           
+           Definition Nat_To_Map_Of_Swap_Zero_With v :=
+             match v with
+             | V_Nat i => E_Map (SwapWithZeroBijection i) E_Nat
+             | v => E_Nat
+             end.})
 
 (define (run-some-in-coq test-cases)
   (define results
@@ -113,6 +157,10 @@
             (o "(E_Map SwapBijection ")
             (o-enum e)
             (o ")")]
+           [`(dep/e ,e nat->map-of-swap-zero-with)
+            (o "(E_Dep ")
+            (o-enum e)
+            (o " Nat_To_Map_Of_Swap_Zero_With)")]
            [`(trace/e ,i ,e)
             (o "(E_Trace ")
             (o (match i
@@ -136,7 +184,12 @@
             (o ")")]
            [(`(map/e ,f-in ,f-out ,e) v)
             (o-v e v)]
-           ;; dep goes here
+           [(`(dep/e ,e nat->map-of-swap-zero-with) (cons i j))
+            (o "(V_Pair ")
+            (o-v e i)
+            (o " ")
+            (o-v `natural/e j)
+            (o ")")]
            [(`(or/e ,e1 ,e2) (cons 0 b))
             (o "(V_Sum_Left ")
             (o-v e1 b)
@@ -184,18 +237,18 @@
              "Enum"
              scratch.v))
   (define resultsp (open-input-string (get-output-string sp)))
-  (define raw-results
-    (with-handlers ([exn:fail:read? (λ (x)
-                                      (eprintf "failed to read:\n")
-                                      (display (get-output-string sp) (current-error-port))
-                                      (newline (current-error-port))
-                                      (raise x))])
-      (let loop ()
-        (define r (read resultsp))
-        (if (eof-object? r)
-            '()
-            (cons r (loop))))))
-  (properly-parenthesize-and-convert-results raw-results))
+  (with-handlers ([exn:fail? (λ (x)
+                               (eprintf "failed to convert:\n")
+                               (display (get-output-string sp) (current-error-port))
+                               (newline (current-error-port))
+                               (raise x))])
+    
+    (properly-parenthesize-and-convert-results
+     (let loop ()
+       (define r (read resultsp))
+       (if (eof-object? r)
+           '()
+           (cons r (loop)))))))
 
 (define (properly-parenthesize-and-convert-results lst)
   (let loop ([lst lst])
@@ -255,6 +308,11 @@
 
 
 (run-tests
+ (build-test-cases '(dep/e natural/e nat->map-of-swap-zero-with)
+                   3))
+
+#;
+(run-tests
  (build-test-cases 'natural/e 100)
  (build-test-cases '(cons/e natural/e natural/e) 100)
  (build-test-cases '(or/e natural/e natural/e) 100)
@@ -268,6 +326,10 @@
                           (trace/e 2 natural/e))
                    100)
  (build-test-cases '(map/e swap-cons swap-cons (cons/e natural/e natural/e))
+                   100)
+ (build-test-cases '(map/e (swap-zero-with 10) natural/e)
+                   20)
+ (build-test-cases '(dep/e nat->map-of-swap-zero-with natural/e)
                    100))
 
 ;; missing dep/e

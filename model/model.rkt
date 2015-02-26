@@ -35,10 +35,8 @@
   
   (f ::= 
      swap-cons
-     (add integer)
-     (mult natural)
-     (mult (/ natural))
-     produce-map/e-natural/e-with-add-of-given-int))
+     (swap-zero-with natural)
+     nat->map-of-swap-zero-with))
 (define e? (redex-match L e))
 (define T? (redex-match L T))
 (define v? (redex-match L v))
@@ -114,16 +112,15 @@
 
 (define-metafunction L
   Eval-bij : (f any) -> any
-  [(Eval-bij ((add integer) n)) ,(+ (term integer) (term n))]
-  [(Eval-bij ((mult natural) n)) ,(* (term natural) (term n))]
-  [(Eval-bij ((mult (/ natural)) n)) ,(* (/ (term natural)) (term n))]
   [(Eval-bij (swap-cons (cons v_1 v_2))) (cons v_2 v_1)]
+  [(Eval-bij ((swap-zero-with n) 0)) n]
+  [(Eval-bij ((swap-zero-with n) n)) 0]
   [(Eval-bij (f any)) any])
 
 (define-metafunction L
   Eval-enum : (f any) -> any
-  [(Eval-enum (produce-map/e-natural/e-with-add-of-given-int integer))
-   (map/e (add integer) (add ,(- (term integer))) natural/e)]
+  [(Eval-enum (nat->map-of-swap-zero-with natural))
+   (map/e (swap-zero-with natural) (swap-zero-with natural) natural/e)]
   [(Eval-enum (f any)) natural/e])
 
 (define-judgment-form L
@@ -170,40 +167,26 @@
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
   [(to-enum natural/e) ,:natural/e]
-  
-  ;; these don't handle all of the cases, but instead
-  ;; collapse into less interesting enumerations when
-  ;; we step outside of the useful area.
-  [(to-enum (map/e (add integer) any e))
-   ,(let ([e (term (to-enum e))])
-      (:map/e (λ (x) (if (integer? x) (+ x (term integer)) x))
-              (λ (x) (if (integer? x) (- x (term integer)) x))
-              e
-              #:contract (or/c (and/c exact-integer? (>=/c (term integer)))
-                               (:enum-contract e))))]
-  [(to-enum (map/e (mult any) any e))
+  [(to-enum (map/e (swap-zero-with natural) (swap-zero-with natural) e))
    ,(let ([e (term (to-enum e))]
-          [factor (if (pair? (term any))
-                      (/ (second (term any)))
-                      (term any))])
-      (:map/e (λ (x) (if (integer? x) (* x factor) x))
-              (λ (x) (if (integer? x) (/ x factor) x))
-              e
-              #:contract (or/c rational?
-                               (:enum-contract e))))]
+          [swapper
+           (λ (x) (if (exact-nonnegative-integer? x)
+                      (cond
+                        [(= x (term natural)) 0]
+                        [(= x 0) (term natural)]
+                        [else x])
+                      x))])
+      (:map/e swapper swapper e #:contract (:enum-contract e)))]
   [(to-enum (map/e swap-cons swap-cons e)) 
    ,(let ([e (term (to-enum e))]
           [swap (λ (x) (if (pair? x) (cons (cdr x) (car x)) x))])
-      (:map/e swap swap
-              e
-              #:contract any/c))]
+      (:map/e swap swap e #:contract (:enum-contract e)))]
   [(to-enum (map/e any any e)) (to-enum e)]
-  [(to-enum (dep/e e produce-map/e-natural/e-with-add-of-given-int))
+  [(to-enum (dep/e e nat->map-of-swap-zero-with))
    ,(:dep/e (term (to-enum e))
-            (λ (x) 
-              (if (integer? x)
-                  (:map/e (λ (y) (+ y x)) (λ (y) (- y x)) :natural/e
-                          #:contract (and/c exact-integer? (>=/c x)))
+            (λ (x)
+              (if (exact-nonnegative-integer? x)
+                  (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) natural/e)))
                   :natural/e)))]
   [(to-enum (dep/e e any)) (to-enum (cons/e e natural/e))]
   [(to-enum (trace/e n e)) (to-enum e)])
@@ -458,10 +441,15 @@
   (try-many (term (or/e natural/e (cons/e natural/e natural/e))))
   (try-many (term (or/e (cons/e natural/e natural/e) natural/e)))
   (try-many (term (cons/e natural/e natural/e)))
-  (try-many (term (map/e (add 1) (add -1) natural/e)))
+  (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) natural/e)))
   (try-many (term (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
-  (try-many (term (dep/e natural/e produce-map/e-natural/e-with-add-of-given-int)))
+  (try-many (term (dep/e natural/e nat->map-of-swap-zero-with)))
   (try-many (term (trace/e 0 natural/e)))
+  
+  (check-equal? (:enum->list
+                 (term (to-enum (map/e (swap-zero-with 3) (swap-zero-with 3) natural/e)))
+                 10)
+                '(3 1 2 0 4 5 6 7 8 9))
   
   (check-equal? (get-trace (term natural/e) 0) (hash))
   (check-equal? (get-trace (term (trace/e 0 natural/e)) 0) (hash 0 (set 0)))
@@ -483,40 +471,25 @@
                            100)
                 (hash 0 (set 0) 1 (set 1) 2 (set 3)))
   
-  ;; test dep/e
-  (for ([x (in-range 1000)])
+  ;; test that the dep/e construction is actually not just
+  ;; (cons/e natural/e natural/e) but that it shares a lot with it
+  (define num-different 0)
+  (define num-same 0)
+  (for ([x (in-range 100)])
     (define l
       (judgment-holds 
-       (@ (dep/e natural/e produce-map/e-natural/e-with-add-of-given-int)
+       (@ (dep/e natural/e nat->map-of-swap-zero-with)
           ,x
           v
           T)
        (to-val v)))
-    (define passes (and (pair? l)
-                        (null? (cdr l))
-                        (let ([enum-value (car l)])
-                          (<= (car enum-value) (cdr enum-value)))))
-    (test-log! passes)
-    (unless passes
-      (eprintf "dep/e test failes for ~s, got ~s\n" x l)))
+    (unless (= 1 (length l))
+      (error 'dep/e-test "didn't get singleton back from judgment-holds ~s" l))
+    (if (equal? (car l) (:from-nat (:cons/e :natural/e :natural/e) x))
+        (set! num-same (+ num-same 1))
+        (set! num-different (+ num-different 1))))
+  (check-true (> num-same 20))
+  (check-true (> num-different 10)))
   
-  ;; test we can recombine and get nats back
-  (for ([x (in-range 1000)])
-    (define l
-      (judgment-holds 
-       (@ (or/e (map/e (mult 2) (mult (/ 2)) natural/e)
-                (map/e (add 1) (add -1) (map/e (mult 2) (mult (/ 2)) natural/e)))
-          ,x
-          v
-          T)
-       (to-val v)))
-    (define n (and (pair? l) 
-                   (null? (cdr l))
-                   ;; above checks we got one result from the judgment
-                   (let ([v (car l)])
-                     ;; here we drop the or/e injection
-                     (cdr v))))
-    (define passed? (equal? n x))
-    (test-log! passed?)
-    (unless passed?
-      (eprintf "natural/e recombination didn't work for ~s, got ~s" x l))))
+  
+  
