@@ -1032,6 +1032,7 @@ Section Sets.
     rewrite !z_to_n_correct; auto.
   Qed.
 
+
 End Sets.
 Hint Resolve set_eq_refl.
 Hint Resolve subset_refl.
@@ -2149,6 +2150,29 @@ Section Fairness.
           n < equilibrium /\ set_eq z_uses o_uses /\ set_eq o_uses tw_uses /\ set_eq tw_uses th_uses
       end.
 
+  Definition AltUnfair3 k :=
+    exists threshold,
+      forall eq_cand,
+        eq_cand > threshold ->
+        match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
+          | Tracing use0 use1 use2 _ =>
+            (~ (set_eq use0 use1)) \/ (~ (set_eq use1 use2)) \/ (~ (set_eq use0 use2))
+        end.
+
+  Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k).
+  Proof.
+    unfold AltUnfair3, Fair3, not.
+    intros [thresh Halt] Hunf.
+    destruct (Hunf thresh) as [eq_cand Hblah].
+    clear Hunf.
+    remember (Halt eq_cand).
+    clear Halt Heqy.
+    destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
+                       eq_cand) as [t0 t1 t2 t3] in *.
+    intuition.
+    assert (set_eq t0 t2) by (eapply set_eq_trans; eauto); contradiction.
+  Qed.
+  
   Section SumFair.
     Lemma Sum_Parity_Trace :
       forall n,
@@ -2234,6 +2258,102 @@ Section Fairness.
 
   End SumFair.
 
+  Section NaiveSumUnfair.
+    Definition NaiveSum3 e1 e2 e3 :=
+      E_Sum e1 (E_Sum e2 e3).
+
+    Definition foo n :=
+      let p := (S (div2 (S (div2 n))))
+      in let m := S p
+         in (2 * m, n, 4 * p).
+    Eval compute in map foo (6::7::8::9::10::11::12::13::nil).
+
+    Lemma div2_slower_than_id n :
+      4 <= n ->
+      (S (div2 (S n))) < n.
+    Proof.
+      intros H.
+      remember (n - 4) as k; replace n with (4 + k) by nliamega; clear dependent n; rename k into n.
+      induction n.
+      compute; nliamega.
+      destruct (even_odd_dec (S (4 + n))).
+      rewrite even_div2 in IHn by assumption.
+      replace (S (4 + S n)) with (S (S (4 + n))) by nliamega.
+      nliamega.
+
+      replace (S (4 + n)) with (4 + S n) in o by nliamega.
+      rewrite <-odd_div2 by assumption.
+      replace (4 + S n) with (S (4 + n)) at 1 by nliamega.
+      nliamega.
+    Qed.
+
+    Definition x4 n := double (double n).
+    
+    Lemma par4 : forall n, n = x4 (div2 (div2 n))
+                           \/ n = (x4 (div2 (div2 n))) + 1
+                           \/ n = (x4 (div2 (div2 n))) + 2
+                           \/ n = (x4 (div2 (div2 n))) + 3.
+    Proof.
+      intros.
+      destruct (even_odd_dec n).
+      remember (even_div2 n e).
+      destruct (even_odd_dec (div2 n)).
+      - left. (* n = 4*(n/4)*)
+        unfold x4.
+        rewrite <-even_double by assumption.
+        apply even_double; assumption.
+      - right; right; left.
+        unfold x4.
+        replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
+        rewrite <-double_S.
+        rewrite <-odd_double by assumption.
+        apply even_double; assumption.
+      - destruct (even_odd_dec (div2 n)).
+        + right; left.
+          unfold x4.
+          rewrite <-even_double by assumption.
+          replace (double (div2 n) + 1) with (S (double (div2 n))) by nliamega.
+          apply odd_double; assumption.
+        + right; right; right.
+          unfold x4.
+          replace (double (double (div2 (div2 n))) + 3) with (S (S (S (double (double (div2 (div2 n))))))) by nliamega.
+          rewrite <-double_S.
+          rewrite <-odd_double by assumption.
+          apply odd_double; assumption.
+    Qed.
+
+    Lemma div2div4 : forall n, n >= 8 -> exists m p, 2 * m <= n < 4 * p /\ p < m.
+    Proof.
+      intros n Hn4.
+      remember (S (div2 (S (div2 n)))) as p.
+      remember (S p) as m.
+      exists m.
+      exists p.
+      split; [| nliamega].
+
+    Admitted.
+    
+    Definition NS3T := NaiveSum3 (E_Trace zero E_Nat)
+                                 (E_Trace one  E_Nat)
+                                 (E_Trace two  E_Nat).
+    Theorem NaiveSumUnfair : ~ (Fair3 NaiveSum3).
+    Proof.
+      apply AltUnfair3Suff; unfold AltUnfair3; fold NS3T.
+      exists 3.
+      intros n H.
+      remember (Trace_lt NS3T n) as t; destruct t as [s0 s1 s2 s4].
+      assert (exists m p, 2 * m <= n < 4 * p /\ p < m) as [m [p [[Hmn Hnp] Hpn]]] by admit.
+      
+      left.
+      assert (~ subset s0 s1); [| intros [? ?]; contradiction ].
+      assert (subset (z_to_n m) s0) by admit.
+      assert (subset s1 (z_to_n p)) by admit.
+      intros Hcontra.
+      eapply z_to_n_nosub; [apply Hpn|].
+      repeat (eapply subset_trans; [eassumption|]); apply subset_refl.
+    Qed.
+
+  End NaiveSumUnfair.
   Section PairFair.
     Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
     Lemma Pair_layer e1 e2 n
@@ -2382,29 +2502,6 @@ Section Fairness.
     Definition NaiveTriple3 e1 e2 e3 :=
       E_Pair e1 (E_Pair e2 e3).
 
-    Definition AltUnfair3 k :=
-      exists threshold,
-        forall eq_cand,
-          eq_cand > threshold ->
-          match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
-            | Tracing use0 use1 use2 _ =>
-              (~ (set_eq use0 use1)) \/ (~ (set_eq use1 use2)) \/ (~ (set_eq use0 use2))
-          end.
-
-    Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k).
-    Proof.
-      unfold AltUnfair3, Fair3, not.
-      intros [thresh Halt] Hunf.
-      destruct (Hunf thresh) as [eq_cand Hblah].
-      clear Hunf.
-      remember (Halt eq_cand).
-      clear Halt Heqy.
-      destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
-                         eq_cand) as [t0 t1 t2 t3] in *.
-      intuition.
-      assert (set_eq t0 t2) by (eapply set_eq_trans; eauto); contradiction.
-    Qed.
-
     Definition traceNP3 := Trace_lt (NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
 
     Definition NP3T := NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
@@ -2478,16 +2575,10 @@ Section Fairness.
         eapply set_eq_trans; [apply set_union_unitl|].
         eapply set_eq_trans; [apply set_union_unitr|].
         apply set_eq_refl.
+
         intros Hsub01.
-        assert (subset (z_to_n m) (z_to_n p)).
-        eapply subset_trans; try eassumption.
-        eapply subset_trans; try eassumption.
-        assert (m <= p); [| nliamega].
-        apply nat_lt_iff.
-        intros q.
-        rewrite <-z_to_n_correct.
-        rewrite <-z_to_n_correct.
-        apply In_subset_def; assumption.
+        eapply z_to_n_nosub; [apply Hppmm|].
+        repeat (eapply subset_trans; try eassumption); apply subset_refl.
     Qed.
   End NaiveTripleUnfair.
 End Fairness.
