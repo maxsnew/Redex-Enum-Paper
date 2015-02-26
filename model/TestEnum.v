@@ -21,42 +21,6 @@ Definition show_one (e : Enum) (n : nat) : Value * Trace :=
 
 Eval compute in show_one (E_Trace zero E_Nat) 5.
 
-
-Definition plusn n (m : nat) : {p : nat | p > n }.
-  refine (exist _ (S (n + m)) _).
-  apply Gt.le_gt_S.
-  apply Plus.le_plus_l.
-Defined.
-
-Definition minusn n : {p : nat | p > n} -> nat.
-  intros p.
-  destruct p as [p Hp].
-  exact (p - (S n)).
-Defined.
-
-(* Require Import Eqdep_dec. May be useful.. *)
-Definition plus_minus_bijection : forall n, Bijection nat {x : nat | x > n}.
-Proof.
-  intros.
-  unfold Bijection.
-  refine (exist _ (plusn n, minusn n) _).
-  split.
-  intros a.
-  remember (plusn n a) as m.
-  replace (snd (plusn n, minusn n) (fst (plusn n, minusn n) a)) with (minusn n (plusn n a)) by trivial.
-  unfold minusn.
-  unfold plusn.
-  nliamega.
-
-  intros b.
-  replace (fst (plusn n, minusn n) (snd (plusn n, minusn n) b)) with (plusn n (minusn n b)) by trivial.
-  destruct b.
-  unfold minusn.
-  unfold plusn.
-  (* I think this is not proveable.. *)
-  admit.
-Defined.
-
 (*
 Eval compute in show_all (E_Pair E_Nat E_Nat) 25.
 *)
