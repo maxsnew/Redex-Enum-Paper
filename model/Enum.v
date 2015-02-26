@@ -351,12 +351,14 @@ Notation set' := (set nat).
 Notation "∅" := (@empty_set nat).
 Notation "p ∪ q" := (@set_union nat eq_nat_dec p q) (at level 50).
 Notation set_add' := (@set_add nat eq_nat_dec).
+Notation "x ∈ s" := (set_In x s) (at level 70).
+
 Section Sets.
   Fixpoint subset (s1 s2 : set nat) :=
     match s1 with
       | nil => True
       | x :: more =>
-        set_In x s2 /\ subset more s2
+        x ∈ s2 /\ subset more s2
     end.
   Hint Unfold subset.
   Notation "s1 ⊂ s2" := (subset s1 s2) (at level 70, no associativity).
@@ -378,6 +380,7 @@ Section Sets.
 
   Definition set_eq s1 s2 := s1 ⊂ s2 /\ s2 ⊂ s1.
   Hint Unfold set_eq.
+  Notation "s1 ≃ s2" := (set_eq s1 s2) (at level 70, no associativity).
 
   Lemma subset_consr s1 s2 n : s1 ⊂ s2 -> s1 ⊂ (cons n s2).
   Proof.
@@ -422,7 +425,7 @@ Section Sets.
     destruct (subset_dec s1 s2); tauto.
   Qed.
 
-  Definition set_eq_dec s1 s2 : { set_eq s1 s2 } + { ~ (set_eq s1 s2) }.
+  Definition set_eq_dec s1 s2 : { s1 ≃ s2 } + { ~ (s1 ≃ s2) }.
   Proof.
     destruct (subset_dec s1 s2).
     destruct (subset_dec s2 s1).
@@ -440,12 +443,12 @@ Section Sets.
     apply subset_consr; auto.
   Qed.
 
-  Theorem set_eq_refl s : set_eq s s.
+  Theorem set_eq_refl s : s ≃ s.
   Proof.
     split; apply subset_refl.
   Qed.
 
-  Theorem subset_In : forall x s s', set_In x s -> s ⊂ s' -> set_In x s'.
+  Theorem subset_In : forall x s s', x ∈ s -> s ⊂ s' -> x ∈ s'.
   Proof.
     intros x s.
     generalize dependent x.
@@ -458,7 +461,7 @@ Section Sets.
     destruct Hyinxs; subst; auto.
   Qed.
 
-  Theorem subset_In_def s s' : (forall x, set_In x s -> set_In x s') -> s ⊂ s'.
+  Theorem subset_In_def s s' : (forall x, x ∈ s -> x ∈ s') -> s ⊂ s'.
   Proof.
     generalize dependent s'.
     induction s.
@@ -472,7 +475,7 @@ Section Sets.
     constructor 2; auto.
   Qed.
 
-  Theorem In_subset_def s s' : s ⊂ s' -> (forall x, set_In x s -> set_In x s').
+  Theorem In_subset_def s s' : s ⊂ s' -> (forall x, x ∈ s -> x ∈ s').
   Proof.
     generalize dependent s'.
     induction s.
@@ -490,18 +493,18 @@ Section Sets.
   Qed.
 
   Hint Resolve subset_In_def In_subset_def.
-  Theorem subset_In_equiv s s' : s ⊂ s' <-> (forall x, set_In x s -> set_In x s').
+  Theorem subset_In_equiv s s' : s ⊂ s' <-> (forall x, x ∈ s -> x ∈ s').
   Proof.
     split; eauto.
   Qed.
 
-  Lemma set_subset_weaken : forall s1 s2, set_eq s1 s2 -> s1 ⊂ s2.
+  Lemma set_subset_weaken : forall s1 s2, s1 ≃ s2 -> s1 ⊂ s2.
   Proof.
     unfold set_eq.
     tauto.
   Qed.
 
-  Theorem not_subset_In_def s s' x : set_In x s -> ~(set_In x s') -> ~ s ⊂ s'.
+  Theorem not_subset_In_def s s' x : x ∈ s -> ~(x ∈ s') -> ~ s ⊂ s'.
   Proof.
     intros; eauto.
   Qed.
@@ -528,21 +531,21 @@ Section Sets.
   Qed.
 
 
-  Lemma set_eq_trans : forall s1 s2 s3, set_eq s1 s2 -> set_eq s2 s3 -> set_eq s1 s3.
+  Lemma set_eq_trans : forall s1 s2 s3, s1 ≃ s2 -> s2 ≃ s3 -> s1 ≃ s3.
   Proof.
     unfold set_eq.
     intros s1 s2 s3 H1 H2; destruct H1; destruct H2.
     split; eapply subset_trans; eauto.
   Qed.
 
-  Lemma set_eq_symm : forall s1 s2, set_eq s1 s2 -> set_eq s2 s1.
+  Lemma set_eq_symm : forall s1 s2, s1 ≃ s2 -> s2 ≃ s1.
   Proof.
     intros s1 s2 H; inversion H; split; auto.
   Qed.
 
   (* Theorem set_union_or : forall s1 s2, s1 ⊂ (s1 ∪ s2). *)
 
-  Lemma set_add_subset : forall x s1 s2, set_In x s2 -> s1 ⊂ s2 -> (set_add' x s1) ⊂ s2.
+  Lemma set_add_subset : forall x s1 s2, x ∈ s2 -> s1 ⊂ s2 -> (set_add' x s1) ⊂ s2.
   Proof.
 
     intros y s1.
@@ -582,7 +585,7 @@ Section Sets.
     assumption.
   Qed.
 
-  Lemma set_eq_cons_swap : forall x y s1 s2, set_eq s1 s2 -> set_eq (x :: y :: s1) (y :: x :: s2).
+  Lemma set_eq_cons_swap : forall x y s1 s2, s1 ≃ s2 -> (x :: y :: s1) ≃ (y :: x :: s2).
   Proof.
     split; destruct H; apply subset_cons_swap; auto.
   Qed.
@@ -596,14 +599,14 @@ Section Sets.
     apply subset_consr; auto.
   Qed.
 
-  Lemma set_eq_cons_cons x s1 s2 : set_eq s1 s2 -> set_eq (x :: s1) (x :: s2).
+  Lemma set_eq_cons_cons x s1 s2 : s1 ≃ s2 -> (x :: s1) ≃ (x :: s2).
   Proof.
     intros H.
     destruct H.
     split; apply set_cons_cons_subset; auto.
   Qed.
 
-  Lemma set_add_cons_eq : forall x s, set_eq (x :: s) (set_add' x s).
+  Lemma set_add_cons_eq : forall x s, (x :: s) ≃ (set_add' x s).
   Proof.
     split.
     generalize dependent x.
@@ -656,7 +659,7 @@ Section Sets.
     apply set_add_cons_eq.
   Qed.
 
-  Lemma set_union_unitl : forall s, set_eq (∅ ∪ s) s.
+  Lemma set_union_unitl : forall s, (∅ ∪ s) ≃ s.
   Proof.
     split.
     induction s.
@@ -679,14 +682,14 @@ Section Sets.
     apply set_add_cons_subset; auto.
   Qed.
 
-  Lemma set_union_unitr : forall s, set_eq (s ∪ ∅) s.
+  Lemma set_union_unitr : forall s, (s ∪ ∅) ≃ s.
   Proof.
     apply set_eq_refl.
   Qed.
 
   Lemma elem_union :
     forall s x,
-      set_In x s -> forall s', set_In x (s' ∪ s).
+      x ∈ s -> forall s', x ∈ (s' ∪ s).
   Proof.
     induction s.
     intros H contra.
@@ -694,7 +697,7 @@ Section Sets.
 
     intros x Hin s'.
     simpl.
-    assert (set_In x (a :: (s' ∪ s))).
+    assert (x ∈ (a :: (s' ∪ s))).
     destruct Hin.
     constructor; auto.
     eapply In_subset_def.
@@ -741,7 +744,7 @@ Section Sets.
     apply IHs1.
   Qed.
 
-  Theorem set_eq_union_comm : forall s1 s2, set_eq (s1 ∪ s2) (s2 ∪ s1).
+  Theorem set_eq_union_comm : forall s1 s2, (s1 ∪ s2) ≃ (s2 ∪ s1).
   Proof.
     intros s1 s2.
     split; apply subset_union_comm.
@@ -800,7 +803,7 @@ Section Sets.
   Qed.
 
   Lemma set_union_cong : forall sl sr sl' sr',
-                           set_eq sl sl' -> set_eq sr sr' -> set_eq (sl ∪ sr) (sl' ∪ sr').
+                           sl ≃ sl' -> sr ≃ sr' -> (sl ∪ sr) ≃ (sl' ∪ sr').
   Proof.
     intros sl sr sl' sr' Hl Hr.
     destruct Hl as [Hl Hl'].
@@ -816,7 +819,7 @@ Section Sets.
     apply subset_consr; auto.
   Qed.
 
-  Theorem set_eq_app_cons_comm s1 s2 a : set_eq (a :: (s1 ++ s2)) (s1 ++ a :: s2).
+  Theorem set_eq_app_cons_comm s1 s2 a : (a :: (s1 ++ s2)) ≃ (s1 ++ a :: s2).
   Proof.
     induction s1.
     apply set_eq_refl.
@@ -828,7 +831,7 @@ Section Sets.
     apply set_eq_cons_cons; auto.
   Qed.
 
-  Theorem set_union_app_eq : forall s1 s2, set_eq (s1 ∪ s2) (s1 ++ s2).
+  Theorem set_union_app_eq : forall s1 s2, (s1 ∪ s2) ≃ (s1 ++ s2).
   Proof.
     induction s2.
     simpl.
@@ -844,9 +847,9 @@ Section Sets.
   Qed.
 
   Theorem set_union_app_eq_gen : forall s1 s2 s3 s4,
-                                   set_eq s1 s3 ->
-                                   set_eq s2 s4 ->
-                                   set_eq (s1 ∪ s2) (s3 ++ s4).
+                                   s1 ≃ s3 ->
+                                   s2 ≃ s4 ->
+                                   (s1 ∪ s2) ≃ (s3 ++ s4).
   Proof.
     intros s1 s2 s3 s4 H13 H24.
     eapply set_eq_trans; [| apply set_union_app_eq].
@@ -866,7 +869,7 @@ Section Sets.
     apply In_subset_def with sr; auto.
   Qed.
 
-  Theorem subset_union_eq : forall s1 s2, s1 ⊂ s2 -> set_eq (s1 ∪ s2) s2.
+  Theorem subset_union_eq : forall s1 s2, s1 ⊂ s2 -> (s1 ∪ s2) ≃ s2.
   Proof.
     split; [| apply subset_union_transr; apply subset_refl ].
     generalize dependent s2.
@@ -892,8 +895,7 @@ Section Sets.
   Qed.
 
   Theorem set_union_assoc s1 s2 s3
-  : set_eq ((s1 ∪ s2) ∪ s3)
-           (s1 ∪ (s2 ∪ s3)).
+  : ((s1 ∪ s2) ∪ s3) ≃ (s1 ∪ (s2 ∪ s3)).
   Proof.
     apply set_eq_trans with (s2 := ((s1 ++ s2) ++ s3)).
     apply set_union_app_eq_gen.
@@ -906,8 +908,7 @@ Section Sets.
     apply set_union_app_eq.
   Qed.
 
-  Example set_eq_test : (set_eq (set_add' 1 (set_add' 0 ∅))
-                                (set_add' 0 (set_add' 1 ∅))).
+  Example set_eq_test : ((set_add' 1 (set_add' 0 ∅)) ≃ (set_add' 0 (set_add' 1 ∅))).
   Proof.
     compute.
     tauto.
@@ -954,7 +955,7 @@ Section Sets.
     auto.
   Qed.
 
-  Lemma set_eq_rev : forall s, set_eq s (rev s).
+  Lemma set_eq_rev : forall s, s ≃ (rev s).
   Proof.
     split; try apply subset_rev.
     rewrite <-rev_involutive.
@@ -970,7 +971,7 @@ Section Sets.
   Definition n_to_z n : set nat := rev (z_to_n n).
 
   Theorem z_to_n_correct n x
-  : set_In x (z_to_n n) <-> x < n.
+  : x ∈ (z_to_n n) <-> x < n.
   Proof.
     generalize dependent x.
     induction n.
@@ -987,7 +988,7 @@ Section Sets.
     split.
     simpl.
     intros H.
-    assert (set_In x (z_to_n n)).
+    assert (x ∈ (z_to_n n)).
     apply set_add_elim2 with (b := n) (Aeq_dec := eq_nat_dec); auto.
     assert (x < n).
     apply IHn.
@@ -1004,7 +1005,7 @@ Section Sets.
   Lemma z_to_n_nosubS m : ~ (z_to_n (S m)) ⊂ (z_to_n m).
   Proof.
     intros H.
-    assert (set_In m (z_to_n m)).
+    assert (m ∈ (z_to_n m)).
     eapply In_subset_def; eauto.
     apply z_to_n_correct; nliamega.
     rewrite z_to_n_correct in H0.
@@ -1024,7 +1025,7 @@ Section Sets.
     intros x.
     rewrite z_to_n_correct.
     intros Hlt.
-    assert (set_In x (set_add' (S (m + n)) (z_to_n (S (m + n))))).
+    assert (x ∈ (set_add' (S (m + n)) (z_to_n (S (m + n))))).
     replace (set_add' (S (m + n)) (z_to_n (S (m + n)))) with (z_to_n (S (S (m + n)))).
     apply z_to_n_correct; nliamega.
     trivial.
@@ -1047,6 +1048,7 @@ Section Sets.
 
 End Sets.
 Notation "s1 ⊂ s2" := (subset s1 s2) (at level 70, no associativity).
+Notation "s1 ≃ s2" := (set_eq s1 s2) (at level 70, no associativity).
 Hint Resolve set_eq_refl.
 Hint Resolve subset_refl.
 
@@ -1087,10 +1089,7 @@ Section Traces.
   Definition trace_eq (t1 t2 : Trace) : Prop :=
     match (t1, t2) with
       | (Tracing l0 l1 l2 l3, Tracing r0 r1 r2 r3) =>
-        set_eq l0 r0
-        /\ set_eq l1 r1
-        /\ set_eq l2 r2
-        /\ set_eq l3 r3
+        l0 ≃ r0 /\ l1 ≃ r1 /\ l2 ≃ r2 /\ l3 ≃ r3
     end.
   Notation "t1 ≡ t2" := (trace_eq t1 t2) (at level 70, no associativity).
 
@@ -1116,7 +1115,7 @@ Section Traces.
   Theorem sub_trace_zero t : ε ⊏ t.
   Proof. destruct t; compute; tauto. Qed.
 
-  Theorem trace_eq_proj t1 t2 tg : t1 ≡ t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
+  Theorem trace_eq_proj t1 t2 tg : t1 ≡ t2 -> (trace_proj tg t1) ≃ (trace_proj tg t2).
   Proof.
     unfold trace_eq, trace_proj; destruct t1; destruct t2; destruct tg; intuition.
   Qed.
@@ -1261,7 +1260,7 @@ Section Traces.
   Theorem sub_trace_In_equiv t1 t2
   : t1 ⊏ t2 
     <-> 
-    (forall x tg, set_In x (trace_proj tg t1) -> set_In x (trace_proj tg t2)).
+    (forall x tg, x ∈ (trace_proj tg t1) -> x ∈ (trace_proj tg t2)).
   Proof.
     destruct t1; destruct t2; split.
     intros Hst x tg Hin; destruct4 Hst; destruct tg; eapply subset_In; eassumption.
@@ -1271,8 +1270,8 @@ Section Traces.
 
   Theorem sub_trace_In_util t1 t2 x tg
   : t1 ⊏ t2 
-    -> set_In x (trace_proj tg t1)
-    -> set_In x (trace_proj tg t2).
+    -> x ∈ (trace_proj tg t1)
+    -> x ∈ (trace_proj tg t2).
   Proof.
     intros Hsub.
     generalize x tg.
@@ -1843,8 +1842,7 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_lt_Nat n tg
-  : set_eq (z_to_n n)
-           (trace_proj tg (Trace_lt (E_Trace tg E_Nat) n)).
+  : z_to_n n ≃ trace_proj tg (Trace_lt (E_Trace tg E_Nat) n).
   Proof.
     induction n as [| n IHn]; [destruct tg; compute; tauto|].
     unfold Trace_lt. fold Trace_lt.
@@ -1977,10 +1975,10 @@ Section EnumTrace.
   Qed.
 
   Theorem set_In_trace' (tg : tag) e x m n :
-    set_In x (trace_proj tg (Trace_from_to e m (S (m + n))))
+    x ∈ (trace_proj tg (Trace_from_to e m (S (m + n))))
     <->
     (exists k,
-       m <= k < S (m + n) /\ set_In x (trace_proj tg (Trace_on e k))).
+       m <= k < S (m + n) /\ x ∈ (trace_proj tg (Trace_on e k))).
   Proof.
     split.
     generalize dependent m.
@@ -2046,9 +2044,8 @@ Section EnumTrace.
 
   Theorem set_In_Trace_from_to (tg : tag) e x m n :
     (m < n) ->
-    (set_In x (trace_proj tg (Trace_from_to e m n)) <->
-     (exists k,
-        m <= k < n /\ set_In x (trace_proj tg (Trace_on e k)))).
+    (x ∈ (trace_proj tg (Trace_from_to e m n)) <->
+     (exists k, m <= k < n /\ x ∈ (trace_proj tg (Trace_on e k)))).
   Proof.
     intros H.
     remember (pred (n - m)) as p.
@@ -2058,22 +2055,21 @@ Section EnumTrace.
   Qed.
 
   Theorem set_In_Trace_lt tg e x n :
-    set_In x (trace_proj tg (Trace_lt e (S n)))
+    x ∈ (trace_proj tg (Trace_lt e (S n)))
     <->
-    exists k,
-      k < S n /\ set_In x (trace_proj tg (Trace_on e k)).
+    exists k, k < S n /\ x ∈ (trace_proj tg (Trace_on e k)).
   Proof.
     destruct (set_In_Trace_from_to tg e x 0 (S n)) as [Hl Hr]; try nliamega.
     split; [clear Hr|clear Hl].
     intros Hin.
-    assert (set_In x (trace_proj tg (Trace_from_to e 0 (S n)))).
+    assert (x ∈ (trace_proj tg (Trace_from_to e 0 (S n)))).
     apply In_subset_def with (trace_proj tg (Trace_lt e (S n))); [| assumption].
     apply sub_trace_proj; apply trace_eq_weakenl; apply trace_lt_from_to_0_same.
     destruct (Hl H) as [k [? Hink]].
     exists k; split; [nliamega| assumption].
     
     intros Hex; destruct Hex as [k [Hbound Hink]].
-    assert (set_In x (trace_proj tg (Trace_from_to e 0 (S n)))).
+    assert (x ∈ (trace_proj tg (Trace_from_to e 0 (S n)))).
     apply Hr.
     exists k; split; [nliamega| assumption].
     apply In_subset_def with (trace_proj tg (Trace_from_to e 0 (S n))); [| assumption].
@@ -2152,7 +2148,7 @@ Section Fairness.
     exists equilibrium,
       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
         | Tracing l_uses r_uses _ _ =>
-          n < equilibrium /\ set_eq  l_uses r_uses
+          n < equilibrium /\ l_uses ≃ r_uses
       end.
 
   Definition Fair3 (k : Enum -> Enum -> Enum -> Enum) :=
@@ -2160,7 +2156,7 @@ Section Fairness.
     exists equilibrium,
       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
         | Tracing z_uses o_uses t_uses _ =>
-          n < equilibrium /\ set_eq z_uses o_uses /\ set_eq o_uses t_uses
+          n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses
       end.
 
   Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) :=
@@ -2168,7 +2164,7 @@ Section Fairness.
     exists equilibrium,
       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with
         | Tracing z_uses o_uses tw_uses th_uses =>
-          n < equilibrium /\ set_eq z_uses o_uses /\ set_eq o_uses tw_uses /\ set_eq tw_uses th_uses
+          n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses
       end.
 
   Definition AltUnfair3 k :=
@@ -2177,7 +2173,7 @@ Section Fairness.
         eq_cand > threshold ->
         match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
           | Tracing use0 use1 use2 _ =>
-            (~ (set_eq use0 use1)) \/ (~ (set_eq use1 use2)) \/ (~ (set_eq use0 use2))
+            (~ (use0 ≃ use1)) \/ (~ (use1 ≃ use2)) \/ (~ (use0 ≃ use2))
         end.
 
   Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k).
@@ -2191,7 +2187,7 @@ Section Fairness.
     destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
                        eq_cand) as [t0 t1 t2 t3] in *.
     intuition.
-    assert (set_eq t0 t2) by (eapply set_eq_trans; eauto); contradiction.
+    assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction.
   Qed.
   
   Section SumFair.
@@ -2375,8 +2371,7 @@ Section Fairness.
 
     Lemma NS3Tl_precise
     : forall n,
-        set_eq (trace_proj zero (Trace_lt NS3T (double n)))
-               (z_to_n n).
+        (trace_proj zero (Trace_lt NS3T (double n))) ≃ (z_to_n n).
     Proof.
       intros n.
       eapply set_eq_trans; [apply trace_eq_proj; apply Sum_precise|].
@@ -2389,8 +2384,7 @@ Section Fairness.
 
     Lemma NS3Tr_precise
     : forall n,
-        set_eq (trace_proj one (Trace_lt NS3T (double (double n))))
-               (z_to_n n).
+        (trace_proj one (Trace_lt NS3T (double (double n)))) ≃ z_to_n n.
     Proof.
       intros n.
       eapply set_eq_trans; [apply trace_eq_proj; apply SumSum_precise|].
