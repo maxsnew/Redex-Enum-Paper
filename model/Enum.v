@@ -2289,32 +2289,32 @@ Section Fairness.
 
     Definition x4 n := double (double n).
     
-    Lemma par4 : forall n, n = x4 (div2 (div2 n))
-                           \/ n = (x4 (div2 (div2 n))) + 1
-                           \/ n = (x4 (div2 (div2 n))) + 2
-                           \/ n = (x4 (div2 (div2 n))) + 3.
+    Lemma par4 : forall n, (n = x4 (div2 (div2 n)) /\ even n /\ even (div2 n))
+                           \/ (n = (x4 (div2 (div2 n))) + 1 /\ odd n /\ even (div2 n))
+                           \/ (n = (x4 (div2 (div2 n))) + 2 /\ even n /\ odd (div2 n))
+                           \/ (n = (x4 (div2 (div2 n))) + 3 /\ odd n /\ odd (div2 n)).
     Proof.
       intros.
       destruct (even_odd_dec n).
-      remember (even_div2 n e).
-      destruct (even_odd_dec (div2 n)).
-      - left. (* n = 4*(n/4)*)
-        unfold x4.
-        rewrite <-even_double by assumption.
-        apply even_double; assumption.
-      - right; right; left.
-        unfold x4.
-        replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
-        rewrite <-double_S.
-        rewrite <-odd_double by assumption.
-        apply even_double; assumption.
+      - remember (even_div2 n e).
+        destruct (even_odd_dec (div2 n)).
+        + left; split; [| split]; try assumption.
+          unfold x4.
+          rewrite <-even_double by assumption.
+          apply even_double; assumption.
+        + right; right; left; split; [| split]; try assumption.
+          unfold x4.
+          replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
+          rewrite <-double_S.
+          rewrite <-odd_double by assumption.
+          apply even_double; assumption.
       - destruct (even_odd_dec (div2 n)).
-        + right; left.
+        + right; left; split; [| split]; try assumption.
           unfold x4.
           rewrite <-even_double by assumption.
           replace (double (div2 n) + 1) with (S (double (div2 n))) by nliamega.
           apply odd_double; assumption.
-        + right; right; right.
+        + right; right; right; split; [| split]; try assumption.
           unfold x4.
           replace (double (double (div2 (div2 n))) + 3) with (S (S (S (double (double (div2 (div2 n))))))) by nliamega.
           rewrite <-double_S.
@@ -2330,8 +2330,35 @@ Section Fairness.
       exists m.
       exists p.
       split; [| nliamega].
-
-    Admitted.
+      subst.
+      replace (4 * _) with (2 * (2 * (S (div2 (S (div2 n)))))) by nliamega.
+      repeat (rewrite <-double_twice).
+      destruct (par4 n) as [[? [? ?]] | [[? [? ?]] | [[? [? ?]] | [? [? ?]]]]]; rewrite H at 2; rewrite H at 3; unfold x4.
+      - clear H0; split.
+        + rewrite double_twice; rewrite double_twice.
+          apply mult_le_compat_l.
+          rewrite <-even_div2 by assumption.
+          unfold double.
+          assert (div2 (div2 n) >= 2) by admit.
+          nliamega.
+        + rewrite <-even_div2 by assumption.
+          unfold x4 in H.
+          (repeat (rewrite double_twice)).
+          nliamega.
+      - split.
+        + rewrite double_S.
+          replace (double (double (div2 (div2 n))) + 1 ) with (S (double (double (div2 (div2 n))))) by nliamega.
+          apply le_n_S.
+          rewrite <-even_div2 by assumption.
+          assert (div2 (div2 n) >= 2) by admit.
+          unfold double.
+          nliamega.
+        + rewrite <-even_div2 by assumption.
+          replace (_ + 1) with (S (double (double (div2 (div2 n))))) by nliamega.
+          unfold double; nliamega.
+      - admit.
+      - admit.
+    Qed.
     
     Definition NS3T := NaiveSum3 (E_Trace zero E_Nat)
                                  (E_Trace one  E_Nat)
