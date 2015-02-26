@@ -1064,6 +1064,7 @@ Section Traces.
                 (set_union' l3 r3)
                 (set_union' l4 r4)
     end.
+  Notation "x +++ y" := (trace_plus x y) (at level 50).
 
   Definition trace_one n t : Trace :=
     match t with
@@ -2194,21 +2195,6 @@ Section Fairness.
   Qed.
   
   Section SumFair.
-    Lemma Sum_Parity_Trace :
-      forall n,
-        Trace_on (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) n
-        = trace_one (div2 n)
-                    (if even_odd_dec n
-                     then zero
-                     else one).
-    Proof.
-      intros n.
-      remember (even_odd_dec n) as mH.
-      unfold Trace_on; simpl.
-      destruct mH; rewrite <-HeqmH; auto.
-    Qed.
-
-    Notation "x +++ y" := (trace_plus x y) (at level 50).
     Lemma Sum_precise
     : forall n e1 e2,
         trace_eq (Trace_lt (E_Sum e1 e2) (double n))
@@ -2260,101 +2246,29 @@ Section Fairness.
     Proof.
       unfold Fair2.
       intros n.
-      exists (2 * n + 2).
-      remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
-      destruct t as [tz to ttw tth].
-      split; [nliamega| ].
+      exists (double (S n)).
+      remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (double (S n))) as t; destruct t as [tz to ttw tth].
+      split; [unfold double; nliamega| ].
 
-      generalize dependent tth.
-      generalize dependent ttw.
-      generalize dependent to.
-      generalize dependent tz.
-      induction n.
-      intros tz to ttw tth Heqt.
-      inversion Heqt; auto; apply set_eq_refl.
+      remember (Sum_precise (S n) (E_Trace zero E_Nat) (E_Trace one E_Nat)).
+      apply set_eq_trans with (z_to_n (S n));
+        [ replace tz with (trace_proj zero (Tracing tz to ttw tth)) by trivial
+        | replace to with (trace_proj one (Tracing tz to ttw tth)) by trivial; apply set_eq_symm
+        ];
+        (eapply set_eq_trans; [apply trace_eq_proj; rewrite Heqt; eassumption|]).
+      rewrite trace_proj_plus_distrl; rewrite (trace_lt_Nat_off _ zero one); [| discriminate].
+      eapply set_eq_trans; [apply set_union_unitr | apply set_eq_symm; apply trace_lt_Nat].
 
-      intros tz to ttw tth Htzto.
-      remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
-      replace (2 * S n + 2) with (S (S (2 * n + 2))) in Htzto by nliamega.
-      simpl in Htzto.
-      replace (n + (n + 0) + 2) with (2 * n + 2) in Htzto by nliamega.
-      destruct t as [tz' to' ttw' tth'].
-      assert (set_eq tz' to').
-      eapply IHn ; auto.
-      rewrite <-Heqt in Htzto.
-      clear Heqt.
-      clear IHn.
-      replace (Trace_on (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (S (2 * n + 2))) with (trace_one (S n) one) in Htzto.
-
-      replace (Trace_on (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) ((2 * n)+2)) with (trace_one (S n) zero) in Htzto.
-      unfold trace_one in Htzto.
-      unfold trace_plus in Htzto.
-      inversion Htzto.
-      clear  Htzto H1 H2.
-
-      - apply set_eq_trans with (s2 := set_union' (S n :: nil) tz').
-        apply set_union_unitl.
-        apply set_eq_trans with (s2 := set_union' (S n :: nil) to').
-        apply set_union_cong; auto.
-        apply set_union_cong.
-        apply set_eq_refl.
-        apply set_eq_symm.
-        apply set_union_unitl.
-
-      (* Trace (left + right) (2n+3) =  *)
-      - unfold Trace_on.
-        destruct (Enumerates_from_dec (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2)).
-        assert (Enumerates (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (2 * n + 2) (V_Sum_Left (V_Nat (S n))) (trace_one (S n) zero)).
-        apply ES_Sum_Left with (ln := (S n)); [nliamega| ].
-        econstructor.
-        constructor.
-        destruct x.
-
-        destruct (Enumerates_from_fun _ _ _ _ _ _ y H0); subst.
-        auto.
-
-      - unfold Trace_on.
-        destruct (Enumerates_from_dec (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (S (2 * n + 2))).
-        assert (Enumerates (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (S (2 * n + 2)) (V_Sum_Right (V_Nat (S n))) (trace_one (S n) one)).
-        apply ES_Sum_Right with (rn := S n); [nliamega|].
-        econstructor; constructor.
-        destruct x.
-        destruct (Enumerates_from_fun _ _ _ _ _ _ y H0); subst.
-        auto.
+      rewrite trace_proj_plus_distrl; rewrite (trace_lt_Nat_off _ one zero); [| discriminate].
+      eapply set_eq_trans; [apply set_union_unitl | apply set_eq_symm; apply trace_lt_Nat].
     Qed.
-
   End SumFair.
 
   Section NaiveSumUnfair.
     Definition NaiveSum3 e1 e2 e3 :=
       E_Sum e1 (E_Sum e2 e3).
 
-    Definition foo n :=
-      let p := (S (div2 (S (div2 n))))
-      in let m := S p
-         in (2 * m, n, 4 * p).
-    Eval compute in map foo (6::7::8::9::10::11::12::13::nil).
-
-    Lemma div2_slower_than_id n :
-      4 <= n ->
-      (S (div2 (S n))) < n.
-    Proof.
-      intros H.
-      remember (n - 4) as k; replace n with (4 + k) by nliamega; clear dependent n; rename k into n.
-      induction n.
-      compute; nliamega.
-      destruct (even_odd_dec (S (4 + n))).
-      rewrite even_div2 in IHn by assumption.
-      replace (S (4 + S n)) with (S (S (4 + n))) by nliamega.
-      nliamega.
-
-      replace (S (4 + n)) with (4 + S n) in o by nliamega.
-      rewrite <-odd_div2 by assumption.
-      replace (4 + S n) with (S (4 + n)) at 1 by nliamega.
-      nliamega.
-    Qed.
-
-    Definition x4 n := double (double n).
+    Notation x4 n := (double (double n)).
     
     Lemma par4 : forall n, (n = x4 (div2 (div2 n)) /\ even n /\ even (div2 n))
                            \/ (n = (x4 (div2 (div2 n))) + 1 /\ odd n /\ even (div2 n))
@@ -2366,23 +2280,19 @@ Section Fairness.
       - remember (even_div2 n e).
         destruct (even_odd_dec (div2 n)).
         + left; split; [| split]; try assumption.
-          unfold x4.
           rewrite <-even_double by assumption.
           apply even_double; assumption.
         + right; right; left; split; [| split]; try assumption.
-          unfold x4.
           replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
           rewrite <-double_S.
           rewrite <-odd_double by assumption.
           apply even_double; assumption.
       - destruct (even_odd_dec (div2 n)).
         + right; left; split; [| split]; try assumption.
-          unfold x4.
           rewrite <-even_double by assumption.
           replace (double (div2 n) + 1) with (S (double (div2 n))) by nliamega.
           apply odd_double; assumption.
         + right; right; right; split; [| split]; try assumption.
-          unfold x4.
           replace (double (double (div2 (div2 n))) + 3) with (S (S (S (double (double (div2 (div2 n))))))) by nliamega.
           rewrite <-double_S.
           rewrite <-odd_double by assumption.
@@ -2391,9 +2301,7 @@ Section Fairness.
 
     Lemma div4big : forall n, n >= 8 -> (div2 (div2 n) >= 2).
     Proof.
-      intros n H; remember (n - 8) as k; replace n with (k + 8) by nliamega; clear dependent n; rename k into n.
-      replace (n + 8) with (S (S (S (S (S (S (S (S n)))))))) by nliamega.
-      unfold div2; nliamega.
+      intros n ?; remember (n - 8) as k; replace n with (8 + k); simpl; nliamega.
     Qed.
 
     Lemma div2div4 : forall n, n >= 8 -> exists m p, 2 * m <= n < 4 * p /\ p < m.
@@ -2408,7 +2316,7 @@ Section Fairness.
       replace (4 * _) with (2 * (2 * (S (div2 (S (div2 n)))))) by nliamega.
       assert (div2 (div2 n) >= 2) by (apply div4big; assumption).
       repeat (rewrite <-double_twice).
-      destruct (par4 n) as [[Hpar [? ?]] | [[Hpar [? ?]] | [[Hpar [? ?]] | [Hpar [? ?]]]]]; rewrite Hpar at 2; rewrite Hpar at 3; unfold x4.
+      destruct (par4 n) as [[Hpar [? ?]] | [[Hpar [? ?]] | [[Hpar [? ?]] | [Hpar [? ?]]]]]; rewrite Hpar at 2; rewrite Hpar at 3.
       - clear H0; split.
         + rewrite double_twice; rewrite double_twice.
           apply mult_le_compat_l.
@@ -2416,7 +2324,6 @@ Section Fairness.
           unfold double.
           nliamega.
         + rewrite <-even_div2 by assumption.
-          unfold x4 in H.
           (repeat (rewrite double_twice)).
           nliamega.
       - split.
