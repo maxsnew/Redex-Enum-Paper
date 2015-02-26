@@ -335,7 +335,7 @@ Hint Resolve Pairing_from_sound.
 
 Notation set' := (set nat).
 Notation "∅" := (@empty_set nat).
-Notation set_union' := (@set_union nat eq_nat_dec).
+Notation "p ∪ q" := (@set_union nat eq_nat_dec p q) (at level 50).
 Notation set_add' := (@set_add nat eq_nat_dec).
 Section Sets.
   Fixpoint subset (s1 s2 : set nat) :=
@@ -525,7 +525,7 @@ Section Sets.
     intros s1 s2 H; inversion H; split; auto.
   Qed.
 
-  (* Theorem set_union_or : forall s1 s2, subset s1 (set_union' s1 s2). *)
+  (* Theorem set_union_or : forall s1 s2, subset s1 (s1 ∪ s2). *)
 
   Lemma set_add_subset : forall x s1 s2, set_In x s2 -> subset s1 s2 -> subset (set_add' x s1) s2.
   Proof.
@@ -641,7 +641,7 @@ Section Sets.
     apply set_add_cons_eq.
   Qed.
 
-  Lemma set_union_unitl : forall s, set_eq (set_union' ∅ s) s.
+  Lemma set_union_unitl : forall s, set_eq (∅ ∪ s) s.
   Proof.
     split.
     induction s.
@@ -654,26 +654,24 @@ Section Sets.
                    | nil => x
                    | a1 :: y1 => set_add eq_nat_dec a1 (set_union x y1)
                  end) ∅ s
-            )) with (set_union' ∅ s) in * by auto.
-    fold set_add'.
+            )) with (∅ ∪ s) in * by auto.
     apply set_add_subset; auto.
     constructor; auto.
     apply subset_consr; auto.
 
     induction s; auto.
     unfold set_union.
-    fold set_union.
     apply set_add_cons_subset; auto.
   Qed.
 
-  Lemma set_union_unitr : forall s, set_eq (set_union' s ∅) s.
+  Lemma set_union_unitr : forall s, set_eq (s ∪ ∅) s.
   Proof.
     apply set_eq_refl.
   Qed.
 
   Lemma elem_union :
     forall s x,
-      set_In x s -> forall s', set_In x (set_union' s' s).
+      set_In x s -> forall s', set_In x (s' ∪ s).
   Proof.
     induction s.
     intros H contra.
@@ -681,7 +679,7 @@ Section Sets.
 
     intros x Hin s'.
     simpl.
-    assert (set_In x (a :: (set_union' s' s))).
+    assert (set_In x (a :: (s' ∪ s))).
     destruct Hin.
     constructor; auto.
     eapply In_subset_def.
@@ -694,7 +692,7 @@ Section Sets.
     auto.
   Qed.
 
-  Lemma subset_union_cons : forall x s1 s2, subset (set_union' (x::s1) s2) (x :: (set_union' s1 s2)).
+  Lemma subset_union_cons : forall x s1 s2, subset ((x::s1) ∪ s2) (x :: (s1 ∪ s2)).
     induction s2.
     simpl; split.
     tauto.
@@ -702,7 +700,7 @@ Section Sets.
     simpl.
     eapply subset_trans.
     apply set_add_cons_eq.
-    apply subset_trans with (s2 := (x :: a :: (set_union' s1 s2))).
+    apply subset_trans with (s2 := (x :: a :: (s1 ∪ s2))).
     eapply subset_trans.
     apply set_cons_cons_subset.
     apply IHs2.
@@ -712,7 +710,7 @@ Section Sets.
     apply set_add_cons_eq.
   Qed.
 
-  Theorem subset_union_comm : forall s1 s2, subset (set_union' s1 s2) (set_union' s2 s1).
+  Theorem subset_union_comm : forall s1 s2, subset (s1 ∪ s2) (s2 ∪ s1).
   Proof.
     induction s1.
     intros.
@@ -728,7 +726,7 @@ Section Sets.
     apply IHs1.
   Qed.
 
-  Theorem set_eq_union_comm : forall s1 s2, set_eq (set_union' s1 s2) (set_union' s2 s1).
+  Theorem set_eq_union_comm : forall s1 s2, set_eq (s1 ∪ s2) (s2 ∪ s1).
   Proof.
     intros s1 s2.
     split; apply subset_union_comm.
@@ -737,7 +735,7 @@ Section Sets.
   Lemma subset_union_transr :
     forall s sl sr,
       subset s sr ->
-      subset s (set_union' sl sr).
+      subset s (sl ∪ sr).
   Proof.
     intros.
     apply subset_In_def.
@@ -751,7 +749,7 @@ Section Sets.
   Lemma subset_union_transl :
     forall s sl sr,
       subset s sl ->
-      subset s (set_union' sl sr).
+      subset s (sl ∪ sr).
   Proof.
     intros.
     eapply subset_trans; [| apply subset_union_comm ].
@@ -761,7 +759,7 @@ Section Sets.
 
   Lemma set_union_subset_cong :
     forall sl sr sl' sr',
-      subset sl sl' -> subset sr sr' -> subset (set_union' sl sr) (set_union' sl' sr').
+      subset sl sl' -> subset sr sr' -> subset (sl ∪ sr) (sl' ∪ sr').
   Proof.
     induction sr.
     intros.
@@ -771,7 +769,7 @@ Section Sets.
 
     intros sl' sr' Hsubl Hsubr.
     simpl.
-    apply subset_trans with (s2 := (a :: set_union' sl sr)).
+    apply subset_trans with (s2 := (a :: sl ∪ sr)).
     apply set_subset_weaken.
     apply set_eq_symm.
     apply set_add_cons_eq.
@@ -787,7 +785,7 @@ Section Sets.
   Qed.
 
   Lemma set_union_cong : forall sl sr sl' sr',
-                           set_eq sl sl' -> set_eq sr sr' -> set_eq (set_union' sl sr) (set_union' sl' sr').
+                           set_eq sl sl' -> set_eq sr sr' -> set_eq (sl ∪ sr) (sl' ∪ sr').
   Proof.
     intros sl sr sl' sr' Hl Hr.
     destruct Hl as [Hl Hl'].
@@ -815,7 +813,7 @@ Section Sets.
     apply set_eq_cons_cons; auto.
   Qed.
 
-  Theorem set_union_app_eq : forall s1 s2, set_eq (set_union' s1 s2) (s1 ++ s2).
+  Theorem set_union_app_eq : forall s1 s2, set_eq (s1 ∪ s2) (s1 ++ s2).
   Proof.
     induction s2.
     simpl.
@@ -833,7 +831,7 @@ Section Sets.
   Theorem set_union_app_eq_gen : forall s1 s2 s3 s4,
                                    set_eq s1 s3 ->
                                    set_eq s2 s4 ->
-                                   set_eq (set_union' s1 s2) (s3 ++ s4).
+                                   set_eq (s1 ∪ s2) (s3 ++ s4).
   Proof.
     intros s1 s2 s3 s4 H13 H24.
     eapply set_eq_trans; [| apply set_union_app_eq].
@@ -842,7 +840,7 @@ Section Sets.
 
 
   Theorem subset_union_both s sl sr
-  : subset sl s -> subset sr s -> subset (set_union' sl sr) s.
+  : subset sl s -> subset sr s -> subset (sl ∪ sr) s.
   Proof.
     intros Hls Hrs.
     apply subset_In_def.
@@ -853,7 +851,7 @@ Section Sets.
     apply In_subset_def with sr; auto.
   Qed.
 
-  Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (set_union' s1 s2) s2.
+  Theorem subset_union_eq : forall s1 s2, subset s1 s2 -> set_eq (s1 ∪ s2) s2.
   Proof.
     split; [| apply subset_union_transr; apply subset_refl ].
     generalize dependent s2.
@@ -864,7 +862,7 @@ Section Sets.
     apply subset_refl.
 
     intros s2 Hsub.
-    apply subset_trans with (s2 := x :: (set_union' s1 s2)).
+    apply subset_trans with (s2 := x :: (s1 ∪ s2)).
     apply subset_trans with (s2 := (x :: s1 ++ s2)).
     apply set_union_app_eq.
     apply set_subset_weaken.
@@ -879,8 +877,8 @@ Section Sets.
   Qed.
 
   Theorem set_union_assoc s1 s2 s3
-  : set_eq (set_union' (set_union' s1 s2) s3)
-           (set_union' s1 (set_union' s2 s3)).
+  : set_eq ((s1 ∪ s2) ∪ s3)
+           (s1 ∪ (s2 ∪ s3)).
   Proof.
     apply set_eq_trans with (s2 := ((s1 ++ s2) ++ s3)).
     apply set_union_app_eq_gen.
@@ -1059,10 +1057,7 @@ Section Traces.
   Definition trace_plus (t1 t2 : Trace) : Trace :=
     match (t1, t2) with
       | (Tracing l1 l2 l3 l4, Tracing r1 r2 r3 r4) =>
-        Tracing (set_union' l1 r1)
-                (set_union' l2 r2)
-                (set_union' l3 r3)
-                (set_union' l4 r4)
+        Tracing (l1 ∪ r1) (l2 ∪ r2) (l3 ∪ r3) (l4 ∪ r4)
     end.
   Notation "x +++ y" := (trace_plus x y) (at level 50).
 
@@ -1082,6 +1077,7 @@ Section Traces.
         /\ set_eq l2 r2
         /\ set_eq l3 r3
     end.
+  Notation "t1 ≡ t2" := (trace_eq t1 t2) (at level 70, no associativity).
 
   Definition sub_trace (t1 t2 : Trace) : Prop :=
     match (t1, t2) with
@@ -1107,7 +1103,7 @@ Section Traces.
   Theorem sub_trace_zero t : sub_trace trace_zero t.
   Proof. destruct t; compute; tauto. Qed.
 
-  Theorem trace_eq_proj t1 t2 tg : trace_eq t1 t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
+  Theorem trace_eq_proj t1 t2 tg : t1 ≡ t2 -> set_eq (trace_proj tg t1) (trace_proj tg t2).
   Proof.
     unfold trace_eq, trace_proj; destruct t1; destruct t2; destruct tg; intuition.
   Qed.
@@ -1123,19 +1119,19 @@ Section Traces.
   Proof. unfold trace_eq'; intuition. Qed.
   Theorem trace_eq'_weakenr t1 t2 : trace_eq' t1 t2 -> sub_trace t2 t1.
   Proof. unfold trace_eq'; intuition. Qed.
-  Theorem trace_eq_eq'_equiv t1 t2 : trace_eq t1 t2 <-> trace_eq' t1 t2.
+  Theorem trace_eq_eq'_equiv t1 t2 : t1 ≡ t2 <-> trace_eq' t1 t2.
   Proof.
     unfold trace_eq, trace_eq', sub_trace, set_eq;
     destruct t1; destruct t2; intuition.
   Qed.
 
-  Theorem trace_eq_weakenl t1 t2 : trace_eq t1 t2 -> sub_trace t1 t2.
+  Theorem trace_eq_weakenl t1 t2 : t1 ≡ t2 -> sub_trace t1 t2.
   Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenl. Qed.
 
-  Theorem trace_eq_weakenr t1 t2 : trace_eq t1 t2 -> sub_trace t2 t1.
+  Theorem trace_eq_weakenr t1 t2 : t1 ≡ t2 -> sub_trace t2 t1.
   Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenr. Qed.
 
-  Theorem trace_plus_cong t1 t2 t3 t4 : trace_eq t1 t3 -> trace_eq t2 t4 -> trace_eq (t1 +++ t2) (t3 +++ t4).
+  Theorem trace_plus_cong t1 t2 t3 t4 : t1 ≡ t3 -> t2 ≡ t4 -> (t1 +++ t2) ≡ (t3 +++ t4).
     unfold trace_eq.
     destruct t1; destruct t2; destruct t3; destruct t4.
     unfold trace_plus.
@@ -1144,13 +1140,13 @@ Section Traces.
     split4; apply set_union_cong; auto.
   Qed.
 
-  Theorem trace_eq_refl t : trace_eq t t.
+  Theorem trace_eq_refl t : t ≡ t.
   Proof.
     unfold trace_eq; destruct t; split4; apply set_eq_refl.
   Qed.
 
 
-  Theorem trace_eq_symm t1 t2 : trace_eq t1 t2 -> trace_eq t2 t1.
+  Theorem trace_eq_symm t1 t2 : t1 ≡ t2 -> t2 ≡ t1.
   Proof.
     unfold trace_eq.
     destruct t1; destruct t2.
@@ -1158,7 +1154,7 @@ Section Traces.
     split4; apply set_eq_symm; auto.
   Qed.
 
-  Theorem trace_eq_trans t1 t2 t3 : trace_eq t1 t2 -> trace_eq t2 t3 -> trace_eq t1 t3.
+  Theorem trace_eq_trans t1 t2 t3 : t1 ≡ t2 -> t2 ≡ t3 -> t1 ≡ t3.
   Proof.
     unfold trace_eq.
     destruct t1; destruct t2; destruct t3.
@@ -1167,14 +1163,14 @@ Section Traces.
     split4; eapply set_eq_trans; eauto.
   Qed.
 
-  Theorem trace_plus_comm t1 t2 : trace_eq (t1 +++ t2) (t2 +++ t1).
+  Theorem trace_plus_comm t1 t2 : (t1 +++ t2) ≡ (t2 +++ t1).
   Proof.
     destruct t1, t2.
     unfold trace_plus.
     split4; apply set_eq_union_comm.
   Qed.
 
-  Theorem trace_plus_assoc t1 t2 t3 : trace_eq (t1 +++ (t2 +++ t3))
+  Theorem trace_plus_assoc t1 t2 t3 : (t1 +++ (t2 +++ t3)) ≡
                                                ((t1 +++ t2) +++ t3).
   Proof.
     destruct t1, t2, t3.
@@ -1200,20 +1196,20 @@ Section Traces.
     apply sub_trace_plus_transl; auto.
   Qed.
 
-  Theorem sub_trace_plus_eq : forall t1 t2, sub_trace t1 t2 -> trace_eq (t1 +++ t2) t2.
+  Theorem sub_trace_plus_eq : forall t1 t2, sub_trace t1 t2 -> (t1 +++ t2) ≡ t2.
   Proof.
     intros t1 t2 H; destruct t1; destruct t2;
       destruct4 H; split4; apply subset_union_eq; auto.
   Qed.
 
   Theorem trace_plus_unitl t :
-    trace_eq (trace_zero +++ t) t.
+    (trace_zero +++ t) ≡ t.
   Proof.
     destruct t; split4; apply set_union_unitl.
   Qed.
 
   Theorem trace_plus_unitl_gen t1 t2 :
-    trace_eq t1 t2 -> trace_eq (trace_zero +++ t1) t2.
+    t1 ≡ t2 -> (trace_zero +++ t1) ≡ t2.
   Proof.
     intros H.
     eapply trace_eq_trans; [ apply trace_plus_unitl | auto].
@@ -1221,7 +1217,7 @@ Section Traces.
 
 
   Theorem trace_plus_unitr t :
-    trace_eq (t +++ trace_zero) t.
+    (t +++ trace_zero) ≡ t.
   Proof.
     eapply trace_eq_trans;
     [apply trace_plus_comm| apply trace_plus_unitl].
@@ -1229,7 +1225,7 @@ Section Traces.
 
 
   Theorem trace_plus_unitr_gen t1 t2 :
-    trace_eq t1 t2 -> trace_eq (t1 +++ trace_zero) t2.
+    t1 ≡ t2 -> (t1 +++ trace_zero) ≡ t2.
   Proof.
     intros H.
     eapply trace_eq_trans; [ apply trace_plus_unitr | auto].
@@ -1277,6 +1273,7 @@ Section Traces.
 
 End Traces.
 Notation "x +++ y" := (trace_plus x y) (at level 50).
+Notation "t1 ≡ t2" := (trace_eq t1 t2) (at level 70, no associativity).
 Hint Resolve trace_eq_refl.
 Hint Resolve sub_trace_refl.
 
@@ -1646,7 +1643,7 @@ Section EnumTrace.
            | S hi' => (Trace_on e hi') +++ (Trace_from_to e lo hi')
          end.
 
-  Theorem trace_lt_from_to_0_same e n : trace_eq (Trace_lt e n) (Trace_from_to e 0 n).
+  Theorem trace_lt_from_to_0_same e n : (Trace_lt e n) ≡ (Trace_from_to e 0 n).
   Proof.
     induction n.
     simpl.
@@ -1678,8 +1675,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_split1r e m n
   : m <= n ->
-    trace_eq (Trace_from_to e m (S n))
-             ((Trace_from_to e m n) +++ (Trace_on e n)).
+    (Trace_from_to e m (S n)) ≡ ((Trace_from_to e m n) +++ (Trace_on e n)).
   Proof.
     intros H.
     unfold Trace_from_to at 1.
@@ -1694,8 +1690,7 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_from_to_split1l' e m n
-  : trace_eq (Trace_from_to e m (S (m + n)))
-             ((Trace_on e m) +++ (Trace_from_to e (S m) (S (m + n)))).
+  : (Trace_from_to e m (S (m + n))) ≡ ((Trace_on e m) +++ (Trace_from_to e (S m) (S (m + n)))).
   Proof.
     generalize dependent m.
     induction n as [| n].
@@ -1743,8 +1738,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_split1l e m n
   : m < n ->
-    trace_eq (Trace_from_to e m n)
-             ((Trace_on e m) +++ (Trace_from_to e (S m) n)).
+    Trace_from_to e m n ≡ (Trace_on e m) +++ (Trace_from_to e (S m) n).
   Proof.
     intros H.
     remember (pred (n - m)) as t.
@@ -1756,8 +1750,7 @@ Section EnumTrace.
 
   Theorem trace_from_to_split e m n p :
     (m <= n < p)
-    -> trace_eq (Trace_from_to e m p)
-                ((Trace_from_to e m n) +++ (Trace_from_to e n p)).
+    -> Trace_from_to e m p ≡ (Trace_from_to e m n) +++ (Trace_from_to e n p).
   Proof.
     generalize dependent p.
     generalize dependent m.
@@ -1795,8 +1788,7 @@ Section EnumTrace.
   Theorem trace_from_to_0_split :
     forall m n e,
       m < n ->
-      trace_eq (Trace_lt e n)
-               ((Trace_lt e m) +++ (Trace_from_to e m n)).
+      Trace_lt e n ≡ (Trace_lt e m) +++ (Trace_from_to e m n).
   Proof.
     intros m n e Hmn.
     eapply trace_eq_trans.
@@ -1825,7 +1817,7 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_proj_plus_distrl tg t1 t2
-  : trace_proj tg (t1 +++ t2) = (set_union' (trace_proj tg t1) (trace_proj tg t2)).
+  : trace_proj tg (t1 +++ t2) = ((trace_proj tg t1) ∪ (trace_proj tg t2)).
   Proof.
     destruct t1; destruct t2; destruct tg; auto.
   Qed.
@@ -2194,8 +2186,7 @@ Section Fairness.
   Section SumFair.
     Lemma Sum_precise
     : forall n e1 e2,
-        trace_eq (Trace_lt (E_Sum e1 e2) (double n))
-                 ((Trace_lt e1 n) +++ (Trace_lt e2 n)).
+        Trace_lt (E_Sum e1 e2) (double n) ≡ (Trace_lt e1 n) +++ (Trace_lt e2 n).
     Proof.
       intros n e1 e2.
       induction n.
@@ -2358,8 +2349,8 @@ Section Fairness.
 
     Lemma SumSum_precise
     : forall n e1 e2 e3,
-        trace_eq (Trace_lt (E_Sum e1 (E_Sum e2 e3)) (double (double n)))
-                 ((Trace_lt e1 (double n)) +++ ((Trace_lt e2 n) +++ (Trace_lt e3 n))).
+        Trace_lt (E_Sum e1 (E_Sum e2 e3)) (double (double n))
+        ≡ (Trace_lt e1 (double n)) +++ ((Trace_lt e2 n) +++ (Trace_lt e3 n)).
     Proof.
       intros.
       eapply trace_eq_trans; [apply Sum_precise|].
@@ -2437,8 +2428,8 @@ Section Fairness.
   Section PairFair.
     Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
     Lemma Pair_layer e1 e2 n
-    : trace_eq (Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n))
-               ((Trace_lt e1 (S n)) +++ (Trace_lt e2 (S n))).
+    : Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n)
+      ≡ (Trace_lt e1 (S n)) +++ (Trace_lt e2 (S n)).
     Proof.
       apply trace_eq_eq'_equiv; split.
       (* trace (e1 x e2) n^2 (n+1)^2 < (trace ) *)
@@ -2490,8 +2481,8 @@ Section Fairness.
 
     Lemma PairNN_layer :
       forall n,
-        trace_eq (Trace_from_to E_PairNN (n * n) (S n * S n))
-                 (Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅).
+        Trace_from_to E_PairNN (n * n) (S n * S n)
+        ≡ Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅.
     Proof.
       intros n.
       eapply trace_eq_trans.
@@ -2507,8 +2498,7 @@ Section Fairness.
 
     Lemma Pair_precise
     : forall n e1 e2,
-        trace_eq (Trace_lt (E_Pair e1 e2) (n * n))
-                 ((Trace_lt e1 n) +++ (Trace_lt e2 n)).
+        (Trace_lt (E_Pair e1 e2) (n * n)) ≡ ((Trace_lt e1 n) +++ (Trace_lt e2 n)).
       intros n.
       induction n as [| n IHn]; [  intros; compute; tauto| ].
       intros e1 e2.
@@ -2522,8 +2512,8 @@ Section Fairness.
 
     Lemma PairPair_precise
     : forall n e1 e2 e3,
-        trace_eq (Trace_lt (E_Pair e1 (E_Pair e2 e3)) ((n * n) * (n * n)))
-                 ((Trace_lt e1 (n * n)) +++ ((Trace_lt e2 n) +++ (Trace_lt e3 n))).
+        Trace_lt (E_Pair e1 (E_Pair e2 e3)) ((n * n) * (n * n))
+        ≡ (Trace_lt e1 (n * n)) +++ ((Trace_lt e2 n) +++ (Trace_lt e3 n)).
     Proof.
       intros n e1 e2 e3.
       eapply trace_eq_trans; [apply Pair_precise|].
@@ -2532,7 +2522,7 @@ Section Fairness.
     Qed.
 
     Lemma Pair_Fair_precise :
-      forall n, trace_eq (Trace_lt E_PairNN (n * n)) (Tracing (z_to_n n) (z_to_n n) ∅ ∅).
+      forall n, Trace_lt E_PairNN (n * n) ≡ Tracing (z_to_n n) (z_to_n n) ∅ ∅.
     Proof.
       induction n.
       compute; tauto.
