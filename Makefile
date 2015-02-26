@@ -7,8 +7,9 @@ paper:
 DNE:
 
 test:
-	raco make -v model/model.rkt
+	raco make -v model/model.rkt model/run-coq-redex-tests.rkt
 	raco test model/model.rkt
+	raco test model/run-coq-redex-tests.rkt
 
 model/Enum.vo: model/Enum.v
 	coqc -R model Enum model/Enum.v

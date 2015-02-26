@@ -40,7 +40,7 @@
                   (coq-pair coq-n _coq-backwards-trace)))
        (define-values (redex-v redex-trace) (m:from-nat+trace redex-e orig-n))
        (define (check-it failed? fmt-str . args)
-         (test-log! (not failed?))
+         (test-log! failed?)
          (unless failed?
            (eprintf "FAILED:\n enum: ~s\n n: ~s\n val: ~s\n ~a\n\n"
                     redex-e 
@@ -308,11 +308,6 @@
 
 
 (run-tests
- (build-test-cases '(dep/e natural/e nat->map-of-swap-zero-with)
-                   3))
-
-#;
-(run-tests
  (build-test-cases 'natural/e 100)
  (build-test-cases '(cons/e natural/e natural/e) 100)
  (build-test-cases '(or/e natural/e natural/e) 100)
@@ -327,9 +322,7 @@
                    100)
  (build-test-cases '(map/e swap-cons swap-cons (cons/e natural/e natural/e))
                    100)
- (build-test-cases '(map/e (swap-zero-with 10) natural/e)
-                   20)
- (build-test-cases '(dep/e nat->map-of-swap-zero-with natural/e)
+ (build-test-cases '(dep/e natural/e nat->map-of-swap-zero-with)
                    100))
 
 ;; missing dep/e
