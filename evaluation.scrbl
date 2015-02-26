@@ -10,7 +10,7 @@
           racket/runtime-path
           (only-in pict scale))
 
-@(define-runtime-path 10-17-14 "results/10-17-14")
+@(define-runtime-path 2-25-15 "results/2-25-15")
 
 @title[#:tag "sec:evaluation"]{Empirical Evaluation}
 
@@ -41,7 +41,7 @@ until 24 hours elapses, whichever comes first.
          @list{Overview of random testing performance of ad hoc generation,
                enumeration, and random indexing into an enumeration,
                on a benchmark of Redex models.}
-         (plot-lines-from-directory 10-17-14)]
+         (plot-lines-from-directory 2-25-15)]
 
 We used two identical 64 core AMD machines with Opteron
 6274s running at 2,200 MHz with a 2 MB L2 cache to run the
@@ -86,7 +86,7 @@ than the other two.
          @list{The mean time each generator takes to find the bugs,
                for each bug that some generator found; bars indicate
                90% confidence intervals}
-         (plot-points-from-directory 10-17-14)]
+         (plot-points-from-directory 2-25-15)]
 
 For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned
