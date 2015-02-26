@@ -13,10 +13,6 @@
 
 @title{Fair Pairing}
 
-For pairing we use @citet[elegant-pairing-function]'s bijection, that we
-refer to as ``boxy'' pairing, which is specified in the "cons/e x" and
-"cons/e y" rules in @Figure-ref["fig:semantics"].
-
 @theorem{@racket[cons/e] is Fair}
 @proof{
 Our equilibria points are @texmath{n^2} for every natural number

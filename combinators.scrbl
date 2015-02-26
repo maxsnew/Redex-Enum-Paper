@@ -47,6 +47,21 @@ an enumeration with the six given elements, where the elements
 are put in correspondence with the naturals in order they are
 given.
 
+The disjoint union enumerator, @racket[or/e], takes two or more
+enumerators. The resulting enumeration alternates between the input
+enumerations, so that if given @racket[n] infinite enumerations, the
+resulting enumeration will alternate through each of the enumerations
+every @racket[n] positions.  For example, the following is the
+beginning of the disjoint union of an enumeration of natural numbers
+and an enumeration of strings:
+
+@enum-example[(or/e natural/e string/e)
+              14]
+
+The contracts associated with the enumerators are used to determine
+which enumeration a value came from.  We describe the ordering
+in detail in @secref["sec:fair"].
+
 The next combinator is the pairing operator 
 @racket[cons/e]. It takes two enumerations and returns an
 enumeration of pairs of those values. If one of the
@@ -67,23 +82,9 @@ first 12 elements are
 
 The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
-n-dimensional grid. We discuss this in detail in @secref["sec:fair"].
+n-dimensional grid.
+We discuss this in detail in @secref["sec:fair"].
 
-The disjoint union enumerator, @racket[or/e], takes two or more
-enumerators. The resulting enumeration alternates between the input
-enumerations, so that if given @racket[n] infinite enumerations, the
-resulting enumeration will alternate through each of the enumerations
-every @racket[n] positions.  For example, the following is the
-beginning of the disjoint union of an enumeration of natural numbers
-and an enumeration of strings:
-
-@enum-example[(or/e natural/e string/e)
-              14]
-
-The contracts associated with the enumerators are used to determine
-which enumeration a value came from.  We describe the ordering
-in detail in @secref["sec:fair"].
-              
 The combinator
 @racket[delay/e] facilitates fixed points of enumerators,
 in order to build recursive enumerations.

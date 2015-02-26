@@ -92,7 +92,9 @@
 
 @include-section["combinators.scrbl"]
 
-@include-section["fair-intro.scrbl"]
+@include-section["fair-informal.scrbl"]
+
+@include-section["fair-formal.scrbl"]
 
 @include-section["redex-enumeration.scrbl"]
 

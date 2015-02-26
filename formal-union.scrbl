@@ -13,11 +13,7 @@
 
 @title{Fair Union}
 
-The @racket[or/e] in our model is different from the implementation in
-3 ways. First, it's restricted to 2 arguments, secondly, it
-attaches a tag to the front of the resulting values to make apparent
-from which enumeration a value came and finally it can use finite enumerations.
-
+Unsurprisingly, the @racket[or/e] combinator is fair.
 @theorem{@racket[or/e] is fair.}
 @proof{
 We prove that @texmath{2*n} is an equilibrium point for all
@@ -50,19 +46,6 @@ indicates it is unfairly weighted to the first argument, as shown on the left in
 @centered{@(hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good))}
 }
 
-@theorem{@racket[or-three/e is unfair]}
-@proof{
-To show something is unfair, we show that after a certain point, there
-are no equilibria. For any @texmath{n}, the trace evaluated at
-@texmath{0} will always include a number near
-@texmath{\lfloor{(n-1)/2}\rfloor}, but everything in the set that is
-the trace evaluated at @texmath{1} or @texmath{2} will be less than
-@texmath{\lceil{n/4}\rceil}. For sufficiently large @texmath{n},
-@texmath{\lfloor{(n-1)/2}\rfloor > \lceil{n/4}\rceil} so these sets
-are not equal.
-@qed
-}
-The theorem in the coq model is @racket[NaiveSum3Unfair].
 
 A fair generalization to @texmath{k} arguments is a straightforward
 extension. Instead of checking parity and dividing by @texmath{2},
