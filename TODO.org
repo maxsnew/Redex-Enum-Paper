@@ -6,6 +6,10 @@
   5. [-] write the dang paper                     (Max + everyone)
      1. [ ] writeup of bounded-list/e                (Max)
      2. [ ] rewrite fairness section                 (Max)
+        1. [ ] Use common terminology:
+           1. [ ] Complete trace vs Trace from 0 to n
+           2. [ ] Trace from to ?
+           3. [ ] State which proofs are formalized in coq
      3. [X] redex ambiguity                          (Robby)
      4. [X] Fix Figure 3 (both sides are fair)
      5. [ ] figure out what to do with this cite:
