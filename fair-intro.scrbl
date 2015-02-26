@@ -219,7 +219,14 @@ in the complete trace of @raw-latex{$c^k$} applied to @sr[(trace/e 1 enum_1)]
 to @sr[enum_k], is a function that maps each number between @sr[1] and @sr[k]
 to exactly the same set of numbers. Any other combinator is unfair.
 
+We present high-level overviews of proofs of fairness and unfairness
+in the following sections. We have mechanized many of these proofs in
+coq using a formalism very similar to that in
+@Figure-ref["fig:semantics"]. The main difference in the coq model is
+that traces are represented as a 4-tuple of sets of natural numbers
+rather than functions from natural numbers to sets of naturals. We
+will note which proofs have been formalized as we go.
+
 @include-section["fair-union.scrbl"]
 
 @include-section["fair-tuple.scrbl"]
-

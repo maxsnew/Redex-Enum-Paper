@@ -28,6 +28,8 @@
                  #"\\newtheorem{theorem}{Theorem}\n"
                  #"\\newenvironment{proof}[1][Proof]{\\begin{trivlist}\n"
                  #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
+                 #"\\newenvironment{proof_idea}[1][Proof Idea]{\\begin{trivlist}\n"
+                 #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
                  #"\\newcommand{\\qed}{\\nobreak \\ifvmode \\relax \\else\n"
                  #"\\ifdim\\lastskip<1.5em \\hskip-\\lastskip\n"
                  #"\\hskip1.5em plus0em minus0.5em \\fi \\nobreak\n"

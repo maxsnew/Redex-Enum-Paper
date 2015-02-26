@@ -232,7 +232,7 @@ Section Pairing.
     Lemma sqrt_4th_root_spread n :
       16 <= n ->
       exists m p,
-        m * m <= n < (p * p) * (p * p) /\ p * p < m * m.
+        m * m <= n < (p * p) * (p * p) /\ p < m.
     Proof.
       intros H.
       exists (S (S (sqrt (S (sqrt n))))).
@@ -2377,9 +2377,9 @@ Section Fairness.
     Qed.
   End PairFair.
 
-  Section NaivePairUnfair.
+  Section NaiveTripleUnfair.
 
-    Definition NaivePair3 e1 e2 e3 :=
+    Definition NaiveTriple3 e1 e2 e3 :=
       E_Pair e1 (E_Pair e2 e3).
 
     Definition AltUnfair3 k :=
@@ -2405,11 +2405,11 @@ Section Fairness.
       assert (set_eq t0 t2) by (eapply set_eq_trans; eauto); contradiction.
     Qed.
 
-    Definition traceNP3 := Trace_lt (NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
+    Definition traceNP3 := Trace_lt (NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
 
-    Definition NP3T := NaivePair3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
+    Definition NP3T := NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
 
-    Theorem NaivePairUnFair : ~ (Fair3 NaivePair3).
+    Theorem NaiveTripleUnfair : ~ (Fair3 NaiveTriple3).
     Proof.
 
       apply AltUnfair3Suff.
@@ -2434,7 +2434,7 @@ Section Fairness.
         destruct4 H.
         eapply subset_trans; try eassumption.
         clear H H0 H1 H2; clear dependent t0; clear t1 t2 t3.
-        unfold NP3T, NaivePair3 in *.
+        unfold NP3T, NaiveTriple3 in *.
         remember (Pair_precise m (E_Trace zero E_Nat) (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))).
         clear Heqt.
         rewrite <-Heqt0 in t.
@@ -2457,7 +2457,7 @@ Section Fairness.
         eapply subset_trans; try eassumption.
         clear H0 H1 H2 H3; clear dependent t0; clear t1 t2 t3; clear dependent m; clear dependent n.
         unfold NP3T in Heqp4t.
-        unfold NaivePair3 in Heqp4t.
+        unfold NaiveTriple3 in Heqp4t.
         remember (PairPair_precise p (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
         clear Heqt.
         rewrite <-Heqp4t in t.
@@ -2489,5 +2489,5 @@ Section Fairness.
         rewrite <-z_to_n_correct.
         apply In_subset_def; assumption.
     Qed.
-  End NaivePairUnfair.
+  End NaiveTripleUnfair.
 End Fairness.
