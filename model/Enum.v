@@ -2208,6 +2208,7 @@ Section Fairness.
       destruct mH; rewrite <-HeqmH; auto.
     Qed.
 
+    Notation "x +++ y" := (trace_plus x y) (at level 50).
     Lemma Sum_precise
     : forall n e1 e2,
         trace_eq (Trace_lt (E_Sum e1 e2) (double n))
@@ -2222,7 +2223,37 @@ Section Fairness.
       unfold Trace_on.
       remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er].
       remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El].
-    Admitted.
+      simpl.
+      eapply trace_eq_trans; [apply trace_plus_assoc|].
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]|].
+      eapply trace_eq_trans; [apply trace_eq_symm; apply trace_plus_assoc|].
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|]; apply trace_plus_cong; [apply trace_eq_refl|]; apply IHn |].
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_assoc]|].
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]]|].
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|apply trace_eq_symm; apply trace_plus_assoc ]|].
+      eapply trace_eq_trans; [apply trace_plus_assoc|].
+      apply trace_plus_cong; apply trace_plus_cong; [| apply trace_eq_refl | | apply trace_eq_refl].
+      unfold Trace_on.
+      destruct (Enumerates_from_dec e1 n) as [[x' t'] Henum'].
+      simpl.
+      clear HeqEr; clear dependent vr; clear tr HeqEl.
+      inversion El; subst.
+      rewrite double_twice in H1.
+      
+      apply even_fun in H1; subst.
+      destruct (Enumerates_from_fun _ _ _ _ _ _ H5 Henum'); subst; apply trace_eq_refl.
+
+      apply False_ind; apply odd_neq_even with (x := n) (y := rn); rewrite <-double_twice; assumption.
+      
+      clear HeqEr HeqEl.
+      unfold Trace_on.
+      destruct (Enumerates_from_dec e2 n) as [[x' t'] Henum'].
+      inversion Er.
+      apply False_ind; apply odd_neq_even with (x := ln) (y := n); symmetry; rewrite <-double_twice; nliamega.
+
+      assert (n = rn) by (apply odd_fun; rewrite <-double_twice; nliamega); subst.
+      destruct (Enumerates_from_fun _ _ _ _ _ _ Henum' H5 ); subst; apply trace_eq_refl.
+    Qed.
 
     (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
     Theorem Sum_Fair : Fair2 E_Sum.
@@ -2428,7 +2459,12 @@ Section Fairness.
                  (trace_plus (Trace_lt e1 (double n))
                              (trace_plus (Trace_lt e2 n)
                                          (Trace_lt e3 n))).
-    Admitted.
+    Proof.
+      intros.
+      eapply trace_eq_trans; [apply Sum_precise|].
+      apply trace_plus_cong; [apply trace_eq_refl|].
+      apply Sum_precise.
+    Qed.
 
     Definition NS3T := NaiveSum3 (E_Trace zero E_Nat)
                                  (E_Trace one  E_Nat)
