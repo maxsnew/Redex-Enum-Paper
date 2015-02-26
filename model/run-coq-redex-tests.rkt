@@ -263,6 +263,10 @@
                             (cons/e (trace/e 2 natural/e)
                                     (trace/e 3 natural/e)))
                    100)
+ (build-test-cases '(or/e (cons/e (trace/e 0 natural/e)
+                                  (trace/e 1 natural/e))
+                          (trace/e 2 natural/e))
+                   100)
  (build-test-cases '(map/e swap-cons swap-cons (cons/e natural/e natural/e))
                    100))
 
