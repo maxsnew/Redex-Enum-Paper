@@ -1955,6 +1955,26 @@ Section EnumTrace.
     rewrite IHm; auto.
   Qed.
 
+  Theorem trace_on_Sum_off tg e1 e2 m
+  : (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
+    -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
+    -> trace_proj tg (Trace_on (E_Sum e1 e2) m) = empty_set'.
+  Proof.
+    intros Hl Hr; unfold Trace_on;
+    remember (Enumerates_from_dec _ _) as x; destruct x as [[v t] Henum]; simpl;
+    inversion Henum; subst; apply Trace_on_correct in H5; rewrite <-H5; auto.
+  Qed.
+
+  Theorem trace_lt_Sum_off tg e1 e2 m
+  : (forall n, trace_proj tg (Trace_on e1 n) = empty_set')
+    -> (forall n, trace_proj tg (Trace_on e2 n) = empty_set')
+    -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = empty_set'.
+  Proof.
+    induction m; [intros; compute; destruct tg; trivial|];
+    intros; unfold Trace_lt; fold Trace_lt; rewrite trace_proj_plus_distrl;
+    rewrite IHm; auto; apply trace_on_Sum_off; auto.
+  Qed.
+
   Theorem set_In_trace' (tg : tag) e x m n :
     set_In x (trace_proj tg (Trace_from_to e m (S (m + n))))
     <->
@@ -2394,13 +2414,31 @@ Section Fairness.
         set_eq (trace_proj zero (Trace_lt NS3T (double n)))
                (z_to_n n).
     Proof.
-    Admitted.
+      intros n.
+      eapply set_eq_trans; [apply trace_eq_proj; apply Sum_precise|].
+      rewrite trace_proj_plus_distrl.
+      eapply set_eq_trans; [| apply set_union_unitr].
+      apply set_union_cong.
+      apply set_eq_symm; apply trace_lt_Nat.
+      rewrite trace_lt_Sum_off; [apply set_eq_refl| | ]; (intros; rewrite trace_off; [trivial | discriminate ]).
+    Qed.
 
     Lemma NS3Tr_precise
     : forall n,
         set_eq (trace_proj one (Trace_lt NS3T (double (double n))))
                (z_to_n n).
-    Admitted.
+    Proof.
+      intros n.
+      eapply set_eq_trans; [apply trace_eq_proj; apply SumSum_precise|].
+      eapply set_eq_trans; [apply trace_eq_proj; apply trace_plus_comm|].
+      eapply set_eq_trans; [apply trace_eq_proj; apply trace_eq_symm; apply trace_plus_assoc|].
+      rewrite trace_proj_plus_distrl.
+      eapply set_eq_trans; [| apply set_union_unitr].
+      apply set_union_cong; [apply set_eq_symm; apply trace_lt_Nat|].
+      rewrite trace_proj_plus_distrl.
+      repeat (rewrite trace_lt_Nat_off; [| discriminate]).
+      compute; tauto.
+    Qed.
 
     Theorem NaiveSumUnfair : ~ (Fair3 NaiveSum3).
     Proof.
