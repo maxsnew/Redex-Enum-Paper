@@ -364,29 +364,44 @@
 
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
-(define linebreaking-with-cases
+(define linebreaking-with-cases1
   '(("or l" "or r")
-    ("cons/e x")
-    ("cons/e y")
+    ("cons/e x")))
+
+(define linebreaking-with-cases2
+  '(("natural/e" "cons/e y")
     ("map in" "map out")
-    ("natural/e" "dep/e")
-    ("trace/e")))
+    ("trace/e" "dep/e")))
 
 (define (semantics-figure)
-  (w/rewriters
-   (ht-append
-    40
-    (inset (frame (inset (render-language L #:nts '(e)) 4)) 4)
-    (apply
-     vc-append
-     20
-     (for/list ([line (in-list linebreaking-with-cases)])
-       (apply 
-        hb-append
-        30
-        (for/list ([name (in-list line)])
-          (parameterize ([judgment-form-cases (list name)])
-            (render-judgment-form @)))))))))
+  (define helv-font "Helvetica")
+  (define size 11)
+  (parameterize ([label-font-size size]
+                 [default-font-size size]
+                 [metafunction-font-size size]
+                 [metafunction-style helv-font]
+                 [literal-style helv-font]
+                 [grammar-style helv-font])
+    (w/rewriters
+     (vc-append
+      20
+      (ht-append 
+       60
+       (inset (frame (inset (render-language L #:nts '(e v)) 4)) 4)
+       (some-rules linebreaking-with-cases1))
+      (some-rules linebreaking-with-cases2)))))
+
+(define (some-rules linebreaking)
+  (apply
+   vc-append
+   20
+   (for/list ([line (in-list linebreaking)])
+     (apply 
+      hb-append
+      30
+      (for/list ([name (in-list line)])
+        (parameterize ([judgment-form-cases (list name)])
+          (render-judgment-form @)))))))
 
 (define-syntax-rule 
   (sr e)
