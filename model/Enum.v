@@ -2223,7 +2223,6 @@ Section Fairness.
       remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er].
       remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El].
     Admitted.
-    
 
     (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
     Theorem Sum_Fair : Fair2 E_Sum.
@@ -2359,6 +2358,13 @@ Section Fairness.
           apply odd_double; assumption.
     Qed.
 
+    Lemma div4big : forall n, n >= 8 -> (div2 (div2 n) >= 2).
+    Proof.
+      intros n H; remember (n - 8) as k; replace n with (k + 8) by nliamega; clear dependent n; rename k into n.
+      replace (n + 8) with (S (S (S (S (S (S (S (S n)))))))) by nliamega.
+      unfold div2; nliamega.
+    Qed.
+
     Lemma div2div4 : forall n, n >= 8 -> exists m p, 2 * m <= n < 4 * p /\ p < m.
     Proof.
       intros n Hn4.
@@ -2369,14 +2375,14 @@ Section Fairness.
       split; [| nliamega].
       subst.
       replace (4 * _) with (2 * (2 * (S (div2 (S (div2 n)))))) by nliamega.
+      assert (div2 (div2 n) >= 2) by (apply div4big; assumption).
       repeat (rewrite <-double_twice).
-      destruct (par4 n) as [[? [? ?]] | [[? [? ?]] | [[? [? ?]] | [? [? ?]]]]]; rewrite H at 2; rewrite H at 3; unfold x4.
+      destruct (par4 n) as [[Hpar [? ?]] | [[Hpar [? ?]] | [[Hpar [? ?]] | [Hpar [? ?]]]]]; rewrite Hpar at 2; rewrite Hpar at 3; unfold x4.
       - clear H0; split.
         + rewrite double_twice; rewrite double_twice.
           apply mult_le_compat_l.
           rewrite <-even_div2 by assumption.
           unfold double.
-          assert (div2 (div2 n) >= 2) by admit.
           nliamega.
         + rewrite <-even_div2 by assumption.
           unfold x4 in H.
@@ -2387,14 +2393,33 @@ Section Fairness.
           replace (double (double (div2 (div2 n))) + 1 ) with (S (double (double (div2 (div2 n))))) by nliamega.
           apply le_n_S.
           rewrite <-even_div2 by assumption.
-          assert (div2 (div2 n) >= 2) by admit.
           unfold double.
           nliamega.
         + rewrite <-even_div2 by assumption.
           replace (_ + 1) with (S (double (double (div2 (div2 n))))) by nliamega.
           unfold double; nliamega.
-      - admit.
-      - admit.
+      - split.
+        + rewrite double_S.
+          rewrite double_S.
+          rewrite <-odd_div2 by assumption.
+          rewrite double_S.
+          replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
+          repeat apply le_n_S.
+          unfold double; nliamega.
+        + rewrite <-odd_div2 by assumption.
+          repeat rewrite double_S.
+          nliamega.
+      - split.
+        + rewrite double_S.
+          rewrite double_S.
+          rewrite <-odd_div2 by assumption.
+          rewrite double_S.
+          replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
+          repeat apply le_n_S.
+          unfold double; nliamega.
+        + rewrite <-odd_div2 by assumption.
+          repeat rewrite double_S.
+          nliamega.
     Qed.
 
     Lemma SumSum_precise
