@@ -31,6 +31,7 @@ enumeration at @texmath{n}, so the final trace maps both @texmath{0}
 and @texmath{1} to @texmath{\{n\}\cup s}.
 @qed
 }
+The Theorem in the coq model is named @racket[SumFair]. 
 
 The typical way to extend to an @texmath{n}-ary combinator would be to
 map to nested calls of the binary combinator. Consider a trinary
@@ -61,6 +62,7 @@ the trace evaluated at @texmath{1} or @texmath{2} will be less than
 are not equal.
 @qed
 }
+The theorem in the coq model is @racket[NaiveSum3Unfair].
 
 A fair generalization to @texmath{k} arguments is a straightforward
 extension. Instead of checking parity and dividing by @texmath{2},

@@ -28,9 +28,7 @@ that tracing from @texmath{0} to @texmath{n^2} maps @texmath{0} and
 then holds by straightforward induction on @texmath{n}.
 @qed
 }
-For the full details of the proof of the theorem, see the coq
-development. The theorem is called @racket[Pair_Fair] and it appears
-in section @racket[PairFair].
+The theorem is named @racket[PairFair] in the coq model.
 
 The naive tripling combinator @racket[triple/e] that uses nested calls
 to @racket[cons/e], as defined before, is unfair.
@@ -45,9 +43,7 @@ to sets that are subsets of @texmath{\{0,\ldots,p\}}. Since @texmath{p < m},
 these sets are different, so @racket[triple/e] is unfair.
 @qed
 }
-
-The theorem is called @racket[NaiveTripleUnfair] in the coq model and
-it appears in section @racket[NaiveTripleUnfair].
+The theorem is named @racket[NaiveTripleUnfair] in the coq model.
 
 @;{
 @;{TODO: move all of this to the previous section}

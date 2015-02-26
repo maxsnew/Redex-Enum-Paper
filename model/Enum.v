@@ -5,19 +5,19 @@ Require Import Coq.Lists.ListSet.
 Require Import Coq.Lists.List.
 Require Import Psatz.
 
-(* TeX input mode notes:
+(* Notation notes:
 Sets
-∅ \emptyset
-∈ \in
-∪ \cup  
-⊂ \subset
-≃ \simeq
+∅ \emptyset empty_set
+∈ \in       set_In
+∪ \cup      set_union'
+⊂ \subset   subset
+≃ \simeq    set_eq
 
 Traces
-ε \epsilon
-⊔ \sqcup
-⊏ \sqsubset
-≡ \equiv
+ε \epsilon  trace_zero
+⊔ \sqcup    trace_plus
+⊏ \sqsubset sub_trace
+≡ \equiv    trace_eq
 *)
 Ltac nliamega := try omega; try lia; try nia; fail "omega, lia and nia all failed".
 
@@ -2236,7 +2236,7 @@ Section Fairness.
     Qed.
 
     (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
-    Theorem Sum_Fair : Fair2 E_Sum.
+    Theorem SumFair : Fair2 E_Sum.
     Proof.
       unfold Fair2.
       intros n.
@@ -2258,7 +2258,7 @@ Section Fairness.
     Qed.
   End SumFair.
 
-  Section NaiveSumUnfair.
+  Section NaiveSum3Unfair.
     Definition NaiveSum3 e1 e2 e3 :=
       E_Sum e1 (E_Sum e2 e3).
 
@@ -2398,7 +2398,7 @@ Section Fairness.
       compute; tauto.
     Qed.
 
-    Theorem NaiveSumUnfair : ~ (Fair3 NaiveSum3).
+    Theorem NaiveSum3Unfair : ~ (Fair3 NaiveSum3).
     Proof.
       apply AltUnfair3Suff; unfold AltUnfair3; fold NS3T.
       exists 7.
@@ -2428,7 +2428,7 @@ Section Fairness.
       eapply z_to_n_nosub; [apply Hpn|].
       repeat (eapply subset_trans; [eassumption|]); apply subset_refl.
     Qed.
-  End NaiveSumUnfair.
+  End NaiveSum3Unfair.
 
   Section PairFair.
     Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
@@ -2549,7 +2549,7 @@ Section Fairness.
       apply trace_eq_refl.
     Qed.
 
-    Theorem Pair_Fair : Fair2 E_Pair.
+    Theorem PairFair : Fair2 E_Pair.
       unfold Fair2.
       intros n.
       exists ((S n) * (S n)).
