@@ -13,6 +13,7 @@
      3. [X] redex ambiguity                          (Robby)
      4. [X] Fix Figure 3 (both sides are fair)
      5. [ ] figure out what to do with this cite:
+  6. [ ] prepare supplementary material
 
 @inproceedings{ppdp14tarau,
         Address = {New York, NY, USA},
