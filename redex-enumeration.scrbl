@@ -15,41 +15,6 @@
 
 @title[#:tag "sec:redex-enum"]{Enumerating Redex Patterns}
 
-==========================
-
-Fair combinators give us predictability for programs that
-use our enumerators. In Redex, our main application of
-enumeration combinators, fairness ensures that when a Redex
-programmer makes an innocuous change to the grammar of
-the language (e.g. changing the relative order of two
-subexpressions in an expression form) the enumeration
-quality is not significantly affected. For example, consider
-an application expression. From the perspective of the
-enumerator, an application expression looks just like a list
-of expressions. An unfair enumerator might cause our
-bug-finding search to spend a lot of time generating
-different argument expressions and always using similar
-(simple, boring) function expressions. 
-
-Of course, the flip-side of this coin is that using unfair
-combinators can improve the quality of the search in
-some cases, even over fair enumeration. For example, when we
-are enumerating expressions that consist of a choice between
-variables and other kinds of expressions, we do not want to
-spend lots of time trying out different variables because most
-models are sensitive only to when variables differ from 
-each other, not their exact spelling. Accordingly unfairly
-biasing our enumerators away from different variables 
-can be a win for finding bugs. Overall, however, it is important
-that we do have a fair set of combinators that correspond
-to the way that Redex programs are constructed and then when
-Redex programs are compiled into the combinators, the compilation
-can use domain knowledge about Redex patterns to selectively
-choose targeted unfairness, but still use fair combinators when it
-has no special knowledge.
-
-==========================
-
 The inspiration for our enumeration library is bringing the success of
 Lazy Small Check@~cite[small-check] and FEAT@~cite[feat], 
 to property-based testing for Redex programs. This section
@@ -100,7 +65,7 @@ To give a flavor for the new capability in Redex, consider
 the language to the right, which contains a Redex program that defines
 the grammar of a simply-typed calculus, plus numeric
 constants. With only this much written down, a Redex programmer can ask for
-first nine terms:
+the first nine terms:
 @enum-example[(pam/e (λ (i)
                        (generate-term L e #:i-th i))
                      natural/e
@@ -245,7 +210,7 @@ but rearrangement is the key idea.
 
 @paralabel{Ambiguous patterns}
 And finally, there is one relatively uncommon use of Redex's patterns 
-that we cannot enumerate. It is a bit technical and explaining requires
+that we cannot enumerate. It is a bit technical and explaining it requires
 first explaining ambiguity in matching Redex patterns. There are
 several different ways that a Redex grammar definition can be ambiguous.
 The simplest one is when a single non-terminal has overlapping productions,
@@ -253,7 +218,7 @@ but it can occur due to multiple uses of ellipses in a single sequence or
 when matching @racket[in-hole]. Because of the way our enumerator compilation 
 works, we are not technically building a bijection between the naturals
 and terms in a Redex pattern; it is more accurate to say we are building
-a bijection between the naturals and the one might parse a Redex pattern.
+a bijection between the naturals and the one ways might parse a Redex pattern.
 In our implementation, of course, we construct a concrete term from the
 parse, but when a pattern is ambiguous there may be a single term
 that corresponds to multiple parses and thus our enumeration is not bijective.
@@ -265,5 +230,38 @@ in the general case is a computationally difficult task, so we approximate
 it in a way that works well for Redex models we encounter in practice 
 (since few Redex languages are intentionally ambiguous), but if we cannot
 determine that a pattern is unambiguous and it is combined with a
-@racket[_!_] pattern, Redex will signal an error instead of enumerating
+@racket[__!_] pattern, Redex will signal an error instead of enumerating
 the pattern.
+
+@section{Fairness and Redex}
+
+Fair combinators give us predictability for programs that
+use our enumerators. In Redex, our main application of
+enumeration combinators, fairness ensures that when a Redex
+programmer makes an innocuous change to the grammar of
+the language (e.g. changing the relative order of two
+subexpressions in an expression form) the enumeration
+quality is not significantly affected. For example, consider
+an application expression. From the perspective of the
+enumerator, an application expression looks just like a list
+of expressions. An unfair enumerator might cause our
+bug-finding search to spend a lot of time generating
+different argument expressions and always using similar
+(simple, boring) function expressions. 
+
+Of course, the flip-side of this coin is that using unfair
+combinators can improve the quality of the search in
+some cases, even over fair enumeration. For example, when we
+are enumerating expressions that consist of a choice between
+variables and other kinds of expressions, we do not want to
+spend lots of time trying out different variables because most
+models are sensitive only to when variables differ from 
+each other, not their exact spelling. Accordingly unfairly
+biasing our enumerators away from different variables 
+can be a win for finding bugs. Overall, however, it is important
+that we do have a fair set of combinators that correspond
+to the way that Redex programs are constructed and then when
+Redex programs are compiled into the combinators, the compilation
+can use domain knowledge about Redex patterns to selectively
+choose targeted unfairness, but still use fair combinators when it
+has no special knowledge.
