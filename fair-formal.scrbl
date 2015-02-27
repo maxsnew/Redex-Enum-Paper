@@ -15,7 +15,7 @@
           "enum-util.rkt"
           "util.rkt")
 
-@title[#:tag "sec:fair-formal"]{Enumeration and Fairness Semantics}
+@title[#:tag "sec:fair-formal"]{Enumeration Semantics}
 
 @figure*["fig:semantics" @list{Semantics of Enumeration Combinators} (semantics-figure)]
 
@@ -29,11 +29,11 @@ of fairness; ignore it for now. The
 @sr[|@|] by treating either the value or
 index argument as given and computing the other one.
 
-The @sr[natural/e] enumeration is in the bottom left; it is
+The simplest rule is for @sr[natural/e], in the middle on the left; it is
 just the identity. The two rules in the top of the figure
 show how @sr[or/e] works; if the number is even we use the
 left enumeration and if it is odd, we use the right one. The two @sr[cons/e]
-rules in the middle are the most complex. They enumerate in
+rules are the most complex. They enumerate in
 the order discussed in @secref["sec:enum"], walking in ever
 larger squares starting at the origin. The ``x'' rule walks
 horizontally and the ``y'' rule walks vertically. The condition
@@ -43,12 +43,55 @@ two halves of the bijection. It uses the ``in'' rule with
 @sr[from-nat] and the ``out'' rule with @sr[to-nat].
 The @sr[dep/e] rule exploits @sr[cons/e] to get two indicies.
 
-The model is different from our implementation in three ways.
+The model simplifies our implementation in three ways.
 First, it covers only some of the combinators and
-only infinite enumerations. Second, @sr[or/e] in our implementation
+only infinite enumerations. 
+Second, the enumerations do not have contracts.
+Third, @sr[or/e] in our implementation
 allows user-specified predicates instead of forcing disjointness
 by construction like @sr[or/e] in the model. Nevertheless, it
-is enough for us to state and and prove results about fairness.
+is enough for us to state and and prove some results about fairness.
+
+Before we define fairness, however, we first need to prove that
+the model actually defines two functions. 
+@theorem{For all e, n, there exists 
+         a unique v and t such that @sr[(|@| e n v T)],
+         and we can compute the existential witness.}
+@proof{The basic idea is that you can read the value off
+       of the rules recursively, computing new values of
+       @sr[n] and checking the conditions in on
+       @sr[n] in the premises of when there are
+       multiple rules for a given @sr[e]. Computing the
+       @sr[T] argument is straightforward.
+       The full proof is given as @tt{Enumerates_from_dec} in
+       the supplementary material.}
+
+@theorem{For all e, v, there exists 
+         a unique n and t such that @sr[(|@| e n v T)],
+         or there are no n and t such that @sr[(|@| e n v T)],
+         and we can compute the existential witness or
+         compute its absence.}
+@proof{As with the previous theorem, we recursively process
+       the rules to compute @sr[n], but this is complicated
+       by the fact that we need inverse functions for the 
+       formulas in the premises of the rules to go from the
+       given @sr[n] to the one to use in the recursive call,
+       but these inverses exist.
+       The full proof is given as @tt{Enumerates_to_dec} in
+       the supplementary material.}
+
+Although we don't prove it formally, the situation when there is no
+witness corresponds to the situation where the value that 
+we are attempting to convert to a number does not match the contract
+in the enumeration in our implementation.
+
+We use these two results to connect the Coq code to our implementation.
+Specifically, we use Coq's @tt{Eval compute} facility to print out
+specific values of the enumeration at specific points and then
+compare that to what our implementation produces. Also, the content
+of @figure-ref["fig:semantics"] is automatically generated from a Redex
+model and we also test the Redex model against the Coq model in
+the same manner.
 
 To define fairness, we need to be able to trace how an enumeration
 combinator uses its arguments, and this is the purpose of the
