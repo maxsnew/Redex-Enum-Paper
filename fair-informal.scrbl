@@ -65,14 +65,14 @@ the enumeration to be lists), then the
 which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using
-the unfair @racket[(cons/e natural/e (cons/e natural/e natural/e))]
-and when using a fair tupling that combines three @racket[natural/e] 
-enumerations. The x-coordinates of the plot correspond to the different
+the unfair and the fair four-tuple enumerations. 
+The x-coordinates of the plot correspond to the different
 values that appear in the tuples and the height of each bar is
 the number of times that particular number appeared when enumerating
-the first 1,000 tuples. As you can see, all three components have the
+the first @(add-commas unfairness-histograms-total-size) tuples. 
+As you can see, all four components have the
 same set of values for the fair tupling operation, but the first tuple
-element is considerably different from the other two when using the
+element is considerably different from the other three when using the
 unfair combination.
 
 @figure*["fig:unfairness"

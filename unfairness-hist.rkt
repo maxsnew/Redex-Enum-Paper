@@ -3,8 +3,8 @@
          pict
          plot)
 
-(provide unfairness-histograms)
-(define total-size 1500)
+(provide unfairness-histograms unfairness-histograms-total-size)
+(define unfairness-histograms-total-size 1500)
 
 (define unfair (cons/e natural/e (cons/e natural/e (cons/e natural/e natural/e))))
 (define fair (list/e natural/e natural/e natural/e natural/e))
@@ -33,7 +33,7 @@
 
 (define (build-hashes enumeration)
   (define hashes (vector (make-hash) (make-hash) (make-hash) (make-hash)))
-  (for ([x (in-range total-size)])
+  (for ([x (in-range unfairness-histograms-total-size)])
     (for/list ([x (in-list (flatten (from-nat enumeration x)))]
                [i (in-naturals)])
       (define ht (vector-ref hashes i))
