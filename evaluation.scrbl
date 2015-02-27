@@ -19,7 +19,7 @@ of buggy models. Each model and bug is equipped with a
 property that should hold for every term (but does not, due to
 the bug) and three functions that generate terms, each with
 a different strategy: in-order enumeration, random selection
-from a uniform distribution, and ad hoc random generation.
+from an enumeration, and ad hoc random generation.
 The full benchmark consists of a number of models, including
 the Racket virtual machine model@~cite[racket-virtual-machine],
 a polymorphic λ-calculus used for random testing in other 
@@ -43,20 +43,21 @@ until 24 hours elapses, whichever comes first.
                on a benchmark of Redex models.}
          (plot-lines-from-directory 2-25-15)]
 
+@; TODO: decide if we want to be more specific
 We used two identical 64 core AMD machines with Opteron
 6274s running at 2,200 MHz with a 2 MB L2 cache to run the
 benchmarks. Each machine has 64 gigabytes of memory. Our script
 runs each model/bug combination sequentially, although we
 ran multiple different combinations at once in parallel.
-We used the unreleased version 6.1.1.1 of Racket (of which
-Redex is a part); more precisely the version at git commit
-@tt{878358ec9e}.@note{@url{https://github.com/plt/racket/commit/878358ec9e2}}
+We used the unreleased version 6.1.1.8 of Racket (of which
+Redex is a part); more precisely a version of Racket with all
+libraries at their latest versions on February 23, 2015 .
 
 For the in-order enumeration, we simply indexed into the
 decode functions (as described in @secref["sec:enum"]),
 starting at zero and incrementing by one each time. 
 
-For the random selection from the uniform distribution, we
+For the random selection from an enumeration, we
 need a mechanism to pick a natural number. To do this, we
 first pick an exponent @raw-latex|{$i$}| in base 2 from the
 geometric distribution and then pick uniformly at random an
@@ -70,7 +71,7 @@ That is, if you take the mean of some number of samples and
 then add more samples and take the mean again, the mean of
 the new numbers is larger than from the mean of the old. We
 believe this is a good property to have when indexing into
-our uniform distribution so as to avoid biasing our indices
+our enumerations so as to avoid biasing our indices
 towards a small size.
 
 The random-selection results are quite sensitive to the
@@ -78,7 +79,7 @@ probability of picking the zero exponent from the geometric
 distribution. Because this method was our
 worst performing method, we empirically chose
 benchmark-specific numbers in an attempt to maximize the
-success of the random uniform distribution method. Even with
+success of the random enumeration method. Even with
 this artificial help, this method was still worse, overall,
 than the other two.
 
@@ -101,7 +102,7 @@ unfolding non-terminals, is parameterized over the depth at
 which it attempts to stop unfolding non-terminals. We chose
 a value of 5 for this depth since that seemed to be the
 most successful. This produces terms of a similar size to
-those of the uniform random generator, although the
+those of the random enumeration method, although the
 distribution is different.
 
 @Figure-ref["fig:benchmark-lines"] shows a high-level view
@@ -127,7 +128,7 @@ and it gives up the lead only briefly, between the
 Overall, we take this to mean that on interactive
 time-frames, the in-order enumeration is the best method and
 on longer time-frames ad hoc generation is the best. While
-selection from the uniform distribution does win briefly, it
+random selection from enumerations does win briefly, it
 does not hold its lead for long and there are no bugs that
 it finds that ad hoc generation does not also find.
 
@@ -137,8 +138,8 @@ able to find more than 37 of them in a 24 hour period.
 @Figure-ref["fig:benchmark-overview"] also shows that, for
 the most part, bugs that were easy (could be found in less
 than a few seconds) for either the ad hoc generator or the
-generator that selected at random from the uniform
-distribution were easy for all three generators. The
+generator that selected at random from the enumerations
+were easy for all three generators. The
 in-order enumeration, however, was able to find several bugs
 (such as bug #8 in poly-stlc and #7 in let-poly) in much
 shorter times than the other approaches.
