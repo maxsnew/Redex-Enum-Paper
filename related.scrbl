@@ -128,7 +128,7 @@ about half of the time, taking on average about 400 attempts
 when it succeeds.
 Redex's random generator does a little bit better, finding it
 nearly every time, typically in about 150 attempts.
-Not to single out a single example 
+Not to focus on a single example 
 @citet[isabelle-testing] discuss this buggy
 property (the last @racket[xs] should be @racket[ys]):
 @racketblock[nth (append xs ys) (length xs+n) = nth xs n]

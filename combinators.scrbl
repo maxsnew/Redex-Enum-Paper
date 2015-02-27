@@ -31,7 +31,7 @@ a @racket[to-nat] function that computes the index of any value in the enumerati
 a @racket[from-nat] function that computes a value from an index, the size
 of the enumeration, which can be either a natural number or @racket[+inf.0],
 and a contract that captures all of the values in the enumeration precisely.
-Each enumeration has the invariant that the 
+Each enumeration has the invariant that
 the @racket[to-nat] and @racket[from-nat] functions form a bijection between
 the natural numbers (up to the size) and the values that are being 
 enumerated.@note{Our library also supports one-way enumerations as

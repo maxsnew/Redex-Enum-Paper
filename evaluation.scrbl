@@ -79,7 +79,7 @@ distribution. Because this method was our
 worst performing method, we empirically chose
 benchmark-specific numbers in an attempt to maximize the
 success of the random uniform distribution method. Even with
-this artificial help, this method was still worse, overall
+this artificial help, this method was still worse, overall,
 than the other two.
 
 @figure*["fig:benchmark-overview"
@@ -111,19 +111,18 @@ found for each point in time. There are three lines on the
 plot showing how the total number of counterexamples found changes as
 time passes.
 
-The red dashed line shows the performance of in-order
+The red dotted line shows the performance of in-order
 enumeration and it is clearly the winner in the left-hand
 side of the graph. The solid black line shows the performance
 of the ad hoc random generator and it is clearly the winner
 on the right-hand side of the graph, i.e. the longer
 time-frames.
 
-There are two crossover points marked on the graph with
-black dots. After 2 minutes, with 22 of the bugs found, the
-enumerator starts to lose and random selection from the
-uniform distribution starts to win until 3 minutes pass, at
-which time the ad hoc generator starts to win and it never
-gives up the lead.
+There are three crossover points marked on the graph with
+black dots. After 3 minutes, with 23 of the bugs found, the
+enumerator starts to lose and the ad hoc generator starts to win
+and it gives up the lead only briefly, between the 
+33 and 39 minute marks (with one bug).
 
 Overall, we take this to mean that on interactive
 time-frames, the in-order enumeration is the best method and
@@ -143,4 +142,3 @@ distribution were easy for all three generators. The
 in-order enumeration, however, was able to find several bugs
 (such as bug #8 in poly-stlc and #7 in let-poly) in much
 shorter times than the other approaches.
-

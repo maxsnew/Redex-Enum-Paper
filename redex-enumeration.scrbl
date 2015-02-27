@@ -18,7 +18,7 @@
 The inspiration for our enumeration library is bringing the success of
 Lazy Small Check@~cite[small-check] and FEAT@~cite[feat], 
 to property-based testing for Redex programs. This section
-gives an information overview of how Redex programs are compiled
+gives an informal overview of how Redex programs are compiled
 into calls to the enumeration library in preparation for
 the evaluation in @secref["sec:evaluation"].
 
