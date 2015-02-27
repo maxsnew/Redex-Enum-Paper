@@ -46,7 +46,7 @@ operations be binary pairs. Put another way, it is not possible to
 fairly enumerate a three-tuple of natural numbers using Feat. Feat
 can enumerate such tuples, but it effectively
 gives you an enumeration of nested pairs which is, as discussed in 
-@secref["sec:fair"], unfair.
+@secref["sec:fair-informal"], unfair.
 
 @citet[scife] is similar to Feat, but with
 the addition of a dependent combinator. Like Feat, it does not support

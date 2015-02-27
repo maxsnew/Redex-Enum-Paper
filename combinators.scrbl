@@ -59,8 +59,7 @@ and an enumeration of strings:
               14]
 
 The contracts associated with the enumerators are used to determine
-which enumeration a value came from.  We describe the ordering
-in detail in @secref["sec:fair"].
+which enumeration a value came from.
 
 The next combinator is the pairing operator 
 @racket[cons/e]. It takes two enumerations and returns an
@@ -83,7 +82,7 @@ first 12 elements are
 The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
 n-dimensional grid.
-We discuss this in detail in @secref["sec:fair"].
+We discuss this in detail in @secref["sec:fair-informal"].
 
 The combinator
 @racket[delay/e] facilitates fixed points of enumerators,
