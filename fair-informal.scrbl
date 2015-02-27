@@ -33,10 +33,10 @@
                        exact-nonnegative-integer? exact-nonnegative-integer?)))
 
 A fair enumeration combinator is one that indexes into its
-argument enumerators roughly equally, instead of indexing
+argument enumerations roughly equally, instead of indexing
 deeply into one and shallowly into another one. For
-example, imagine we wanted to build an enumerator for lists
-of length 4. This enumerator is one way to build it:
+example, imagine we wanted to build an enumeration for lists
+of length 4. This enumeration is one way to build it:
 @racketblock[(cons/e natural/e (cons/e natural/e 
               (cons/e natural/e (cons/e natural/e 
                (fin/e null)))))]
@@ -59,7 +59,7 @@ expressions like this:
               (cons/e natural/e natural/e)
               (cons/e natural/e natural/e))]
 (and then use @racket[map/e] to adjust the elements of
-the enumeration to actually be lists), then the
+the enumeration to be lists), then the
 @(add-commas one-billion) element is
 @code{@(format "~v" (from-nat fair-four-tuple one-billion))},
 which is much more balanced. This balance is not specific to
@@ -67,7 +67,7 @@ just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using
 the unfair @racket[(cons/e natural/e (cons/e natural/e natural/e))]
 and when using a fair tupling that combines three @racket[natural/e] 
-enumerators. The x-coordinates of the plot correspond to the different
+enumerations. The x-coordinates of the plot correspond to the different
 values that appear in the tuples and the height of each bar is
 the number of times that particular number appeared when enumerating
 the first 1,000 tuples. As you can see, all three components have the
@@ -145,21 +145,21 @@ which face of which hypercube we are on at each point in the
 enumeration. Returning to two dimensions, say we want the
 44th element of the enumeration, we first compute the
 integer square root, 6, and then compute the remainder (i.e.
-48-36), 8. The 6 tells us that we are in the sixth layer
-(where all pairs have a 6 and there are no elements larger
-than 6). The remainder 8 tells us that we are at the 8th
+44-6@raw-latex{$^2$}), 8. The 6 tells us that we are in the sixth layer,
+where all pairs have a 6 and there are no elements larger
+than 6. The remainder 8 tells us that we are at the 8th
 such pair, which is @racket['(6 . 2)].
 
 To perform the inverse, we take @racket['(6 . 2)] and identify that
 its max is 6. Then we pass @racket['(6 . 2)] into the opposite
 direction of the enumeration of pairs with max of 6, giving us
-8. We then square the 6 and add 8 to get 42.
+8. We then square the 6 and add 8 to get 44.
 
 This process generalizes to @raw-latex{$n$} dimensions. We take the 
 @raw-latex{$n$}th root to find which layer we are in. Then we take
 the remainder and use that to index into an enumeration of @raw-latex{$n$}-tuples 
 that has at least one @raw-latex{$n$} and whose other values are all
-less than @raw-latex{$n$}. At a high-level, this has reduced the problem
+less than or equal to @raw-latex{$n$}. At a high-level, this has reduced the problem
 from a @raw-latex{$n$}-dimension problem to an @raw-latex{$n-1$} dimensional
 problem, since we can think of the faces of the @raw-latex{$n$} dimensional
 hypercube as @raw-latex{$n-1$} dimensional hypercubes. It is not
@@ -174,40 +174,10 @@ whose elements have a fixed maximum (i.e. the elements of the sequence
 are all less than the maximum and yet the maximum definitely appears). 
 This enumeration can be handled with the combinators discussed in
 @secref["sec:enum"]. Specifically, an @raw-latex{$n$} tuple that contains
-a maximum of @raw-latex{$m$} is either @raw-latex{$m$} combined with an
+a maximum of @raw-latex{$m$} is either @raw-latex{$m$} consed onto the front of an
 @raw-latex{$n-1$} tuple that has values between 0 and @raw-latex{$m$} or
 it is a number less than @raw-latex{$m$} combined with an @raw-latex{$n-1$}
-that has a maximum of @raw-latex{$m$}, which gives rise to a recursive
-structure to the enumeration. 
-
-
-@;{ how much glory do we need below?
-@racketblock[(define (box-untuple k)
-               (λ (n)
-                 (define layer (integer-root n k)) ; floor of the kth root of n
-                 (define smallest (expt layer k))  ; layer^k
-                 (define layer/e (bounded-list/e k layer))
-                 (decode layer/e (- n smallest))))]
-                 
-Here @racket[bounded-list/e] is a function that takes a positive
-integer list length @racket[k] and a natural number bound
-@racket[layer] and returns an enumeration of lists of length
-@racket[k] that have a maximal value of @racket[layer]. 
-For example the values of @racket[(bounded-list/e 3 2)] are
-
-@enum-example[(slice/e (list/e natural/e natural/e natural/e) 8 10000000000) 19]
-
-Since the elements of the enumerated lists are bounded by a specific
-number, @racket[bounded-list/e] always returns a finite enumeration,
-which we denote @racket[e]. Furthermore, enumerating every element of
-@racket[e] will use all of its arguments in exactly the same way since
-for any tuple @racket[(i_1 i_2 ... i_k)] in @racket[e], every
-permutation of that tuple is also in @racket[e], since it has the same
-maximum.
-}
-
-
-MORE COMING HERE
+tuple that has a maximum of @raw-latex{$m$}.
 
 @;{
 
@@ -215,7 +185,7 @@ As a final optimization, we found that it is faster to prime factorize
 the length and then use compose @racket[list/e] calls at smaller
 lengths. For instance, to enumerate lists of length @racket[6], we
 enumerate pairs of lists of length @racket[3]. Composing the fair
-enumerators in this way results in an enumeration that is also fair.
+enumerations in this way results in an enumeration that is also fair.
 
 
 
@@ -324,31 +294,5 @@ Cantor enumerates in the order of the sum of its arguments, tracing
 out the outer faces of an n simplex. By maintaining this ``layering''
 property, we ensure that the generalized combinators are also fair.
 
-
-
-
-
-Despite their conceptual similarity, we found the boxy enumeration
-lends itself to a more efficient implementation. To understand why, note
-that most combinatorics applications of pairing functions are chiefly
-concerned with one half of the bijection: the one from pairs of
-natural numbers to natural numbers, defined above.
-
-For enumerations we are primarily concerned with the other
-direction of the bijection, since that is the one used to generate
-terms. For the pairing case, these functions have fairly
-straightforward inverses, but their generalizations do not. This is
-the generalization of the cantor pairing function to length
-@texmath{k} tuples:
-@centered{@raw-latex{$cantor\_tuple(n_1,n_2,\ldots,n_k) =
-{{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
-{{n_1}\choose{1}}$}}
-We can easily define a highly inefficient (but correct) way to compute
-the inverse by trying every natural number, in order, applying the
-original @raw-latex{$cantor\_tuple$} function to see if it was the
-argument given. The best known algorithm for this
-@citet[inverting-cantor-n-tupling] improves on this implementation by
-vastly reducing the search space, but the algorithm there is still a
-search procedure, and we found it too slow to use in practice.
 
 }
