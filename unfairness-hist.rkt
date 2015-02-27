@@ -4,18 +4,22 @@
          plot)
 
 (provide unfairness-histograms)
-(define total-size 1000)
+(define total-size 1500)
 
-(define unfair (cons/e natural/e (cons/e natural/e natural/e)))
-(define fair (list/e natural/e natural/e natural/e))
+(define unfair (cons/e natural/e (cons/e natural/e (cons/e natural/e natural/e))))
+(define fair (list/e natural/e natural/e natural/e natural/e))
 
 (define (unfairness-histograms)
   (define unfair-hashes (build-hashes unfair))
   (define fair-hashes (build-hashes fair))
   (define-values (max-x max-y) (find-maxes unfair-hashes fair-hashes))
-  (vc-append 
-   (build-plots fair-hashes max-x max-y #f #t)
-   (build-plots unfair-hashes max-x max-y #t #f)))
+  (define main
+    (vc-append 
+     (build-plots fair-hashes max-x max-y #f #t)
+     (build-plots unfair-hashes max-x max-y #t #f)))
+  (cc-superimpose
+   (colorize (frame (inset (launder (ghost main)) 1)) "white")
+   main))
 
 (define (find-maxes v1 v2)
   (define max-x 0)
@@ -28,7 +32,7 @@
   (values max-x max-y))
 
 (define (build-hashes enumerator)
-  (define hashes (vector (make-hash) (make-hash) (make-hash)))
+  (define hashes (vector (make-hash) (make-hash) (make-hash) (make-hash)))
   (for ([x (in-range total-size)])
     (for/list ([x (in-list (flatten (from-nat enumerator x)))]
                [i (in-naturals)])
@@ -53,6 +57,7 @@
                                     [(0) "first"]
                                     [(1) "second"]
                                     [(2) "third"]
+                                    [(3) "fourth"]
                                     [else (error 'ack-unfairness)])))
                      #f))))
 
@@ -65,7 +70,7 @@
      #:x-label x-label
      #:y-label y-label
      (list
-      (parameterize ([plot-font-size 6])
+      (parameterize ([plot-font-size 7])
         (x-ticks (for/list ([x (in-range (+ max-x 1))]
                             #:when (zero? (modulo x 4)))
                    (tick (+ x .5) #t (format "~a" x)))))
