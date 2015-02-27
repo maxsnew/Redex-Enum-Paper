@@ -20,9 +20,10 @@
 (define (disj-sum-pict/bad)
   (define (bad-disj-sum/e a b c)
     (or/e a (or/e b c)))
-  (gen-table bad-disj-sum/e 8 16 40 6 #:arrows? #t))
+  (gen-table bad-disj-sum/e 8 32 40 6 #:arrows? #t #:last-arrow 15))
 
-(define (gen-table or/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows?)
+(define (gen-table or/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows? #:last-arrow [last-arrow +inf.0] 
+                   )
   (define x-count 3)
   (define width (* size-per-cell x-count))
   (define height (* size-per-cell y-count))
@@ -97,7 +98,7 @@
                      (- y1 (/ (pict-height index) 2))
                      index))
          (loop (+ i 1)
-               (if arrows?
+               (if (and arrows? (i . < . last-arrow))
                    (pin-arrow-line
                     #:color "blue"
                     #:alpha 0.5
