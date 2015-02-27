@@ -15,3 +15,6 @@ compiled/
 *.glob
 lia.cache
 nlia.cache
+supp/Makefile
+supp/model/
+supp.tar.gz
