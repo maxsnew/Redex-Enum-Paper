@@ -29,42 +29,16 @@ and @texmath{1} to @texmath{\{n\}\cup s}.
 }
 The Theorem in the coq model is named @racket[SumFair]. 
 
-The typical way to extend to an @texmath{n}-ary combinator would be to
-map to nested calls of the binary combinator. Consider a trinary
-version implemented this way:
-
-@(define (or-three/e e_1 e_2 e_3)
-   (or/e e_1 (or/e e_2 e_3)))
-@racketblock[(define (or-three/e e_1 e_2 e_3)
-               (or/e e_1 (or/e e_2 e_3)))]
-
-then enumerating some of the first elements of               
-@racket[(or-three/e (cons natural/e nat?) (cons symbol/e sym?) (cons float/e float?))]
-indicates it is unfairly weighted to the first argument, as shown on the left in @figure-ref["fig:disj-sum"].
-
-@figure["fig:disj-sum" "Unfair (left) and fair (right) disjoint union enumerations"]{
-@centered{@(hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good))}
+@theorem{@racket[or-three/e is unfair]}
+@proof{
+To show something is unfair, we show that after a certain point, there
+are no equilibria. For any @texmath{n}, the trace evaluated at
+@texmath{0} will always include a number near
+@texmath{\lfloor{(n-1)/2}\rfloor}, but everything in the set that is
+the trace evaluated at @texmath{1} or @texmath{2} will be less than
+@texmath{\lceil{n/4}\rceil}. For sufficiently large @texmath{n},
+@texmath{\lfloor{(n-1)/2}\rfloor > \lceil{n/4}\rceil} so these sets
+are not equal.
+@qed
 }
-
-
-A fair generalization to @texmath{k} arguments is a straightforward
-extension. Instead of checking parity and dividing by @texmath{2},
-take the quotient with remainder of @texmath{n} with @texmath{k}.
-This gives you the fair order illustrated on @texmath{3} arguments in
-@figure-ref["fig:disj-sum"], where you use each argument at the same
-index before moving to the next one.
-
-Finally, with finite arguments @racket[or/e] approximates the infinite
-behavior until an argument is exhausted:
-
-@racketblock[(or/e (fin/e 'a 'b 'c 'd)
-                   natural/e
-                   (fin/e "x" "y"))]
-@enum-example[(or/e (fin/e 'a 'b 'c 'd)
-                   natural/e
-                   (fin/e "x" "y"))
-              14]
-
-The implemenatation finds the ranges of natural numbers when each
-finite enumeration is exhausted to compute which enumeration to use
-for some index.
+The theorem in the coq model is @racket[NaiveSum3Unfair].

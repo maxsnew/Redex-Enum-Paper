@@ -12,7 +12,11 @@
            3. [ ] State which proofs are formalized in coq
      3. [X] redex ambiguity                          (Robby)
      4. [X] Fix Figure 3 (both sides are fair)
-     5. [ ] figure out what to do with this cite:
+     5. [ ] Double down on fairness
+        1. [ ] call out all the other libraries. If they had written
+           binary combinators unfairly by default that would seem
+           arbitrary, so why do we let them get away with it for n-ary?
+     6. [ ] figure out what to do with this cite:
   6. [ ] prepare supplementary material
 
 @inproceedings{ppdp14tarau,
