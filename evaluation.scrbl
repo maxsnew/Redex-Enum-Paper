@@ -39,7 +39,7 @@ until 24 hours elapses, whichever comes first.
 
 @figure*["fig:benchmark-lines"
          @list{Overview of random testing performance of ad hoc generation,
-               enumeration, and random indexing into an enumeration,
+               in-order enumeration, and random indexing into an enumeration,
                on a benchmark of Redex models.}
          (plot-lines-from-directory 2-25-15)]
 
@@ -95,7 +95,7 @@ based on our experience programming in Redex, but not
 recently. The most recent change to it was a bug fix in
 April of 2011 and the most recent change that affected
 the generation of random terms was in January of 2011,
-both well before we started working on the enumerator. 
+both well before we started working on the enumerations. 
 
 This generator, which is based on the method of recursively
 unfolding non-terminals, is parameterized over the depth at
@@ -121,7 +121,7 @@ time-frames.
 
 There are three crossover points marked on the graph with
 black dots. After 3 minutes, with 23 of the bugs found, the
-enumerator starts to lose and the ad hoc generator starts to win
+in-order enumeration starts to lose and the ad hoc generator starts to win
 and it gives up the lead only briefly, between the 
 33 and 39 minute marks (with one bug).
 

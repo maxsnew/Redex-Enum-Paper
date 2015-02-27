@@ -20,7 +20,7 @@
 @figure*["fig:semantics" @list{Semantics of Enumeration Combinators} (semantics-figure)]
 
 @Figure-ref["fig:semantics"] shows a formal model of a
-subset of our enumerators. It defines of the relation 
+subset of our enumerations. It defines of the relation 
 @sr[|@|], which relates an enumeration and an index to the
 value that the enumeration produces at the index. 
 The @sr[T] that follows the vertical bar is used in the definition
@@ -60,7 +60,7 @@ tracked and the @sr[n] argument is a label used to identify
 a portion of the trace. The @sr[T] component is the trace; it
 is a function that maps the @sr[n] arguments in the @sr[trace/e]
 expressions to sets of natural numbers indicating which naturals
-the enumerator has been used with.
+the enumeration has been used with.
 
 Furthermore, we also need to be able to collect all of the
 numbers traced of an enumeration for all naturals up to some

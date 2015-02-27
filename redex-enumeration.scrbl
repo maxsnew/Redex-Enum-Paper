@@ -91,7 +91,7 @@ our library's fairness. In particular, when enumerating the pattern,
 @racket[(λ (x : τ) e)], we do not generate list and pair patterns
 following the precise structure, which would lead to an unfair nesting.
 Instead, we generate the pattern @racket[(list/e x/e τ/e e/e)] (where
-@racket[x/e], @racket[τ/e] and @racket[e/e] correspond to the enumerators
+@racket[x/e], @racket[τ/e] and @racket[e/e] correspond to the enumerations
 for those non-terminals) and then use @racket[map/e] to construct the
 actual term.
 
@@ -111,7 +111,7 @@ they have different subscripts.
 When enumerating patterns like this one, @racket[(subst (λ (a : int) a) a 1)]
 is valid, but the term @racket[(subst (λ (a : int) a) b 1)] is not.
 
-To handle such patterns the enumerator makes a pass over the entire term
+To handle such patterns the enumeration makes a pass over the entire term
 and collects all of the variables. It then enumerates a pair where the
 first component is an environment mapping the found variables to terms
 and the second component is the rest of the term where the variables
@@ -192,19 +192,19 @@ To enumerate patterns like this, it is natural to think of using
 a dependent enumeration, where you first pick the length of the 
 sequence and then separately enumerate sequences dependent on
 the list. Such a strategy is inefficient, however, because
-the dependent enumeration requires constructing enumerators
+the dependent enumeration requires constructing enumerations
 during decoding. 
 
 Instead, if we separate the pattern into two parts, first
 one part that has the repeated elements, but now grouped together:
 @racket[((x v) ...)]
 and then the remainder in a second part (just 
-@racket[(λ e)] in our example), then the enumerator can handle
+@racket[(λ e)] in our example), then the enumeration can handle
 these two parts with the ordinary pairing operator and, once
 we have the term, we can rearrange it to match the original
 pattern. 
 
-This is the strategy that our enumerator implementation uses. Of course,
+This is the strategy that our enumeration implementation uses. Of course,
 ellipses can be nested, so the full implementation is more complex,
 but rearrangement is the key idea.
 
@@ -215,7 +215,7 @@ first explaining ambiguity in matching Redex patterns. There are
 several different ways that a Redex grammar definition can be ambiguous.
 The simplest one is when a single non-terminal has overlapping productions,
 but it can occur due to multiple uses of ellipses in a single sequence or
-when matching @racket[in-hole]. Because of the way our enumerator compilation 
+when matching @racket[in-hole]. Because of the way our enumeration compilation 
 works, we are not technically building a bijection between the naturals
 and terms in a Redex pattern; it is more accurate to say we are building
 a bijection between the naturals and the one ways might parse a Redex pattern.
@@ -236,15 +236,15 @@ the pattern.
 @section{Fairness and Redex}
 
 Fair combinators give us predictability for programs that
-use our enumerators. In Redex, our main application of
+use our enumerations. In Redex, our main application of
 enumeration combinators, fairness ensures that when a Redex
 programmer makes an innocuous change to the grammar of
 the language (e.g. changing the relative order of two
 subexpressions in an expression form) the enumeration
 quality is not significantly affected. For example, consider
 an application expression. From the perspective of the
-enumerator, an application expression looks just like a list
-of expressions. An unfair enumerator might cause our
+enumeration, an application expression looks just like a list
+of expressions. An unfair enumeration might cause our
 bug-finding search to spend a lot of time generating
 different argument expressions and always using similar
 (simple, boring) function expressions. 
@@ -257,7 +257,7 @@ variables and other kinds of expressions, we do not want to
 spend lots of time trying out different variables because most
 models are sensitive only to when variables differ from 
 each other, not their exact spelling. Accordingly unfairly
-biasing our enumerators away from different variables 
+biasing our enumerations away from different variables 
 can be a win for finding bugs. Overall, however, it is important
 that we do have a fair set of combinators that correspond
 to the way that Redex programs are constructed and then when

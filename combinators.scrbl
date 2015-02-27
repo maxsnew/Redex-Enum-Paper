@@ -26,7 +26,7 @@ fairness and the rest of the paper discusses our evaluation, related
 work, and concludes.
 
 Our library provides a basic enumerations and combinators
-that build up more complex ones. Each enumerator consists of four pieces:
+that build up more complex ones. Each enumeration consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
 a @racket[from-nat] function that computes a value from an index, the size
 of the enumeration, which can be either a natural number or @racket[+inf.0],
@@ -38,7 +38,7 @@ enumerated.@note{Our library also supports one-way enumerations as
                  they can be useful in practice, but we do not talk
                  about them here.}
 
-The most basic enumerator is @racket[natural/e]. Its @racket[to-nat]
+The most basic enumeration is @racket[natural/e]. Its @racket[to-nat]
 and @racket[from-nat] functions are simply the identity function
 and its size is @racket[+inf.0]. The combinator @racket[fin/e]
 builds a finite enumeration 
@@ -47,8 +47,8 @@ an enumeration with the six given elements, where the elements
 are put in correspondence with the naturals in order they are
 given.
 
-The disjoint union enumerator, @racket[or/e], takes two or more
-enumerators. The resulting enumeration alternates between the input
+The disjoint union enumeration, @racket[or/e], takes two or more
+enumerations. The resulting enumeration alternates between the input
 enumerations, so that if given @racket[n] infinite enumerations, the
 resulting enumeration will alternate through each of the enumerations
 every @racket[n] positions.  For example, the following is the
@@ -58,7 +58,7 @@ and an enumeration of strings:
 @enum-example[(or/e natural/e string/e)
               14]
 
-The contracts associated with the enumerators are used to determine
+The contracts associated with the enumerations are used to determine
 which enumeration a value came from.
 
 The next combinator is the pairing operator 
@@ -85,9 +85,9 @@ n-dimensional grid.
 We discuss this in detail in @secref["sec:fair-informal"].
 
 The combinator
-@racket[delay/e] facilitates fixed points of enumerators,
+@racket[delay/e] facilitates fixed points of enumerations,
 in order to build recursive enumerations.
-For example, we can construct an enumerator
+For example, we can construct an enumeration
 for lists of numbers:
 @racketblock[
 (letrec ([lon/e
@@ -137,18 +137,18 @@ when building the bijection, @racket[map/e]'s contract randomly checks
 a few values of the enumeration to make sure they map back to themselves
 when passed through the two functions.
 
-We exploit the bidirectionality of our enumerators to define
-the @racket[except/e] enumerator. It accepts an element and an
+We exploit the bidirectionality of our enumerations to define
+the @racket[except/e] enumeration. It accepts an element and an
 enumeration, and returns an enumeration that doesn't have the given element. For
 example, the first 8 elements of @racket[(except/e natural/e 4)] are
 @enum-example[(except/e natural/e 4) 8] 
 The @racket[from-nat] function for @racket[except/e] simply
-uses the original enumerator's @racket[to-nat] on the given
+uses the original enumeration's @racket[to-nat] on the given
 element and then either subtracts one before passing the
 natural number along (if it is above the given exception) or
 simply passes it along (if it is below). Similarly, the 
 @racket[except/e]'s @racket[to-nat] function calls the input
-enumerator's @racket[to-nat] function.
+enumeration's @racket[to-nat] function.
 
 One important point about the combinators used so far: the
 decoding function is linear in the number of bits in the
@@ -172,10 +172,10 @@ Here are the first 12 elements of the enumeration:
                        [tl (hd) (naturals-above/e hd)])
               12]
 The implementation of @racket[dep/e] has three different
-cases, depending on the cardinality of the enumerators it
+cases, depending on the cardinality of the enumerations it
 receives. If all of the enumerations are infinite, then it
 is just like @racket[cons/e], except
-using the dependent function to build the enumerator to select
+using the dependent function to build the enumeration to select
 from for the second element of the pair. Similarly, if the
 independent enumeration is finite and the dependent ones are all
 infinite, then @racket[cons/de] can use quotient and remainder to compute
@@ -190,8 +190,8 @@ enumerations are all finite. In that case, we
 think of the dependent component of the pair being drawn from
 a single enumeration that consists of all of the
 finite enumerations, one after the other. Unfortunately,
-in this case, the @racket[cons/de] enumerator must compute
-all of the enumerators for the second component as soon
+in this case, the @racket[cons/de] enumeration must compute
+all of the enumerations for the second component as soon
 as a single (sufficiently large) number is passed to decode,
 which can, in the worst case, take time proportional the
 magnitude of the number during decoding.

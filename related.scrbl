@@ -12,8 +12,8 @@ random testing.
 @citet[bijective-term-encodings]'s work on bijective encoding schemes for 
 Prolog terms is most
 similar to ours. However, we differ in three main ways. 
-First, our n-ary enumerators are fair (not just the binary ones).
-Second, our enumerators deal with enumeration of finite sets wherever
+First, our n-ary enumerations are fair (not just the binary ones).
+Second, our enumerations deal with enumeration of finite sets wherever
 they appear in the larger structure. This is complicated because it
 forces our system to deal with mismatches between the cardinalities of
 two sides of a pair: for instance, the naive way to implement pairing
@@ -21,7 +21,7 @@ is to give odd bits to the left element and even bits to the right
 element, but this cannot work if one side of the pair, say the left,
 can be exhausted as there will be arbitrarily numbers of bits that
 do not enumerate more elements on the left. Third, we have a
-dependent pairing enumerator that allows the right element of a pair
+dependent pairing enumeration that allows the right element of a pair
 to depend on the actual value produced on the left. Like finite sets,
 this is challenging because of the way each pairing of an element on
 the left with a set on the right consumes an unpredictable number of
