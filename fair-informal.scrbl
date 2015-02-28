@@ -82,7 +82,7 @@ unfair combination.
                         [plot-height 135])
            (unfairness-histograms))]
 
-The subtle point about fairness is that we cannot restrict 
+A subtle point about fairness is that we cannot restrict 
 the combinators to work completely in lock-step on their argument
 enumerations, or else we would not admit @emph{any} pairing operation
 as fair. After all, a combinator that builds the pair
@@ -91,7 +91,7 @@ of @racket[natural/e] with itself we must eventually produce the pair
 after the pair @racket['(1000 . 1)]. So if we insist that at
 every point in the enumeration that the combinator's result enumeration
 has used all of its argument enumerations equally, then pairing would
-be impossible.
+be impossible to do fairly.
 
 Instead, we insist that there are infinitely many places in
 the enumeration where the combinators reach an equilibrium. That is,
