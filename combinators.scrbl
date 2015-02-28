@@ -26,7 +26,7 @@ introduces the basics of enumeration. The next section explains
 fairness and the rest of the paper discusses our evaluation, related 
 work, and concludes.
 
-Our library provides a basic enumerations and combinators
+Our library provides basic enumerations and combinators
 that build up more complex ones. Each enumeration consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
 a @racket[from-nat] function that computes a value from an index, the size
