@@ -179,19 +179,38 @@ a maximum of @raw-latex{$m$} is either @raw-latex{$m$} consed onto the front of 
 it is a number less than @raw-latex{$m$} combined with an @raw-latex{$n-1$}
 tuple that has a maximum of @raw-latex{$m$}.
 
+The combinatorially-inclined reader may wonder why we do not use the classic Cantor
+pairing function, which can be interpreted as a more
+triangular grid walk: @centered{@cantor-cons-pict[]}
+
+The two bijections are quite similar; they are both quadratic
+functions with similar geometric interpretations.
+@citet[elegant-pairing-function]'s traces out the
+edges of increasingly large squares and Cantor's traces out the bottoms
+of increasingly large triangles. Importantly, they are both fair (although
+with different equilibrium points).
+
+For enumerations we are primarily concerned with the other
+direction of the bijection, since that is the one used to generate
+terms. In the pairing case, the Cantor function has a fairly
+straightforward inverse, but its generalization does not. This is
+the generalization of the cantor pairing function to length
+@texmath{k} tuples:
+@centered{@raw-latex{$cantor\_tuple(n_1,n_2,\ldots,n_k) =
+{{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
+{{n_1}\choose{1}}$}}
+We can easily define a inefficient (but correct) way to compute
+the inverse by trying every natural number, in order, applying the
+original @raw-latex{$cantor\_tuple$} function to see if it was the
+argument given. @citet[inverting-cantor-n-tupling] gives
+the best known algorithm that strinks the search space considerably, 
+but the algorithm there is still a search procedure, and we found it
+too slow to use in practice. That said, our library uses 
+@citet[inverting-cantor-n-tupling]'s algorithm (via 
+a keyword argument to @racket[cons/e] and @racket[list/e]), in
+case someone finds it useful.
+
 @;{
-
-As a final optimization, we found that it is faster to prime factorize
-the length and then use compose @racket[list/e] calls at smaller
-lengths. For instance, to enumerate lists of length @racket[6], we
-enumerate pairs of lists of length @racket[3]. Composing the fair
-enumerations in this way results in an enumeration that is also fair.
-
-
-
-============================================================
-
-
 @section{Union}
 @(define either-index 77)
 @(define quot (quotient either-index 2))
@@ -257,42 +276,5 @@ for some index.
 
 
 ============================================================
-
-
-The combinatorially-inclined reader may have noticed in our
-description of @racket[cons/e] that we did not use the classic Cantor
-pairing function for our bijection, which can be interpreted as a more
-triangular grid walk:@centered{@cantor-cons-pict[]}. Instead we use
-@citet[elegant-pairing-function]'s bijection, that we refer to as
-``boxy'' pairing. The pairing functions are given by
-
-@centered{@raw-latex{$cantor\_pair(m, n) = \frac{(n+m)(n+m+1)}{2} + m$}}
-@centered{@raw-latex{$box\_pair(m, n) =
-                     \begin{cases} 
-                     x^2+x+y &\mbox{if } x\ge y\\
-                     x+y^2   &\mbox{if } x < y 
-                     \end{cases}$}}
-
-The two bijections are quite similar; they are both quadratic
-functions with similar geometric interpretations: boxy traces out the
-edges of increasingly large squares and Cantor traces out the bottoms
-of increasingly large triangles. This is exactly why they are both
-fair. When enumerating, each ``layer'' uses its arguments equally so
-enumerating each layer in turn is fair. An algebraic way to state this
-is that the Cantor pairing function is monotonic in the sum of its 2
-arguments, whereas the boxy pairing function is monotonic in the max
-of its 2 arguments. The Cantor function first enumerates all pairs
-with sum 0, then those with sum 1 and so on, whereas the boxy does the
-same for the maximum.
-
-
-
-This point of view also leads to natural generalizations to
-n-tuples. Generalized boxy enumerates in order of the maximum of its n
-arguments, tracing out the outer faces of an n cube. Generalized
-Cantor enumerates in the order of the sum of its arguments, tracing
-out the outer faces of an n simplex. By maintaining this ``layering''
-property, we ensure that the generalized combinators are also fair.
-
 
 }

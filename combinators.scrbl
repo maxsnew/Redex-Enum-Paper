@@ -8,7 +8,8 @@
           scriblib/footnote
           scribble/core
           "util.rkt"
-          "enum-util.rkt")
+          "enum-util.rkt"
+          "cite.rkt")
 
 @;{
 
@@ -73,7 +74,8 @@ quotient with remainder of the index with the lesser size.
 Pairing infinite enumerations require more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening
-squares to enumerate all pairs:
+squares to enumerate all pairs (using @citet[elegant-pairing-function]'s
+bijection):
 @centered{@pair-pict[]}
 which means that @racket[(cons/e natural/e natural/e)]'s
 first 12 elements are
