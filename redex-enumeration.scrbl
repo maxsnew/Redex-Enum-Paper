@@ -218,7 +218,7 @@ but it can occur due to multiple uses of ellipses in a single sequence or
 when matching @racket[in-hole]. Because of the way our enumeration compilation 
 works, we are not technically building a bijection between the naturals
 and terms in a Redex pattern; it is more accurate to say we are building
-a bijection between the naturals and the one ways might parse a Redex pattern.
+a bijection between the naturals and the ways one might parse a Redex pattern.
 In our implementation, of course, we construct a concrete term from the
 parse, but when a pattern is ambiguous there may be a single term
 that corresponds to multiple parses and thus our enumeration is not bijective.
