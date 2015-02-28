@@ -195,5 +195,5 @@ finite enumerations, one after the other. Unfortunately,
 in this case, the @racket[cons/de] enumeration must compute
 all of the enumerations for the second component as soon
 as a single (sufficiently large) number is passed to decode,
-which can, in the worst case, take time proportional the
+which can, in the worst case, take time proportional to the
 magnitude of the number during decoding.
