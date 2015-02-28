@@ -1556,6 +1556,23 @@ Section Enumerates.
       eapply RF; eauto.
   Defined.
 
+  Definition Enumerates_to_dec_uniq :
+    forall e x,
+      (exists ! (nt : nat * Trace),
+         let (n, t) := nt in
+         Enumerates e n x t)
+      \/ (forall n t, ~ Enumerates e n x t).
+  Proof.
+    intros.
+    destruct (Enumerates_to_dec e x).
+    left.
+    destruct s as [[n t] Henum].
+    exists (n, t).
+    split; [assumption|].
+    intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ Henum Henum'); subst; auto.
+    right; auto.
+  Qed.
+
   Lemma even_SS :
     forall n,
       { l | n = 2 * l } -> { m | S (S n) = 2 * m }.
@@ -1644,6 +1661,20 @@ Section Enumerates.
       exists (x, trace_one n tg).
       eauto.
   Defined.
+
+  Definition Enumerates_from_dec_uniq :
+    forall e n,
+    exists ! (xt : Value * Trace),
+      let (x, t) := xt
+      in Enumerates e n x t.
+  Proof.
+    intros.
+    destruct (Enumerates_from_dec e n) as [[v t] Henum].
+    exists (v, t).
+
+    split; [assumption|].
+    intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ Henum Henum'); subst; auto.
+  Qed.  
 End Enumerates.
 Hint Constructors Enumerates.
 Hint Resolve Enumerates_to_dec_Trace.

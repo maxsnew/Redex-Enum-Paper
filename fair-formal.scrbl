@@ -69,9 +69,8 @@ the model actually defines two functions.
        @sr[n] in the premises ensure there is exactly one rule
        to use. Computing the
        @sr[T] argument is straightforward.
-       The proof @tt{Enumerates_from_dec} in the supplementary
-       material gives the algorithm and @tt{Enumerates_from_fun}
-       shows the answer it produces is unique.}
+       The full proof is given as @tt{Enumerates_from_dec_uniq} in the supplementary
+       material.}
 
 @theorem{For all @sr[e], @sr[v], there exists 
          a unique @sr[T] and @sr[n] such that @sr[(|@| e n v T)],
@@ -84,10 +83,8 @@ the model actually defines two functions.
        formulas in the premises of the rules to go from the
        given @sr[n] to the one to use in the recursive call,
        but these inverses exist.
-       The proof @tt{Enumerates_to_dec} in
-       the supplementary material gives the algorithm
-       and the proof @tt{Enumerates_to_fun} shows the answer
-       is unique (when it exists).}
+       The full proof is given as @tt{Enumerates_to_dec_uniq} in
+       the supplementary material.}
 
 Although we don't prove it formally, the situation when there is no
 @sr[n] in the second theorem corresponds to the situation where the value that 
