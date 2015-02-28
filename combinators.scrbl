@@ -30,7 +30,7 @@ Our library provides basic enumerations and combinators
 that build up more complex ones. Each enumeration consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
 a @racket[from-nat] function that computes a value from an index, the size
-of the enumeration, which can be either a natural number or @racket[+inf.0],
+of the enumeration, which can be either a natural number or positive infinity (written @racket[+inf.0]),
 and a contract that captures all of the values in the enumeration precisely.
 Each enumeration has the invariant that
 the @racket[to-nat] and @racket[from-nat] functions form a bijection between
