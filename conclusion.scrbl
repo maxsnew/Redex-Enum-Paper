@@ -10,7 +10,7 @@ study showing that fair enumeration can support an
 effective testing tool. 
 
 Indeed, the results of our empirical study have convinced us
-to modified Redex's default random testing functionality. The new
+to modify Redex's default random testing functionality. The new
 default strategy for random testing first tests a property
 using the in-order enumeration for 10 seconds, then
 alternates between enumeration and the ad hoc random
@@ -28,4 +28,4 @@ Thanks to Ben Lerner for proving a square root property that gave us
 fits.
 Thanks to Hai Zhou, Li Li, Yuankai Chen, and Peng Kang for
 graciously sharing their compute servers with us. Thanks to
-Matthias Felleisen for helpful comments on the writing. 
+Matthias Felleisen and Ben Greenman for helpful comments on the writing. 
