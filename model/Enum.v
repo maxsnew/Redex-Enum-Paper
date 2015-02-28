@@ -1326,50 +1326,6 @@ Section Enumerates.
         Enumerates (E_Trace tg e) n v (trace_one n tg).
   Hint Constructors Enumerates.
 
-  (* Couldn't prove this with traces assumed to be equal. *)
-  Theorem Enumerates_to_fun :
-    forall e x n1 n2 t1 t2,
-      Enumerates e n1 x t1 ->
-      Enumerates e n2 x t2 ->
-      n1 = n2.
-  Proof.
-    induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; subst; try congruence.
-
-    (* E_Pair *)
-    - replace lx0 with lx in *; try congruence.
-      replace rx0 with rx in *; try congruence.
-      erewrite (IHe1 _ _ _ _ _ H2 H10) in *.
-      erewrite (IHe2 _ _ _ _ _ H6 H14) in *.
-      erewrite (Pairing_from_fun _ _ _ _ H1 H9) in *.
-      auto.
-
-    (* E_Map *)
-    - erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H8) in *.
-      erewrite (IHe _ _ _ _ _ H5 H12) in *.
-      auto.
-
-    (* E_Dep *)
-    - inversion H13.
-      subst.
-      erewrite (IHe _ _ _ _ _ H3 H11) in *.
-      erewrite (H _ _ _ _ _ _ H7 H15) in *.
-      erewrite (Pairing_from_fun _ _ _ _ H2 H10) in *.
-      auto.
-
-    (* E_Sum Left *)
-    - inversion H10; subst.
-      erewrite (IHe1 _ _ _ _ _ H5 H12).
-      auto.
-
-    (* E_Sum Right *)
-    - inversion H10; subst.
-      erewrite (IHe2 _ _ _ _ _ H5 H12).
-      auto.
-
-    (* E_Trace *)
-    - apply IHe with (x := x) (t1 := _t) (t2 := _t0); assumption.
-  Qed.
-
   Lemma even_fun:
     forall x y,
       2 * x = 2 * y ->
@@ -1440,6 +1396,65 @@ Section Enumerates.
     (* E_Trace *)
     - destruct (IHe _ _ _ _ _ H4 H10); subst.
       auto.
+  Qed.
+
+  (* Couldn't prove this with traces assumed to be equal. *)
+  Theorem Enumerates_to_fun :
+    forall e x n1 n2 t1 t2,
+      Enumerates e n1 x t1 ->
+      Enumerates e n2 x t2 ->
+      n1 = n2.
+  Proof.
+    induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; subst; try congruence.
+
+    (* E_Pair *)
+    - replace lx0 with lx in *; try congruence.
+      replace rx0 with rx in *; try congruence.
+      erewrite (IHe1 _ _ _ _ _ H2 H10) in *.
+      erewrite (IHe2 _ _ _ _ _ H6 H14) in *.
+      erewrite (Pairing_from_fun _ _ _ _ H1 H9) in *.
+      auto.
+
+    (* E_Map *)
+    - erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H8) in *.
+      erewrite (IHe _ _ _ _ _ H5 H12) in *.
+      auto.
+
+    (* E_Dep *)
+    - inversion H13.
+      subst.
+      erewrite (IHe _ _ _ _ _ H3 H11) in *.
+      erewrite (H _ _ _ _ _ _ H7 H15) in *.
+      erewrite (Pairing_from_fun _ _ _ _ H2 H10) in *.
+      auto.
+
+    (* E_Sum Left *)
+    - inversion H10; subst.
+      erewrite (IHe1 _ _ _ _ _ H5 H12).
+      auto.
+
+    (* E_Sum Right *)
+    - inversion H10; subst.
+      erewrite (IHe2 _ _ _ _ _ H5 H12).
+      auto.
+
+    (* E_Trace *)
+    - apply IHe with (x := x) (t1 := _t) (t2 := _t0); assumption.
+  Qed.
+
+  Theorem Enumerates_to_fun'
+  : forall e x n1 n2 t1 t2,
+      Enumerates e n1 x t1 ->
+      Enumerates e n2 x t2 ->
+      n1 = n2 /\ t1 = t2.
+  Proof.
+    intros.
+    assert (n1 = n2 /\ ((n1 = n2) -> t1 = t2)).
+    split.
+    eapply Enumerates_to_fun; eauto.
+    intros; subst.
+    destruct (Enumerates_from_fun _ _ _ _ _ _ H0 H); auto.
+    destruct H1; split; auto.
   Qed.
 
   (* Map/Trace compatibility lemmas *)
