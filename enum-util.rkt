@@ -15,12 +15,12 @@
          fin/e)
 
 (define (disj-sum-pict/good)
-  (gen-table or/e 8 24 40 12 #:arrows? #t))
+  (gen-table or/e 8 24 40 8 #:arrows? #t))
 
 (define (disj-sum-pict/bad)
   (define (bad-disj-sum/e a b c)
     (or/e a (or/e b c)))
-  (gen-table bad-disj-sum/e 8 32 40 6 #:arrows? #t #:last-arrow 15))
+  (gen-table bad-disj-sum/e 8 32 40 8 #:arrows? #t #:last-arrow 15))
 
 (define (gen-table or/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows? #:last-arrow [last-arrow +inf.0] 
                    )
@@ -57,8 +57,8 @@
    (vc-append
     (apply 
      hc-append
-     (for/list ([i (in-list (list "nat?" "sym?" "float?"))])
-       (define txt (text (format "~a" i)))
+     (for/list ([i (in-list (list "natural" "symbol" "float"))])
+       (define txt (text (format "~a" i) '() 10))
        (cc-superimpose (blank size-per-cell 0)
                        (refocus
                         (hbl-append
@@ -309,3 +309,6 @@
     (cond
       [(null? lst) enum]
       [else (loop (cdr lst) (except/e enum (car lst)))])))
+
+(module+ main 
+  (hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good)))
