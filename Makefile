@@ -14,7 +14,7 @@ clean:
 	rm supp/Makefile
 	rm -f supp.tar.gz
 
-test:
+test: model/Enum.vo
 	raco make -v model/model.rkt model/run-coq-redex-tests.rkt
 	raco test model/model.rkt
 	raco test model/run-coq-redex-tests.rkt
