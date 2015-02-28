@@ -135,18 +135,20 @@ The full proof is @tt{SumFair} in the Coq model.
 
 @theorem{@racket[or-three/e] from @secref["sec:fair-informal"] is unfair.}
 @proof{
-We show that after a certain point, there
-are no equilibria. For any @texmath{n}, the trace evaluated at
-@texmath{0} will always include a number near
-@texmath{\lfloor{(n-1)/2}\rfloor}, but everything in the set that is
-the trace evaluated at @texmath{1} or @texmath{2} will be less than
-@texmath{\lceil{n/4}\rceil}. For sufficiently large @texmath{n},
-@texmath{\lfloor{(n-1)/2}\rfloor > \lceil{n/4}\rceil} so these sets
-are not equal. The full proof is @tt{NaiveSum3Unfair} in the Coq model.
+
+We show that after a certain point, there are no equilibria. For
+@texmath{n \ge 8}, there exist natural numbers @texmath{m, p} such
+that @texmath{2m \le n < 4p} while @texmath{p < m}. Then a complete
+trace from @texmath{0} to @texmath{n} maps @texmath{0} to a set that
+contains @texmath{\{0,\ldots,m\}}, but on the other hand maps
+@texmath{1} (and @texmath{2}) to subset of
+@texmath{\{0,\ldots,p\}}. Since @texmath{p < m}, these sets are
+different. Thus @racket[or-three/e] is unfair.
+The full proof is @tt{NaiveSum3Unfair} in the Coq model.
 }
 
 
-@theorem{@racket[cons/e] is Fair}
+@theorem{@racket[cons/e] is fair}
 @proof{
 Our equilibria points are @texmath{n^2} for every natural number
 @texmath{n}. First, it can be shown that tracing from @texmath{n^2} to
@@ -157,9 +159,6 @@ that tracing from @texmath{0} to @texmath{n^2} maps @texmath{0} and
 then holds by induction on @texmath{n}.
 The full proof is @tt{PairFair} in the Coq model.
 }
-
-... need to say something about n-tuples here? LIke admit we don't prove it but that we think
-a similar proof would work?
 
 The naive tripling combinator @racket[triple/e] that uses nested calls
 to @racket[cons/e], as defined before, is unfair.
@@ -172,7 +171,6 @@ Then a complete trace from @texmath{0} to @texmath{n} will map
 @texmath{\{0,\ldots,m\}}, but will map @texmath{1} (and @texmath{2})
 to sets that are subsets of @texmath{\{0,\ldots,p\}}. Since @texmath{p < m},
 these sets are different, so @racket[triple/e] is unfair.
-@qed
+The full proof is @tt{NaiveTripleUnfair} in the Coq model.
 }
-The theorem is named @racket[NaiveTripleUnfair] in the coq model.
 
