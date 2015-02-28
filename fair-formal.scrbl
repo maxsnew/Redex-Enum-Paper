@@ -34,19 +34,18 @@ semantics. All of the theorems stated in this section
 are proven with respect to the Coq model and the Redex model,
 Coq model, and our implementation are all tested against each other.
 
-The simplest rule is for @sr[natural/e], in the middle on the left; it is
-just the identity. The two rules in the top of the figure
+The simplest rule is for @sr[natural/e], in the bottom right; it is
+just the identity. The two rules just above it
 show how @sr[or/e] works; if the number is even we use the
 left enumeration and if it is odd, we use the right one. The two @sr[cons/e]
-rules are the most complex. They enumerate in
+rules at the top of the figure are the most complex. They enumerate in
 the order discussed in @secref["sec:enum"], walking in ever
 larger squares starting at the origin. The ``x'' rule walks
 horizontally and the ``y'' rule walks vertically. The condition
-in the first premise controls which rule applies. The two 
-@sr[map/e] rules cover the ways the implementation uses the
-two halves of the bijection. It uses the ``in'' rule with 
-@sr[from-nat] and the ``out'' rule with @sr[to-nat].
+in the first premise controls which rule applies. The
+@sr[map/e] rule shows how the bijection is used.
 The @sr[dep/e] rule exploits @sr[cons/e] to get two indicies.
+We return to the rule for @sr[trace/e] shortly.
 
 The model simplifies our implementation in three ways.
 First, it covers only some of the combinators and

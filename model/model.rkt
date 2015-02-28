@@ -45,7 +45,7 @@
   #:mode (@ I I O O)
   #:contract (@ e natural v T)
   
-  [-------------------- "natural/e"
+  [-------------------- "natural"
    (@ natural/e n n ∅)]
   
   [(even n) (@ e_1 (ae-interp (/ n 2)) v T)
@@ -58,36 +58,30 @@
   
   [(side-condition (ae-interp
                     (< (- n (sqr (integer-sqrt n)))
-                       (integer-sqrt n))))
-   (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
+                       (integer-sqrt n)))) (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
    (@ e_2 (ae-interp (integer-sqrt n)) v_2 T_2)
-   ----------------------------------------------------------- "cons/e x"
+   ----------------------------------------------------------- "cons x"
    (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(side-condition (ae-interp
                     (>= (- n (sqr (integer-sqrt n)))
-                        (integer-sqrt n))))
-   (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
+                        (integer-sqrt n)))) (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
    (@ e_2 (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))) v_2 T_2)
-   ---------------------------------------------------------------------------------------- "cons/e y"
-   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
+   ---------------------------------------------------------------------------------------- "cons y"
+   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))] 
   
-  
-  [(@ e n v T)
-   -------------------------------------------------  "map in"
-   (@ (map/e f_1 f_2 e) n (Eval-bij (f_1 v)) T)]
-  
-  [(@ e n (Eval-bij (f_2 v)) T)
-   ---------------------------------  "map out"
-   (@ (map/e f_1 f_2 e) n v T)]
+  [(@ e n v_1 T)
+   (where v_2 (Eval-bij (f_1 v_1))) (where v_1 (Eval-bij (f_2 v_2)))
+   -----------------------------------------------------------------  "map"
+   (@ (map/e f_1 f_2 e) n v_2 T)]
   
   [(@ (cons/e e natural/e) n_1 (cons v_1 n_2) T_1)
    (@ (Eval-enum (f v_1)) n_2 v_2 T_2)
-   ----------------------------------------------  "dep/e"
+   ----------------------------------------------  "dep"
    (@ (dep/e e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(@ e n_2 v T)
-   ----------------------------------------------  "trace/e"
+   ----------------------------------------------  "trace"
    (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
 
 (define-metafunction L
@@ -362,13 +356,12 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases1
-  '(("or l" "or r")
-    ("cons/e x")))
+  '(("cons x")
+    ("cons y")))
 
 (define linebreaking-with-cases2
-  '(("natural/e" "cons/e y")
-    ("map in" "map out")
-    ("trace/e" "dep/e")))
+  '(("trace" "or l" "or r")
+    ("dep" "map" "natural")))
 
 (define (semantics-figure)
   (define helv-font "Helvetica")
@@ -395,7 +388,7 @@
    (for/list ([line (in-list linebreaking)])
      (apply 
       hb-append
-      30
+      25
       (for/list ([name (in-list line)])
         (parameterize ([judgment-form-cases (list name)])
           (render-judgment-form @)))))))
@@ -408,7 +401,10 @@
     (w/rewriters
      (t))))
 
-(module+ main (semantics-figure))
+(module+ main 
+  (define sf (semantics-figure))
+  sf
+  (pict-width sf))
 
 (module+ test
   (require rackunit rackunit/log)
