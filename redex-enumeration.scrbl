@@ -83,7 +83,7 @@ or the @(add-commas example-term-index)th term:
 which takes only 10 or 20 milliseconds to compute.
 
 Our extensions to Redex map each different pattern that can appear
-in a grammar definition into Redex. At a high-level, the correspondence
+in a grammar definition into an enumeration. At a high-level, the correspondence
 between Redex patterns and our combinators is clear, namely recursive non-terminals map
 into uses of @racket[dep/e], alternatives map into @racket[or/e] and 
 sequences map into @racket[list/e]. We also take care to exploit
