@@ -57,21 +57,18 @@
    (@ (or/e e_1 e_2) n (cons 1 v) T)]
   
   [(side-condition (ae-interp
-                    (< (- (+ (* 2 n) 1)
-                          (sqr (integer-sqrt n)))
-                       (sqr (+ (integer-sqrt n) 1))))) (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
+                    (< (- n (sqr (integer-sqrt n)))
+                       (integer-sqrt n))))
+   (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
    (@ e_2 (ae-interp (integer-sqrt n)) v_2 T_2)
    ----------------------------------------------------------- "cons/e x"
    (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(side-condition (ae-interp
-                    (>= (- (+ (* 2 n) 1)
-                           (sqr (integer-sqrt n)))
-                        (sqr (+ (integer-sqrt n) 1))))) (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
-   (@ e_2 (ae-interp (- n (sqr (integer-sqrt n)) (/ (- (sqr (+ (integer-sqrt n) 1))
-                                                              (sqr (integer-sqrt n))
-                                                              1)
-                                                           2))) v_2 T_2)
+                    (>= (- n (sqr (integer-sqrt n)))
+                        (integer-sqrt n))))
+   (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
+   (@ e_2 (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))) v_2 T_2)
    ---------------------------------------------------------------------------------------- "cons/e y"
    (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
