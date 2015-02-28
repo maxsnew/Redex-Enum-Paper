@@ -2,6 +2,7 @@
 
 @(require scribble/manual
           scribble/eval
+          scriblib/figure
           racket/list
           racket/contract
           data/enumerate/lib
@@ -11,26 +12,21 @@
           "enum-util.rkt"
           "cite.rkt")
 
-@;{
-
-- implementation points:
-   => representation as three-tuples (size, two functions forming a bijection)
-   => running time as linear in the bit representation
-   
-}
-
 @title[#:tag "sec:enum"]{Introduction to Enumeration}
 
 This section gives a tour of our enumeration library and
-introduces the basics of enumeration. The next section explains
-fairness and the rest of the paper discusses our evaluation, related 
-work, and concludes.
+introduces the basics of enumeration. 
+@Secref["sec:fair-informal"] explains the concept of
+fairness and @secref["sec:fair-formal"] gives our formal
+model and an overview of the proofs. The rest of the paper
+discusses our evaluation, related work, and concludes.
 
 Our library provides basic enumerations and combinators
 that build up more complex ones. Each enumeration consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
 a @racket[from-nat] function that computes a value from an index, the size
-of the enumeration, which can be either a natural number or positive infinity (written @racket[+inf.0]),
+of the enumeration, which can be either a natural number or positive infinity 
+(written @racket[+inf.0]),
 and a contract that captures all of the values in the enumeration precisely.
 Each enumeration has the invariant that
 the @racket[to-nat] and @racket[from-nat] functions form a bijection between
@@ -48,6 +44,12 @@ an enumeration with the six given elements, where the elements
 are put in correspondence with the naturals in order they are
 given.
 
+
+@figure["fig:pair-pict" "Pairing Order"]{
+  @centered{@pair-pict[]}
+}
+
+
 The disjoint union enumeration, @racket[or/e], takes two or more
 enumerations. The resulting enumeration alternates between the input
 enumerations, so that if given @racket[n] infinite enumerations, the
@@ -57,10 +59,11 @@ beginning of the disjoint union of an enumeration of natural numbers
 and an enumeration of strings:
 
 @enum-example[(or/e natural/e string/e)
-              14]
+              16]
 
 The contracts associated with the enumerations are used to determine
-which enumeration a value came from.
+which enumeration a value came from when going from a value back to
+a natural bnumber.
 
 The next combinator is the pairing operator 
 @racket[cons/e]. It takes two enumerations and returns an
@@ -75,15 +78,14 @@ Pairing infinite enumerations require more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening
 squares to enumerate all pairs (using @citet[elegant-pairing-function]'s
-bijection):
-@centered{@pair-pict[]}
-which means that @racket[(cons/e natural/e natural/e)]'s
-first 12 elements are
+bijection), as shown in @figure-ref["fig:pair-pict"].
+The first 12 elements of @racket[(cons/e natural/e natural/e)]
+enumerator are:
 @enum-example[(cons/e natural/e natural/e) 12]
 
 The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
-n-dimensional grid.
+@texmath{n}-dimensional grid.
 We discuss this in detail in @secref["sec:fair-informal"].
 
 The combinator
@@ -94,7 +96,8 @@ for lists of numbers:
 @racketblock[
 (letrec ([lon/e
           (or/e (fin/e null)
-                (cons/e natural/e (delay/e lon/e)))])
+                (cons/e natural/e
+                        (delay/e lon/e)))])
   lon/e)]
 and here are its first 12 elements:
 @enum-example[(letrec ([lon/e
@@ -157,14 +160,15 @@ decoding function is linear in the number of bits in the
 number it is given. This means, for example, that it takes only
 a few milliseconds to compute the
 @raw-latex{$2^{100,000}$}th element
-in the list of natural number enumeration given above, for example.
+in the list of natural numbers enumeration given above, for example.
 
 Our next combinator, @racket[cons/de], does not always have this property.
 It builds enumerations of pairs, but where the enumeration on one
 side of the pair depends on the element in the other side of the pair.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
-@racketblock[(cons/de [hd natural/e] [tl (hd) (naturals-above/e hd)])]
+@racketblock[(cons/de [hd natural/e]
+                      [tl (hd) (naturals-above/e hd)])]
 A @racket[cons/de] has two subexpressions (@racket[natural/e] and @racket[(naturals-above/e i)]
 in this example), each of which is named (@racket[hd] and @racket[tl] in this example).
 And one of the expressions may refer to the other's variable by putting it
@@ -194,6 +198,6 @@ a single enumeration that consists of all of the
 finite enumerations, one after the other. Unfortunately,
 in this case, the @racket[cons/de] enumeration must compute
 all of the enumerations for the second component as soon
-as a single (sufficiently large) number is passed to decode,
+as a single (sufficiently large) number is passed to @racket[from-nat],
 which can, in the worst case, take time proportional to the
-magnitude of the number during decoding.
+magnitude of the number.
