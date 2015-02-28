@@ -7,11 +7,24 @@
           racket/contract
           scribble/manual
           scribble/core
+          scriblib/figure
           redex/reduction-semantics
           data/enumerate/lib)
 
 @(define (paralabel . args)
    (elem #:style (style "paragraph" '()) args))
+
+@(define example-term-index 100000000)
+
+@(define-language L
+   (e ::= 
+      (e e)
+      (λ (x : τ) e)
+      x
+      +
+      natural)
+   (τ ::= ℕ (τ → τ))
+   (x ::= variable))
 
 @title[#:tag "sec:redex-enum"]{Enumerating Redex Patterns}
 
@@ -22,12 +35,7 @@ gives an informal overview of how Redex programs are compiled
 into calls to the enumeration library in preparation for
 the evaluation in @secref["sec:evaluation"].
 
-Redex programmers write down a high-level specification of a grammar, reduction
-rules, type systems, etc., and properties that should hold for
-all programs in these languages that relate, say, the reduction
-semantics to the type system. Redex can then generate example
-programs and test the property, looking for counterexamples. 
-
+@;{
 @(compound-paragraph (style "wrapfigure" '())
                      (list
                       (paragraph (style #f '()) 
@@ -47,22 +55,29 @@ programs and test the property, looking for counterexamples.
                       #;
                       (paragraph (style "vspace*" '()) 
                                  (list (element (style #f '(exact-chars)) '("-.5in"))))))
+}
 
-@(define example-term-index 100000000)
+@figure["fig:redex-example" "Simply-Typed λ-Calculus"]{
+ @centered{
+ @racketblock[(define-language L
+                (e ::= 
+                   (e e)
+                   (λ (x : τ) e)
+                   x
+                   +
+                   natural)
+                (τ ::= ℕ (τ → τ))
+                (x ::= variable))]
+}}
 
-@(define-language L
-   (e ::= 
-      (e e)
-      (λ (x : τ) e)
-      x
-      +
-      natural)
-   (τ ::= ℕ (τ → τ))
-   (x ::= variable))
-
+Redex programmers write down a high-level specification of a grammar, reduction
+rules, type system, etc., and properties that should hold for
+programs in these languages that relate, say, the reduction
+semantics to the type system. Redex can then generate example
+programs and try to falsify the properties.
 
 To give a flavor for the new capability in Redex, consider
-the language to the right, which contains a Redex program that defines
+the language in @figure-ref["fig:redex-example"], which contains a Redex program that defines
 the grammar of a simply-typed calculus, plus numeric
 constants. With only this much written down, a Redex programmer can ask for
 the first nine terms:
@@ -90,9 +105,9 @@ sequences map into @racket[list/e]. We also take care to exploit
 our library's fairness. In particular, when enumerating the pattern, 
 @racket[(λ (x : τ) e)], we do not generate list and pair patterns
 following the precise structure, which would lead to an unfair nesting.
-Instead, we generate the pattern @racket[(list/e x/e τ/e e/e)] (where
+Instead, we generate the pattern @racket[(list/e x/e τ/e e/e)], where
 @racket[x/e], @racket[τ/e] and @racket[e/e] correspond to the enumerations
-for those non-terminals) and then use @racket[map/e] to construct the
+for those non-terminals, and use @racket[map/e] to construct the
 actual term.
 
 Redex's pattern language is more general, however, and there are four

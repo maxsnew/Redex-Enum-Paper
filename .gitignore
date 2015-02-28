@@ -17,4 +17,4 @@ lia.cache
 nlia.cache
 supp/Makefile
 supp/model/
-supp.tar.gz
+./supp.tar.gz

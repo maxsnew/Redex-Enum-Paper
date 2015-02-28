@@ -95,6 +95,7 @@ Specifically, we use Coq's @tt{Eval} @tt{compute} facility to print out
 specific values of the enumeration at specific points and then
 compare that to what our implementation produces. This is the same
 mechanism we use to test our Redex model against the Coq model.
+The testing code is in the supplementary material.
 
 To define fairness, we need to be able to trace how an enumeration
 combinator uses its arguments, and this is the purpose of the
@@ -160,9 +161,7 @@ then holds by induction on @texmath{n}.
 The full proof is @tt{PairFair} in the Coq model.
 }
 
-The naive tripling combinator @racket[triple/e] that uses nested calls
-to @racket[cons/e], as defined before, is unfair.
-@theorem{@racket[triple/e] is unfair}
+@theorem{@racket[triple/e] from @secref["sec:fair-informal"] is unfair}
 @proof{
 For any natural @texmath{n \ge 16}, there exist natural numbers
 @texmath{m, p} such that @texmath{m^2 \le n < p^4} and @texmath{p < m}.

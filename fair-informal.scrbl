@@ -183,9 +183,6 @@ The combinatorially-inclined reader may wonder why we do not use the classic Can
 pairing function, which can be interpreted as a more
 triangular grid walk: @centered{@cantor-cons-pict[]}
 
-Instead, we use a generalization of @citet[elegant-pairing-function]'s
-``elegant'' pairing function.
-
 The two bijections are quite similar; they are both quadratic
 functions with similar geometric interpretations.
 @citet[elegant-pairing-function]'s traces out the
@@ -199,8 +196,10 @@ terms. In the pairing case, the Cantor function has a fairly
 straightforward inverse, but its generalization does not. This is
 the generalization of the cantor pairing function to length
 @texmath{k} tuples:
-@centered{@raw-latex{$cantor\_tuple(n_1,n_2,\ldots,n_k) =
-{{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
+@centered{@raw-latex{\vspace*{-.02in}}
+           @raw-latex{$cantor\_tuple(n_1,n_2,\ldots,n_k) =$}
+           @raw-latex{\vspace*{.05in}}
+@raw-latex{${{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
 {{n_1}\choose{1}}$}}
 We can easily define a inefficient (but correct) way to compute
 the inverse by systematically trying every tuple by using a different untupling function, applying the
@@ -232,8 +231,7 @@ version implemented this way:
 and consider passing in an enumeration of naturals,
 one of symbols, and one of floats.
 The left side of @figure-ref["fig:disj-sum"] shows the order used by
-the unfair nesting and the right side shows the ordering a fair
-enumeration uses.
+the unfair nesting and the right side shows the fair ordering.
 
 @figure["fig:disj-sum" "Unfair (left) and fair (right) disjoint union enumerations"]{
 @centered{@(hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good))}
