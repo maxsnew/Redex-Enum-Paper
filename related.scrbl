@@ -72,8 +72,7 @@ a concept of n-ary fair operators for n > 2.
 
 @section{Testing Studies}
 
-Although the focus of our paper is on the combinators and
-fairness, the literature has few studies that specifically
+The literature has few studies that specifically
 compare random testing and enumeration. We are aware of only
 one other, namely in @citet[small-check]'s original paper on
 SmallCheck. SmallCheck is an enumeration-based testing
