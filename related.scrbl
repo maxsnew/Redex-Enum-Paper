@@ -77,7 +77,7 @@ compare random testing and enumeration. We are aware of only
 one other, namely in @citet[small-check]'s original paper on
 SmallCheck. SmallCheck is an enumeration-based testing
 library for Haskell and the paper contains a comparison with
-QuickCheck, Haskell random testing library.
+QuickCheck, a Haskell random testing library.
 
 Their study is not as in-depth as ours; the paper does not
 say, for example, how many errors were found by each of the
@@ -104,13 +104,14 @@ Similarly,
 @citet[finding-and-understanding-bugs-in-c-compilers]'s 
 work 
 also presents a test-case generator tailored to testing programming 
-languages with complex well-formedness constraints, but this time
+languages with complex well-formedness constraints.
 C. @citet[fuzzing-unix-utils] designed a random generator for streams
 of characters with various properties (e.g. including nulls or not, 
 to include newline characters at specific points) and used it
-to find bugs in unix utilities.
+to find bugs in Unix utilities.
 
-Despite an early, convincing study on the value of random
+In surveying related work, we noticed that despite an early,
+convincing study on the value of random
 testing@~cite[an-evaluation-of-random-testing]
 and an early influential paper@~cite[fuzzing-unix-utils], there 
 seems to be a general impression that random testing is a poor choice for
