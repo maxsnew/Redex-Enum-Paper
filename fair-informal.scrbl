@@ -183,6 +183,9 @@ The combinatorially-inclined reader may wonder why we do not use the classic Can
 pairing function, which can be interpreted as a more
 triangular grid walk: @centered{@cantor-cons-pict[]}
 
+Instead, we use a generalization of @citet[elegant-pairing-function]'s
+``elegant'' pairing function.
+
 The two bijections are quite similar; they are both quadratic
 functions with similar geometric interpretations.
 @citet[elegant-pairing-function]'s traces out the
@@ -200,10 +203,10 @@ the generalization of the cantor pairing function to length
 {{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
 {{n_1}\choose{1}}$}}
 We can easily define a inefficient (but correct) way to compute
-the inverse by trying every natural number, in order, applying the
+the inverse by systematically trying every tuple by using a different untupling function, applying the
 original @raw-latex{$cantor\_tuple$} function to see if it was the
 argument given. @citet[inverting-cantor-n-tupling] gives
-the best known algorithm that strinks the search space considerably, 
+the best known algorithm that shrinks the search space considerably, 
 but the algorithm there is still a search procedure, and we found it
 too slow to use in practice. That said, our library uses 
 @citet[inverting-cantor-n-tupling]'s algorithm (via 
