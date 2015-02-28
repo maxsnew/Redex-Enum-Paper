@@ -59,9 +59,10 @@ the model actually defines two functions.
          and we can compute @sr[v] and @sr[T].}
 @proof{The basic idea is that you can read the value off
        of the rules recursively, computing new values of
-       @sr[n] and checking the conditions in on
-       @sr[n] in the premises of when there are
-       multiple rules for a given @sr[e]. Computing the
+       @sr[n]. In some cases there are multiple rules that apply
+       for a given @sr[e], but the conditions on
+       @sr[n] in the premises ensure there is exactly one rule
+       to use. Computing the
        @sr[T] argument is straightforward.
        The proof @tt{Enumerates_from_dec} in the supplementary
        material gives the algorithm and @tt{Enumerates_from_fun}
@@ -84,7 +85,7 @@ the model actually defines two functions.
        is unique (when it exists).}
 
 Although we don't prove it formally, the situation when there is no
-witness corresponds to the situation where the value that 
+@sr[n] in the second theorem corresponds to the situation where the value that 
 we are attempting to convert to a number does not match the contract
 in the enumeration in our implementation.
 
