@@ -21,87 +21,110 @@ Traces
 *)
 Ltac nliamega := try omega; try lia; try nia; fail "omega, lia and nia all failed".
 
-Inductive Value : Set :=
-| V_Nat : nat -> Value
-| V_Pair : Value -> Value -> Value
-| V_Sum_Left : Value -> Value
-| V_Sum_Right : Value -> Value.
-Hint Constructors Value.
+Section Value.
+  
+  Inductive type : Set :=
+  | TNat  : type
+  | TPair : type -> type -> type
+  | TSum  : type -> type -> type.
 
-Definition Bijection (A:Set) (B:Set) :=
-  { fg : (A->B)*(B->A) |
-    (forall (a:A),
-      (snd fg) ((fst fg) a) = a)
-    /\
-    (forall (b:B),
-      (fst fg) ((snd fg) b) = b) }.
-Definition biject_to {A} {B} (bi:Bijection A B) (a:A) : B :=
-  (fst (proj1_sig bi)) a.
-Definition biject_from {A} {B} (bi:Bijection A B) (b:B) : A :=
-  (snd (proj1_sig bi)) b.
+  Fixpoint tdenote t : Set :=
+    match t with
+      | TNat => nat
+      | TPair tl tr => tdenote tl * tdenote tr
+      | TSum  tl tr => tdenote tl + tdenote tr
+    end%type.
+End Value.
 
-Definition Bijects {A:Set} {B:Set} (bi:Bijection A B) (a:A) (b:B) :=
-  biject_to bi a = b
-  /\ biject_from bi b = a.
+Section Bijection.
+  Definition Bijection (A:Set) (B:Set) :=
+    { fg : (A->B)*(B->A) |
+      (forall (a:A),
+         (snd fg) ((fst fg) a) = a)
+      /\
+      (forall (b:B),
+         (fst fg) ((snd fg) b) = b) }.
+  Definition biject_to {A} {B} (bi:Bijection A B) (a:A) : B :=
+    (fst (proj1_sig bi)) a.
+  Definition biject_from {A} {B} (bi:Bijection A B) (b:B) : A :=
+    (snd (proj1_sig bi)) b.
 
-Lemma Bijects_fun_right:
-  forall A B (b:Bijection A B) x y1 y2,
-    Bijects b x y1 ->
-    Bijects b x y2 ->
-    y1 = y2.
-Proof.
-  intros A B b x y1 y2.
-  intros [B1_l B1_r] [B2_l B2_r].
-  congruence.
-Qed.
-Lemma Bijects_fun_left:
-  forall A B (b:Bijection A B) x1 x2 y,
-    Bijects b x1 y ->
-    Bijects b x2 y ->
-    x1 = x2.
-Proof.
-  intros A B b x1 x2 y.
-  intros [B1_l B1_r] [B2_l B2_r].
-  congruence.
-Qed.
+  Definition Bijects {A:Set} {B:Set} (bi:Bijection A B) (a:A) (b:B) :=
+    biject_to bi a = b
+    /\ biject_from bi b = a.
 
-Definition Bijects_to_dec :
-  forall A B (bi:Bijection A B) a,
-    { b | Bijects bi a b }.
-Proof.
-  intros. exists (biject_to bi a).
-  unfold Bijects. intuition.
-  unfold biject_from, biject_to.
-  destruct bi as [[f g] [F G]].
-  simpl in *. auto.
-Defined.
+  Lemma Bijects_fun_right:
+    forall A B (b:Bijection A B) x y1 y2,
+      Bijects b x y1 ->
+      Bijects b x y2 ->
+      y1 = y2.
+  Proof.
+    intros A B b x y1 y2.
+    intros [B1_l B1_r] [B2_l B2_r].
+    congruence.
+  Qed.
 
-Definition Bijects_from_dec :
-  forall A B (bi:Bijection A B) b,
-    { a | Bijects bi a b }.
-Proof.
-  intros. exists (biject_from bi b).
-  unfold Bijects. intuition.
-  unfold biject_from, biject_to.
-  destruct bi as [[f g] [F G]].
-  simpl in *. auto.
-Defined.
+  Lemma Bijects_fun_left:
+    forall A B (b:Bijection A B) x1 x2 y,
+      Bijects b x1 y ->
+      Bijects b x2 y ->
+      x1 = x2.
+  Proof.
+    intros A B b x1 x2 y.
+    intros [B1_l B1_r] [B2_l B2_r].
+    congruence.
+  Qed.
 
-Inductive tag : Set :=
-| zero  : tag
-| one   : tag
-| two   : tag
-| three : tag.
+  Definition Bijects_to_dec :
+    forall A B (bi:Bijection A B) a,
+      { b | Bijects bi a b }.
+  Proof.
+    intros. exists (biject_to bi a).
+    unfold Bijects. intuition.
+    unfold biject_from, biject_to.
+    destruct bi as [[f g] [F G]].
+    simpl in *. auto.
+  Defined.
 
-Inductive Enum : Set :=
-| E_Nat : Enum
-| E_Pair : Enum -> Enum -> Enum
-| E_Map : Bijection Value Value -> Enum -> Enum
-| E_Dep : Enum -> (Value -> Enum) -> Enum
-| E_Sum : Enum -> Enum -> Enum
-| E_Trace : tag -> Enum -> Enum (* A no-op wrapper to signal tracing *)
-.
+  Definition Bijects_from_dec :
+    forall A B (bi:Bijection A B) b,
+      { a | Bijects bi a b }.
+  Proof.
+    intros. exists (biject_from bi b).
+    unfold Bijects. intuition.
+    unfold biject_from, biject_to.
+    destruct bi as [[f g] [F G]].
+    simpl in *. auto.
+  Defined.
 
+  Section BijExamples.
+    Definition SwapCons {A B} (p : A * B) :=
+      match p with | (x, y) => (y, x) end.
+
+    Definition SwapConsBij {A B : Set} : Bijection (A * B) (B * A).
+      refine (exist _  (SwapCons, SwapCons) _).
+      split; intros p; destruct p; reflexivity.
+    Defined.
+  End BijExamples.
+    
+End Bijection.
+
+Section Enum.
+  Inductive tag : Set :=
+  | zero  : tag
+  | one   : tag
+  | two   : tag
+  | three : tag.
+
+  Inductive Enum : type -> Set :=
+  | E_Nat : Enum TNat
+  | E_Pair tl tr : Enum tl -> Enum tr -> Enum (TPair tl tr)
+  | E_Map t1 t2 : Bijection (tdenote t2) (tdenote t1) -> Enum t1 -> Enum t2
+  | E_Dep t1 t2 : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
+  | E_Sum tl tr : Enum tl -> Enum tr -> Enum (TSum tl tr)
+  | E_Trace t : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
+  .
+End Enum.
 Hint Constructors Enum.
 
 Section Pairing.
@@ -1288,42 +1311,42 @@ Hint Resolve trace_eq_refl.
 Hint Resolve sub_trace_refl.
 
 Section Enumerates.
-  Inductive Enumerates : Enum -> nat -> Value -> Trace -> Prop :=
+  Inductive Enumerates : forall (t : type), Enum t -> nat -> tdenote t -> Trace -> Prop :=
   | ES_Nat :
       forall n,
-        Enumerates E_Nat n (V_Nat n) ε
+        Enumerates _ E_Nat n n ε
   | ES_Pair :
-      forall l r n ln rn lx rx lt rt,
+      forall tl tr l r n ln rn lx rx lt rt,
         Pairing n ln rn ->
-        Enumerates l ln lx lt ->
-        Enumerates r rn rx rt ->
-        Enumerates (E_Pair l r) n (V_Pair lx rx) (lt ⊔ rt)
+        Enumerates tl l ln lx lt ->
+        Enumerates tr r rn rx rt ->
+        Enumerates _ (E_Pair _ _ l r) n (lx, rx) (lt ⊔ rt)
   | ES_Map :
-      forall bi inner inner_x n x t,
+      forall tl tr bi inner inner_x n x t,
         Bijects bi x inner_x ->
-        Enumerates inner n inner_x t ->
-        Enumerates (E_Map bi inner) n x t
+        Enumerates tl inner n inner_x t ->
+        Enumerates tr (E_Map _ _ bi inner) n x t
   | ES_Dep:
-      forall l f n ln rn lx rx lt rt,
+      forall tl tr l f n ln rn lx rx lt rt,
         Pairing n ln rn ->
-        Enumerates l ln lx lt ->
-        Enumerates (f lx) rn rx rt ->
-        Enumerates (E_Dep l f) n (V_Pair lx rx) (lt ⊔ rt)
+        Enumerates tl l ln lx lt ->
+        Enumerates tr (f lx) rn rx rt ->
+        Enumerates _ (E_Dep _ _ l f) n (lx, rx) (lt ⊔ rt)
   | ES_Sum_Left:
-      forall l r n ln lx t,
+      forall tl tr l r n ln lx t,
         n = 2 * ln ->
-        Enumerates l ln lx t ->
-        Enumerates (E_Sum l r) n (V_Sum_Left lx) t
+        Enumerates tl l ln lx t ->
+        Enumerates (TSum tl tr) (E_Sum _ _ l r) n (inl lx) t
   | ES_Sum_Right:
-      forall l r n rn rx t,
+      forall tl tr l r n rn rx t,
         n = 2 * rn + 1 ->
-        Enumerates r rn rx t ->
-        Enumerates (E_Sum l r) n (V_Sum_Right rx) t
+        Enumerates tr r rn rx t ->
+        Enumerates (TSum tl tr) (E_Sum _ _ l r) n (inr rx) t
   (* E_Trace hides traces below it. This makes traces super easily spoofable, but makes it easier to reason about when they're not spoofed *)
   | ES_Trace :
-      forall n tg e v _t,
-        Enumerates e n v _t ->
-        Enumerates (E_Trace tg e) n v (trace_one n tg).
+      forall ty n tg e v _t,
+        Enumerates ty e n v _t ->
+        Enumerates ty (E_Trace _ tg e) n v (trace_one n tg).
   Hint Constructors Enumerates.
 
   Lemma even_fun:
@@ -1351,9 +1374,9 @@ Section Enumerates.
   Qed.
 
   Theorem Enumerates_from_fun :
-    forall e n x1 x2 t1 t2,
-      Enumerates e n x1 t1 ->
-      Enumerates e n x2 t2 ->
+    forall ty e n x1 x2 t1 t2,
+      Enumerates ty e n x1 t1 ->
+      Enumerates ty e n x2 t2 ->
       x1 = x2 /\ t1 = t2.
   Proof.
     induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; eauto; subst; try congruence.
