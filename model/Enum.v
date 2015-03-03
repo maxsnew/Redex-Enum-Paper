@@ -22,17 +22,18 @@ Traces
 *)
 Ltac nliamega := try omega; try lia; try nia; fail "omega, lia and nia all failed".
 
+(* sumbool notation a la cpdt *)
+Notation Yes := (left _).
+Notation No := (right _).
+Notation "l &&& r" := (if l then r else No) (at level 70).
+Notation Refine x := (if x then Yes else No).
+
 Section Value.
-  
   Inductive type : Set :=
   | TNat  : type
   | TPair : type -> type -> type
   | TSum  : type -> type -> type.
 
-  Notation Yes := (left _).
-  Notation No := (right _).
-  Notation "l &&& r" := (if l then r else No) (at level 70).
-  Notation Refine x := (if x then Yes else No).
   Fixpoint type_eq_dec (t1 t2 : type) : { t1 = t2 } + { t1 <> t2 }.
     refine (match t1, t2 with
               | TNat, TNat => Yes
@@ -137,7 +138,7 @@ Section Enum.
   Inductive Enum : type -> Set :=
   | E_Nat : Enum TNat
   | E_Pair tl tr : Enum tl -> Enum tr -> Enum (TPair tl tr)
-  | E_Map t1 t2 : Bijection (tdenote t2) (tdenote t1) -> Enum t1 -> Enum t2
+  | E_Map tyin tyout : Bijection (tdenote tyout) (tdenote tyin) -> Enum tyin -> Enum tyout
   | E_Dep t1 t2 : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
   | E_Sum tl tr : Enum tl -> Enum tr -> Enum (TSum tl tr)
   | E_Trace t : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
@@ -1487,6 +1488,12 @@ Section Enumerates.
       | [ H: inr _ = inl _ |- _ ] => inversion H
     end.
 
+  Ltac rewrite_biject_funr :=
+    match goal with
+      | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
+        erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H2) in *; clear H1 H2
+    end.
+  
   Theorem Enumerates_to_fun :
     forall ty e x n1 n2 t1 t2,
       Enumerates ty e n1 x t1 ->
@@ -1495,10 +1502,8 @@ Section Enumerates.
   Proof.
     induction e; intros;
     repeat invert_Enumerates; try sumbool_contra;
-    repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun;
+    repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
     try match goal with
-      | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
-        erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H2) in *; clear H1 H2
       | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
         , H1 : Enumerates ?t ?e _ _ _
         , H2 : Enumerates ?t ?e _ _ _
@@ -1525,140 +1530,88 @@ Section Enumerates.
     end; trivial.
   Qed.
 
+  Ltac mycontra :=
+    match goal with
+      | [ H: context[_ -> False] |- False ] =>
+        eapply H; eauto; fail
+    end.
+
+  Ltac Etd_indHyp :=
+    match goal with
+      | [ H : forall (x0 : ?t), { _ : (prod _ _) | _ }
+        , x : ?t
+        |- _ ] => destruct (H x) as [[? ?] ?]; clear H
+    end.    
+  
   (* Map/Trace compatibility lemmas *)
   Lemma Enumerates_to_dec_Map :
-    forall b e x,
-      (forall x,
-         { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }
-         + { forall n t, ~ Enumerates e n x t }) ->
-      { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Map b e) n x t }
-      + { forall n t, ~ Enumerates (E_Map b e) n x t }.
+    forall tyin tyout b e x,
+      (forall x, { nt: nat * Trace | let (n, t) := nt in Enumerates tyin e n x t }) ->
+      { nt : nat * Trace | let (n, t) := nt in Enumerates tyout (E_Map tyin tyout b e) n x t }.
   Proof.
-    intros b e x IHe.
-    destruct (Bijects_to_dec _ _ b x) as [y B].
-    destruct (IHe y) as [[nt IHE] | NIH].
-
-    left. exists nt. destruct nt. eauto.
-
-    right. intros n t E.
-    inversion E. subst n0 x0 t0 inner bi.
-    rename H1 into B'. rename H5 into IHE.
-    erewrite (Bijects_fun_right _ _ _ _ _ _ B B') in *.
-    eapply NIH. apply IHE.
+    intros;
+    match goal with
+      | [ Hb: Bijection ?tout _, Hx: ?tout |- _ ] => destruct (Bijects_to_dec _ _ Hb Hx)
+    end;
+    Etd_indHyp; eexists (_, _); eauto.
   Defined.
   Hint Resolve Enumerates_to_dec_Map.
 
-  Lemma Enumerates_to_dec_Trace :
-    forall tg e x,
-      (forall x,
-         { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }
-         + { forall n t, ~ Enumerates e n x t }) ->
-      { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Trace tg e) n x t }
-      + { forall n t, ~ Enumerates (E_Trace tg e) n x t }.
-  Proof.
-    intros tg e x IHe.
-    destruct (IHe x) as [[[n t] IHE] | NIH].
+  Lemma Enumerates_to_dec_Dep :
+    forall tyl tyr e f x,
+      (forall x y,
+         { nt : nat * Trace | let (n, t) := nt in Enumerates tyr (f x) n y t}) -> 
+         (forall x,
+            { nt : nat * Trace | let (n, t) := nt in Enumerates tyl e n x t }) ->
+         { nt : nat * Trace | let (n, t) := nt in Enumerates (TPair _ _) (E_Dep _ _ e f) n x t }.
+  Admitted.
+  Hint Resolve Enumerates_to_dec_Dep.
 
-    left.
-    exists (n, trace_one n tg); eauto.
-
-    right.
-    intros n t E.
-    inversion E; eapply NIH; eauto.
-  Defined.
-  Hint Resolve Enumerates_to_dec_Trace.
-
-
+  Ltac tdenote_crush :=
+    repeat (
+        match goal with
+          | [ x : prod ?t1 ?t2 |- _] => destruct x
+          | [ x : sum ?t1 ?t2 |- _] => destruct x
+          | [ H : tdenote ?t |- _ ] =>
+            match t with
+              | TNat      => simpl in H
+              | TPair _ _ => simpl in H
+              | TSum _ _  => simpl in H
+            end
+        end).
+  
   Definition Enumerates_to_dec:
-    forall e x,
-      { nt : nat * Trace | let (n, t) := nt in Enumerates e n x t } + { forall n t, ~ Enumerates e n x t }.
+    forall ty e x,
+      { nt : nat * Trace | let (n, t) := nt in Enumerates ty e n x t }.
   Proof.
-    induction e; destruct x; eauto;
-    try ( right; intros _n _t E; inversion E; fail ).
-
-    (* E_Nat *)
-    - left; exists (n, ε); constructor.
-
-    (* E_Pair *)
-    - rename x1 into lx. rename x2 into rx.
-      rename e1 into l. rename e2 into r.
-      destruct (IHe1 lx) as [[[ln lt] EL] | LF].
-      destruct (IHe2 rx) as [[[rn rt] ER] | RF].
-      left.
-      destruct (Pairing_to_dec ln rn) as [n P].
-      exists (n, lt ⊔ rt).
-      eauto.
-
-      right. intros _n _t E; inversion E; subst.
-      eapply RF; eauto.
-
-      right. intros _n _t E; inversion E; subst.
-      eapply LF; eauto.
-
-    (* E_Dep *)
-    - destruct (IHe x1) as [[[ln lt] EL] | LF].
-      destruct (X x1 x2) as [[[rn rt] ER] | RF].
-      left.
-      destruct (Pairing_to_dec ln rn) as [n P].
-      exists (n, lt ⊔ rt).
-      eauto.
-
-      right. intros _n _t E; inversion E; subst.
-      eapply RF; eauto.
-
-      right. intros _n _t E; inversion E; subst.
-      eapply LF; eauto.
-
-    (* E_Sum Left *)
-    - destruct (IHe1 x) as [[[ln lt] EL] | LF].
-      left. exists (2 * ln, lt). eauto.
-
-      right. intros _n _t E. inversion E; subst.
-      eapply LF; eauto.
-
-    (* E_Sum Right *)
-    - destruct (IHe2 x) as [[[rn rt] ER] | RF].
-      left. exists (2 * rn + 1, rt). eauto.
-
-      right. intros _n _t E. inversion E; subst.
-      eapply RF; eauto.
+    induction e; intros; auto;
+    try (eexists (_, _); eauto; fail);
+    tdenote_crush; repeat Etd_indHyp; (eexists (_, _); eauto).
   Defined.
 
   Definition Enumerates_to_dec_uniq :
-    forall e x,
+    forall ty e x,
       (exists ! (nt : nat * Trace),
          let (n, t) := nt in
-         Enumerates e n x t)
-      \/ (forall n t, ~ Enumerates e n x t).
+         Enumerates ty e n x t).
   Proof.
-    intros.
-    destruct (Enumerates_to_dec e x).
-    left.
-    destruct s as [[n t] Henum].
-    exists (n, t).
-    split; [assumption|].
-    intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ Henum Henum'); subst; auto.
-    right; auto.
+    intros; destruct (Enumerates_to_dec _ e x) as [[n t] Henum];
+    exists (n, t); split; [assumption|];
+    intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ _ Henum Henum'); subst; auto.
   Qed.
 
   Lemma even_SS :
     forall n,
       { l | n = 2 * l } -> { m | S (S n) = 2 * m }.
   Proof.
-    intros n P.
-    destruct P.
-    exists ((S x)).
-    nliamega.
+    intros n P; destruct P; exists ((S x)); nliamega.
   Defined.
 
   Lemma odd_SS :
     forall n,
       { r | n = 2 * r + 1 } -> { m | S (S n) = 2 * m + 1 }.
   Proof.
-    intros n P.
-    destruct P.
-    exists ((S x)).
-    nliamega.
+    intros n P; destruct P; exists ((S x)); nliamega.
   Defined.
 
   Fixpoint even_odd_eq_dec n : { l | n = 2 * l } + { r | n = 2 * r + 1 }.
