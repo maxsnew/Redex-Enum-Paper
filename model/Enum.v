@@ -1630,77 +1630,74 @@ Section Enumerates.
     right; apply odd_SS; assumption.
   Defined.
 
+  Notation "{{ x }}" := (exist _ x _).
   Definition Enumerates_from_dec:
-    forall e n,
-      { xt : Value * Trace | let (x, t) := xt in Enumerates e n x t }.
+    forall ty e n,
+      { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates ty e n x t }.
   Proof.
-    induction e; intros n; eauto.
-
-    (* E_Nat *)
-    - exists (V_Nat n, ε); eauto.
-
-    (* E_pair *)
-    - rename e1 into l. rename e2 into r.
-      remember (Pairing_from n) as PF.
-      destruct PF as [ln rn].
-      destruct (IHe1 ln) as [[lx lt] EL].
-      destruct (IHe2 rn) as [[rx rt] ER].
-      exists (V_Pair lx rx, lt ⊔ rt).
-      eauto.
-
-    (* E_Map *)
-    - destruct (IHe n) as [[x t] IHE].
-      destruct (Bijects_from_dec _ _ b x) as [y B].
-      exists (y, t). eauto.
-
-    (* E_Dep *)
-    - rename e into l. rename e0 into f.
-      remember (Pairing_from n) as PF.
-      destruct PF as [ln rn].
-      destruct (IHe ln) as [[lx lt] EL].
-      destruct (X lx rn) as [[rx rt] ER].
-      exists (V_Pair lx rx, lt ⊔ rt). eauto.
-
-    (* E_Sum *)
-    - destruct (even_odd_dec n) as [Hev | Hodd].
-      apply even_double in Hev.
-      destruct (IHe1 (div2 n)) as [[lx lt] EL].
-      exists (V_Sum_Left lx, lt).
-      rewrite double_twice in Hev.
-      eauto.
-
-      apply odd_double in Hodd.
-      destruct (IHe2 (div2 n)) as [[rx rt] ER].
-      exists (V_Sum_Right rx, rt).
-      rewrite double_twice in Hodd.
-      replace (S (2 * div2 n)) with (2 * div2 n + 1) in Hodd by nliamega.
-      eauto.
-
-    (* E_Trace *)
-    - rename t into tg.
-      destruct (IHe n) as [[x _t] E].
-      exists (x, trace_one n tg).
-      eauto.
+    refine (fix F ty e n : { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates ty e n x t } :=
+        match e with
+          | E_Nat  => {{(n, ε)}}
+          | E_Pair _ _ el er =>
+            match Pairing_from_dec n with
+              | {{ p }} =>
+                match F _ el (fst p), F _ er (snd p) with
+                  | {{ lxt }}, {{ rxt }} =>
+                    {{ ((fst lxt, fst rxt), (snd lxt ⊔ snd rxt)) }}
+                end
+            end
+          | E_Map _ _ b ein  =>
+            match F _ ein n with
+              | {{ xt }} =>
+                match Bijects_from_dec _ _ b (fst xt) with
+                  | {{ y }} => {{ (y, snd xt ) }}
+                end
+            end
+          | E_Dep _ _ e f =>
+            match Pairing_from_dec n with
+              | {{ p }} =>
+                match F _ e (fst p) with
+                  | {{ lxt }} =>
+                    match F _ (f (fst lxt)) (snd p) with
+                      | {{ rxt }} => {{ ((fst lxt, fst rxt), snd lxt ⊔ snd rxt ) }}
+                    end
+                end
+            end
+          | E_Sum _ _ el er =>
+            match even_odd_eq_dec n with
+              | inl {{ l }} =>
+                match F _ el l with
+                  | {{ lxt }} =>
+                    {{ (inl (fst lxt), snd lxt) }}
+                end
+              | inr {{ r }} =>
+                match F _ er r with
+                  | {{ rxt }} =>
+                    {{ (inr (fst rxt), snd rxt) }}
+                end
+            end
+          | E_Trace _ tg e =>
+            match F _ e n with
+              | {{ xt }} =>
+                {{ (fst xt, trace_one n tg)}}
+            end
+        end); clear F; tdenote_crush; eauto.
   Defined.
 
   Definition Enumerates_from_dec_uniq :
-    forall e n,
-    exists ! (xt : Value * Trace),
+    forall ty e n,
+    exists ! (xt : tdenote ty * Trace),
       let (x, t) := xt
-      in Enumerates e n x t.
+      in Enumerates _ e n x t.
   Proof.
-    intros.
-    destruct (Enumerates_from_dec e n) as [[v t] Henum].
-    exists (v, t).
-
-    split; [assumption|].
-    intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ Henum Henum'); subst; auto.
+    intros;
+    destruct (Enumerates_from_dec _ e n) as [[v t] Henum];
+    exists (v, t);
+    split; [assumption|];
+    intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ _ Henum Henum'); subst; auto.
   Qed.  
 End Enumerates.
 Hint Constructors Enumerates.
-Hint Resolve Enumerates_to_dec_Trace.
-Hint Resolve Enumerates_to_dec_Map.
-
 
 Section EnumTrace.
   Definition Trace_on (e : Enum) (n : nat) : Trace :=
