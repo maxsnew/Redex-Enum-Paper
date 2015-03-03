@@ -3,6 +3,7 @@ Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Div2 Coq.Arith.Even.
 Require Import Coq.Lists.ListSet.
 Require Import Coq.Lists.List.
+Require Import Coq.Logic.Eqdep_dec.
 Require Import Psatz.
 
 (* Notation notes:
@@ -28,6 +29,22 @@ Section Value.
   | TPair : type -> type -> type
   | TSum  : type -> type -> type.
 
+  Notation Yes := (left _).
+  Notation No := (right _).
+  Notation "l &&& r" := (if l then r else No) (at level 70).
+  Notation Refine x := (if x then Yes else No).
+  Fixpoint type_eq_dec (t1 t2 : type) : { t1 = t2 } + { t1 <> t2 }.
+    refine (match t1, t2 with
+              | TNat, TNat => Yes
+              | TPair t1l t1r, TPair t2l t2r =>
+                (type_eq_dec t1l t2l) &&& Refine (type_eq_dec t1r t2r)
+              | TSum t1l t1r, TSum t2l t2r =>
+                (type_eq_dec t1l t2l) &&& Refine (type_eq_dec t1r t2r)
+              | _, _ => right _
+            end
+           ); subst; try discriminate; try congruence; auto.
+  Defined.
+
   Fixpoint tdenote t : Set :=
     match t with
       | TNat => nat
@@ -35,6 +52,7 @@ Section Value.
       | TSum  tl tr => tdenote tl + tdenote tr
     end%type.
 End Value.
+Hint Resolve type_eq_dec.
 
 Section Bijection.
   Definition Bijection (A:Set) (B:Set) :=
@@ -1373,55 +1391,84 @@ Section Enumerates.
     induction x as [|x]; intros; nliamega.
   Qed.
 
+  (* if there's a hypothesis of the shape Enumerates ..., inversion; subst; clear it *)
+  Ltac invert_Enumerates :=
+    match goal with
+      | [ H : Enumerates _ ?E _ _ _ |- _ ] =>
+        match E with
+          | E_Nat          => inversion H; subst; clear H
+          | E_Pair _ _ _ _ => inversion H; subst; clear H
+          | E_Map _ _ _ _  => inversion H; subst; clear H
+          | E_Dep _ _ _ _  => inversion H; subst; clear H
+          | E_Sum _ _ _ _  => inversion H; subst; clear H
+          | E_Trace _ _ _  => inversion H; subst; clear H
+        end
+    end.
+
+  (* Turn hypotheses of shape (existT h1 h2 l = existT h1 h2 r) into l = r if equality on lhs is decidable *)
+  Ltac dec_K :=
+    match goal with
+      | [ H : existT ?P ?L ?x = existT ?P ?L ?y |- _ ] => apply inj_pair2_eq_dec in H;
+          [subst |]; auto
+    end.
+
+  Ltac rewrite_pairing_fun :=
+    match goal with
+      | [ H1 : Pairing ?x ?y1 ?z1, H2 : Pairing ?x ?y2 ?z2 |- _ ] =>
+        destruct (Pairing_to_fun _ _ _ _ _ H1 H2) as [Hl Hr]; rewrite Hl in *; rewrite Hr in *; clear H1 H2 Hl Hr
+    end.
+
+  Ltac odd_neq_event :=
+    match goal with
+      | [ H : 2 * ?x = 2 * ?y + 1 |- _ ] => apply odd_neq_even in H; contradiction
+      | [ H : 2 * ?y + 1 = 2 * ?x |- _ ] => symmetry in H; apply odd_neq_even in H; contradiction
+    end.
+
   Theorem Enumerates_from_fun :
     forall ty e n x1 x2 t1 t2,
       Enumerates ty e n x1 t1 ->
       Enumerates ty e n x2 t2 ->
       x1 = x2 /\ t1 = t2.
   Proof.
-    induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; eauto; subst; try congruence.
+    induction e; intros; repeat (invert_Enumerates); repeat dec_K; repeat rewrite_pairing_fun; try odd_neq_event; auto.
 
     (* E_Pair *)
-    - erewrite (Pairing_to_l_fun _ _ _ _ _ H1 H9) in *.
-      erewrite (Pairing_to_r_fun _ _ _ _ _ H1 H9) in *.
-      destruct (IHe1 _ _ _ _ _ H2 H10); subst.
-      destruct (IHe2 _ _ _ _ _ H6 H14); subst.
-      auto.
-
+    - destruct (IHe1 _ _ _ _ _ H14 H9); subst; clear IHe1 H14 H9;
+      destruct (IHe2 _ _ _ _ _ H15 H10); subst; clear IHe2 H15 H10;
+      intuition.
+    
     (* E_Map *)
-    - destruct (IHe _ _ _ _ _ H5 H12); subst.
-      erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H8) in *.
-      auto.
+    - destruct (IHe _ _ _ _ _ H9 H13); subst; clear IHe H9 H13;
+      match goal with
+        | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
+          erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
+      end;
+      intuition.
 
     (* E_Dep *)
-    - erewrite (Pairing_to_l_fun _ _ _ _ _ H2 H10) in *.
-      erewrite (Pairing_to_r_fun _ _ _ _ _ H2 H10) in *.
-      destruct (IHe _ _ _ _ _ H3 H11); subst.
-      destruct (H _ _ _ _ _ _ H7 H15); subst.
-      auto.
+    - destruct (IHe _ _ _ _ _ H15 H10); clear H15 H10 IHe; subst;
+      destruct (H _ _ _ _ _ _ H11 H16); clear H H11 H16; subst;
+      intuition.
 
     (* E_Sum Left *)
-    - erewrite (even_fun _ _ H8) in *.
-      destruct (IHe1 _ _ _ _ _ H5 H12); subst.
+    - match goal with
+        | [ H : 2 * ?x = 2 * ?y |- _ ] => erewrite (even_fun _ _ H) in *; clear H
+      end;
+      destruct (IHe1 _ _ _ _ _ H9 H12); subst;
       auto.
 
-    (* E_Sum Left & Right *)
-    - apply odd_neq_even in H8. contradiction.
-
-    (* E_Sum Right & Left *)
-    - subst. symmetry in H8. apply odd_neq_even in H8. contradiction.
-
     (* E_Sum Right *)
-    - erewrite (odd_fun _ _ H8) in *.
-      destruct (IHe2 _ _ _ _ _ H5 H12); subst.
+    - match goal with
+        | [ H : 2 * ?x + 1 = 2 * ?y + 1 |- _ ] => erewrite (odd_fun _ _ H) in *; clear H
+      end;
+      destruct (IHe2 _ _ _ _ _ H9 H12); subst;
       auto.
 
     (* E_Trace *)
-    - destruct (IHe _ _ _ _ _ H4 H10); subst.
+    - destruct (IHe _ _ _ _ _ H7 H9); subst.
       auto.
   Qed.
 
-  (* Couldn't prove this with traces assumed to be equal. *)
   Theorem Enumerates_to_fun :
     forall e x n1 n2 t1 t2,
       Enumerates e n1 x t1 ->
