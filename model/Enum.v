@@ -1392,7 +1392,7 @@ Section Enumerates.
   Qed.
 
   (* if there's a hypothesis of the shape Enumerates ..., inversion; subst; clear it *)
-  Ltac invert_Enumerates :=
+  Ltac invert_Enumerates' :=
     match goal with
       | [ H : Enumerates _ ?E _ _ _ |- _ ] =>
         match E with
@@ -1412,7 +1412,9 @@ Section Enumerates.
           [subst |]; auto
     end.
 
-  Ltac rewrite_pairing_fun :=
+  Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
+
+  Ltac rewrite_pairing_to_fun :=
     match goal with
       | [ H1 : Pairing ?x ?y1 ?z1, H2 : Pairing ?x ?y2 ?z2 |- _ ] =>
         destruct (Pairing_to_fun _ _ _ _ _ H1 H2) as [Hl Hr]; rewrite Hl in *; rewrite Hr in *; clear H1 H2 Hl Hr
@@ -1424,107 +1426,103 @@ Section Enumerates.
       | [ H : 2 * ?y + 1 = 2 * ?x |- _ ] => symmetry in H; apply odd_neq_even in H; contradiction
     end.
 
+  Ltac Eff_indHyp :=
+    match goal with
+      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
+        , H1 : Enumerates ?t ?e _ _ _
+        , H2 : Enumerates ?t ?e _ _ _
+      |- _ ] => destruct (IH _ _ _ _ _ H1 H2); clear IH H1 H2; subst
+    end.
+
   Theorem Enumerates_from_fun :
     forall ty e n x1 x2 t1 t2,
       Enumerates ty e n x1 t1 ->
       Enumerates ty e n x2 t2 ->
       x1 = x2 /\ t1 = t2.
   Proof.
-    induction e; intros; repeat (invert_Enumerates); repeat dec_K; repeat rewrite_pairing_fun; try odd_neq_event; auto.
-
-    (* E_Pair *)
-    - destruct (IHe1 _ _ _ _ _ H14 H9); subst; clear IHe1 H14 H9;
-      destruct (IHe2 _ _ _ _ _ H15 H10); subst; clear IHe2 H15 H10;
-      intuition.
-    
-    (* E_Map *)
-    - destruct (IHe _ _ _ _ _ H9 H13); subst; clear IHe H9 H13;
-      match goal with
-        | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
-          erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
-      end;
-      intuition.
-
-    (* E_Dep *)
-    - destruct (IHe _ _ _ _ _ H15 H10); clear H15 H10 IHe; subst;
-      destruct (H _ _ _ _ _ _ H11 H16); clear H H11 H16; subst;
-      intuition.
-
-    (* E_Sum Left *)
-    - match goal with
-        | [ H : 2 * ?x = 2 * ?y |- _ ] => erewrite (even_fun _ _ H) in *; clear H
-      end;
-      destruct (IHe1 _ _ _ _ _ H9 H12); subst;
-      auto.
-
-    (* E_Sum Right *)
-    - match goal with
-        | [ H : 2 * ?x + 1 = 2 * ?y + 1 |- _ ] => erewrite (odd_fun _ _ H) in *; clear H
-      end;
-      destruct (IHe2 _ _ _ _ _ H9 H12); subst;
-      auto.
-
-    (* E_Trace *)
-    - destruct (IHe _ _ _ _ _ H7 H9); subst.
-      auto.
+    induction e; intros; invert_Enumerates;
+    repeat rewrite_pairing_to_fun;
+    try odd_neq_event;
+    repeat Eff_indHyp;
+    try match goal with
+      | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
+        erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
+      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ /\ _]
+        , H1 : Enumerates ?t ?e _ _ _
+        , H2 : Enumerates ?t ?e _ _ _
+          |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
+      | [ H : 2 * ?x = 2 * ?y |- _ ] => erewrite (even_fun _ _ H) in *; clear H
+      | [ H : 2 * ?x + 1 = 2 * ?y + 1 |- _ ] => erewrite (odd_fun _ _ H) in *; clear H
+        end;
+    repeat Eff_indHyp;
+    tauto.
   Qed.
 
+  Ltac destruct_eq :=
+    match goal with
+      | [ H: (?x1, ?y1) = (?x2, ?y2) |- _ ] =>
+        (assert (x1 = x2) by congruence); (assert (y1 = y2) by congruence); subst; clear H
+      | [ H: inl ?x = inl ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
+      | [ H: inr ?x = inr ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
+    end.
+
+  Ltac rewrite_pairing_from_fun :=
+    match goal with
+      | [ H1: Pairing ?n1 ?l ?r, H2: Pairing ?n2 ?l ?r |- _ ] =>
+        erewrite (Pairing_from_fun _ _ _ _ H1 H2) in *; clear H1 H2
+    end.
+
+  Ltac Etf_indHyp :=
+    match goal with
+      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
+        , H1 : Enumerates ?t ?e _ _ _
+        , H2 : Enumerates ?t ?e _ _ _
+      |- _ ] =>
+        erewrite (IH _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
+    end.
+
+  Ltac sumbool_contra :=
+    match goal with
+      | [ H: inl _ = inr _ |- _ ] => inversion H
+      | [ H: inr _ = inl _ |- _ ] => inversion H
+    end.
+
   Theorem Enumerates_to_fun :
-    forall e x n1 n2 t1 t2,
-      Enumerates e n1 x t1 ->
-      Enumerates e n2 x t2 ->
+    forall ty e x n1 n2 t1 t2,
+      Enumerates ty e n1 x t1 ->
+      Enumerates ty e n2 x t2 ->
       n1 = n2.
   Proof.
-    induction e; intros x n1 n2 t1 t2 E1 E2; inversion E1; inversion E2; subst; try congruence.
-
-    (* E_Pair *)
-    - replace lx0 with lx in *; try congruence.
-      replace rx0 with rx in *; try congruence.
-      erewrite (IHe1 _ _ _ _ _ H2 H10) in *.
-      erewrite (IHe2 _ _ _ _ _ H6 H14) in *.
-      erewrite (Pairing_from_fun _ _ _ _ H1 H9) in *.
-      auto.
-
-    (* E_Map *)
-    - erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H8) in *.
-      erewrite (IHe _ _ _ _ _ H5 H12) in *.
-      auto.
-
-    (* E_Dep *)
-    - inversion H13.
-      subst.
-      erewrite (IHe _ _ _ _ _ H3 H11) in *.
-      erewrite (H _ _ _ _ _ _ H7 H15) in *.
-      erewrite (Pairing_from_fun _ _ _ _ H2 H10) in *.
-      auto.
-
-    (* E_Sum Left *)
-    - inversion H10; subst.
-      erewrite (IHe1 _ _ _ _ _ H5 H12).
-      auto.
-
-    (* E_Sum Right *)
-    - inversion H10; subst.
-      erewrite (IHe2 _ _ _ _ _ H5 H12).
-      auto.
-
-    (* E_Trace *)
-    - apply IHe with (x := x) (t1 := _t) (t2 := _t0); assumption.
+    induction e; intros;
+    repeat invert_Enumerates; try sumbool_contra;
+    repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun;
+    try match goal with
+      | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
+        erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H2) in *; clear H1 H2
+      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
+        , H1 : Enumerates ?t ?e _ _ _
+        , H2 : Enumerates ?t ?e _ _ _
+      |- _ ] =>
+        erewrite (IH _ _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
+    end;
+    repeat Etf_indHyp;
+    repeat rewrite_pairing_from_fun;
+    try tauto.
   Qed.
 
   Theorem Enumerates_to_fun'
-  : forall e x n1 n2 t1 t2,
-      Enumerates e n1 x t1 ->
-      Enumerates e n2 x t2 ->
+  : forall ty e x n1 n2 t1 t2,
+      Enumerates ty e n1 x t1 ->
+      Enumerates ty e n2 x t2 ->
       n1 = n2 /\ t1 = t2.
   Proof.
-    intros.
-    assert (n1 = n2 /\ ((n1 = n2) -> t1 = t2)).
-    split.
-    eapply Enumerates_to_fun; eauto.
-    intros; subst.
-    destruct (Enumerates_from_fun _ _ _ _ _ _ H0 H); auto.
-    destruct H1; split; auto.
+    intros; assert (n1 = n2 /\ ((n1 = n2) -> t1 = t2)); [split| tauto];
+    [ eapply Enumerates_to_fun; eauto |];
+    intros; subst;
+    match goal with
+      | [H1: Enumerates ?ty ?e _ ?x _, H2: Enumerates ?ty ?e _ ?x _ |- _ ] =>
+        destruct (Enumerates_from_fun _ _ _ _ _ _ _ H H0); subst
+    end; trivial.
   Qed.
 
   (* Map/Trace compatibility lemmas *)
