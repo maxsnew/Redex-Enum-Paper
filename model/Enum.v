@@ -2047,12 +2047,13 @@ Section EnumTrace.
     rewrite IHm; auto; apply trace_on_Sum_off; auto.
   Qed.
 
-  Theorem set_In_trace' (tg : tag) e x m n :
+  Theorem set_In_trace' {ty} tg (e : Enum ty) x m n :
     x ∈ (trace_proj tg (Trace_from_to e m (S (m + n))))
     <->
     (exists k,
        m <= k < S (m + n) /\ x ∈ (trace_proj tg (Trace_on e k))).
   Proof.
+    
     split.
     generalize dependent m.
     induction n; intros m;
@@ -2064,7 +2065,7 @@ Section EnumTrace.
                         destruct (le_lt_dec (S m) m);
                         [apply le_Sn_n in l; contradiction
                         |
-                        fold Trace_from_to in H;
+                        fold (@Trace_from_to ty) in H;
                           rewrite trace_from_to_self in H;
                           remember ((Trace_on e m) ⊔ ε) as t;
                           destruct t;
@@ -2073,7 +2074,7 @@ Section EnumTrace.
                           destruct t';
                           simpl in *;
                           inversion Heqt; subst; auto ])
-    | unfold Trace_from_to; fold Trace_from_to;
+    | unfold Trace_from_to; fold (@Trace_from_to ty);
       destruct (le_lt_dec (S (m + S n)) m) as [contra | _]; [ assert (~ (S (m + S n)) <= m) by (apply gt_not_le; nliamega); contradiction|];
       unfold trace_plus;
       remember (Trace_on e (m + S n))as t; destruct t as [tl tr];
@@ -2095,7 +2096,7 @@ Section EnumTrace.
     replace (S (m + 0)) with (S m) in * by nliamega;
       unfold Trace_from_to;
       destruct (le_lt_dec (S m) m); [apply le_Sn_n in l; contradiction|];
-      fold Trace_from_to; rewrite trace_from_to_self; assert (k = m) by nliamega; subst;
+      fold (@Trace_from_to ty); rewrite trace_from_to_self; assert (k = m) by nliamega; subst;
 
       remember ((Trace_on e m) ⊔ ε) as t;
       destruct t; simpl in *;
@@ -2106,7 +2107,7 @@ Section EnumTrace.
 
     replace (S (m + n)) with (m + S n) in * by nliamega;
       destruct (eq_nat_dec k (m + S n)); subst;
-      unfold Trace_from_to; fold Trace_from_to;
+      unfold Trace_from_to; fold (@Trace_from_to ty);
       (destruct (le_lt_dec (S (m + S n)) m); [ assert (~ (S (m + S n) <= m)) by (apply le_not_gt; nliamega); contradiction| ]); (remember (Trace_on e (m + S n)) as t); destruct t as [t0 t1 t2 t3];
       (remember (Trace_from_to e m (m + S n)) as t'); destruct t' as [t0' t1' t2' t3'].
     destruct tg; (
@@ -2115,19 +2116,16 @@ Section EnumTrace.
     destruct tg; simpl in *; apply set_union_intro2; apply IHn; nliamega.
   Qed.
 
-  Theorem set_In_Trace_from_to (tg : tag) e x m n :
+  Theorem set_In_Trace_from_to {ty} (tg : tag) (e: Enum ty) x m n :
     (m < n) ->
     (x ∈ (trace_proj tg (Trace_from_to e m n)) <->
      (exists k, m <= k < n /\ x ∈ (trace_proj tg (Trace_on e k)))).
   Proof.
-    intros H.
-    remember (pred (n - m)) as p.
-    assert (n = (S (m + p))) by nliamega.
-    subst n.
+    intros H; remember (pred (n - m)) as p; replace n with (S (m + p)) in * by nliamega; clear n;
     apply set_In_trace'.
   Qed.
 
-  Theorem set_In_Trace_lt tg e x n :
+  Theorem set_In_Trace_lt {ty} tg (e: Enum ty) x n :
     x ∈ (trace_proj tg (Trace_lt e (S n)))
     <->
     exists k, k < S n /\ x ∈ (trace_proj tg (Trace_on e k)).
@@ -2167,12 +2165,12 @@ Section EnumTrace.
     split4; auto.
   Qed.
 
-  Theorem Trace_from_to_sub' e m n p : (Trace_from_to e m n) ⊏ (Trace_from_to e m (n + p)).
+  Theorem Trace_from_to_sub' {ty} (e : Enum ty) m n p : (Trace_from_to e m n) ⊏ (Trace_from_to e m (n + p)).
   Proof.
     induction p.
     replace (n + 0) with n by nliamega; apply sub_trace_refl.
     replace (n + S p) with (S (n + p)) by nliamega.
-    unfold Trace_from_to at 2; fold Trace_from_to.
+    unfold Trace_from_to at 2; fold (@Trace_from_to ty).
     destruct (le_lt_dec (S (n + p))).
     replace (Trace_from_to e m n) with ε; [apply sub_trace_refl|].
     unfold Trace_from_to.
@@ -2182,13 +2180,13 @@ Section EnumTrace.
     apply sub_trace_plus_intror; auto.
   Qed.
 
-  Theorem Trace_from_to_sub e m n p : n <= p -> (Trace_from_to e m n) ⊏ (Trace_from_to e m p).
+  Theorem Trace_from_to_sub {ty} (e: Enum ty) m n p : n <= p -> (Trace_from_to e m n) ⊏ (Trace_from_to e m p).
   Proof.
     Local Hint Resolve Trace_from_to_sub'.
     intros; replace p with (n + (p - n)) by nliamega; auto.
   Qed.
 
-  Theorem Trace_lt_sub e m n : m <= n -> (Trace_lt e m) ⊏ (Trace_lt e n).
+  Theorem Trace_lt_sub {ty} (e: Enum ty) m n : m <= n -> (Trace_lt e m) ⊏ (Trace_lt e n).
   Proof.
     intros H.
     eapply sub_trace_trans; [apply trace_eq_weakenl; apply trace_lt_from_to_0_same| ].
@@ -2196,7 +2194,7 @@ Section EnumTrace.
     apply Trace_from_to_sub; auto.
   Qed.
 
-  Theorem Trace_lt_Enumerates m n e v t 
+  Theorem Trace_lt_Enumerates m n {ty} (e: Enum ty) v t 
   : m < n
     -> Enumerates e m v t
     -> t ⊏ (Trace_lt e n).
