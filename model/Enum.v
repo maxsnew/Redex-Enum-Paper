@@ -19,14 +19,34 @@ Traces
 ⊔ \sqcup    trace_plus
 ⊏ \sqsubset sub_trace
 ≡ \equiv    trace_eq
-*)
+ *)
+
 Ltac nliamega := try omega; try lia; try nia; fail "omega, lia and nia all failed".
+
+(* Turn hypotheses of shape (existT h1 h2 l = existT h1 h2 r) into l = r if equality on lhs is decidable *)
+Ltac dec_K :=
+  match goal with
+    | [ H : existT ?P ?L ?x = existT ?P ?L ?y |- _ ] => apply inj_pair2_eq_dec in H;
+        [subst |]; auto
+  end.
+
+(* Try possible contradictions *)
+Ltac mycontra :=
+  match goal with
+    | [ H: context[_ -> False] |- False ] =>
+      eapply H; eauto; fail
+  end.
 
 (* sumbool notation a la cpdt *)
 Notation Yes := (left _).
 Notation No := (right _).
 Notation "l &&& r" := (if l then r else No) (at level 70).
 Notation Refine x := (if x then Yes else No).
+Ltac sumbool_contra :=
+  match goal with
+    | [ H: inl _ = inr _ |- _ ] => inversion H
+    | [ H: inr _ = inl _ |- _ ] => inversion H
+  end.
 
 Section Value.
   Inductive type : Set :=
@@ -54,6 +74,25 @@ Section Value.
     end%type.
 End Value.
 Hint Resolve type_eq_dec.
+Ltac tdenote_crush :=
+  repeat (
+      match goal with
+        | [ x : prod ?t1 ?t2 |- _] => destruct x
+        | [ x : sum ?t1 ?t2 |- _] => destruct x
+        | [ H : tdenote ?t |- _ ] =>
+          match t with
+            | TNat      => simpl in H
+            | TPair _ _ => simpl in H
+            | TSum _ _  => simpl in H
+          end
+      end).
+Ltac destruct_eq :=
+  match goal with
+    | [ H: (?x1, ?y1) = (?x2, ?y2) |- _ ] =>
+      (assert (x1 = x2) by congruence); (assert (y1 = y2) by congruence); subst; clear H
+    | [ H: inl ?x = inl ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
+    | [ H: inr ?x = inr ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
+  end.
 
 Section Bijection.
   Definition Bijection (A:Set) (B:Set) :=
@@ -106,7 +145,7 @@ Section Bijection.
   Defined.
 
   Definition Bijects_from_dec :
-    forall A B (bi:Bijection A B) b,
+    forall {A B} (bi:Bijection A B) b,
       { a | Bijects bi a b }.
   Proof.
     intros. exists (biject_from bi b).
@@ -127,6 +166,11 @@ Section Bijection.
   End BijExamples.
     
 End Bijection.
+Ltac rewrite_biject_funr :=
+  match goal with
+    | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
+      erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H2) in *; clear H1 H2
+  end.
 
 Section Enum.
   Inductive tag : Set :=
@@ -137,11 +181,11 @@ Section Enum.
 
   Inductive Enum : type -> Set :=
   | E_Nat : Enum TNat
-  | E_Pair tl tr : Enum tl -> Enum tr -> Enum (TPair tl tr)
-  | E_Map tyin tyout : Bijection (tdenote tyout) (tdenote tyin) -> Enum tyin -> Enum tyout
-  | E_Dep t1 t2 : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
-  | E_Sum tl tr : Enum tl -> Enum tr -> Enum (TSum tl tr)
-  | E_Trace t : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
+  | E_Pair {tl tr} : Enum tl -> Enum tr -> Enum (TPair tl tr)
+  | E_Map {tyin tyout} : Bijection (tdenote tyout) (tdenote tyin) -> Enum tyin -> Enum tyout
+  | E_Dep {t1 t2} : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
+  | E_Sum {tl tr} : Enum tl -> Enum tr -> Enum (TSum tl tr)
+  | E_Trace {t} : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
   .
 End Enum.
 Hint Constructors Enum.
@@ -388,6 +432,16 @@ End Pairing.
 Hint Constructors Pairing.
 Hint Resolve Pairing_to_sound.
 Hint Resolve Pairing_from_sound.
+Ltac rewrite_pairing_to_fun :=
+  match goal with
+    | [ H1 : Pairing ?x ?y1 ?z1, H2 : Pairing ?x ?y2 ?z2 |- _ ] =>
+      destruct (Pairing_to_fun _ _ _ _ _ H1 H2) as [Hl Hr]; rewrite Hl in *; rewrite Hr in *; clear H1 H2 Hl Hr
+  end.
+Ltac rewrite_pairing_from_fun :=
+  match goal with
+    | [ H1: Pairing ?n1 ?l ?r, H2: Pairing ?n2 ?l ?r |- _ ] =>
+      erewrite (Pairing_from_fun _ _ _ _ H1 H2) in *; clear H1 H2
+  end.
 
 Notation set' := (set nat).
 Notation "∅" := (@empty_set nat).
@@ -1330,42 +1384,42 @@ Hint Resolve trace_eq_refl.
 Hint Resolve sub_trace_refl.
 
 Section Enumerates.
-  Inductive Enumerates : forall (t : type), Enum t -> nat -> tdenote t -> Trace -> Prop :=
+  Inductive Enumerates : forall {t : type}, Enum t -> nat -> tdenote t -> Trace -> Prop :=
   | ES_Nat :
       forall n,
-        Enumerates _ E_Nat n n ε
+        Enumerates E_Nat n n ε
   | ES_Pair :
-      forall tl tr l r n ln rn lx rx lt rt,
+      forall {tl tr} (l: Enum tl) (r: Enum tr) n ln rn lx rx lt rt,
         Pairing n ln rn ->
-        Enumerates tl l ln lx lt ->
-        Enumerates tr r rn rx rt ->
-        Enumerates _ (E_Pair _ _ l r) n (lx, rx) (lt ⊔ rt)
+        Enumerates l ln lx lt ->
+        Enumerates r rn rx rt ->
+        Enumerates (E_Pair l r) n (lx, rx) (lt ⊔ rt)
   | ES_Map :
-      forall tl tr bi inner inner_x n x t,
+      forall {tl tr} (bi : Bijection (tdenote tl) (tdenote tr)) inner inner_x n x t,
         Bijects bi x inner_x ->
-        Enumerates tl inner n inner_x t ->
-        Enumerates tr (E_Map _ _ bi inner) n x t
+        Enumerates inner n inner_x t ->
+        Enumerates (E_Map bi inner) n x t
   | ES_Dep:
-      forall tl tr l f n ln rn lx rx lt rt,
+      forall {tl tr} (l: Enum tl) (f: tdenote tl -> Enum tr) n ln rn lx rx lt rt,
         Pairing n ln rn ->
-        Enumerates tl l ln lx lt ->
-        Enumerates tr (f lx) rn rx rt ->
-        Enumerates _ (E_Dep _ _ l f) n (lx, rx) (lt ⊔ rt)
+        Enumerates l ln lx lt ->
+        Enumerates (f lx) rn rx rt ->
+        Enumerates (E_Dep l f) n (lx, rx) (lt ⊔ rt)
   | ES_Sum_Left:
-      forall tl tr l r n ln lx t,
+      forall {tl tr} (l: Enum tl) (r: Enum tr) n ln lx t,
         n = 2 * ln ->
-        Enumerates tl l ln lx t ->
-        Enumerates (TSum tl tr) (E_Sum _ _ l r) n (inl lx) t
+        Enumerates l ln lx t ->
+        Enumerates (E_Sum l r) n (inl lx) t
   | ES_Sum_Right:
-      forall tl tr l r n rn rx t,
+      forall {tl tr} (l: Enum tl) (r: Enum tr) n rn rx t,
         n = 2 * rn + 1 ->
-        Enumerates tr r rn rx t ->
-        Enumerates (TSum tl tr) (E_Sum _ _ l r) n (inr rx) t
+        Enumerates r rn rx t ->
+        Enumerates (E_Sum l r) n (inr rx) t
   (* E_Trace hides traces below it. This makes traces super easily spoofable, but makes it easier to reason about when they're not spoofed *)
   | ES_Trace :
-      forall ty n tg e v _t,
-        Enumerates ty e n v _t ->
-        Enumerates ty (E_Trace _ tg e) n v (trace_one n tg).
+      forall {ty} n tg (e: Enum ty) v _t,
+        Enumerates e n v _t ->
+        Enumerates (E_Trace tg e) n v (trace_one n tg).
   Hint Constructors Enumerates.
 
   Lemma even_fun:
@@ -1395,31 +1449,19 @@ Section Enumerates.
   (* if there's a hypothesis of the shape Enumerates ..., inversion; subst; clear it *)
   Ltac invert_Enumerates' :=
     match goal with
-      | [ H : Enumerates _ ?E _ _ _ |- _ ] =>
+      | [ H : Enumerates ?E _ _ _ |- _ ] =>
         match E with
           | E_Nat          => inversion H; subst; clear H
-          | E_Pair _ _ _ _ => inversion H; subst; clear H
-          | E_Map _ _ _ _  => inversion H; subst; clear H
-          | E_Dep _ _ _ _  => inversion H; subst; clear H
-          | E_Sum _ _ _ _  => inversion H; subst; clear H
-          | E_Trace _ _ _  => inversion H; subst; clear H
+          | E_Pair _ _ => inversion H; subst; clear H
+          | E_Map _ _  => inversion H; subst; clear H
+          | E_Dep _ _  => inversion H; subst; clear H
+          | E_Sum _ _  => inversion H; subst; clear H
+          | E_Trace _ _  => inversion H; subst; clear H
         end
-    end.
-
-  (* Turn hypotheses of shape (existT h1 h2 l = existT h1 h2 r) into l = r if equality on lhs is decidable *)
-  Ltac dec_K :=
-    match goal with
-      | [ H : existT ?P ?L ?x = existT ?P ?L ?y |- _ ] => apply inj_pair2_eq_dec in H;
-          [subst |]; auto
     end.
 
   Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
 
-  Ltac rewrite_pairing_to_fun :=
-    match goal with
-      | [ H1 : Pairing ?x ?y1 ?z1, H2 : Pairing ?x ?y2 ?z2 |- _ ] =>
-        destruct (Pairing_to_fun _ _ _ _ _ H1 H2) as [Hl Hr]; rewrite Hl in *; rewrite Hr in *; clear H1 H2 Hl Hr
-    end.
 
   Ltac odd_neq_event :=
     match goal with
@@ -1429,16 +1471,16 @@ Section Enumerates.
 
   Ltac Eff_indHyp :=
     match goal with
-      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
-        , H1 : Enumerates ?t ?e _ _ _
-        , H2 : Enumerates ?t ?e _ _ _
+      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
+        , H1 : Enumerates ?e _ _ _
+        , H2 : Enumerates ?e _ _ _
       |- _ ] => destruct (IH _ _ _ _ _ H1 H2); clear IH H1 H2; subst
     end.
 
   Theorem Enumerates_from_fun :
-    forall ty e n x1 x2 t1 t2,
-      Enumerates ty e n x1 t1 ->
-      Enumerates ty e n x2 t2 ->
+    forall {ty} (e: Enum ty) n x1 x2 t1 t2,
+      Enumerates e n x1 t1 ->
+      Enumerates e n x2 t2 ->
       x1 = x2 /\ t1 = t2.
   Proof.
     induction e; intros; invert_Enumerates;
@@ -1448,9 +1490,9 @@ Section Enumerates.
     try match goal with
       | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
         erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
-      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ /\ _]
-        , H1 : Enumerates ?t ?e _ _ _
-        , H2 : Enumerates ?t ?e _ _ _
+      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ /\ _]
+        , H1 : Enumerates ?e _ _ _
+        , H2 : Enumerates ?e _ _ _
           |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
       | [ H : 2 * ?x = 2 * ?y |- _ ] => erewrite (even_fun _ _ H) in *; clear H
       | [ H : 2 * ?x + 1 = 2 * ?y + 1 |- _ ] => erewrite (odd_fun _ _ H) in *; clear H
@@ -1459,95 +1501,68 @@ Section Enumerates.
     tauto.
   Qed.
 
-  Ltac destruct_eq :=
-    match goal with
-      | [ H: (?x1, ?y1) = (?x2, ?y2) |- _ ] =>
-        (assert (x1 = x2) by congruence); (assert (y1 = y2) by congruence); subst; clear H
-      | [ H: inl ?x = inl ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
-      | [ H: inr ?x = inr ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
-    end.
-
-  Ltac rewrite_pairing_from_fun :=
-    match goal with
-      | [ H1: Pairing ?n1 ?l ?r, H2: Pairing ?n2 ?l ?r |- _ ] =>
-        erewrite (Pairing_from_fun _ _ _ _ H1 H2) in *; clear H1 H2
-    end.
-
   Ltac Etf_indHyp :=
     match goal with
-      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
-        , H1 : Enumerates ?t ?e _ _ _
-        , H2 : Enumerates ?t ?e _ _ _
+      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
+        , H1 : Enumerates ?e _ _ _
+        , H2 : Enumerates ?e _ _ _
       |- _ ] =>
         erewrite (IH _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
     end.
 
-  Ltac sumbool_contra :=
-    match goal with
-      | [ H: inl _ = inr _ |- _ ] => inversion H
-      | [ H: inr _ = inl _ |- _ ] => inversion H
-    end.
-
-  Ltac rewrite_biject_funr :=
-    match goal with
-      | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
-        erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H2) in *; clear H1 H2
-    end.
-  
   Theorem Enumerates_to_fun :
-    forall ty e x n1 n2 t1 t2,
-      Enumerates ty e n1 x t1 ->
-      Enumerates ty e n2 x t2 ->
+    forall {ty} (e: Enum ty) x n1 n2 t1 t2,
+      Enumerates e n1 x t1 ->
+      Enumerates e n2 x t2 ->
       n1 = n2.
   Proof.
     induction e; intros;
     repeat invert_Enumerates; try sumbool_contra;
     repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
     try match goal with
-      | [ IH: context[Enumerates ?t _ _ _ _ -> Enumerates ?t _ _ _ _ -> _ ]
-        , H1 : Enumerates ?t ?e _ _ _
-        , H2 : Enumerates ?t ?e _ _ _
+      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
+        , H1 : Enumerates ?e _ _ _
+        , H2 : Enumerates ?e _ _ _
       |- _ ] =>
         erewrite (IH _ _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
     end;
     repeat Etf_indHyp;
     repeat rewrite_pairing_from_fun;
-    try tauto.
+    tauto.
   Qed.
 
   Theorem Enumerates_to_fun'
-  : forall ty e x n1 n2 t1 t2,
-      Enumerates ty e n1 x t1 ->
-      Enumerates ty e n2 x t2 ->
+  : forall {ty} (e: Enum ty) x n1 n2 t1 t2,
+      Enumerates e n1 x t1 ->
+      Enumerates e n2 x t2 ->
       n1 = n2 /\ t1 = t2.
   Proof.
     intros; assert (n1 = n2 /\ ((n1 = n2) -> t1 = t2)); [split| tauto];
     [ eapply Enumerates_to_fun; eauto |];
     intros; subst;
     match goal with
-      | [H1: Enumerates ?ty ?e _ ?x _, H2: Enumerates ?ty ?e _ ?x _ |- _ ] =>
-        destruct (Enumerates_from_fun _ _ _ _ _ _ _ H H0); subst
+      | [H1: Enumerates ?e _ ?x _, H2: Enumerates ?e _ ?x _ |- _ ] =>
+        destruct (Enumerates_from_fun _ _ _ _ _ _ H H0); subst
     end; trivial.
   Qed.
-
-  Ltac mycontra :=
-    match goal with
-      | [ H: context[_ -> False] |- False ] =>
-        eapply H; eauto; fail
-    end.
 
   Ltac Etd_indHyp :=
     match goal with
       | [ H : forall (x0 : ?t), { _ : (prod _ _) | _ }
         , x : ?t
         |- _ ] => destruct (H x) as [[? ?] ?]; clear H
+      | [ H : forall (x0 : ?t1) (y0: ?t2), { _ : (prod _ _) | _ }
+        , x : ?t1
+        , y : ?t2
+        |- _ ] => destruct (H x y) as [[? ?] ?]; clear H
     end.    
+  
   
   (* Map/Trace compatibility lemmas *)
   Lemma Enumerates_to_dec_Map :
-    forall tyin tyout b e x,
-      (forall x, { nt: nat * Trace | let (n, t) := nt in Enumerates tyin e n x t }) ->
-      { nt : nat * Trace | let (n, t) := nt in Enumerates tyout (E_Map tyin tyout b e) n x t }.
+    forall tyin tyout (b: Bijection (tdenote tyin) (tdenote tyout)) e x,
+      (forall x, { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }) ->
+      { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Map b e) n x t }.
   Proof.
     intros;
     match goal with
@@ -1557,32 +1572,9 @@ Section Enumerates.
   Defined.
   Hint Resolve Enumerates_to_dec_Map.
 
-  Lemma Enumerates_to_dec_Dep :
-    forall tyl tyr e f x,
-      (forall x y,
-         { nt : nat * Trace | let (n, t) := nt in Enumerates tyr (f x) n y t}) -> 
-         (forall x,
-            { nt : nat * Trace | let (n, t) := nt in Enumerates tyl e n x t }) ->
-         { nt : nat * Trace | let (n, t) := nt in Enumerates (TPair _ _) (E_Dep _ _ e f) n x t }.
-  Admitted.
-  Hint Resolve Enumerates_to_dec_Dep.
-
-  Ltac tdenote_crush :=
-    repeat (
-        match goal with
-          | [ x : prod ?t1 ?t2 |- _] => destruct x
-          | [ x : sum ?t1 ?t2 |- _] => destruct x
-          | [ H : tdenote ?t |- _ ] =>
-            match t with
-              | TNat      => simpl in H
-              | TPair _ _ => simpl in H
-              | TSum _ _  => simpl in H
-            end
-        end).
-  
   Definition Enumerates_to_dec:
-    forall ty e x,
-      { nt : nat * Trace | let (n, t) := nt in Enumerates ty e n x t }.
+    forall {ty} (e : Enum ty) x,
+      { nt : nat * Trace | let (n, t) := nt in Enumerates e n x t }.
   Proof.
     induction e; intros; auto;
     try (eexists (_, _); eauto; fail);
@@ -1590,14 +1582,14 @@ Section Enumerates.
   Defined.
 
   Definition Enumerates_to_dec_uniq :
-    forall ty e x,
+    forall {ty} (e: Enum ty) x,
       (exists ! (nt : nat * Trace),
          let (n, t) := nt in
-         Enumerates ty e n x t).
+         Enumerates e n x t).
   Proof.
-    intros; destruct (Enumerates_to_dec _ e x) as [[n t] Henum];
+    intros; destruct (Enumerates_to_dec e x) as [[n t] Henum];
     exists (n, t); split; [assumption|];
-    intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ _ Henum Henum'); subst; auto.
+    intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ Henum Henum'); subst; auto.
   Qed.
 
   Lemma even_SS :
@@ -1632,33 +1624,33 @@ Section Enumerates.
 
   Notation "{{ x }}" := (exist _ x _).
   Definition Enumerates_from_dec:
-    forall ty e n,
-      { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates ty e n x t }.
+    forall {ty} (e: Enum ty) n,
+      { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t }.
   Proof.
-    refine (fix F ty e n : { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates ty e n x t } :=
+    refine (fix F {ty} e n : { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t } :=
         match e with
           | E_Nat  => {{(n, ε)}}
           | E_Pair _ _ el er =>
             match Pairing_from_dec n with
               | {{ p }} =>
-                match F _ el (fst p), F _ er (snd p) with
+                match F el (fst p), F er (snd p) with
                   | {{ lxt }}, {{ rxt }} =>
                     {{ ((fst lxt, fst rxt), (snd lxt ⊔ snd rxt)) }}
                 end
             end
           | E_Map _ _ b ein  =>
-            match F _ ein n with
+            match F ein n with
               | {{ xt }} =>
-                match Bijects_from_dec _ _ b (fst xt) with
+                match Bijects_from_dec b (fst xt) with
                   | {{ y }} => {{ (y, snd xt ) }}
                 end
             end
           | E_Dep _ _ e f =>
             match Pairing_from_dec n with
               | {{ p }} =>
-                match F _ e (fst p) with
+                match F e (fst p) with
                   | {{ lxt }} =>
-                    match F _ (f (fst lxt)) (snd p) with
+                    match F (f (fst lxt)) (snd p) with
                       | {{ rxt }} => {{ ((fst lxt, fst rxt), snd lxt ⊔ snd rxt ) }}
                     end
                 end
@@ -1666,18 +1658,18 @@ Section Enumerates.
           | E_Sum _ _ el er =>
             match even_odd_eq_dec n with
               | inl {{ l }} =>
-                match F _ el l with
+                match F el l with
                   | {{ lxt }} =>
                     {{ (inl (fst lxt), snd lxt) }}
                 end
               | inr {{ r }} =>
-                match F _ er r with
+                match F er r with
                   | {{ rxt }} =>
                     {{ (inr (fst rxt), snd rxt) }}
                 end
             end
           | E_Trace _ tg e =>
-            match F _ e n with
+            match F e n with
               | {{ xt }} =>
                 {{ (fst xt, trace_one n tg)}}
             end
@@ -1685,31 +1677,44 @@ Section Enumerates.
   Defined.
 
   Definition Enumerates_from_dec_uniq :
-    forall ty e n,
+    forall {ty} (e: Enum ty) n,
     exists ! (xt : tdenote ty * Trace),
       let (x, t) := xt
-      in Enumerates _ e n x t.
+      in Enumerates e n x t.
   Proof.
     intros;
-    destruct (Enumerates_from_dec _ e n) as [[v t] Henum];
+    destruct (Enumerates_from_dec e n) as [[v t] Henum];
     exists (v, t);
     split; [assumption|];
-    intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ _ Henum Henum'); subst; auto.
+    intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ Henum Henum'); subst; auto.
   Qed.  
 End Enumerates.
 Hint Constructors Enumerates.
+Ltac invert_Enumerates' :=
+  match goal with
+    | [ H : Enumerates ?E _ _ _ |- _ ] =>
+      match E with
+        | E_Nat          => inversion H; subst; clear H
+        | E_Pair _ _ => inversion H; subst; clear H
+        | E_Map _ _  => inversion H; subst; clear H
+        | E_Dep _ _  => inversion H; subst; clear H
+        | E_Sum _ _  => inversion H; subst; clear H
+        | E_Trace _ _  => inversion H; subst; clear H
+      end
+  end.
+Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
 
 Section EnumTrace.
-  Definition Trace_on (e : Enum) (n : nat) : Trace :=
-    let (nt, _) := (Enumerates_from_dec e n) in snd nt.
+  Definition Trace_on {ty} (e : Enum ty) (n : nat) : Trace :=
+    (snd (proj1_sig (Enumerates_from_dec e n))).
 
-  Fixpoint Trace_lt (e : Enum) n : Trace :=
+  Fixpoint Trace_lt {ty} (e : Enum ty) n : Trace :=
     match n with
       | 0 => ε
       | S n' => (Trace_on e n') ⊔ (Trace_lt e n')
     end.
 
-  Fixpoint Trace_from_to e lo hi : Trace :=
+  Fixpoint Trace_from_to {ty} (e : Enum ty) lo hi : Trace :=
     if le_lt_dec hi lo
     then ε
     else match hi with
@@ -1717,7 +1722,8 @@ Section EnumTrace.
            | S hi' => (Trace_on e hi') ⊔ (Trace_from_to e lo hi')
          end.
 
-  Theorem trace_lt_from_to_0_same e n : (Trace_lt e n) ≡ (Trace_from_to e 0 n).
+  
+  Theorem trace_lt_from_to_0_same {ty} (e : Enum ty) n : (Trace_lt e n) ≡ (Trace_from_to e 0 n).
   Proof.
     induction n.
     simpl.
@@ -1732,7 +1738,7 @@ Section EnumTrace.
     split4; (apply set_union_cong; [apply set_eq_refl|]; auto).
   Qed.
 
-  Theorem trace_from_to_ge e m n
+  Theorem trace_from_to_ge {ty} (e:Enum ty) m n
   : n <= m ->
     Trace_from_to e m n = ε.
   Proof.
@@ -1743,11 +1749,11 @@ Section EnumTrace.
     destruct n; rewrite <-Heql; reflexivity.
   Qed.
 
-  Theorem trace_from_to_self e m 
+  Theorem trace_from_to_self {ty} (e: Enum ty) m 
   : Trace_from_to e m m = ε.
   Proof. apply trace_from_to_ge; nliamega. Qed.
 
-  Theorem trace_from_to_split1r e m n
+  Theorem trace_from_to_split1r {ty} (e:Enum ty) m n
   : m <= n ->
     (Trace_from_to e m (S n)) ≡ ((Trace_from_to e m n) ⊔ (Trace_on e n)).
   Proof.
@@ -1759,11 +1765,11 @@ Section EnumTrace.
     apply le_trans with (m := m); auto.
     apply le_Sn_n in H0.
     contradiction.
-    fold Trace_from_to.
+    fold (@Trace_from_to ty).
     apply trace_plus_comm.
   Qed.
 
-  Theorem trace_from_to_split1l' e m n
+  Theorem trace_from_to_split1l' {ty} (e: Enum ty) m n
   : (Trace_from_to e m (S (m + n))) ≡ ((Trace_on e m) ⊔ (Trace_from_to e (S m) (S (m + n)))).
   Proof.
     generalize dependent m.
@@ -1777,7 +1783,7 @@ Section EnumTrace.
     apply le_Sn_n in l.
     contradiction.
 
-    fold Trace_from_to.
+    fold (@Trace_from_to ty).
     rewrite trace_from_to_self.
     rewrite trace_from_to_self.
     apply trace_eq_refl.
@@ -1789,7 +1795,7 @@ Section EnumTrace.
     clear Heqt.
     apply (le_not_gt) in l.
     contradiction.
-    fold Trace_from_to.
+    fold (@Trace_from_to ty).
     clear l Heqt.
     remember (le_lt_dec (S (m + S n)) (S m)).
     destruct s.
@@ -1810,7 +1816,7 @@ Section EnumTrace.
     apply trace_eq_refl.
   Qed.
 
-  Theorem trace_from_to_split1l e m n
+  Theorem trace_from_to_split1l {ty} (e : Enum ty) m n
   : m < n ->
     Trace_from_to e m n ≡ (Trace_on e m) ⊔ (Trace_from_to e (S m) n).
   Proof.
@@ -1822,7 +1828,7 @@ Section EnumTrace.
   Qed.
 
 
-  Theorem trace_from_to_split e m n p :
+  Theorem trace_from_to_split {ty} (e : Enum ty) m n p :
     (m <= n < p)
     -> Trace_from_to e m p ≡ (Trace_from_to e m n) ⊔ (Trace_from_to e n p).
   Proof.
@@ -1860,15 +1866,15 @@ Section EnumTrace.
   Qed.
 
   Theorem trace_from_to_0_split :
-    forall m n e,
+    forall m n {ty} (e : Enum ty),
       m < n ->
       Trace_lt e n ≡ (Trace_lt e m) ⊔ (Trace_from_to e m n).
   Proof.
-    intros m n e Hmn.
+    intros m n ty e Hmn.
     eapply trace_eq_trans.
     apply trace_lt_from_to_0_same.
     eapply trace_eq_trans.
-    apply trace_from_to_split with (n := m); split; [nliamega | assumption].
+    apply (@trace_from_to_split ty) with (n := m); split; [nliamega | assumption].
     apply trace_plus_cong.
     apply trace_eq_symm.
     apply trace_lt_from_to_0_same.
@@ -1896,7 +1902,7 @@ Section EnumTrace.
     destruct t1; destruct t2; destruct tg; auto.
   Qed.
 
-  Theorem Trace_on_correct e n x t : Enumerates e n x t -> Trace_on e n = t.
+  Theorem Trace_on_correct {ty} (e: Enum ty) n x t : Enumerates e n x t -> Trace_on e n = t.
   Proof.
     intros H.
     unfold Trace_on.
@@ -1909,7 +1915,7 @@ Section EnumTrace.
   : z_to_n n ≃ trace_proj tg (Trace_lt (E_Trace tg E_Nat) n).
   Proof.
     induction n as [| n IHn]; [destruct tg; compute; tauto|].
-    unfold Trace_lt. fold Trace_lt.
+    unfold Trace_lt. fold (@Trace_lt TNat).
     unfold z_to_n. fold z_to_n.
     rewrite trace_proj_plus_distrl.
     rewrite Trace_nat.
@@ -1929,14 +1935,14 @@ Section EnumTrace.
     intros Hdiff.
     induction n.
     destruct tg1; auto.
-    unfold Trace_lt; fold Trace_lt.
+    unfold Trace_lt; fold (@Trace_lt TNat).
     rewrite trace_proj_plus_distrl.
     rewrite trace_off.
     rewrite IHn; compute; auto.
     auto.
   Qed.
 
-  Lemma sub_trace_from_tol l m n e
+  Lemma sub_trace_from_tol {ty} l m n (e: Enum ty)
   : l <= m
     -> (Trace_from_to e m n) ⊏ (Trace_from_to e l n).
   Proof.
@@ -1948,11 +1954,11 @@ Section EnumTrace.
     rewrite trace_from_to_ge by assumption;
       apply sub_trace_zero.
     eapply sub_trace_trans;
-      [| apply trace_eq_weakenl; apply trace_eq_symm; apply trace_from_to_split with (n := l + S k); nliamega ];
+      [| apply trace_eq_weakenl; apply trace_eq_symm; apply (@trace_from_to_split ty) with (n := l + S k); nliamega ];
       apply sub_trace_plus_transr; apply sub_trace_refl.
   Qed.
 
-  Theorem sub_trace_from_to l m n p e
+  Theorem sub_trace_from_to l m n p {ty} (e : Enum ty)
   : l <= m
     -> n <= p
     -> (Trace_from_to e m n) ⊏ (Trace_from_to e l p).
@@ -1968,7 +1974,7 @@ Section EnumTrace.
     replace (Trace_from_to e l (n + k)) with ε in IHk; auto.
     symmetry.
     apply trace_from_to_ge; nliamega.
-    fold Trace_from_to.
+    fold (@Trace_from_to ty).
     apply sub_trace_plus_transr; auto.
   Qed.
 
@@ -1985,32 +1991,35 @@ Section EnumTrace.
     erewrite <-trace_lt_Nat_off; [ apply sub_trace_proj|]; eauto.
   Qed.
 
-  Theorem trace_on_Pair_off tg e1 e2 m
+  Ltac get_trace_ons :=
+    repeat (match goal with
+       | [ H: Enumerates _ _ _ _ |- _] => apply Trace_on_correct in H
+     end).
+  
+  Theorem trace_on_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2: Enum tyr) m
   : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
     -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
     -> trace_proj tg (Trace_on (E_Pair e1 e2) m) = ∅.
   Proof.
-    intros.
-    unfold Trace_on.
-    destruct (Enumerates_from_dec _ _) as [[v t] Henum].
-    inversion Henum; subst.
-    apply Trace_on_correct in H4.
-    apply Trace_on_correct in H8.
-    simpl.
-    subst.
-    rewrite trace_proj_plus_distrl.
-    rewrite H, H0.
-    trivial.
+    intros; unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
+    invert_Enumerates;
+    get_trace_ons; subst;
+    rewrite trace_proj_plus_distrl;
+    repeat (match goal with
+       | [H1: forall (x: ?t), _ = _,
+          x: ?t
+         |- _] => rewrite H1 in *
+     end); trivial.
   Qed.
 
-  Theorem trace_lt_Pair_off tg e1 e2 m
+  Theorem trace_lt_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
   : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
     -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
     -> trace_proj tg (Trace_lt (E_Pair e1 e2) m) = ∅.
   Proof.
     induction m; [intros; destruct tg; reflexivity|].
     intros H1 H2.
-    unfold Trace_lt; fold Trace_lt.
+    unfold Trace_lt; fold (@Trace_lt (TPair tyl tyr)).
     rewrite trace_proj_plus_distrl.
     apply subset_nil_nil.
     apply subset_union_both.
@@ -2018,23 +2027,23 @@ Section EnumTrace.
     rewrite IHm; auto.
   Qed.
 
-  Theorem trace_on_Sum_off tg e1 e2 m
+  Theorem trace_on_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
   : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
     -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
     -> trace_proj tg (Trace_on (E_Sum e1 e2) m) = ∅.
   Proof.
     intros Hl Hr; unfold Trace_on;
-    remember (Enumerates_from_dec _ _) as x; destruct x as [[v t] Henum]; simpl;
-    inversion Henum; subst; apply Trace_on_correct in H5; rewrite <-H5; auto.
+    remember (Enumerates_from_dec (E_Sum e1 e2) m) as x eqn:Heqx; clear Heqx; destruct x as [[v t] Henum]; simpl;
+    invert_Enumerates; get_trace_ons; subst; auto.
   Qed.
 
-  Theorem trace_lt_Sum_off tg e1 e2 m
+  Theorem trace_lt_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
   : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
     -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
     -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = ∅.
   Proof.
     induction m; [intros; compute; destruct tg; trivial|];
-    intros; unfold Trace_lt; fold Trace_lt; rewrite trace_proj_plus_distrl;
+    intros; unfold Trace_lt; (fold (@Trace_lt (TSum tyl tyr))); rewrite trace_proj_plus_distrl;
     rewrite IHm; auto; apply trace_on_Sum_off; auto.
   Qed.
 
