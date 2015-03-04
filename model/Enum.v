@@ -1446,6 +1446,14 @@ Section Enumerates.
     induction x as [|x]; intros; nliamega.
   Qed.
 
+  Ltac even_odd_crush :=
+    match goal with
+      | [ H: 2 * _ = 2 * _ |- _ ] => apply even_fun in H
+      | [ H: 2 * _ + 1 = 2 * _ + 1 |- _ ] => apply odd_fun in H
+      | [ H: 2 * _     = 2 * _ + 1 |- _] => apply odd_neq_even in H; contradiction
+      | [ H: 2 * _ + 1 = 2 * _     |- _] => symmetry in H; apply odd_neq_even in H; contradiction
+    end.
+  
   (* if there's a hypothesis of the shape Enumerates ..., inversion; subst; clear it *)
   Ltac invert_Enumerates' :=
     match goal with
@@ -1485,8 +1493,8 @@ Section Enumerates.
   Proof.
     induction e; intros; invert_Enumerates;
     repeat rewrite_pairing_to_fun;
-    try odd_neq_event;
     repeat Eff_indHyp;
+    try (even_odd_crush; subst);
     try match goal with
       | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
         erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
@@ -1494,8 +1502,6 @@ Section Enumerates.
         , H1 : Enumerates ?e _ _ _
         , H2 : Enumerates ?e _ _ _
           |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
-      | [ H : 2 * ?x = 2 * ?y |- _ ] => erewrite (even_fun _ _ H) in *; clear H
-      | [ H : 2 * ?x + 1 = 2 * ?y + 1 |- _ ] => erewrite (odd_fun _ _ H) in *; clear H
         end;
     repeat Eff_indHyp;
     tauto.
@@ -1703,6 +1709,20 @@ Ltac invert_Enumerates' :=
       end
   end.
 Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
+Ltac Eff :=
+  match goal with
+    | [H1: Enumerates ?e ?n _ _, H2: Enumerates ?e ?n _ _ |- _ ] =>
+      destruct (Enumerates_from_fun _ _ _ _ _ _ H1 H2)
+  end.
+Ltac even_odd_crush :=
+  repeat (match goal with
+    | [ H: context[double _] |- _] => rewrite double_twice in H
+    | [ H: context[S (2 * ?x)] |- _ ] => replace (S (2 * x)) with (2 * x + 1) in * by (nliamega)
+    | [ H: 2 * _ = 2 * _ |- _ ] => apply even_fun in H
+    | [ H: 2 * _ + 1 = 2 * _ + 1 |- _ ] => apply odd_fun in H
+    | [ H: 2 * _     = 2 * _ + 1 |- _] => apply odd_neq_even in H; contradiction
+    | [ H: 2 * _ + 1 = 2 * _     |- _] => symmetry in H; apply odd_neq_even in H; contradiction
+  end).
 
 Section EnumTrace.
   Definition Trace_on {ty} (e : Enum ty) (n : nat) : Trace :=
@@ -2214,7 +2234,7 @@ Section EnumTrace.
 End EnumTrace.
 
 Section Fairness.
-  Definition Fair2 (k : Enum -> Enum -> Enum) :=
+  Definition Fair2 tout (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
     forall n,
     exists equilibrium,
       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
@@ -2222,92 +2242,75 @@ Section Fairness.
           n < equilibrium /\ l_uses ≃ r_uses
       end.
 
-  Definition Fair3 (k : Enum -> Enum -> Enum -> Enum) :=
-    forall n,
-    exists equilibrium,
-      match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
-        | Tracing z_uses o_uses t_uses _ =>
-          n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses
-      end.
+  (* Definition Fair3 (k : Enum -> Enum -> Enum -> Enum) := *)
+  (*   forall n, *)
+  (*   exists equilibrium, *)
+  (*     match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with *)
+  (*       | Tracing z_uses o_uses t_uses _ => *)
+  (*         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses *)
+  (*     end. *)
 
-  Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) :=
-    forall n,
-    exists equilibrium,
-      match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with
-        | Tracing z_uses o_uses tw_uses th_uses =>
-          n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses
-      end.
+  (* Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) := *)
+  (*   forall n, *)
+  (*   exists equilibrium, *)
+  (*     match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with *)
+  (*       | Tracing z_uses o_uses tw_uses th_uses => *)
+  (*         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses *)
+  (*     end. *)
 
-  Definition AltUnfair3 k :=
-    exists threshold,
-      forall eq_cand,
-        eq_cand > threshold ->
-        match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
-          | Tracing use0 use1 use2 _ =>
-            (~ (use0 ≃ use1)) \/ (~ (use1 ≃ use2)) \/ (~ (use0 ≃ use2))
-        end.
+  (* Definition AltUnfair3 k := *)
+  (*   exists threshold, *)
+  (*     forall eq_cand, *)
+  (*       eq_cand > threshold -> *)
+  (*       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with *)
+  (*         | Tracing use0 use1 use2 _ => *)
+  (*           (~ (use0 ≃ use1)) \/ (~ (use1 ≃ use2)) \/ (~ (use0 ≃ use2)) *)
+  (*       end. *)
 
-  Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k).
-  Proof.
-    unfold AltUnfair3, Fair3, not.
-    intros [thresh Halt] Hunf.
-    destruct (Hunf thresh) as [eq_cand Hblah].
-    clear Hunf.
-    remember (Halt eq_cand).
-    clear Halt Heqy.
-    destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
-                       eq_cand) as [t0 t1 t2 t3] in *.
-    intuition.
-    assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction.
-  Qed.
+  (* Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k). *)
+  (* Proof. *)
+  (*   unfold AltUnfair3, Fair3, not. *)
+  (*   intros [thresh Halt] Hunf. *)
+  (*   destruct (Hunf thresh) as [eq_cand Hblah]. *)
+  (*   clear Hunf. *)
+  (*   remember (Halt eq_cand). *)
+  (*   clear Halt Heqy. *)
+  (*   destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) *)
+  (*                      eq_cand) as [t0 t1 t2 t3] in *. *)
+  (*   intuition. *)
+  (*   assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction. *)
+  (* Qed. *)
   
   Section SumFair.
     Lemma Sum_precise
-    : forall n e1 e2,
+    : forall {tyl tyr} n (e1: Enum tyl) (e2: Enum tyr),
         Trace_lt (E_Sum e1 e2) (double n) ≡ (Trace_lt e1 n) ⊔ (Trace_lt e2 n).
     Proof.
-      intros n e1 e2.
-      induction n.
-      compute; tauto.
-      rewrite double_S.
-      unfold Trace_lt at 1; fold Trace_lt.
-      unfold Trace_on.
-      remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er].
-      remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El].
-      simpl.
-      eapply trace_eq_trans; [apply trace_plus_assoc|].
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]|].
-      eapply trace_eq_trans; [apply trace_eq_symm; apply trace_plus_assoc|].
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|]; apply trace_plus_cong; [apply trace_eq_refl|]; apply IHn |].
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_assoc]|].
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]]|].
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|apply trace_eq_symm; apply trace_plus_assoc ]|].
-      eapply trace_eq_trans; [apply trace_plus_assoc|].
-      apply trace_plus_cong; apply trace_plus_cong; [| apply trace_eq_refl | | apply trace_eq_refl].
-      unfold Trace_on.
-      destruct (Enumerates_from_dec e1 n) as [[x' t'] Henum'].
-      simpl.
-      clear HeqEr; clear dependent vr; clear tr HeqEl.
-      inversion El; subst.
-      rewrite double_twice in H1.
-      
-      apply even_fun in H1; subst.
-      destruct (Enumerates_from_fun _ _ _ _ _ _ H5 Henum'); subst; apply trace_eq_refl.
-
-      apply False_ind; apply odd_neq_even with (x := n) (y := rn); rewrite <-double_twice; assumption.
-      
-      clear HeqEr HeqEl.
-      unfold Trace_on.
-      destruct (Enumerates_from_dec e2 n) as [[x' t'] Henum'].
-      inversion Er.
-      apply False_ind; apply odd_neq_even with (x := ln) (y := n); symmetry; rewrite <-double_twice; nliamega.
-
-      assert (n = rn) by (apply odd_fun; rewrite <-double_twice; nliamega); subst.
-      destruct (Enumerates_from_fun _ _ _ _ _ _ Henum' H5 ); subst; apply trace_eq_refl.
+      intros; induction n; [compute; tauto|];
+      rewrite double_S; unfold Trace_lt at 1; fold (@Trace_lt (TSum tyl tyr)); unfold Trace_on;
+      remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er];
+      remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El]; simpl;
+      eapply trace_eq_trans; [apply trace_plus_assoc|];
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]|];
+      eapply trace_eq_trans; [apply trace_eq_symm; apply trace_plus_assoc|];
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|]; apply trace_plus_cong; [apply trace_eq_refl|]; apply IHn |];
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_assoc]|];
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]]|];
+      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|apply trace_eq_symm; apply trace_plus_assoc ]|];
+      eapply trace_eq_trans; [apply trace_plus_assoc|];
+      apply trace_plus_cong; apply trace_plus_cong; [| apply trace_eq_refl | | apply trace_eq_refl];
+      [ unfold Trace_on; destruct (Enumerates_from_dec e1 n) as [[x' t'] Henum']; simpl;
+        clear HeqEr; clear dependent vr; clear tr HeqEl;
+        invert_Enumerates; subst; even_odd_crush; subst; Eff; subst; apply trace_eq_refl
+      | clear HeqEr HeqEl; unfold Trace_on;
+        destruct (Enumerates_from_dec e2 n) as [[x' t'] Henum']; simpl;
+        invert_Enumerates; subst; even_odd_crush; repeat subst;
+        Eff; subst; apply trace_eq_refl
+      ].
     Qed.
 
     (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
-    Theorem SumFair : Fair2 E_Sum.
+    Theorem SumFair : Fair2 TSum (@E_Sum).
     Proof.
       unfold Fair2.
       intros n.
