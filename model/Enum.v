@@ -2232,6 +2232,10 @@ Section EnumTrace.
   Qed.
 
 End EnumTrace.
+Ltac get_trace_ons :=
+  repeat (match goal with
+            | [ H: Enumerates _ _ _ _ |- _] => apply Trace_on_correct in H
+          end).
 
 Section Fairness.
   Definition Fair2 {tout} (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
@@ -2506,23 +2510,22 @@ Section Fairness.
 
   Section PairFair.
     Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
-    Lemma Pair_layer e1 e2 n
+    Lemma Pair_layer {tyl tyr} (e1: Enum tyl) (e2: Enum tyr) n
     : Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n)
       ≡ (Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n)).
     Proof.
       apply trace_eq_eq'_equiv; split.
       (* trace (e1 x e2) n^2 (n+1)^2 < (trace ) *)
-      (* This one needs some serious infrastructure *)
+      (* TODO: come at this hard with some Ltac *)
       - apply sub_trace_In_equiv; intros x tg Hin;
-        rewrite set_In_Trace_from_to in Hin by nliamega; destruct Hin as [k [[Hnnk HkSnSn] Hin]].
-        unfold Trace_on in Hin.
-        destruct (Enumerates_from_dec (E_Pair e1 e2) k) as [[v t] Henum].
-        inversion Henum; subst.
-        simpl in Hin.
+        rewrite set_In_Trace_from_to in Hin by nliamega; destruct Hin as [k [[Hnnk HkSnSn] Hin]];
+        unfold Trace_on in Hin;
+        destruct (Enumerates_from_dec (E_Pair e1 e2) k) as [[v t] Henum]; simpl in Hin;
+        invert_Enumerates; subst;
         destruct (sub_trace_In_equiv (lt ⊔ rt)
-                                     ((Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n)))).
-        apply H; [| assumption].
-        clear H H0.
+                                     ((Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n))));
+        apply H; [| assumption];
+        clear H H0;
         apply sub_trace_plus_cong;
           eapply Trace_lt_Enumerates; [| eassumption | | eassumption];
           destruct (Pairing_bound ln rn k n); auto.
@@ -2532,30 +2535,28 @@ Section Fairness.
         + apply sub_trace_In_equiv; intros x tg Hin;
           rewrite set_In_Trace_lt in Hin by nliamega;
           destruct Hin as [k [Hkn Hin]];
-          apply set_In_Trace_from_to; [nliamega|].
+          apply set_In_Trace_from_to; [nliamega|];
           destruct (le_lt_dec n k);
             [exists (k*k + k + n) | exists (k + n * n)];
             (split; [nliamega|]);
-            unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum];
-            inversion Henum; subst; simpl; 
-            rewrite trace_proj_plus_distrl; apply set_union_intro1;
-            [ assert (Pairing (k * k + k + n) k n) by (constructor; nliamega)
-            | assert (Pairing (k + n * n) k n) by (constructor; nliamega)];
-            destruct (Pairing_to_fun _ _  _ _ _ H1 H); subst;
-            (erewrite Trace_on_correct in Hin; eassumption).
+            unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
+          invert_Enumerates;
+          rewrite trace_proj_plus_distrl; apply set_union_intro1;
+          [ assert (Pairing (k * k + k + n) k n) by (constructor; nliamega)
+          | assert (Pairing (k + n * n) k n) by (constructor; nliamega)];
+          rewrite_pairing_to_fun; get_trace_ons; subst; auto.
         + apply sub_trace_In_equiv; intros x tg Hin;
           rewrite set_In_Trace_lt in Hin by nliamega;
           destruct Hin as [k [Hkn Hin]];
-          apply set_In_Trace_from_to; [nliamega|].
+          apply set_In_Trace_from_to; [nliamega|];
           destruct (le_lt_dec k n);
             [exists (n * n + n + k) | exists (n + k * k)]; (split; [nliamega|]);
-            unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum];
-            inversion Henum; subst; simpl; 
+            unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
+            invert_Enumerates;
             rewrite trace_proj_plus_distrl; apply set_union_intro2;
             [ assert (Pairing (n * n + n + k) n k) by (constructor; nliamega)
             | assert (Pairing (n + k * k) n k) by (constructor; nliamega) ];
-            destruct (Pairing_to_fun _ _  _ _ _ H1 H); subst;
-            (erewrite Trace_on_correct in Hin; eassumption).
+          rewrite_pairing_to_fun; get_trace_ons; subst; auto.
     Qed.
 
     Lemma PairNN_layer :
@@ -2576,11 +2577,11 @@ Section Fairness.
     Qed.      
 
     Lemma Pair_precise
-    : forall n e1 e2,
-        (Trace_lt (E_Pair e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊔ (Trace_lt e2 n)).
+    : forall n {ty1 ty2} e1 e2,
+        (Trace_lt (@E_Pair ty1 ty2 e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊔ (Trace_lt e2 n)).
       intros n.
       induction n as [| n IHn]; [  intros; compute; tauto| ].
-      intros e1 e2.
+      intros.
       eapply trace_eq_trans.
       apply trace_from_to_0_split with (m := n * n) (n := S n * S n); nliamega.
       eapply trace_eq_trans; [apply sub_trace_plus_eq| apply Pair_layer].
@@ -2590,11 +2591,11 @@ Section Fairness.
     Qed.
 
     Lemma PairPair_precise
-    : forall n e1 e2 e3,
-        Trace_lt (E_Pair e1 (E_Pair e2 e3)) ((n * n) * (n * n))
+    : forall {ty1 ty2 ty3} n e1 e2 e3,
+        Trace_lt (@E_Pair ty1 _ e1 (@E_Pair ty2 ty3 e2 e3)) ((n * n) * (n * n))
         ≡ (Trace_lt e1 (n * n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
     Proof.
-      intros n e1 e2 e3.
+      intros.
       eapply trace_eq_trans; [apply Pair_precise|].
       apply trace_plus_cong; [apply trace_eq_refl| ].
       apply Pair_precise.
@@ -2623,7 +2624,7 @@ Section Fairness.
       apply trace_eq_refl.
     Qed.
 
-    Theorem PairFair : Fair2 E_Pair.
+    Theorem PairFair : Fair2 (@E_Pair).
       unfold Fair2.
       intros n.
       exists ((S n) * (S n)).
