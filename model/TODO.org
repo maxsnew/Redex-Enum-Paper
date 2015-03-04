@@ -1,0 +1,4 @@
+* Model TODO
+  1. Split into multiple files
+  2. Assume axiom K and get rid of `type`
+  3. Fix run-coq-redex-tests.rkt (need Robby's help here)
