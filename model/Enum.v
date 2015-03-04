@@ -2234,7 +2234,7 @@ Section EnumTrace.
 End EnumTrace.
 
 Section Fairness.
-  Definition Fair2 tout (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
+  Definition Fair2 {tout} (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
     forall n,
     exists equilibrium,
       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
@@ -2242,13 +2242,13 @@ Section Fairness.
           n < equilibrium /\ l_uses ≃ r_uses
       end.
 
-  (* Definition Fair3 (k : Enum -> Enum -> Enum -> Enum) := *)
-  (*   forall n, *)
-  (*   exists equilibrium, *)
-  (*     match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with *)
-  (*       | Tracing z_uses o_uses t_uses _ => *)
-  (*         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses *)
-  (*     end. *)
+  Definition Fair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
+    forall n,
+    exists equilibrium,
+      match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
+        | Tracing z_uses o_uses t_uses _ =>
+          n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses
+      end.
 
   (* Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) := *)
   (*   forall n, *)
@@ -2258,28 +2258,28 @@ Section Fairness.
   (*         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses *)
   (*     end. *)
 
-  (* Definition AltUnfair3 k := *)
-  (*   exists threshold, *)
-  (*     forall eq_cand, *)
-  (*       eq_cand > threshold -> *)
-  (*       match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with *)
-  (*         | Tracing use0 use1 use2 _ => *)
-  (*           (~ (use0 ≃ use1)) \/ (~ (use1 ≃ use2)) \/ (~ (use0 ≃ use2)) *)
-  (*       end. *)
+  Definition AltUnfair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
+    exists threshold,
+      forall eq_cand,
+        eq_cand > threshold ->
+        match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
+          | Tracing use0 use1 use2 _ =>
+            (~ (use0 ≃ use1)) \/ (~ (use1 ≃ use2)) \/ (~ (use0 ≃ use2))
+        end.
 
-  (* Theorem AltUnfair3Suff k : AltUnfair3 k -> ~ (Fair3 k). *)
-  (* Proof. *)
-  (*   unfold AltUnfair3, Fair3, not. *)
-  (*   intros [thresh Halt] Hunf. *)
-  (*   destruct (Hunf thresh) as [eq_cand Hblah]. *)
-  (*   clear Hunf. *)
-  (*   remember (Halt eq_cand). *)
-  (*   clear Halt Heqy. *)
-  (*   destruct (Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) *)
-  (*                      eq_cand) as [t0 t1 t2 t3] in *. *)
-  (*   intuition. *)
-  (*   assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction. *)
-  (* Qed. *)
+  Theorem AltUnfair3Suff {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) : AltUnfair3 (@k) -> ~ (Fair3 (@k)).
+  Proof.
+    unfold AltUnfair3, Fair3, not.
+    intros [thresh Halt] Hunf.
+    destruct (Hunf thresh) as [eq_cand Hblah].
+    clear Hunf.
+    remember (Halt eq_cand).
+    clear Halt Heqy.
+    destruct (Trace_lt (k _ _ _ (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
+                       eq_cand) as [t0 t1 t2 t3] in *.
+    intuition.
+    assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction.
+  Qed.
   
   Section SumFair.
     Lemma Sum_precise
@@ -2310,7 +2310,7 @@ Section Fairness.
     Qed.
 
     (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
-    Theorem SumFair : Fair2 TSum (@E_Sum).
+    Theorem SumFair : Fair2 (@E_Sum).
     Proof.
       unfold Fair2.
       intros n.
@@ -2333,7 +2333,7 @@ Section Fairness.
   End SumFair.
 
   Section NaiveSum3Unfair.
-    Definition NaiveSum3 e1 e2 e3 :=
+    Definition NaiveSum3 {ty1 ty2 ty3} (e1: Enum ty1) (e2: Enum ty2) (e3: Enum ty3) :=
       E_Sum e1 (E_Sum e2 e3).
 
     Notation x4 n := (double (double n)).
@@ -2429,7 +2429,7 @@ Section Fairness.
     Qed.
 
     Lemma SumSum_precise
-    : forall n e1 e2 e3,
+    : forall n {ty1 ty2 ty3} (e1: Enum ty1) (e2: Enum ty2) (e3: Enum ty3),
         Trace_lt (E_Sum e1 (E_Sum e2 e3)) (double (double n))
         ≡ (Trace_lt e1 (double n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
     Proof.
@@ -2472,7 +2472,7 @@ Section Fairness.
       compute; tauto.
     Qed.
 
-    Theorem NaiveSum3Unfair : ~ (Fair3 NaiveSum3).
+    Theorem NaiveSum3Unfair : ~ (Fair3 (@NaiveSum3)).
     Proof.
       apply AltUnfair3Suff; unfold AltUnfair3; fold NS3T.
       exists 7.
@@ -2494,7 +2494,7 @@ Section Fairness.
       replace s1 with (trace_proj one (Trace_lt NS3T n)) by (rewrite <-Heqt; trivial).
       eapply subset_trans.
       apply sub_trace_proj.
-      apply Trace_lt_sub with (n := double (double p)); nliamega.
+      apply (@Trace_lt_sub (TSum TNat (TSum TNat TNat)) )with (n := double (double p)); nliamega.
       apply set_subset_weaken.
       apply NS3Tr_precise.
       
