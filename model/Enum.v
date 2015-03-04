@@ -2645,16 +2645,15 @@ Section Fairness.
 
   Section NaiveTripleUnfair.
 
-    Definition NaiveTriple3 e1 e2 e3 :=
-      E_Pair e1 (E_Pair e2 e3).
+    Definition NaiveTriple3 {ty1 ty2 ty3} e1 e2 e3 :=
+      @E_Pair ty1 _ e1 (@E_Pair ty2 ty3 e2 e3).
 
     Definition traceNP3 := Trace_lt (NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
 
     Definition NP3T := NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
 
-    Theorem NaiveTripleUnfair : ~ (Fair3 NaiveTriple3).
+    Theorem NaiveTripleUnfair : ~ (Fair3 (@NaiveTriple3)).
     Proof.
-
       apply AltUnfair3Suff.
       unfold AltUnfair3.
       fold NP3T.
