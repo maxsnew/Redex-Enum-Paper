@@ -11,7 +11,7 @@ clean:
 	rm -f model/*.vo
 	rm -f model/*.cache
 	rm -rf supp/model
-	rm supp/Makefile
+	rm -f supp/Makefile
 	rm -f supp.tar.gz
 
 test: model/Enum.vo
