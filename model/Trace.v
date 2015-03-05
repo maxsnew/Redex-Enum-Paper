@@ -55,7 +55,7 @@ Theorem sub_trace_refl t : t ⊏ t.
 Proof.
   unfold sub_trace; destruct t; split4; apply subset_refl.
 Qed.
-Hint Resolve sub_trace_refl.
+Hint Immediate sub_trace_refl.
 
 Theorem sub_trace_trans t1 t2 t3 : t1 ⊏ t2 -> t2 ⊏ t3 -> t1 ⊏ t3.
 Proof.
@@ -108,7 +108,7 @@ Theorem trace_eq_refl t : t ≡ t.
 Proof.
   unfold trace_eq; destruct t; split4; apply set_eq_refl.
 Qed.
-Hint Resolve trace_eq_refl.
+Hint Immediate trace_eq_refl.
 
 Theorem trace_eq_symm t1 t2 : t1 ≡ t2 -> t2 ≡ t1.
 Proof.

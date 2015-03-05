@@ -98,13 +98,13 @@ Proof.
   constructor 1; auto.
   apply subset_consr; auto.
 Qed.
-Hint Resolve subset_refl.
+Hint Immediate subset_refl.
 
 Theorem set_eq_refl s : s ≃ s.
 Proof.
   split; apply subset_refl.
 Qed.
-Hint Resolve set_eq_refl.
+Hint Immediate set_eq_refl.
 
 Theorem subset_In : forall x s s', x ∈ s -> s ⊂ s' -> x ∈ s'.
 Proof.
@@ -277,8 +277,7 @@ Proof.
   constructor; auto.
   split.
   constructor; auto.
-  apply subset_consr.
-  apply subset_refl.
+  apply subset_consr; auto.
 
   split.
   destruct (IHs x).
@@ -290,8 +289,7 @@ Proof.
 
   apply subset_trans with (s2 := (set_add' x s)).
   apply IHs.
-  apply subset_consr.
-  apply subset_refl.
+  apply subset_consr; auto.
 
   generalize dependent x.
   induction s as [| y s].
@@ -299,13 +297,11 @@ Proof.
   intros x.
   simpl.
   destruct (eq_nat_dec x y).
-  apply subset_consr.
-  apply subset_refl.
+  apply subset_consr; auto.
   apply subset_trans with (y :: x :: s).
   apply set_cons_cons_subset.
   apply IHs.
-  apply subset_cons_swap.
-  apply subset_refl.
+  apply subset_cons_swap; auto.
 Qed.
 
 Lemma set_add_cons_subset : forall x s1 s2, s1 ⊂ s2 -> (x :: s1) ⊂ (set_add' x s2).
@@ -320,8 +316,7 @@ Qed.
 Lemma set_union_unitl : forall s, (∅ ∪ s) ≃ s.
 Proof.
   split.
-  induction s.
-  apply subset_refl.
+  induction s; auto.
 
   unfold set_union in *.
   replace (((fix set_union (x y : set nat) {struct y} :
@@ -341,9 +336,7 @@ Proof.
 Qed.
 
 Lemma set_union_unitr : forall s, (s ∪ ∅) ≃ s.
-Proof.
-  apply set_eq_refl.
-Qed.
+Proof. auto. Qed.
 
 Lemma elem_union :
   forall s x,
@@ -359,20 +352,16 @@ Proof.
   destruct Hin.
   constructor; auto.
   eapply In_subset_def.
-  apply subset_consr.
-  apply subset_refl.
+  apply subset_consr; auto.
   apply IHs; auto.
-  eapply In_subset_def.
-  apply set_add_cons_subset.
-  apply subset_refl.
-  auto.
+  eapply In_subset_def; [apply set_add_cons_subset|]; auto.
 Qed.
 
 Lemma subset_union_cons : forall x s1 s2, ((x::s1) ∪ s2) ⊂ (x :: (s1 ∪ s2)).
   induction s2.
   simpl; split.
   tauto.
-  apply subset_consr; apply subset_refl.
+  apply subset_consr; auto.
   simpl.
   eapply subset_trans.
   apply set_add_cons_eq.
@@ -380,8 +369,7 @@ Lemma subset_union_cons : forall x s1 s2, ((x::s1) ∪ s2) ⊂ (x :: (s1 ∪ s2)
   eapply subset_trans.
   apply set_cons_cons_subset.
   apply IHs2.
-  apply subset_cons_swap.
-  apply subset_refl.
+  apply subset_cons_swap; auto.
   apply set_cons_cons_subset.
   apply set_add_cons_eq.
 Qed.
@@ -455,8 +443,7 @@ Proof.
   destruct Hsubr; auto.
   apply IHsr; auto.
   eapply subset_trans.
-  eapply subset_consr.
-  apply subset_refl.
+  eapply subset_consr; auto.
   apply Hsubr.
 Qed.
 
@@ -473,18 +460,17 @@ Qed.
 Lemma set_subset_add : forall x s1 s2, s1 ⊂ s2 -> s1 ⊂ (set_add' x s2).
 Proof.
   intros x s1 s2 Hsub.
-  eapply subset_trans; [| apply set_add_cons_subset; apply subset_refl ].
+  eapply subset_trans; [| apply set_add_cons_subset; auto ].
   apply subset_consr; auto.
 Qed.
 
 Theorem set_eq_app_cons_comm s1 s2 a : (a :: (s1 ++ s2)) ≃ (s1 ++ a :: s2).
 Proof.
-  induction s1.
-  apply set_eq_refl.
+  induction s1; auto.
   rewrite <-app_comm_cons.
   eapply set_eq_trans.
-  apply set_eq_cons_swap.
-  apply set_eq_refl.
+  apply set_eq_cons_swap; auto.
+
   replace ((a0 :: s1) ++ a :: s2) with (a0 :: (s1 ++ a :: s2)) by apply app_comm_cons.
   apply set_eq_cons_cons; auto.
 Qed.
@@ -493,8 +479,7 @@ Theorem set_union_app_eq : forall s1 s2, (s1 ∪ s2) ≃ (s1 ++ s2).
 Proof.
   induction s2.
   simpl.
-  rewrite app_nil_r.
-  apply set_eq_refl.
+  rewrite app_nil_r; auto.
 
   simpl.
   eapply set_eq_trans.
@@ -529,13 +514,12 @@ Qed.
 
 Theorem subset_union_eq : forall s1 s2, s1 ⊂ s2 -> (s1 ∪ s2) ≃ s2.
 Proof.
-  split; [| apply subset_union_transr; apply subset_refl ].
+  split; [| apply subset_union_transr; auto ].
   generalize dependent s2.
   induction s1 as [| x s1].
   intros s1 Hsubnil.
-  apply subset_trans with (s2 := s1).
-  apply set_union_unitl; apply subset_refl.
-  apply subset_refl.
+  apply subset_trans with (s2 := s1); auto.
+  apply set_union_unitl; auto.
 
   intros s2 Hsub.
   apply subset_trans with (s2 := x :: (s1 ∪ s2)).
@@ -556,13 +540,11 @@ Theorem set_union_assoc s1 s2 s3
 : ((s1 ∪ s2) ∪ s3) ≃ (s1 ∪ (s2 ∪ s3)).
 Proof.
   apply set_eq_trans with (s2 := ((s1 ++ s2) ++ s3)).
-  apply set_union_app_eq_gen.
+  apply set_union_app_eq_gen; auto.
   apply set_union_app_eq.
-  apply set_eq_refl.
   rewrite <-app_assoc.
   apply set_eq_symm.
-  apply set_union_app_eq_gen.
-  apply set_eq_refl.
+  apply set_union_app_eq_gen; auto.
   apply set_union_app_eq.
 Qed.
 
