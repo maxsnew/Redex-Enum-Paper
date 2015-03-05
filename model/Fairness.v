@@ -21,13 +21,13 @@ Definition Fair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum 
         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses
     end.
 
-(* Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) := *)
-(*   forall n, *)
-(*   exists equilibrium, *)
-(*     match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with *)
-(*       | Tracing z_uses o_uses tw_uses th_uses => *)
-(*         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses *)
-(*     end. *)
+Definition Fair4 {tout} (k : forall {ty1 ty2 ty3 ty4}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum ty4 -> Enum (tout ty1 ty2 ty3 ty4)) :=
+  forall n,
+  exists equilibrium,
+    match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with
+      | Tracing z_uses o_uses tw_uses th_uses =>
+        n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses
+    end.
 
 Definition AltUnfair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
   exists threshold,
