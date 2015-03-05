@@ -36,8 +36,8 @@
         [coq-result (in-list coq-results)])
     (match* (a-test-case coq-result)
       [((test-case redex-e orig-n val) 
-        (coq-pair (coq-pair coq-v coq-trace)
-                  (coq-pair coq-n _coq-backwards-trace)))
+        (cons (cons coq-v coq-trace)
+              (cons coq-n _coq-backwards-trace)))
        (define-values (redex-v redex-trace) (m:from-nat+trace redex-e orig-n))
        (define (check-it failed? fmt-str . args)
          (test-log! failed?)
@@ -60,78 +60,16 @@
         Set Printing Depth 10000.
         Require Import Enum Arith.
         
-        Definition from_nat e n := 
+        Definition from_nat @"{ty}" @"(e: Enum ty)" n := 
           proj1_sig (Enumerates_from_dec e n).
           
-        Definition to_nat e v :=
-          match (Enumerates_to_dec e v) with
-          | inleft x => Some (proj1_sig x)
-          | inright _ => None
-          end.
-          
-        Definition SwapPair (v : Value) :=
-          match v with
-          | V_Pair a b => V_Pair b a
-          | _ => v
-          end.
+        Definition to_nat @"{ty}" @"(e : Enum ty)" v :=
+          proj1_sig (Enumerates_to_dec e v).
+        Definition SwapConsBij' : Bijection (tdenote (TPair TNat TNat)) (tdenote (TPair TNat TNat))  := SwapConsBij.
+        Definition Nat_To_Map_Of_Swap_Zero_With i :=
+          E_Map (SwapWithZeroBijection i) E_Nat.
 
-          Lemma SwapPair_Swaps : forall a : Value, SwapPair (SwapPair a) = a.
-          Proof.
-            intro.
-            unfold SwapPair.
-            destruct a; reflexivity.
-          Qed.
-
-          Definition SwapBijection : Bijection Value Value.
-          Proof.
-            refine (exist _ (SwapPair,SwapPair) _).
-            unfold fst, snd.
-            split;apply SwapPair_Swaps.
-          Defined.
-          
-          Definition SwapWithZero n1 v :=
-           match v with
-             | V_Nat n2 => 
-               V_Nat (if (eq_nat_dec n2 0) 
-                           then n1
-                           else if (eq_nat_dec n2 n1)
-                                then 0
-                                else n2)
-             | _ => v
-           end.
-
-           Lemma SwapWithZero_Swaps : forall n a, (SwapWithZero n) ((SwapWithZero n) a) = a.
-           Proof.
-             intros n a.
-             unfold SwapWithZero.
-             destruct a; try reflexivity.
-             destruct (eq_nat_dec n0 0); subst; auto.
-             destruct (eq_nat_dec n 0); auto.
-             destruct (eq_nat_dec n n); subst; auto.
-             intuition.
-             destruct (eq_nat_dec n0 n).
-             destruct (eq_nat_dec 0 0); subst; auto.
-             intuition.
-             destruct (eq_nat_dec n0 0); subst; auto.
-             intuition.
-             destruct (eq_nat_dec n0 n); subst.
-             intuition.
-             auto.
-           Qed.
-
-           Definition SwapWithZeroBijection : forall n:nat, Bijection Value Value.
-           Proof.
-             intros n.
-             refine (exist _ (SwapWithZero n,SwapWithZero n) _).
-             unfold fst, snd.
-             split;apply (SwapWithZero_Swaps n).
-           Defined.
-           
-           Definition Nat_To_Map_Of_Swap_Zero_With v :=
-             match v with
-             | V_Nat i => E_Map (SwapWithZeroBijection i) E_Nat
-             | v => E_Nat
-             end.})
+})
 
 (define (run-some-in-coq test-cases)
   (define results
@@ -154,7 +92,7 @@
             (o-enum e2)
             (o ")")]
            [`(map/e swap-cons swap-cons ,e)
-            (o "(E_Map SwapBijection ")
+            (o "(E_Map SwapConsBij' ")
             (o-enum e)
             (o ")")]
            [`(dep/e ,e nat->map-of-swap-zero-with)
@@ -175,9 +113,9 @@
        (define (o-v e v)
          (match* (e v)
            [(`natural/e (? number?))
-            (o (format "(V_Nat ~a)" v))]
+            (o (format "~a" v))]
            [(`(cons/e ,e1 ,e2) (cons a b))
-            (o "(V_Pair ")
+            (o "(pair ")
             (o-v e1 a)
             (o " ")
             (o-v e2 b)
@@ -185,17 +123,17 @@
            [(`(map/e ,f-in ,f-out ,e) v)
             (o-v e v)]
            [(`(dep/e ,e nat->map-of-swap-zero-with) (cons i j))
-            (o "(V_Pair ")
+            (o "(pair ")
             (o-v e i)
             (o " ")
             (o-v `natural/e j)
             (o ")")]
            [(`(or/e ,e1 ,e2) (cons 0 b))
-            (o "(V_Sum_Left ")
+            (o "(inl ")
             (o-v e1 b)
             (o ")")]
            [(`(or/e ,e1 ,e2) (cons 1 b))
-            (o "(V_Sum_Right ")
+            (o "(inr ")
             (o-v e2 b)
             (o ")")]
            [(`(trace/e ,i ,e) v)
@@ -279,7 +217,7 @@
   
   (let loop ([exp exp])
     (match exp
-      [`(pair ,a ,b) (coq-pair (loop a) (loop b))]
+      [`(pair ,a ,b) (cons (loop a) (loop b))]
       [`(cons ,a ,b) (cons (loop a) (loop b))]
       [`nil '()]
       [`(Tracing ,ts ...)
@@ -295,13 +233,12 @@
       [`O 0]
       [`(Some ,v) (loop v)]
       [`(None) (coq-none)]
-      [`(V_Nat ,n) (loop n)]
       ;; V_Pairs are just 'cons' pairs in the Redex model
-      [`(V_Pair ,a ,b) (cons (loop a) (loop b))]
-      [`(V_Sum_Right ,v) 
+      [`(pair ,a ,b) (cons (loop a) (loop b))]
+      [`(inr ,v) 
        ;; right sums in the Coq model match up to the `or r' rule in the Redex model
        (cons 1 (loop v))]
-      [`(V_Sum_Left ,v) 
+      [`(inl ,v) 
        ;; left sums in the Coq model match up to the `or l' rule in the Redex model
        (cons 0 (loop v))])))
 

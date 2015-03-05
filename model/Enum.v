@@ -42,6 +42,10 @@ Notation Yes := (left _).
 Notation No := (right _).
 Notation "l &&& r" := (if l then r else No) (at level 70).
 Notation Refine x := (if x then Yes else No).
+
+(* sumor notation a la cpdt *)
+Notation "{{ x }}" := (exist _ x _).
+
 Ltac sumbool_contra :=
   match goal with
     | [ H: inl _ = inr _ |- _ ] => inversion H
@@ -160,12 +164,43 @@ Section Bijection.
       match p with | (x, y) => (y, x) end.
 
     Definition SwapConsBij {A B : Set} : Bijection (A * B) (B * A).
-      refine (exist _  (SwapCons, SwapCons) _).
-      split; intros p; destruct p; reflexivity.
+      refine ({{ (SwapCons, SwapCons )}}); split; intros p; destruct p; reflexivity.
     Defined.
-  End BijExamples.
+
+    Definition SwapWithZero n m :=
+      if eq_nat_dec m 0
+      then n
+      else if eq_nat_dec m n
+           then 0
+           else m.
     
+    Lemma SwapWithZero_Swaps : forall n a, (SwapWithZero n) ((SwapWithZero n) a) = a.
+    Proof.
+      intros n n0.
+      unfold SwapWithZero.
+      destruct (eq_nat_dec n0 0); subst; auto.
+      destruct (eq_nat_dec n 0); auto.
+      destruct (eq_nat_dec n n); subst; auto.
+      intuition.
+      destruct (eq_nat_dec n0 n).
+      destruct (eq_nat_dec 0 0); subst; auto.
+      intuition.
+      destruct (eq_nat_dec n0 0); subst; auto.
+      intuition.
+      destruct (eq_nat_dec n0 n); subst.
+      intuition.
+      auto.
+    Qed.
+
+    Definition SwapWithZeroBijection (n: nat) : Bijection (tdenote TNat) (tdenote TNat).
+      simpl.
+      refine ({{(SwapWithZero n, SwapWithZero n)}}).
+      split; apply SwapWithZero_Swaps.
+    Defined.
+
+  End BijExamples.
 End Bijection.
+
 Ltac rewrite_biject_funr :=
   match goal with
     | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
@@ -1628,7 +1663,6 @@ Section Enumerates.
     right; apply odd_SS; assumption.
   Defined.
 
-  Notation "{{ x }}" := (exist _ x _).
   Definition Enumerates_from_dec:
     forall {ty} (e: Enum ty) n,
       { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t }.
