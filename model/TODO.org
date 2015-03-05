@@ -1,4 +1,5 @@
 * Model TODO
-  1. [ ] Split into multiple files
-  2. [ ] Assume axiom K and get rid of `type`
+  1. [X] Split into multiple files
+  2. [X] Assume axiom K and get rid of `type`
   3. [X] Fix run-coq-redex-tests.rkt (need Robby's help here)
+  4. [ ] Use finite maps for Traces instead of (4 -> Set)
