@@ -3,7 +3,7 @@ Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Div2 Coq.Arith.Even.
 Require Import Coq.Lists.ListSet.
 
-Require Import Enum Pairing Sets Trace Typ Util.
+Require Import Enum Pairing Sets Trace Util.
 
 Definition Fair2 {tout} (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
   forall n,
@@ -58,7 +58,7 @@ Section SumFair.
       Trace_lt (E_Sum e1 e2) (double n) ≡ (Trace_lt e1 n) ⊔ (Trace_lt e2 n).
   Proof.
     intros; induction n; [compute; tauto|];
-    rewrite double_S; unfold Trace_lt at 1; fold (@Trace_lt (TSum tyl tyr)); unfold Trace_on;
+    rewrite double_S; unfold Trace_lt at 1; fold (@Trace_lt (tyl + tyr)); unfold Trace_on;
     remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er];
     remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El]; simpl;
     eapply trace_eq_trans; [apply trace_plus_assoc|];
@@ -81,7 +81,7 @@ Section SumFair.
   Qed.
 
   (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
-  Theorem SumFair : Fair2 (@E_Sum).
+  Theorem SumFair : @Fair2 sum (@E_Sum).
   Proof.
     unfold Fair2.
     intros n.
@@ -265,7 +265,7 @@ Section NaiveSum3Unfair.
     replace s1 with (trace_proj one (Trace_lt NS3T n)) by (rewrite <-Heqt; trivial).
     eapply subset_trans.
     apply sub_trace_proj.
-    apply (@Trace_lt_sub (TSum TNat (TSum TNat TNat)) )with (n := double (double p)); nliamega.
+    apply (@Trace_lt_sub (nat + (nat + nat)) )with (n := double (double p)); nliamega.
     apply set_subset_weaken.
     apply NS3Tr_precise.
     
@@ -288,11 +288,12 @@ Section PairFair.
       rewrite set_In_Trace_from_to in Hin by nliamega; destruct Hin as [k [[Hnnk HkSnSn] Hin]];
       unfold Trace_on in Hin;
       destruct (Enumerates_from_dec (E_Pair e1 e2) k) as [[v t] Henum]; simpl in Hin;
-      invert_Enumerates; subst;
+      invert_Enumerates; subst.
       destruct (sub_trace_In_equiv (lt ⊔ rt)
-                                   ((Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n))));
-      apply H; [| assumption];
-      clear H H0;
+                                   ((Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n)))).
+      match goal with
+        | [ H: context[_ -> _ ∈ trace_proj _ ?T ] |- _ ∈ trace_proj _ ?T ] => apply H; [| assumption]
+      end;
       apply sub_trace_plus_cong;
       eapply Trace_lt_Enumerates; [| eassumption | | eassumption];
       destruct (Pairing_bound ln rn k n); auto.
@@ -391,7 +392,7 @@ Section PairFair.
     apply trace_eq_refl.
   Qed.
 
-  Theorem PairFair : Fair2 (@E_Pair).
+  Theorem PairFair : @Fair2 prod (@E_Pair).
     unfold Fair2.
     intros n.
     exists ((S n) * (S n)).
@@ -493,3 +494,4 @@ Section NaiveTripleUnfair.
       repeat (eapply subset_trans; try eassumption); apply subset_refl.
   Qed.
 End NaiveTripleUnfair.
+Print Assumptions SumFair.

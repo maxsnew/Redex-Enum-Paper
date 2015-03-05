@@ -2,7 +2,7 @@ Require Import Coq.Arith.Arith_base  Coq.Arith.Div2.
 Require Import Coq.Lists.ListSet Coq.Lists.List.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 
-Require Import Bijection Pairing Sets Trace Typ Util.
+Require Import Bijection Pairing Sets Trace Util.
 
 (* Notation notes:
 Sets
@@ -19,17 +19,17 @@ Traces
 ≡ \equiv    trace_eq
  *)
 
-Inductive Enum : type -> Set :=
-| E_Nat : Enum TNat
-| E_Pair {tl tr} : Enum tl -> Enum tr -> Enum (TPair tl tr)
-| E_Map {tyin tyout} : Bijection (tdenote tyout) (tdenote tyin) -> Enum tyin -> Enum tyout
-| E_Dep {t1 t2} : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
-| E_Sum {tl tr} : Enum tl -> Enum tr -> Enum (TSum tl tr)
+Inductive Enum : Set -> Type :=
+| E_Nat : Enum nat
+| E_Pair {tl tr} : Enum tl -> Enum tr -> Enum (tl * tr)
+| E_Map {tyin tyout} : Bijection tyout tyin -> Enum tyin -> Enum tyout
+| E_Dep {t1 t2} : Enum t1 -> (t1 -> Enum t2) -> Enum (t1 * t2)
+| E_Sum {tl tr} : Enum tl -> Enum tr -> Enum (tl + tr)
 | E_Trace {t} : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
 .
 Hint Constructors Enum.
 
-Inductive Enumerates : forall {t : type}, Enum t -> nat -> tdenote t -> Trace -> Prop :=
+Inductive Enumerates : forall {T : Set}, Enum T -> nat -> T -> Trace -> Prop :=
 | ES_Nat :
     forall n,
       Enumerates E_Nat n n ε
@@ -40,12 +40,12 @@ Inductive Enumerates : forall {t : type}, Enum t -> nat -> tdenote t -> Trace ->
       Enumerates r rn rx rt ->
       Enumerates (E_Pair l r) n (lx, rx) (lt ⊔ rt)
 | ES_Map :
-    forall {tl tr} (bi : Bijection (tdenote tl) (tdenote tr)) inner inner_x n x t,
+    forall {tl tr} (bi : Bijection tl tr) inner inner_x n x t,
       Bijects bi x inner_x ->
       Enumerates inner n inner_x t ->
       Enumerates (E_Map bi inner) n x t
 | ES_Dep:
-    forall {tl tr} (l: Enum tl) (f: tdenote tl -> Enum tr) n ln rn lx rx lt rt,
+    forall {tl tr} (l: Enum tl) (f: tl -> Enum tr) n ln rn lx rx lt rt,
       Pairing n ln rn ->
       Enumerates l ln lx lt ->
       Enumerates (f lx) rn rx rt ->
@@ -115,7 +115,7 @@ Ltac invert_Enumerates' :=
       end
   end.
 
-Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
+Ltac invert_Enumerates := repeat invert_Enumerates'; repeat destruct_eq.
 
 Ltac odd_neq_event :=
   match goal with
@@ -150,7 +150,7 @@ Proof.
           |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
       end;
   repeat Eff_indHyp;
-  tauto.
+  try tauto.
 Qed.
 
 Ltac Etf_indHyp :=
@@ -170,7 +170,7 @@ Theorem Enumerates_to_fun :
 Proof.
   induction e; intros;
   repeat invert_Enumerates; try sumbool_contra;
-  repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
+  repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
   try match goal with
         | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
           , H1 : Enumerates ?e _ _ _
@@ -212,7 +212,7 @@ Ltac Etd_indHyp :=
 
 (* Map/Trace compatibility lemmas *)
 Lemma Enumerates_to_dec_Map :
-  forall tyin tyout (b: Bijection (tdenote tyin) (tdenote tyout)) e x,
+  forall tyin tyout (b: Bijection tyin tyout) e x,
     (forall x, { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }) ->
     { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Map b e) n x t }.
 Proof.
@@ -230,7 +230,7 @@ Definition Enumerates_to_dec:
 Proof.
   induction e; intros; auto;
   try (eexists (_, _); eauto; fail);
-  tdenote_crush; repeat Etd_indHyp; (eexists (_, _); eauto).
+  inj_crush; repeat Etd_indHyp; (eexists (_, _); eauto).
 Defined.
 
 Definition Enumerates_to_dec_uniq :
@@ -275,10 +275,10 @@ Proof.
 Defined.
 
 Definition Enumerates_from_dec:
-  forall {ty} (e: Enum ty) n,
-    { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t }.
+  forall {ty: Set} (e: Enum ty) n,
+    { xt : ty * Trace | let (x, t) := xt in Enumerates e n x t }.
 Proof.
-  refine (fix F {ty} e n : { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t } :=
+  refine (fix F {ty : Set} e n : { xt : ty * Trace | let (x, t) := xt in Enumerates e n x t } :=
             match e with
               | E_Nat  => {{(n, ε)}}
               | E_Pair _ _ el er =>
@@ -324,12 +324,12 @@ Proof.
                   | {{ xt }} =>
                     {{ (fst xt, trace_one n tg)}}
                 end
-            end); clear F; tdenote_crush; eauto.
+            end); clear F; inj_crush; eauto.
 Defined.
 
 Definition Enumerates_from_dec_uniq :
   forall {ty} (e: Enum ty) n,
-  exists ! (xt : tdenote ty * Trace),
+  exists ! (xt : ty * Trace),
     let (x, t) := xt
     in Enumerates e n x t.
 Proof.
@@ -554,7 +554,7 @@ Theorem trace_lt_Nat n tg
 : z_to_n n ≃ trace_proj tg (Trace_lt (E_Trace tg E_Nat) n).
 Proof.
   induction n as [| n IHn]; [destruct tg; compute; tauto|].
-  unfold Trace_lt. fold (@Trace_lt TNat).
+  unfold Trace_lt. fold (@Trace_lt nat).
   unfold z_to_n. fold z_to_n.
   rewrite trace_proj_plus_distrl.
   rewrite Trace_nat.
@@ -574,7 +574,7 @@ Proof.
   intros Hdiff.
   induction n.
   destruct tg1; auto.
-  unfold Trace_lt; fold (@Trace_lt TNat).
+  unfold Trace_lt; fold (@Trace_lt nat).
   rewrite trace_proj_plus_distrl.
   rewrite trace_off.
   rewrite IHn; compute; auto.
@@ -658,7 +658,7 @@ Theorem trace_lt_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
 Proof.
   induction m; [intros; destruct tg; reflexivity|].
   intros H1 H2.
-  unfold Trace_lt; fold (@Trace_lt (TPair tyl tyr)).
+  unfold Trace_lt; fold (@Trace_lt (tyl * tyr)).
   rewrite trace_proj_plus_distrl.
   apply subset_nil_nil.
   apply subset_union_both.
@@ -682,7 +682,7 @@ Theorem trace_lt_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
   -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = ∅.
 Proof.
   induction m; [intros; compute; destruct tg; trivial|];
-  intros; unfold Trace_lt; (fold (@Trace_lt (TSum tyl tyr))); rewrite trace_proj_plus_distrl;
+  intros; unfold Trace_lt; (fold (@Trace_lt (tyl + tyr))); rewrite trace_proj_plus_distrl;
   rewrite IHm; auto; apply trace_on_Sum_off; auto.
 Qed.
 

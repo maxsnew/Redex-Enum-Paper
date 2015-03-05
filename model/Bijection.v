@@ -76,7 +76,7 @@ intros; rewrite_biject_funr; intuition.
 Qed.
 
 Section BijExamples.
-  Require Import Typ Util.
+  Require Import Util.
   Require Import Coq.Arith.Arith_base.
   Definition SwapCons {A B} (p : A * B) :=
     match p with | (x, y) => (y, x) end.
@@ -110,9 +110,7 @@ Section BijExamples.
     auto.
   Qed.
 
-  Definition SwapWithZeroBijection (n: nat) : Bijection (tdenote TNat) (tdenote TNat).
-    simpl.
-    refine ({{(SwapWithZero n, SwapWithZero n)}}).
-    split; apply SwapWithZero_Swaps.
+  Definition SwapWithZeroBijection (n: nat) : Bijection nat nat.
+    refine ({{(SwapWithZero n, SwapWithZero n)}}); split; apply SwapWithZero_Swaps.
   Defined.
 End BijExamples.

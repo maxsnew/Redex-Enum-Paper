@@ -1,15 +1,17 @@
-Require Import Coq.Logic.Eqdep_dec.
+Require Import Coq.Logic.Eqdep.
 Require Import Omega.
 Require Import Psatz.
 
 Ltac nliamega := try omega; try lia; try nia; fail "omega, lia and nia all failed".
 
 (* Turn hypotheses of shape (existT h1 h2 l = existT h1 h2 r) into l = r if equality on lhs is decidable *)
-Ltac dec_K :=
-  match goal with
-    | [ H : existT ?P ?L ?x = existT ?P ?L ?y |- _ ] => apply inj_pair2_eq_dec in H;
-        [subst |]; auto
-  end.
+
+Ltac inj_crush :=
+  repeat (
+      match goal with
+        | [ x : prod ?t1 ?t2 |- _] => destruct x
+        | [ x : sum ?t1 ?t2 |- _] => destruct x
+      end).
 
 (* Try possible contradictions *)
 Ltac mycontra :=
@@ -35,6 +37,7 @@ Ltac sumbool_contra :=
 
 Ltac destruct_eq :=
   match goal with
+    | [ H : existT ?P ?L ?x = existT ?P ?L ?y |- _ ] => apply inj_pair2 in H; subst
     | [ H: (?x1, ?y1) = (?x2, ?y2) |- _ ] =>
       (assert (x1 = x2) by congruence); (assert (y1 = y2) by congruence); subst; clear H
     | [ H: inl ?x = inl ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
