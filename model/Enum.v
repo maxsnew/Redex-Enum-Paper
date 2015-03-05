@@ -1,10 +1,8 @@
-Require Import Omega.
+Require Import Coq.Arith.Arith_base  Coq.Arith.Div2.
+Require Import Coq.Lists.ListSet Coq.Lists.List.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
-Require Import Coq.Arith.Div2 Coq.Arith.Even.
-Require Import Coq.Lists.ListSet.
-Require Import Coq.Lists.List.
-Require Import Coq.Logic.Eqdep_dec.
-Require Import Psatz.
+
+Require Import Bijection Pairing Sets Trace Typ Util.
 
 (* Notation notes:
 Sets
@@ -21,1715 +19,89 @@ Traces
 ≡ \equiv    trace_eq
  *)
 
-Ltac nliamega := try omega; try lia; try nia; fail "omega, lia and nia all failed".
-
-(* Turn hypotheses of shape (existT h1 h2 l = existT h1 h2 r) into l = r if equality on lhs is decidable *)
-Ltac dec_K :=
-  match goal with
-    | [ H : existT ?P ?L ?x = existT ?P ?L ?y |- _ ] => apply inj_pair2_eq_dec in H;
-        [subst |]; auto
-  end.
-
-(* Try possible contradictions *)
-Ltac mycontra :=
-  match goal with
-    | [ H: context[_ -> False] |- False ] =>
-      eapply H; eauto; fail
-  end.
-
-(* sumbool notation a la cpdt *)
-Notation Yes := (left _).
-Notation No := (right _).
-Notation "l &&& r" := (if l then r else No) (at level 70).
-Notation Refine x := (if x then Yes else No).
-
-(* sumor notation a la cpdt *)
-Notation "{{ x }}" := (exist _ x _).
-
-Ltac sumbool_contra :=
-  match goal with
-    | [ H: inl _ = inr _ |- _ ] => inversion H
-    | [ H: inr _ = inl _ |- _ ] => inversion H
-  end.
-
-Section Value.
-  Inductive type : Set :=
-  | TNat  : type
-  | TPair : type -> type -> type
-  | TSum  : type -> type -> type.
-
-  Fixpoint type_eq_dec (t1 t2 : type) : { t1 = t2 } + { t1 <> t2 }.
-    refine (match t1, t2 with
-              | TNat, TNat => Yes
-              | TPair t1l t1r, TPair t2l t2r =>
-                (type_eq_dec t1l t2l) &&& Refine (type_eq_dec t1r t2r)
-              | TSum t1l t1r, TSum t2l t2r =>
-                (type_eq_dec t1l t2l) &&& Refine (type_eq_dec t1r t2r)
-              | _, _ => right _
-            end
-           ); subst; try discriminate; try congruence; auto.
-  Defined.
-
-  Fixpoint tdenote t : Set :=
-    match t with
-      | TNat => nat
-      | TPair tl tr => tdenote tl * tdenote tr
-      | TSum  tl tr => tdenote tl + tdenote tr
-    end%type.
-End Value.
-Hint Resolve type_eq_dec.
-Ltac tdenote_crush :=
-  repeat (
-      match goal with
-        | [ x : prod ?t1 ?t2 |- _] => destruct x
-        | [ x : sum ?t1 ?t2 |- _] => destruct x
-        | [ H : tdenote ?t |- _ ] =>
-          match t with
-            | TNat      => simpl in H
-            | TPair _ _ => simpl in H
-            | TSum _ _  => simpl in H
-          end
-      end).
-Ltac destruct_eq :=
-  match goal with
-    | [ H: (?x1, ?y1) = (?x2, ?y2) |- _ ] =>
-      (assert (x1 = x2) by congruence); (assert (y1 = y2) by congruence); subst; clear H
-    | [ H: inl ?x = inl ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
-    | [ H: inr ?x = inr ?y |- _ ] => (assert (x = y) by congruence); subst; clear H
-  end.
-
-Section Bijection.
-  Definition Bijection (A:Set) (B:Set) :=
-    { fg : (A->B)*(B->A) |
-      (forall (a:A),
-         (snd fg) ((fst fg) a) = a)
-      /\
-      (forall (b:B),
-         (fst fg) ((snd fg) b) = b) }.
-  Definition biject_to {A} {B} (bi:Bijection A B) (a:A) : B :=
-    (fst (proj1_sig bi)) a.
-  Definition biject_from {A} {B} (bi:Bijection A B) (b:B) : A :=
-    (snd (proj1_sig bi)) b.
-
-  Definition Bijects {A:Set} {B:Set} (bi:Bijection A B) (a:A) (b:B) :=
-    biject_to bi a = b
-    /\ biject_from bi b = a.
-
-  Lemma Bijects_fun_right:
-    forall A B (b:Bijection A B) x y1 y2,
-      Bijects b x y1 ->
-      Bijects b x y2 ->
-      y1 = y2.
-  Proof.
-    intros A B b x y1 y2.
-    intros [B1_l B1_r] [B2_l B2_r].
-    congruence.
-  Qed.
-
-  Lemma Bijects_fun_left:
-    forall A B (b:Bijection A B) x1 x2 y,
-      Bijects b x1 y ->
-      Bijects b x2 y ->
-      x1 = x2.
-  Proof.
-    intros A B b x1 x2 y.
-    intros [B1_l B1_r] [B2_l B2_r].
-    congruence.
-  Qed.
-
-  Definition Bijects_to_dec :
-    forall A B (bi:Bijection A B) a,
-      { b | Bijects bi a b }.
-  Proof.
-    intros. exists (biject_to bi a).
-    unfold Bijects. intuition.
-    unfold biject_from, biject_to.
-    destruct bi as [[f g] [F G]].
-    simpl in *. auto.
-  Defined.
-
-  Definition Bijects_from_dec :
-    forall {A B} (bi:Bijection A B) b,
-      { a | Bijects bi a b }.
-  Proof.
-    intros. exists (biject_from bi b).
-    unfold Bijects. intuition.
-    unfold biject_from, biject_to.
-    destruct bi as [[f g] [F G]].
-    simpl in *. auto.
-  Defined.
-
-  Section BijExamples.
-    Definition SwapCons {A B} (p : A * B) :=
-      match p with | (x, y) => (y, x) end.
-
-    Definition SwapConsBij {A B : Set} : Bijection (A * B) (B * A).
-      refine ({{ (SwapCons, SwapCons )}}); split; intros p; destruct p; reflexivity.
-    Defined.
-
-    Definition SwapWithZero n m :=
-      if eq_nat_dec m 0
-      then n
-      else if eq_nat_dec m n
-           then 0
-           else m.
-    
-    Lemma SwapWithZero_Swaps : forall n a, (SwapWithZero n) ((SwapWithZero n) a) = a.
-    Proof.
-      intros n n0.
-      unfold SwapWithZero.
-      destruct (eq_nat_dec n0 0); subst; auto.
-      destruct (eq_nat_dec n 0); auto.
-      destruct (eq_nat_dec n n); subst; auto.
-      intuition.
-      destruct (eq_nat_dec n0 n).
-      destruct (eq_nat_dec 0 0); subst; auto.
-      intuition.
-      destruct (eq_nat_dec n0 0); subst; auto.
-      intuition.
-      destruct (eq_nat_dec n0 n); subst.
-      intuition.
-      auto.
-    Qed.
-
-    Definition SwapWithZeroBijection (n: nat) : Bijection (tdenote TNat) (tdenote TNat).
-      simpl.
-      refine ({{(SwapWithZero n, SwapWithZero n)}}).
-      split; apply SwapWithZero_Swaps.
-    Defined.
-
-  End BijExamples.
-End Bijection.
-
-Ltac rewrite_biject_funr :=
-  match goal with
-    | [ H1: Bijects ?b ?x _, H2: Bijects ?b ?x _ |- _ ] =>
-      erewrite (Bijects_fun_right _ _ _ _ _ _ H1 H2) in *; clear H1 H2
-  end.
-
-Section Enum.
-  Inductive tag : Set :=
-  | zero  : tag
-  | one   : tag
-  | two   : tag
-  | three : tag.
-
-  Inductive Enum : type -> Set :=
-  | E_Nat : Enum TNat
-  | E_Pair {tl tr} : Enum tl -> Enum tr -> Enum (TPair tl tr)
-  | E_Map {tyin tyout} : Bijection (tdenote tyout) (tdenote tyin) -> Enum tyin -> Enum tyout
-  | E_Dep {t1 t2} : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
-  | E_Sum {tl tr} : Enum tl -> Enum tr -> Enum (TSum tl tr)
-  | E_Trace {t} : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
-  .
-End Enum.
+Inductive Enum : type -> Set :=
+| E_Nat : Enum TNat
+| E_Pair {tl tr} : Enum tl -> Enum tr -> Enum (TPair tl tr)
+| E_Map {tyin tyout} : Bijection (tdenote tyout) (tdenote tyin) -> Enum tyin -> Enum tyout
+| E_Dep {t1 t2} : Enum t1 -> (tdenote t1 -> Enum t2) -> Enum (TPair t1 t2)
+| E_Sum {tl tr} : Enum tl -> Enum tr -> Enum (TSum tl tr)
+| E_Trace {t} : tag -> Enum t -> Enum t (* A no-op wrapper to signal tracing *)
+.
 Hint Constructors Enum.
 
-Section Pairing.
-  Inductive Pairing : nat -> nat -> nat -> Prop :=
-  | P_XBig :
-    forall x y,
-      y <= x ->
-      Pairing (x*x + x + y) x y
-  | P_XSmall :
-    forall x y,
-      x < y ->
-      Pairing (x + y*y) x y.
-  Hint Constructors Pairing.
-
-  Theorem Pairing_lt :
-    forall m n p,
-      Pairing p m n -> (m = 0 /\ n <= 1) \/ (m <= 1 /\ n = 0) \/ (p > m /\ p > n).
-  Proof.
-    intros m n p P.
-    inversion P; subst; nliamega.
-  Qed.
-
-  Theorem Pairing_from_fun :
-    forall l r n1 n2,
-      Pairing n1 l r ->
-      Pairing n2 l r ->
-      n1 = n2.
-  Proof.
-    intros l r n1 n2 P1 P2.
-    inversion P1; inversion P2; subst; nliamega.
-  Qed.
-
-  Lemma Pairing_to_incompat:
-    forall l1 l2 r1 r2,
-      r1 <= l1 ->
-      l2 < r2 ->
-      l2 + r2 * r2 = l1 * l1 + l1 + r1 ->
-      False.
-  Proof.
-    intros; destruct (eq_nat_dec r2 l1); subst; nliamega.
-  Qed.
-
-  Theorem Pairing_to_fun :
-    forall n l1 l2 r1 r2,
-      Pairing n l1 r1 ->
-      Pairing n l2 r2 ->
-      (l1 = l2) /\ (r1 = r2).
-  Proof.
-    intros n l1 l2 r1 r2 P1 P2.
-    inversion P1; inversion P2; clear P1; clear P2; subst.
-
-    replace l1 with l2 in * by nliamega.
-    replace r1 with r2 in * by nliamega.
-    auto.
-
-    cut False. contradiction.
-    eapply (Pairing_to_incompat _ _ _ _ H H3 H4).
-
-    cut False. contradiction.
-    symmetry in H4.
-    eapply (Pairing_to_incompat _ _ _ _ H3 H H4).
-
-    replace r1 with r2 in * by nliamega.
-    replace l1 with l2 in * by nliamega.
-    auto.
-  Qed.
-
-  Theorem Pairing_to_l_fun :
-    forall n l1 l2 r1 r2,
-      Pairing n l1 r1 ->
-      Pairing n l2 r2 ->
-      l1 = l2.
-  Proof.
-    intros n l1 l2 r1 r2 P1 P2.
-    edestruct (Pairing_to_fun _ _ _ _ _ P1 P2). auto.
-  Qed.
-  Theorem Pairing_to_r_fun :
-    forall n l1 l2 r1 r2,
-      Pairing n l1 r1 ->
-      Pairing n l2 r2 ->
-      r1 = r2.
-  Proof.
-    intros n l1 l2 r1 r2 P1 P2.
-    edestruct (Pairing_to_fun _ _ _ _ _ P1 P2). auto.
-  Qed.
-
-  Theorem Pairing_to_dec:
-    forall x y,
-      { n | Pairing n x y }.
-  Proof.
-    intros x y.
-    destruct (le_lt_dec y x) as [BIG | SMALL]; eauto.
-  Defined.
-
-  Definition Pairing_to x y : nat := proj1_sig (Pairing_to_dec x y).
-  Corollary Pairing_to_sound :
-    forall l r,
-      Pairing (Pairing_to l r) l r.
-  Proof.
-    intros l r. unfold Pairing_to.
-    remember (Pairing_to_dec l r) as vn.
-    destruct vn as [n P]. simpl. auto.
-  Qed.
-  Hint Resolve Pairing_to_sound.
-
-  Section Sqrt.
-    Lemma sqrt_lemma z : (z - (sqrt z * sqrt z)) - sqrt z <= sqrt z.
-    Proof.
-      destruct (sqrt_spec z); nliamega.
-    Qed.
-
-    Lemma sqrt_lemma' z :
-      (z - (sqrt z) * (sqrt z) < (sqrt z))
-      -> z = z - (sqrt z * sqrt z) + (sqrt z * sqrt z).
-    Proof.
-      remember (sqrt_spec z); nliamega.
-    Qed.
-
-    Lemma sqrt_lemma'' k n :
-      (n * n <= k < S n * S n) -> k - sqrt k * sqrt k - sqrt k < S n.
-    Proof.
-      intros H; rewrite (Nat.sqrt_unique k n); lia.
-    Qed.
-
-    Lemma sqrt_slower_than_id n :
-      4 <= n ->
-      (S (sqrt (S n))) < n.
-    Proof.
-      intros H4n.
-      remember (n - 4) as k.
-      replace n with (4 + k) by nliamega.
-      clear dependent n.
-      rename k into n.
-      induction n.
-      compute; reflexivity.
-      assert (sqrt (S (4 + S n)) <= (S (S (S n)))); [| nliamega].
-      eapply le_trans; [apply Nat.sqrt_succ_le|].
-      replace (4 + S n) with (S (4 + n)) by nliamega.
-      nliamega.
-    Qed.
-
-    Lemma sqrt_4th_root_spread n :
-      16 <= n ->
-      exists m p,
-        m * m <= n < (p * p) * (p * p) /\ p < m.
-    Proof.
-      intros H.
-      exists (S (S (sqrt (S (sqrt n))))).
-      exists (S (sqrt (S (sqrt n)))).
-      split; [| nliamega].
-      split; [| destruct (sqrt_spec n); destruct (sqrt_spec (S (sqrt n))); nliamega ].
-      destruct (sqrt_spec n).
-      apply le_trans with (m := sqrt n * sqrt n); auto.
-      assert (S (S (sqrt (S (sqrt n)))) <= sqrt n) as Hperf; [|(apply mult_le_compat; apply Hperf)].
-      assert (4 <= sqrt n).
-      replace 4 with (sqrt 16) .
-      apply Nat.sqrt_le_mono; auto.
-      compute; trivial.
-      apply sqrt_slower_than_id; auto.
-    Qed.
-
-    Lemma nat_le_iff : forall m p, (forall q : nat, q <= m -> q <= p) <-> m <= p.
-    Proof.
-      split.
-      intros H. apply (H m); auto.
-      intros H q; nliamega.
-    Qed.
-
-    Lemma nat_lt_iff : forall m p, (forall q : nat, q < m -> q < p) <-> m <= p.
-    Proof.
-      destruct m.
-      intros p; split; [nliamega| intros _ q contra; inversion contra].
-      destruct p.
-      split.
-      intros contra; assert (m < 0) by (apply contra; auto); nliamega.
-      intros contra; inversion contra.
-      split.
-      intros H.
-      assert (m <= p); [| nliamega].
-      apply nat_le_iff.
-      intros q Hqm.
-      assert (q < S p); [| nliamega].
-      apply H; nliamega.
-      intros; nliamega.
-    Qed.
-
-
-  End Sqrt.
-
-  Theorem Pairing_from_dec:
+Inductive Enumerates : forall {t : type}, Enum t -> nat -> tdenote t -> Trace -> Prop :=
+| ES_Nat :
     forall n,
-      { xy | Pairing n (fst xy) (snd xy) }.
-  Proof.
-  (* (z - rootz^2, rootz)          if z - rootz^2 <  rootz
-     (rootz, (z - rootz^2) -rootz) if z - rootz^2 >= rootz
-   *)
-  intros z.
-  remember (sqrt z) as rootz.
-  destruct (le_lt_dec rootz (z - (rootz * rootz))).
-  (* P_XBig, x >= y: x*x + x + y *)
-  exists (rootz, (z - rootz * rootz) - rootz).
-  assert (z = rootz * rootz + rootz + ((z - rootz * rootz) - rootz)) by nliamega.
-  assert (((z - (rootz * rootz)) - rootz) = z - (rootz * rootz + rootz)) by nliamega.
-
-  rewrite H at 1.
-  constructor 1.
-  simpl.
-
-  remember (sqrt_spec z).
-  rewrite Heqrootz in *.
-  apply sqrt_lemma.
-
-  (* P_XSmall: x < y: x + y*y *)
-  exists (z - (rootz * rootz), rootz).
-  subst.
-  rewrite sqrt_lemma' at 1; [| auto].
-  simpl; constructor 2; auto.
-  Defined.
-
-  Definition Pairing_from n : (nat * nat) := proj1_sig (Pairing_from_dec n).
-  Corollary Pairing_from_sound :
-    forall n l r,
-      (l, r) = Pairing_from n ->
-      Pairing n l r.
-  Proof.
-    intros n l r. unfold Pairing_from.
-    remember (Pairing_from_dec n) as vlr.
-    destruct vlr as [[l' r'] P]. simpl in *.
-    intros EQ. congruence.
-  Qed.
-
-  Theorem Pairing_bound l r k n
-  : k < S n * S n 
-    -> Pairing k l r
-    -> l < S n /\ r < S n.
-  Proof.
-    intros H Hp; inversion Hp; subst; nliamega.
-  Qed.
-
-End Pairing.
-(* TODO: find out how to make hints go out of their section *)
-Hint Constructors Pairing.
-Hint Resolve Pairing_to_sound.
-Hint Resolve Pairing_from_sound.
-Ltac rewrite_pairing_to_fun :=
-  match goal with
-    | [ H1 : Pairing ?x ?y1 ?z1, H2 : Pairing ?x ?y2 ?z2 |- _ ] =>
-      destruct (Pairing_to_fun _ _ _ _ _ H1 H2) as [Hl Hr]; rewrite Hl in *; rewrite Hr in *; clear H1 H2 Hl Hr
-  end.
-Ltac rewrite_pairing_from_fun :=
-  match goal with
-    | [ H1: Pairing ?n1 ?l ?r, H2: Pairing ?n2 ?l ?r |- _ ] =>
-      erewrite (Pairing_from_fun _ _ _ _ H1 H2) in *; clear H1 H2
-  end.
-
-Notation set' := (set nat).
-Notation "∅" := (@empty_set nat).
-Notation "p ∪ q" := (@set_union nat eq_nat_dec p q) (at level 50).
-Notation set_add' := (@set_add nat eq_nat_dec).
-Notation "x ∈ s" := (set_In x s) (at level 70).
-
-Section Sets.
-  Fixpoint subset (s1 s2 : set nat) :=
-    match s1 with
-      | nil => True
-      | x :: more =>
-        x ∈ s2 /\ subset more s2
-    end.
-  Hint Unfold subset.
-  Notation "s1 ⊂ s2" := (subset s1 s2) (at level 70, no associativity).
-
-  Theorem subset_nil : forall s, nil ⊂ s.
-  Proof.
-    auto.
-  Qed.
-
-  Theorem subset_nil_nil : forall s, s ⊂ nil -> s = nil.
-  Proof.
-    induction s.
-    auto.
-    intros contra.
-    unfold subset in contra.
-    destruct contra.
-    inversion H.
-  Qed.
-
-  Definition set_eq s1 s2 := s1 ⊂ s2 /\ s2 ⊂ s1.
-  Hint Unfold set_eq.
-  Notation "s1 ≃ s2" := (set_eq s1 s2) (at level 70, no associativity).
-
-  Lemma subset_consr s1 s2 n : s1 ⊂ s2 -> s1 ⊂ (cons n s2).
-  Proof.
-    generalize dependent s2.
-    generalize dependent n.
-    induction s1.
-    constructor.
-
-    intros n s2 H.
-    unfold subset.
-    unfold subset in H.
-    destruct H.
-    fold subset in *.
-
-    split.
-    constructor 2; auto.
-    apply IHs1; auto.
-  Defined.
-
-  Definition subset_dec s1 s2 : { s1 ⊂ s2 } + { ~ (s1 ⊂ s2) }.
-  Proof.
-    generalize dependent s2.
-    induction s1.
-    left; auto.
-
-    intros s2.
-    destruct (In_dec eq_nat_dec a s2).
-
-    destruct (IHs1 s2).
-    left; constructor; auto.
-
-    right.
-    unfold subset; fold subset.
-    intros H; destruct H; contradiction.
-
-    right.
-    intros H; destruct H; contradiction.
-  Defined.
-
-  Definition subset_nn s1 s2 : ~~(s1 ⊂ s2) -> s1 ⊂ s2.
-  Proof.
-    destruct (subset_dec s1 s2); tauto.
-  Qed.
-
-  Definition set_eq_dec s1 s2 : { s1 ≃ s2 } + { ~ (s1 ≃ s2) }.
-  Proof.
-    destruct (subset_dec s1 s2).
-    destruct (subset_dec s2 s1).
-    left; auto.
-    right; intros contra; destruct contra; apply n; auto.
-    right; intros contra; destruct contra; apply n; auto.
-  Qed.
-
-  Theorem subset_refl s : s ⊂ s.
-  Proof.
-    induction s; unfold subset; auto.
-    fold subset.
-    split.
-    constructor 1; auto.
-    apply subset_consr; auto.
-  Qed.
-
-  Theorem set_eq_refl s : s ≃ s.
-  Proof.
-    split; apply subset_refl.
-  Qed.
-
-  Theorem subset_In : forall x s s', x ∈ s -> s ⊂ s' -> x ∈ s'.
-  Proof.
-    intros x s.
-    generalize dependent x.
-    induction s as [| x s].
-    intros y s contra.
-    inversion contra.
-
-    intros y s' Hyinxs Hsub.
-    destruct Hsub as [Hxins' Hsub].
-    destruct Hyinxs; subst; auto.
-  Qed.
-
-  Theorem subset_In_def s s' : (forall x, x ∈ s -> x ∈ s') -> s ⊂ s'.
-  Proof.
-    generalize dependent s'.
-    induction s.
-    intros; apply subset_nil.
-    split.
-    apply H; auto.
-    constructor; auto.
-    apply IHs.
-    intros x Hins.
-    apply H.
-    constructor 2; auto.
-  Qed.
-
-  Theorem In_subset_def s s' : s ⊂ s' -> (forall x, x ∈ s -> x ∈ s').
-  Proof.
-    generalize dependent s'.
-    induction s.
-    intros s' _ x contra.
-    inversion contra.
-
-    intros s' Hsub x Hin.
-    destruct Hin.
-    destruct Hsub; subst.
-    auto.
-
-    apply IHs.
-    destruct Hsub; subst; auto.
-    auto.
-  Qed.
-
-  Hint Resolve subset_In_def In_subset_def.
-  Theorem subset_In_equiv s s' : s ⊂ s' <-> (forall x, x ∈ s -> x ∈ s').
-  Proof.
-    split; eauto.
-  Qed.
-
-  Lemma set_subset_weaken : forall s1 s2, s1 ≃ s2 -> s1 ⊂ s2.
-  Proof.
-    unfold set_eq.
-    tauto.
-  Qed.
-
-  Theorem not_subset_In_def s s' x : x ∈ s -> ~(x ∈ s') -> ~ s ⊂ s'.
-  Proof.
-    intros; eauto.
-  Qed.
-
-  Lemma subset_trans : forall s1 s2 s3, s1 ⊂ s2 -> s2 ⊂ s3 -> s1 ⊂ s3.
-  Proof.
-    intros s1.
-    induction s1 as [| x s1].
-    intros; apply subset_nil.
-    induction s2 as [| y s2].
-    intros s3 contra.
-    inversion contra.
-    inversion H.
-
-    intros s3 Hxy12 Hy23.
-    unfold subset; fold subset.
-    destruct Hxy12 as [Hxy2 H1y2].
-    split.
-
-    eapply subset_In.
-    apply Hxy2.
-    auto.
-    apply IHs1 with (s2 := (y :: s2)); auto.
-  Qed.
-
-
-  Lemma set_eq_trans : forall s1 s2 s3, s1 ≃ s2 -> s2 ≃ s3 -> s1 ≃ s3.
-  Proof.
-    unfold set_eq.
-    intros s1 s2 s3 H1 H2; destruct H1; destruct H2.
-    split; eapply subset_trans; eauto.
-  Qed.
-
-  Lemma set_eq_symm : forall s1 s2, s1 ≃ s2 -> s2 ≃ s1.
-  Proof.
-    intros s1 s2 H; inversion H; split; auto.
-  Qed.
-
-  (* Theorem set_union_or : forall s1 s2, s1 ⊂ (s1 ∪ s2). *)
-
-  Lemma set_add_subset : forall x s1 s2, x ∈ s2 -> s1 ⊂ s2 -> (set_add' x s1) ⊂ s2.
-  Proof.
-
-    intros y s1.
-    induction s1 as [| x s1].
-    simpl; auto.
-    intros s2 Hy2 Hsub.
-    unfold set_add.
-    destruct (eq_nat_dec y x); subst; auto.
-    fold set_add.
-    unfold subset.
-    split; auto.
-    destruct Hsub; auto.
-    fold subset.
-    apply IHs1; auto.
-    destruct Hsub; auto.
-  Qed.
-
-  Lemma subset_cons_swap : forall x y s1 s2, s1 ⊂ s2 -> (x :: y :: s1) ⊂ (y :: x :: s2).
-  Proof.
-    intros x y s1 s2.
-    destruct (eq_nat_dec x y).
-    simpl; subst.
-    split.
-    tauto.
-    split.
-    tauto.
-    apply subset_consr.
-    apply subset_consr.
-    assumption.
-
-    simpl.
-    split.
-    tauto.
-    split.
-    tauto.
-    apply subset_consr. apply subset_consr.
-    assumption.
-  Qed.
-
-  Lemma set_eq_cons_swap : forall x y s1 s2, s1 ≃ s2 -> (x :: y :: s1) ≃ (y :: x :: s2).
-  Proof.
-    split; destruct H; apply subset_cons_swap; auto.
-  Qed.
-
-  Lemma set_cons_cons_subset : forall x s1 s2, s1 ⊂ s2 -> (x :: s1) ⊂ (x :: s2).
-  Proof.
-    intros x s1 s2 Hsub.
-    unfold subset. fold subset.
-    split.
-    constructor; auto.
-    apply subset_consr; auto.
-  Qed.
-
-  Lemma set_eq_cons_cons x s1 s2 : s1 ≃ s2 -> (x :: s1) ≃ (x :: s2).
-  Proof.
-    intros H.
-    destruct H.
-    split; apply set_cons_cons_subset; auto.
-  Qed.
-
-  Lemma set_add_cons_eq : forall x s, (x :: s) ≃ (set_add' x s).
-  Proof.
-    split.
-    generalize dependent x.
-    induction s as [| y s].
-    compute; tauto.
-    intros x.
-    simpl.
-    destruct (eq_nat_dec x y); subst.
-    split.
-    constructor; auto.
-    split.
-    constructor; auto.
-    apply subset_consr.
-    apply subset_refl.
-
-    split.
-    destruct (IHs x).
-    apply in_cons. apply H.
-    split.
-    constructor; auto.
-    apply subset_trans with (s2:= (x :: s)).
-    apply subset_consr; auto.
-
-    apply subset_trans with (s2 := (set_add' x s)).
-    apply IHs.
-    apply subset_consr.
-    apply subset_refl.
-
-    generalize dependent x.
-    induction s as [| y s].
-    compute; tauto.
-    intros x.
-    simpl.
-    destruct (eq_nat_dec x y).
-    apply subset_consr.
-    apply subset_refl.
-    apply subset_trans with (y :: x :: s).
-    apply set_cons_cons_subset.
-    apply IHs.
-    apply subset_cons_swap.
-    apply subset_refl.
-  Qed.
-
-  Lemma set_add_cons_subset : forall x s1 s2, s1 ⊂ s2 -> (x :: s1) ⊂ (set_add' x s2).
-  Proof.
-    intros x s1 s2 Hsub.
-    apply subset_trans with (s2 := (x :: s2)).
-    apply set_cons_cons_subset; auto.
-    apply set_subset_weaken.
-    apply set_add_cons_eq.
-  Qed.
-
-  Lemma set_union_unitl : forall s, (∅ ∪ s) ≃ s.
-  Proof.
-    split.
-    induction s.
-    apply subset_refl.
-
-    unfold set_union in *.
-    replace (((fix set_union (x y : set nat) {struct y} :
-                 set nat :=
-                 match y with
-                   | nil => x
-                   | a1 :: y1 => set_add eq_nat_dec a1 (set_union x y1)
-                 end) ∅ s
-            )) with (∅ ∪ s) in * by auto.
-    apply set_add_subset; auto.
-    constructor; auto.
-    apply subset_consr; auto.
-
-    induction s; auto.
-    unfold set_union.
-    apply set_add_cons_subset; auto.
-  Qed.
-
-  Lemma set_union_unitr : forall s, (s ∪ ∅) ≃ s.
-  Proof.
-    apply set_eq_refl.
-  Qed.
-
-  Lemma elem_union :
-    forall s x,
-      x ∈ s -> forall s', x ∈ (s' ∪ s).
-  Proof.
-    induction s.
-    intros H contra.
-    inversion contra.
-
-    intros x Hin s'.
-    simpl.
-    assert (x ∈ (a :: (s' ∪ s))).
-    destruct Hin.
-    constructor; auto.
-    eapply In_subset_def.
-    apply subset_consr.
-    apply subset_refl.
-    apply IHs; auto.
-    eapply In_subset_def.
-    apply set_add_cons_subset.
-    apply subset_refl.
-    auto.
-  Qed.
-
-  Lemma subset_union_cons : forall x s1 s2, ((x::s1) ∪ s2) ⊂ (x :: (s1 ∪ s2)).
-    induction s2.
-    simpl; split.
-    tauto.
-    apply subset_consr; apply subset_refl.
-    simpl.
-    eapply subset_trans.
-    apply set_add_cons_eq.
-    apply subset_trans with (s2 := (x :: a :: (s1 ∪ s2))).
-    eapply subset_trans.
-    apply set_cons_cons_subset.
-    apply IHs2.
-    apply subset_cons_swap.
-    apply subset_refl.
-    apply set_cons_cons_subset.
-    apply set_add_cons_eq.
-  Qed.
-
-  Theorem subset_union_comm : forall s1 s2, (s1 ∪ s2) ⊂ (s2 ∪ s1).
-  Proof.
-    induction s1.
-    intros.
-    apply subset_trans with (s2 := s2).
-    apply set_union_unitl.
-    apply set_union_unitr.
-
-    intros s2.
-    simpl.
-    eapply subset_trans.
-    apply subset_union_cons.
-    apply set_add_cons_subset.
-    apply IHs1.
-  Qed.
-
-  Theorem set_eq_union_comm : forall s1 s2, (s1 ∪ s2) ≃ (s2 ∪ s1).
-  Proof.
-    intros s1 s2.
-    split; apply subset_union_comm.
-  Qed.
-
-  Lemma subset_union_transr :
-    forall s sl sr,
-      s ⊂ sr ->
-      s ⊂ (sl ∪ sr).
-  Proof.
-    intros.
-    apply subset_In_def.
-    intros x Hin.
-    apply elem_union.
-    eapply In_subset_def.
-    apply H.
-    auto.
-  Qed.
-
-  Lemma subset_union_transl :
-    forall s sl sr,
-      s ⊂ sl ->
-      s ⊂ (sl ∪ sr).
-  Proof.
-    intros.
-    eapply subset_trans; [| apply subset_union_comm ].
-    apply subset_union_transr; auto.
-  Qed.
-
-
-  Lemma set_union_subset_cong :
-    forall sl sr sl' sr',
-      sl ⊂ sl' -> sr ⊂ sr' -> (sl ∪ sr) ⊂ (sl' ∪ sr').
-  Proof.
-    induction sr.
-    intros.
-    apply subset_trans with (s2 := sl).
-    apply set_union_unitr.
-    apply subset_union_transl; auto.
-
-    intros sl' sr' Hsubl Hsubr.
-    simpl.
-    apply subset_trans with (s2 := (a :: sl ∪ sr)).
-    apply set_subset_weaken.
-    apply set_eq_symm.
-    apply set_add_cons_eq.
-    simpl.
-    split.
-    apply elem_union.
-    destruct Hsubr; auto.
-    apply IHsr; auto.
-    eapply subset_trans.
-    eapply subset_consr.
-    apply subset_refl.
-    apply Hsubr.
-  Qed.
-
-  Lemma set_union_cong : forall sl sr sl' sr',
-                           sl ≃ sl' -> sr ≃ sr' -> (sl ∪ sr) ≃ (sl' ∪ sr').
-  Proof.
-    intros sl sr sl' sr' Hl Hr.
-    destruct Hl as [Hl Hl'].
-    destruct Hr as [Hr Hr'].
-    split; apply set_union_subset_cong; auto.
-  Qed.
-
-
-  Lemma set_subset_add : forall x s1 s2, s1 ⊂ s2 -> s1 ⊂ (set_add' x s2).
-  Proof.
-    intros x s1 s2 Hsub.
-    eapply subset_trans; [| apply set_add_cons_subset; apply subset_refl ].
-    apply subset_consr; auto.
-  Qed.
-
-  Theorem set_eq_app_cons_comm s1 s2 a : (a :: (s1 ++ s2)) ≃ (s1 ++ a :: s2).
-  Proof.
-    induction s1.
-    apply set_eq_refl.
-    rewrite <-app_comm_cons.
-    eapply set_eq_trans.
-    apply set_eq_cons_swap.
-    apply set_eq_refl.
-    replace ((a0 :: s1) ++ a :: s2) with (a0 :: (s1 ++ a :: s2)) by apply app_comm_cons.
-    apply set_eq_cons_cons; auto.
-  Qed.
-
-  Theorem set_union_app_eq : forall s1 s2, (s1 ∪ s2) ≃ (s1 ++ s2).
-  Proof.
-    induction s2.
-    simpl.
-    rewrite app_nil_r.
-    apply set_eq_refl.
-
-    simpl.
-    eapply set_eq_trans.
-    apply set_eq_symm.
-    apply set_add_cons_eq.
-    eapply set_eq_trans; [|   apply set_eq_app_cons_comm].
-    apply set_eq_cons_cons; auto.
-  Qed.
-
-  Theorem set_union_app_eq_gen : forall s1 s2 s3 s4,
-                                   s1 ≃ s3 ->
-                                   s2 ≃ s4 ->
-                                   (s1 ∪ s2) ≃ (s3 ++ s4).
-  Proof.
-    intros s1 s2 s3 s4 H13 H24.
-    eapply set_eq_trans; [| apply set_union_app_eq].
-    apply set_union_cong; auto.
-  Qed.
-
-
-  Theorem subset_union_both s sl sr
-  : sl ⊂ s -> sr ⊂ s -> (sl ∪ sr) ⊂ s.
-  Proof.
-    intros Hls Hrs.
-    apply subset_In_def.
-    intros x Hin.
-    destruct (set_union_elim eq_nat_dec x sl sr).
-    apply Hin.
-    apply In_subset_def with sl; auto.
-    apply In_subset_def with sr; auto.
-  Qed.
-
-  Theorem subset_union_eq : forall s1 s2, s1 ⊂ s2 -> (s1 ∪ s2) ≃ s2.
-  Proof.
-    split; [| apply subset_union_transr; apply subset_refl ].
-    generalize dependent s2.
-    induction s1 as [| x s1].
-    intros s1 Hsubnil.
-    apply subset_trans with (s2 := s1).
-    apply set_union_unitl; apply subset_refl.
-    apply subset_refl.
-
-    intros s2 Hsub.
-    apply subset_trans with (s2 := x :: (s1 ∪ s2)).
-    apply subset_trans with (s2 := (x :: s1 ++ s2)).
-    apply set_union_app_eq.
-    apply set_subset_weaken.
-    apply set_eq_cons_cons.
-    apply set_eq_symm.
-    apply set_union_app_eq.
-
-    simpl.
-    unfold subset in Hsub; fold subset in Hsub.
-    destruct Hsub.
-    split; auto.
-  Qed.
-
-  Theorem set_union_assoc s1 s2 s3
-  : ((s1 ∪ s2) ∪ s3) ≃ (s1 ∪ (s2 ∪ s3)).
-  Proof.
-    apply set_eq_trans with (s2 := ((s1 ++ s2) ++ s3)).
-    apply set_union_app_eq_gen.
-    apply set_union_app_eq.
-    apply set_eq_refl.
-    rewrite <-app_assoc.
-    apply set_eq_symm.
-    apply set_union_app_eq_gen.
-    apply set_eq_refl.
-    apply set_union_app_eq.
-  Qed.
-
-  Example set_eq_test : ((set_add' 1 (set_add' 0 ∅)) ≃ (set_add' 0 (set_add' 1 ∅))).
-  Proof.
-    compute.
-    tauto.
-  Qed.
-
-  Lemma subset_app : forall s1 s2 s3, s1 ⊂ s2 -> s1 ⊂ (s2 ++ s3).
-  Proof.
-    induction s1; auto.
-    induction s2.
-
-    intros s3 H.
-    inversion H.
-    inversion H0.
-
-    intros s3.
-    simpl.
-    rewrite app_comm_cons.
-    intros H.
-    destruct H.
-    destruct H.
-    subst.
-    split.
-    left; auto.
-    apply IHs1; auto.
-
-    split.
-    right.
-    unfold set_In.
-    apply in_or_app.
-    left; auto.
-
-    apply IHs1; auto.
-  Qed.
-  Lemma subset_rev : forall s, s ⊂ (rev s).
-  Proof.
-    induction s; auto.
-    constructor.
-    rewrite <-in_rev.
-    constructor; auto.
-    replace (a :: s) with ((a :: nil) ++ s).
-    rewrite rev_app_distr.
-    apply subset_app; auto.
-
-    auto.
-  Qed.
-
-  Lemma set_eq_rev : forall s, s ≃ (rev s).
-  Proof.
-    split; try apply subset_rev.
-    rewrite <-rev_involutive.
-    apply subset_rev.
-  Qed.
-  
-  Fixpoint z_to_n n : set nat :=
-    match n with
-      | 0 => ∅
-      | S n' => set_add' n' (z_to_n n')
-    end.
-
-  Definition n_to_z n : set nat := rev (z_to_n n).
-
-  Theorem z_to_n_correct n x
-  : x ∈ (z_to_n n) <-> x < n.
-  Proof.
-    generalize dependent x.
-    induction n.
-
-    intros x; compute; split; [apply False_ind | intros contra; inversion contra].
-    intros x.
-    destruct (eq_nat_dec x n).
-    simpl.
-    subst.
-    split; [nliamega|].
-    intros _.
-    apply set_add_intro2; auto.
-
-    split.
-    simpl.
-    intros H.
-    assert (x ∈ (z_to_n n)).
-    apply set_add_elim2 with (b := n) (Aeq_dec := eq_nat_dec); auto.
-    assert (x < n).
-    apply IHn.
-    auto.
-    nliamega.
-
-    intros H.
-    simpl.
-    apply set_add_intro1.
-    apply IHn.
-    nliamega.
-  Qed.
-
-  Lemma z_to_n_nosubS m : ~ (z_to_n (S m)) ⊂ (z_to_n m).
-  Proof.
-    intros H.
-    assert (m ∈ (z_to_n m)).
-    eapply In_subset_def; eauto.
-    apply z_to_n_correct; nliamega.
-    rewrite z_to_n_correct in H0.
-    nliamega.
-  Qed.
-
-  Lemma z_to_n_nosub' m n : ~ (z_to_n (S (m + n))) ⊂ (z_to_n m).
-  Proof.
-    induction n.
-    replace (m + 0) with m by nliamega.
-    apply z_to_n_nosubS.
-    unfold z_to_n; fold z_to_n.
-    replace (m + S n) with (S (m + n)) by nliamega.
-    intros H.
-    apply IHn.
-    apply subset_In_def.
-    intros x.
-    rewrite z_to_n_correct.
-    intros Hlt.
-    assert (x ∈ (set_add' (S (m + n)) (z_to_n (S (m + n))))).
-    replace (set_add' (S (m + n)) (z_to_n (S (m + n)))) with (z_to_n (S (S (m + n)))).
-    apply z_to_n_correct; nliamega.
-    trivial.
-    eapply In_subset_def.
-    apply H.
-    auto.
-  Qed.
-
-  Lemma z_to_n_nosub m n : m < n -> ~ (z_to_n n) ⊂ (z_to_n m).
-  Proof.
-    intros H1 H2.
-    destruct n; [nliamega|].
-    assert (n < m); [| nliamega].
-    apply z_to_n_correct.
-    eapply In_subset_def.
-    eapply subset_trans; eauto.
-    unfold set_In.
-    rewrite !z_to_n_correct; auto.
-  Qed.
-
-End Sets.
-Notation "s1 ⊂ s2" := (subset s1 s2) (at level 70, no associativity).
-Notation "s1 ≃ s2" := (set_eq s1 s2) (at level 70, no associativity).
-Hint Resolve set_eq_refl.
-Hint Resolve subset_refl.
-
-Ltac split4 := split; [| split; [| split]].
-Ltac destruct4 H := destruct H as [? [? [? ?]]].
-Section Traces.
-  Inductive Trace :=
-  | Tracing : set' -> set' -> set' -> set' -> Trace.
-
-  Definition trace_proj tg t :=
-    match t with
-      | Tracing t0 t1 t2 t3 =>
-        match tg with
-          | zero  => t0
-          | one   => t1
-          | two   => t2
-          | three => t3
-        end
-    end.
-
-  Definition trace_zero : Trace := Tracing ∅ ∅ ∅ ∅.
-  Notation ε := trace_zero.
-  Definition trace_plus (t1 t2 : Trace) : Trace :=
-    match (t1, t2) with
-      | (Tracing l1 l2 l3 l4, Tracing r1 r2 r3 r4) =>
-        Tracing (l1 ∪ r1) (l2 ∪ r2) (l3 ∪ r3) (l4 ∪ r4)
-    end.
-  Notation "x ⊔ y" := (trace_plus x y) (at level 50).
-
-  Definition trace_one n t : Trace :=
-    match t with
-      | zero  => Tracing (set_add' n ∅) ∅ ∅ ∅
-      | one   => Tracing ∅ (set_add' n ∅) ∅ ∅
-      | two   => Tracing ∅ ∅ (set_add' n ∅) ∅
-      | three => Tracing ∅ ∅ ∅ (set_add' n ∅)
-    end.
-
-  Definition trace_eq (t1 t2 : Trace) : Prop :=
-    match (t1, t2) with
-      | (Tracing l0 l1 l2 l3, Tracing r0 r1 r2 r3) =>
-        l0 ≃ r0 /\ l1 ≃ r1 /\ l2 ≃ r2 /\ l3 ≃ r3
-    end.
-  Notation "t1 ≡ t2" := (trace_eq t1 t2) (at level 70, no associativity).
-
-  Definition sub_trace (t1 t2 : Trace) : Prop :=
-    match (t1, t2) with
-      | (Tracing l0 l1 l2 l3, Tracing r0 r1 r2 r3) =>
-        l0 ⊂ r0 /\ l1 ⊂ r1 /\ l2 ⊂ r2 /\ l3 ⊂ r3
-    end.
-  Notation "t1 ⊏ t2" := (sub_trace t1 t2) (at level 70, no associativity).
-
-  Theorem sub_trace_refl t : t ⊏ t.
-  Proof.
-    unfold sub_trace; destruct t; split4; apply subset_refl.
-  Qed.
-
-  Theorem sub_trace_trans t1 t2 t3 : t1 ⊏ t2 -> t2 ⊏ t3 -> t1 ⊏ t3.
-  Proof.
-    unfold sub_trace; destruct t1, t2, t3.
-    intros H1 H2; destruct4 H1; destruct4 H2.
-    split4; eapply subset_trans; eauto.
-  Qed.
-
-  Theorem sub_trace_zero t : ε ⊏ t.
-  Proof. destruct t; compute; tauto. Qed.
-
-  Theorem trace_eq_proj t1 t2 tg : t1 ≡ t2 -> (trace_proj tg t1) ≃ (trace_proj tg t2).
-  Proof.
-    unfold trace_eq, trace_proj; destruct t1; destruct t2; destruct tg; intuition.
-  Qed.
-
-  Theorem sub_trace_proj t1 t2 tg : t1 ⊏ t2 -> (trace_proj tg t1) ⊂ (trace_proj tg t2).
-  Proof.
-    unfold sub_trace; destruct t1; destruct t2; destruct tg; intuition.
-  Qed.
-
-  Definition trace_eq' t1 t2 : Prop :=
-    t1 ⊏ t2 /\ t2 ⊏ t1.
-  Theorem trace_eq'_weakenl t1 t2 : trace_eq' t1 t2 -> t1 ⊏ t2.
-  Proof. unfold trace_eq'; intuition. Qed.
-  Theorem trace_eq'_weakenr t1 t2 : trace_eq' t1 t2 -> t2 ⊏ t1.
-  Proof. unfold trace_eq'; intuition. Qed.
-  Theorem trace_eq_eq'_equiv t1 t2 : t1 ≡ t2 <-> trace_eq' t1 t2.
-  Proof.
-    unfold trace_eq, trace_eq', sub_trace, set_eq;
-    destruct t1; destruct t2; intuition.
-  Qed.
-
-  Theorem trace_eq_weakenl t1 t2 : t1 ≡ t2 -> t1 ⊏ t2.
-  Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenl. Qed.
-
-  Theorem trace_eq_weakenr t1 t2 : t1 ≡ t2 -> t2 ⊏ t1.
-  Proof. rewrite trace_eq_eq'_equiv; apply trace_eq'_weakenr. Qed.
-
-  Theorem trace_plus_cong t1 t2 t3 t4 : t1 ≡ t3 -> t2 ≡ t4 -> (t1 ⊔ t2) ≡ (t3 ⊔ t4).
-    unfold trace_eq.
-    destruct t1; destruct t2; destruct t3; destruct t4.
-    unfold trace_plus.
-    intros H; destruct4 H.
-    intros H'; destruct4 H'.
-    split4; apply set_union_cong; auto.
-  Qed.
-
-  Theorem trace_eq_refl t : t ≡ t.
-  Proof.
-    unfold trace_eq; destruct t; split4; apply set_eq_refl.
-  Qed.
-
-
-  Theorem trace_eq_symm t1 t2 : t1 ≡ t2 -> t2 ≡ t1.
-  Proof.
-    unfold trace_eq.
-    destruct t1; destruct t2.
-    intros H; destruct4 H.
-    split4; apply set_eq_symm; auto.
-  Qed.
-
-  Theorem trace_eq_trans t1 t2 t3 : t1 ≡ t2 -> t2 ≡ t3 -> t1 ≡ t3.
-  Proof.
-    unfold trace_eq.
-    destruct t1; destruct t2; destruct t3.
-    intros H; destruct4 H.
-    intros H'; destruct4 H'.
-    split4; eapply set_eq_trans; eauto.
-  Qed.
-
-  Theorem trace_plus_comm t1 t2 : (t1 ⊔ t2) ≡ (t2 ⊔ t1).
-  Proof.
-    destruct t1, t2.
-    unfold trace_plus.
-    split4; apply set_eq_union_comm.
-  Qed.
-
-  Theorem trace_plus_assoc t1 t2 t3 : (t1 ⊔ (t2 ⊔ t3)) ≡ ((t1 ⊔ t2) ⊔ t3).
-  Proof.
-    destruct t1, t2, t3.
-    unfold trace_plus.
-    split4; apply set_eq_symm; apply set_union_assoc.
-  Qed.
-
-  Theorem sub_trace_plus_transl t tl tr
-  : t ⊏ tl -> t ⊏ (tl ⊔ tr).
-  Proof.
-    intros H; destruct t; destruct tl; destruct tr;
-    destruct4 H; split4; apply subset_union_transl; auto.
-  Qed.
-
-  Theorem sub_trace_plus_transr t tl tr
-  : t ⊏ tr -> t ⊏ (tl ⊔ tr).
-  Proof.
-    intros H.
-    eapply sub_trace_trans.
-    Focus 2.
-    apply trace_eq_weakenl.
-    apply trace_plus_comm.
-    apply sub_trace_plus_transl; auto.
-  Qed.
-
-  Theorem sub_trace_plus_eq : forall t1 t2, t1 ⊏ t2 -> (t1 ⊔ t2) ≡ t2.
-  Proof.
-    intros t1 t2 H; destruct t1; destruct t2;
-      destruct4 H; split4; apply subset_union_eq; auto.
-  Qed.
-
-  Theorem trace_plus_unitl t : (ε ⊔ t) ≡ t.
-  Proof.
-    destruct t; split4; apply set_union_unitl.
-  Qed.
-
-  Theorem trace_plus_unitl_gen t1 t2 : t1 ≡ t2 -> (ε ⊔ t1) ≡ t2.
-  Proof.
-    intros H.
-    eapply trace_eq_trans; [ apply trace_plus_unitl | auto].
-  Qed.
-
-
-  Theorem trace_plus_unitr t :
-    (t ⊔ ε) ≡ t.
-  Proof.
-    eapply trace_eq_trans;
-    [apply trace_plus_comm| apply trace_plus_unitl].
-  Qed.
-
-
-  Theorem trace_plus_unitr_gen t1 t2 : t1 ≡ t2 -> (t1 ⊔ ε) ≡ t2.
-  Proof.
-    intros H.
-    eapply trace_eq_trans; [ apply trace_plus_unitr | auto].
-  Qed.
-
-  Theorem sub_trace_plus_cong tl1 tr1 tl2 tr2 : 
-  tl1 ⊏ tl2
-  -> tr1 ⊏ tr2
-  -> (tl1 ⊔ tr1) ⊏ (tl2 ⊔ tr2).
-  Proof.
-    unfold sub_trace, trace_plus.
-    destruct tl1; destruct tl2; destruct tr1; destruct tr2.
-    intros Hl; destruct4 Hl.
-    intros Hr; destruct4 Hr.
-    split4; apply set_union_subset_cong; auto.
-  Qed.
-
-  Theorem trace_proj_reconstruct t 
-  : t = Tracing (trace_proj zero t) (trace_proj one t) (trace_proj two t) (trace_proj three t).
-  Proof.
-    destruct t; reflexivity.
-  Qed.
-
-  Theorem sub_trace_In_equiv t1 t2
-  : t1 ⊏ t2 
-    <-> 
-    (forall x tg, x ∈ (trace_proj tg t1) -> x ∈ (trace_proj tg t2)).
-  Proof.
-    destruct t1; destruct t2; split.
-    intros Hst x tg Hin; destruct4 Hst; destruct tg; eapply subset_In; eassumption.
-    intros H; rewrite trace_proj_reconstruct; rewrite trace_proj_reconstruct at 1;
-    split4; apply subset_In_def; intros; apply H; assumption.
-  Qed.
-
-  Theorem sub_trace_In_util t1 t2 x tg
-  : t1 ⊏ t2 
-    -> x ∈ (trace_proj tg t1)
-    -> x ∈ (trace_proj tg t2).
-  Proof.
-    intros Hsub.
-    generalize x tg.
-    generalize Hsub.
-    apply sub_trace_In_equiv.
-  Qed.
-
-End Traces.
-Notation ε := trace_zero.
-Notation "x ⊔ y" := (trace_plus x y) (at level 50).
-Notation "t1 ≡ t2" := (trace_eq t1 t2) (at level 70, no associativity).
-Notation "t1 ⊏ t2" := (sub_trace t1 t2) (at level 70, no associativity).
-Hint Resolve trace_eq_refl.
-Hint Resolve sub_trace_refl.
-
-Section Enumerates.
-  Inductive Enumerates : forall {t : type}, Enum t -> nat -> tdenote t -> Trace -> Prop :=
-  | ES_Nat :
-      forall n,
-        Enumerates E_Nat n n ε
-  | ES_Pair :
-      forall {tl tr} (l: Enum tl) (r: Enum tr) n ln rn lx rx lt rt,
-        Pairing n ln rn ->
-        Enumerates l ln lx lt ->
-        Enumerates r rn rx rt ->
-        Enumerates (E_Pair l r) n (lx, rx) (lt ⊔ rt)
-  | ES_Map :
-      forall {tl tr} (bi : Bijection (tdenote tl) (tdenote tr)) inner inner_x n x t,
-        Bijects bi x inner_x ->
-        Enumerates inner n inner_x t ->
-        Enumerates (E_Map bi inner) n x t
-  | ES_Dep:
-      forall {tl tr} (l: Enum tl) (f: tdenote tl -> Enum tr) n ln rn lx rx lt rt,
-        Pairing n ln rn ->
-        Enumerates l ln lx lt ->
-        Enumerates (f lx) rn rx rt ->
-        Enumerates (E_Dep l f) n (lx, rx) (lt ⊔ rt)
-  | ES_Sum_Left:
-      forall {tl tr} (l: Enum tl) (r: Enum tr) n ln lx t,
-        n = 2 * ln ->
-        Enumerates l ln lx t ->
-        Enumerates (E_Sum l r) n (inl lx) t
-  | ES_Sum_Right:
-      forall {tl tr} (l: Enum tl) (r: Enum tr) n rn rx t,
-        n = 2 * rn + 1 ->
-        Enumerates r rn rx t ->
-        Enumerates (E_Sum l r) n (inr rx) t
-  (* E_Trace hides traces below it. This makes traces super easily spoofable, but makes it easier to reason about when they're not spoofed *)
-  | ES_Trace :
-      forall {ty} n tg (e: Enum ty) v _t,
-        Enumerates e n v _t ->
-        Enumerates (E_Trace tg e) n v (trace_one n tg).
-  Hint Constructors Enumerates.
-
-  Lemma even_fun:
-    forall x y,
-      2 * x = 2 * y ->
-      x = y.
-  Proof.
-    induction x as [|x]; intros; nliamega.
-  Qed.
-
-  Lemma odd_neq_even:
-    forall x y,
-      2 * x = 2 * y + 1 ->
-      False.
-  Proof.
-    induction x as [|x]; intros; nliamega.
-  Qed.
-
-  Lemma odd_fun:
-    forall x y,
-      2 * x + 1 = 2 * y + 1 ->
-      x = y.
-  Proof.
-    induction x as [|x]; intros; nliamega.
-  Qed.
-
-  Ltac even_odd_crush :=
-    match goal with
-      | [ H: 2 * _ = 2 * _ |- _ ] => apply even_fun in H
-      | [ H: 2 * _ + 1 = 2 * _ + 1 |- _ ] => apply odd_fun in H
-      | [ H: 2 * _     = 2 * _ + 1 |- _] => apply odd_neq_even in H; contradiction
-      | [ H: 2 * _ + 1 = 2 * _     |- _] => symmetry in H; apply odd_neq_even in H; contradiction
-    end.
-  
-  (* if there's a hypothesis of the shape Enumerates ..., inversion; subst; clear it *)
-  Ltac invert_Enumerates' :=
-    match goal with
-      | [ H : Enumerates ?E _ _ _ |- _ ] =>
-        match E with
-          | E_Nat          => inversion H; subst; clear H
-          | E_Pair _ _ => inversion H; subst; clear H
-          | E_Map _ _  => inversion H; subst; clear H
-          | E_Dep _ _  => inversion H; subst; clear H
-          | E_Sum _ _  => inversion H; subst; clear H
-          | E_Trace _ _  => inversion H; subst; clear H
-        end
-    end.
-
-  Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
-
-
-  Ltac odd_neq_event :=
-    match goal with
-      | [ H : 2 * ?x = 2 * ?y + 1 |- _ ] => apply odd_neq_even in H; contradiction
-      | [ H : 2 * ?y + 1 = 2 * ?x |- _ ] => symmetry in H; apply odd_neq_even in H; contradiction
-    end.
-
-  Ltac Eff_indHyp :=
-    match goal with
-      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
-        , H1 : Enumerates ?e _ _ _
-        , H2 : Enumerates ?e _ _ _
-      |- _ ] => destruct (IH _ _ _ _ _ H1 H2); clear IH H1 H2; subst
-    end.
-
-  Theorem Enumerates_from_fun :
-    forall {ty} (e: Enum ty) n x1 x2 t1 t2,
-      Enumerates e n x1 t1 ->
-      Enumerates e n x2 t2 ->
-      x1 = x2 /\ t1 = t2.
-  Proof.
-    induction e; intros; invert_Enumerates;
-    repeat rewrite_pairing_to_fun;
-    repeat Eff_indHyp;
-    try (even_odd_crush; subst);
-    try match goal with
-      | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
-        erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
-      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ /\ _]
-        , H1 : Enumerates ?e _ _ _
-        , H2 : Enumerates ?e _ _ _
-          |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
-        end;
-    repeat Eff_indHyp;
-    tauto.
-  Qed.
-
-  Ltac Etf_indHyp :=
-    match goal with
-      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
-        , H1 : Enumerates ?e _ _ _
-        , H2 : Enumerates ?e _ _ _
-      |- _ ] =>
-        erewrite (IH _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
-    end.
-
-  Theorem Enumerates_to_fun :
-    forall {ty} (e: Enum ty) x n1 n2 t1 t2,
-      Enumerates e n1 x t1 ->
-      Enumerates e n2 x t2 ->
-      n1 = n2.
-  Proof.
-    induction e; intros;
-    repeat invert_Enumerates; try sumbool_contra;
-    repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
-    try match goal with
-      | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
-        , H1 : Enumerates ?e _ _ _
-        , H2 : Enumerates ?e _ _ _
-      |- _ ] =>
-        erewrite (IH _ _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
-    end;
-    repeat Etf_indHyp;
-    repeat rewrite_pairing_from_fun;
-    tauto.
-  Qed.
-
-  Theorem Enumerates_to_fun'
-  : forall {ty} (e: Enum ty) x n1 n2 t1 t2,
-      Enumerates e n1 x t1 ->
-      Enumerates e n2 x t2 ->
-      n1 = n2 /\ t1 = t2.
-  Proof.
-    intros; assert (n1 = n2 /\ ((n1 = n2) -> t1 = t2)); [split| tauto];
-    [ eapply Enumerates_to_fun; eauto |];
-    intros; subst;
-    match goal with
-      | [H1: Enumerates ?e _ ?x _, H2: Enumerates ?e _ ?x _ |- _ ] =>
-        destruct (Enumerates_from_fun _ _ _ _ _ _ H H0); subst
-    end; trivial.
-  Qed.
-
-  Ltac Etd_indHyp :=
-    match goal with
-      | [ H : forall (x0 : ?t), { _ : (prod _ _) | _ }
-        , x : ?t
-        |- _ ] => destruct (H x) as [[? ?] ?]; clear H
-      | [ H : forall (x0 : ?t1) (y0: ?t2), { _ : (prod _ _) | _ }
-        , x : ?t1
-        , y : ?t2
-        |- _ ] => destruct (H x y) as [[? ?] ?]; clear H
-    end.    
-  
-  
-  (* Map/Trace compatibility lemmas *)
-  Lemma Enumerates_to_dec_Map :
-    forall tyin tyout (b: Bijection (tdenote tyin) (tdenote tyout)) e x,
-      (forall x, { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }) ->
-      { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Map b e) n x t }.
-  Proof.
-    intros;
-    match goal with
-      | [ Hb: Bijection ?tout _, Hx: ?tout |- _ ] => destruct (Bijects_to_dec _ _ Hb Hx)
-    end;
-    Etd_indHyp; eexists (_, _); eauto.
-  Defined.
-  Hint Resolve Enumerates_to_dec_Map.
-
-  Definition Enumerates_to_dec:
-    forall {ty} (e : Enum ty) x,
-      { nt : nat * Trace | let (n, t) := nt in Enumerates e n x t }.
-  Proof.
-    induction e; intros; auto;
-    try (eexists (_, _); eauto; fail);
-    tdenote_crush; repeat Etd_indHyp; (eexists (_, _); eauto).
-  Defined.
-
-  Definition Enumerates_to_dec_uniq :
-    forall {ty} (e: Enum ty) x,
-      (exists ! (nt : nat * Trace),
-         let (n, t) := nt in
-         Enumerates e n x t).
-  Proof.
-    intros; destruct (Enumerates_to_dec e x) as [[n t] Henum];
-    exists (n, t); split; [assumption|];
-    intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ Henum Henum'); subst; auto.
-  Qed.
-
-  Lemma even_SS :
-    forall n,
-      { l | n = 2 * l } -> { m | S (S n) = 2 * m }.
-  Proof.
-    intros n P; destruct P; exists ((S x)); nliamega.
-  Defined.
-
-  Lemma odd_SS :
-    forall n,
-      { r | n = 2 * r + 1 } -> { m | S (S n) = 2 * m + 1 }.
-  Proof.
-    intros n P; destruct P; exists ((S x)); nliamega.
-  Defined.
-
-  Fixpoint even_odd_eq_dec n : { l | n = 2 * l } + { r | n = 2 * r + 1 }.
-  Proof.
-    refine (match n with
-              | 0 => _
-              | S 0 => _
-              | S (S n') => _
-            end).
-    left;  exists 0; auto.
-    right; exists 0; auto.
-
-    clear n0.
-    destruct (even_odd_eq_dec n').
-    left; apply even_SS; assumption.
-    right; apply odd_SS; assumption.
-  Defined.
-
-  Definition Enumerates_from_dec:
-    forall {ty} (e: Enum ty) n,
-      { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t }.
-  Proof.
-    refine (fix F {ty} e n : { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t } :=
-        match e with
-          | E_Nat  => {{(n, ε)}}
-          | E_Pair _ _ el er =>
-            match Pairing_from_dec n with
-              | {{ p }} =>
-                match F el (fst p), F er (snd p) with
-                  | {{ lxt }}, {{ rxt }} =>
-                    {{ ((fst lxt, fst rxt), (snd lxt ⊔ snd rxt)) }}
-                end
-            end
-          | E_Map _ _ b ein  =>
-            match F ein n with
-              | {{ xt }} =>
-                match Bijects_from_dec b (fst xt) with
-                  | {{ y }} => {{ (y, snd xt ) }}
-                end
-            end
-          | E_Dep _ _ e f =>
-            match Pairing_from_dec n with
-              | {{ p }} =>
-                match F e (fst p) with
-                  | {{ lxt }} =>
-                    match F (f (fst lxt)) (snd p) with
-                      | {{ rxt }} => {{ ((fst lxt, fst rxt), snd lxt ⊔ snd rxt ) }}
-                    end
-                end
-            end
-          | E_Sum _ _ el er =>
-            match even_odd_eq_dec n with
-              | inl {{ l }} =>
-                match F el l with
-                  | {{ lxt }} =>
-                    {{ (inl (fst lxt), snd lxt) }}
-                end
-              | inr {{ r }} =>
-                match F er r with
-                  | {{ rxt }} =>
-                    {{ (inr (fst rxt), snd rxt) }}
-                end
-            end
-          | E_Trace _ tg e =>
-            match F e n with
-              | {{ xt }} =>
-                {{ (fst xt, trace_one n tg)}}
-            end
-        end); clear F; tdenote_crush; eauto.
-  Defined.
-
-  Definition Enumerates_from_dec_uniq :
-    forall {ty} (e: Enum ty) n,
-    exists ! (xt : tdenote ty * Trace),
-      let (x, t) := xt
-      in Enumerates e n x t.
-  Proof.
-    intros;
-    destruct (Enumerates_from_dec e n) as [[v t] Henum];
-    exists (v, t);
-    split; [assumption|];
-    intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ Henum Henum'); subst; auto.
-  Qed.  
-End Enumerates.
+      Enumerates E_Nat n n ε
+| ES_Pair :
+    forall {tl tr} (l: Enum tl) (r: Enum tr) n ln rn lx rx lt rt,
+      Pairing n ln rn ->
+      Enumerates l ln lx lt ->
+      Enumerates r rn rx rt ->
+      Enumerates (E_Pair l r) n (lx, rx) (lt ⊔ rt)
+| ES_Map :
+    forall {tl tr} (bi : Bijection (tdenote tl) (tdenote tr)) inner inner_x n x t,
+      Bijects bi x inner_x ->
+      Enumerates inner n inner_x t ->
+      Enumerates (E_Map bi inner) n x t
+| ES_Dep:
+    forall {tl tr} (l: Enum tl) (f: tdenote tl -> Enum tr) n ln rn lx rx lt rt,
+      Pairing n ln rn ->
+      Enumerates l ln lx lt ->
+      Enumerates (f lx) rn rx rt ->
+      Enumerates (E_Dep l f) n (lx, rx) (lt ⊔ rt)
+| ES_Sum_Left:
+    forall {tl tr} (l: Enum tl) (r: Enum tr) n ln lx t,
+      n = 2 * ln ->
+      Enumerates l ln lx t ->
+      Enumerates (E_Sum l r) n (inl lx) t
+| ES_Sum_Right:
+    forall {tl tr} (l: Enum tl) (r: Enum tr) n rn rx t,
+      n = 2 * rn + 1 ->
+      Enumerates r rn rx t ->
+      Enumerates (E_Sum l r) n (inr rx) t
+(* E_Trace hides traces below it. This makes traces super easily spoofable, but makes it easier to reason about when they're not spoofed *)
+| ES_Trace :
+    forall {ty} n tg (e: Enum ty) v _t,
+      Enumerates e n v _t ->
+      Enumerates (E_Trace tg e) n v (trace_one n tg).
 Hint Constructors Enumerates.
+
+Lemma even_fun:
+  forall x y,
+    2 * x = 2 * y ->
+    x = y.
+Proof.
+  induction x as [|x]; intros; nliamega.
+Qed.
+
+Lemma odd_neq_even:
+  forall x y,
+    2 * x = 2 * y + 1 ->
+    False.
+Proof.
+  induction x as [|x]; intros; nliamega.
+Qed.
+
+Lemma odd_fun:
+  forall x y,
+    2 * x + 1 = 2 * y + 1 ->
+    x = y.
+Proof.
+  induction x as [|x]; intros; nliamega.
+Qed.
+
+Ltac even_odd_crush :=
+  repeat (match goal with
+            | [ H: context[double _] |- _] => rewrite double_twice in H
+            | [ H: context[S (2 * ?x)] |- _ ] => replace (S (2 * x)) with (2 * x + 1) in * by (nliamega)
+            | [ H: 2 * _ = 2 * _ |- _ ] => apply even_fun in H
+            | [ H: 2 * _ + 1 = 2 * _ + 1 |- _ ] => apply odd_fun in H
+            | [ H: 2 * _     = 2 * _ + 1 |- _] => apply odd_neq_even in H; contradiction
+                                                                         | [ H: 2 * _ + 1 = 2 * _     |- _] => symmetry in H; apply odd_neq_even in H; contradiction
+          end).
+
+(* if there's a hypothesis of the shape Enumerates ..., inversion; subst; clear it *)
 Ltac invert_Enumerates' :=
   match goal with
     | [ H : Enumerates ?E _ _ _ |- _ ] =>
@@ -1742,1022 +114,738 @@ Ltac invert_Enumerates' :=
         | E_Trace _ _  => inversion H; subst; clear H
       end
   end.
+
 Ltac invert_Enumerates := repeat invert_Enumerates'; repeat dec_K.
+
+Ltac odd_neq_event :=
+  match goal with
+    | [ H : 2 * ?x = 2 * ?y + 1 |- _ ] => apply odd_neq_even in H; contradiction
+    | [ H : 2 * ?y + 1 = 2 * ?x |- _ ] => symmetry in H; apply odd_neq_even in H; contradiction
+  end.
+
+Ltac Eff_indHyp :=
+  match goal with
+    | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
+      , H1 : Enumerates ?e _ _ _
+      , H2 : Enumerates ?e _ _ _
+      |- _ ] => destruct (IH _ _ _ _ _ H1 H2); clear IH H1 H2; subst
+  end.
+
+Theorem Enumerates_from_fun :
+  forall {ty} (e: Enum ty) n x1 x2 t1 t2,
+    Enumerates e n x1 t1 ->
+    Enumerates e n x2 t2 ->
+    x1 = x2 /\ t1 = t2.
+Proof.
+  induction e; intros; invert_Enumerates;
+  repeat rewrite_pairing_to_fun;
+  repeat Eff_indHyp;
+  try (even_odd_crush; subst);
+  try match goal with
+        | [ H1 : Bijects ?b ?x1 ?y, H2 : Bijects ?b ?x2 ?y |- _ ] =>
+          erewrite (Bijects_fun_left _ _ _ _ _ _ H1 H2) in *; clear H1 H2
+        | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ /\ _]
+          , H1 : Enumerates ?e _ _ _
+          , H2 : Enumerates ?e _ _ _
+          |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
+      end;
+  repeat Eff_indHyp;
+  tauto.
+Qed.
+
+Ltac Etf_indHyp :=
+  match goal with
+    | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
+      , H1 : Enumerates ?e _ _ _
+      , H2 : Enumerates ?e _ _ _
+      |- _ ] =>
+      erewrite (IH _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
+  end.
+
+Theorem Enumerates_to_fun :
+  forall {ty} (e: Enum ty) x n1 n2 t1 t2,
+    Enumerates e n1 x t1 ->
+    Enumerates e n2 x t2 ->
+    n1 = n2.
+Proof.
+  induction e; intros;
+  repeat invert_Enumerates; try sumbool_contra;
+  repeat destruct_eq; repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
+  try match goal with
+        | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
+          , H1 : Enumerates ?e _ _ _
+          , H2 : Enumerates ?e _ _ _
+          |- _ ] =>
+          erewrite (IH _ _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
+      end;
+  repeat Etf_indHyp;
+  repeat rewrite_pairing_from_fun;
+  tauto.
+Qed.
+
+Theorem Enumerates_to_fun'
+: forall {ty} (e: Enum ty) x n1 n2 t1 t2,
+    Enumerates e n1 x t1 ->
+    Enumerates e n2 x t2 ->
+    n1 = n2 /\ t1 = t2.
+Proof.
+  intros; assert (n1 = n2 /\ ((n1 = n2) -> t1 = t2)); [split| tauto];
+  [ eapply Enumerates_to_fun; eauto |];
+  intros; subst;
+  match goal with
+    | [H1: Enumerates ?e _ ?x _, H2: Enumerates ?e _ ?x _ |- _ ] =>
+      destruct (Enumerates_from_fun _ _ _ _ _ _ H H0); subst
+  end; trivial.
+Qed.
+
+Ltac Etd_indHyp :=
+  match goal with
+    | [ H : forall (x0 : ?t), { _ : (prod _ _) | _ }
+      , x : ?t
+      |- _ ] => destruct (H x) as [[? ?] ?]; clear H
+    | [ H : forall (x0 : ?t1) (y0: ?t2), { _ : (prod _ _) | _ }
+      , x : ?t1
+      , y : ?t2
+      |- _ ] => destruct (H x y) as [[? ?] ?]; clear H
+  end.    
+
+
+(* Map/Trace compatibility lemmas *)
+Lemma Enumerates_to_dec_Map :
+  forall tyin tyout (b: Bijection (tdenote tyin) (tdenote tyout)) e x,
+    (forall x, { nt: nat * Trace | let (n, t) := nt in Enumerates e n x t }) ->
+    { nt : nat * Trace | let (n, t) := nt in Enumerates (E_Map b e) n x t }.
+Proof.
+  intros;
+  match goal with
+    | [ Hb: Bijection ?tout _, Hx: ?tout |- _ ] => destruct (Bijects_to_dec _ _ Hb Hx)
+  end;
+  Etd_indHyp; eexists (_, _); eauto.
+Defined.
+Hint Resolve Enumerates_to_dec_Map.
+
+Definition Enumerates_to_dec:
+  forall {ty} (e : Enum ty) x,
+    { nt : nat * Trace | let (n, t) := nt in Enumerates e n x t }.
+Proof.
+  induction e; intros; auto;
+  try (eexists (_, _); eauto; fail);
+  tdenote_crush; repeat Etd_indHyp; (eexists (_, _); eauto).
+Defined.
+
+Definition Enumerates_to_dec_uniq :
+  forall {ty} (e: Enum ty) x,
+    (exists ! (nt : nat * Trace),
+       let (n, t) := nt in
+       Enumerates e n x t).
+Proof.
+  intros; destruct (Enumerates_to_dec e x) as [[n t] Henum];
+  exists (n, t); split; [assumption|];
+  intros [n' t'] Henum'; destruct (Enumerates_to_fun' _ _ _ _ _ _ Henum Henum'); subst; auto.
+Qed.
+
+Lemma even_SS :
+  forall n,
+    { l | n = 2 * l } -> { m | S (S n) = 2 * m }.
+Proof.
+  intros n P; destruct P; exists ((S x)); nliamega.
+Defined.
+
+Lemma odd_SS :
+  forall n,
+    { r | n = 2 * r + 1 } -> { m | S (S n) = 2 * m + 1 }.
+Proof.
+  intros n P; destruct P; exists ((S x)); nliamega.
+Defined.
+
+Fixpoint even_odd_eq_dec n : { l | n = 2 * l } + { r | n = 2 * r + 1 }.
+Proof.
+  refine (match n with
+            | 0 => _
+            | S 0 => _
+            | S (S n') => _
+          end).
+  left;  exists 0; auto.
+  right; exists 0; auto.
+
+  clear n0.
+  destruct (even_odd_eq_dec n').
+  left; apply even_SS; assumption.
+  right; apply odd_SS; assumption.
+Defined.
+
+Definition Enumerates_from_dec:
+  forall {ty} (e: Enum ty) n,
+    { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t }.
+Proof.
+  refine (fix F {ty} e n : { xt : tdenote ty * Trace | let (x, t) := xt in Enumerates e n x t } :=
+            match e with
+              | E_Nat  => {{(n, ε)}}
+              | E_Pair _ _ el er =>
+                match Pairing_from_dec n with
+                  | {{ p }} =>
+                    match F el (fst p), F er (snd p) with
+                      | {{ lxt }}, {{ rxt }} =>
+                        {{ ((fst lxt, fst rxt), (snd lxt ⊔ snd rxt)) }}
+                    end
+                end
+              | E_Map _ _ b ein  =>
+                match F ein n with
+                  | {{ xt }} =>
+                    match Bijects_from_dec b (fst xt) with
+                      | {{ y }} => {{ (y, snd xt ) }}
+                    end
+                end
+              | E_Dep _ _ e f =>
+                match Pairing_from_dec n with
+                  | {{ p }} =>
+                    match F e (fst p) with
+                      | {{ lxt }} =>
+                        match F (f (fst lxt)) (snd p) with
+                          | {{ rxt }} => {{ ((fst lxt, fst rxt), snd lxt ⊔ snd rxt ) }}
+                        end
+                    end
+                end
+              | E_Sum _ _ el er =>
+                match even_odd_eq_dec n with
+                  | inl {{ l }} =>
+                    match F el l with
+                      | {{ lxt }} =>
+                        {{ (inl (fst lxt), snd lxt) }}
+                    end
+                  | inr {{ r }} =>
+                    match F er r with
+                      | {{ rxt }} =>
+                        {{ (inr (fst rxt), snd rxt) }}
+                    end
+                end
+              | E_Trace _ tg e =>
+                match F e n with
+                  | {{ xt }} =>
+                    {{ (fst xt, trace_one n tg)}}
+                end
+            end); clear F; tdenote_crush; eauto.
+Defined.
+
+Definition Enumerates_from_dec_uniq :
+  forall {ty} (e: Enum ty) n,
+  exists ! (xt : tdenote ty * Trace),
+    let (x, t) := xt
+    in Enumerates e n x t.
+Proof.
+  intros;
+  destruct (Enumerates_from_dec e n) as [[v t] Henum];
+  exists (v, t);
+  split; [assumption|];
+  intros [v' t'] Henum'; destruct (Enumerates_from_fun _ _ _ _ _ _ Henum Henum'); subst; auto.
+Qed.  
+
 Ltac Eff :=
   match goal with
     | [H1: Enumerates ?e ?n _ _, H2: Enumerates ?e ?n _ _ |- _ ] =>
       destruct (Enumerates_from_fun _ _ _ _ _ _ H1 H2)
   end.
-Ltac even_odd_crush :=
-  repeat (match goal with
-    | [ H: context[double _] |- _] => rewrite double_twice in H
-    | [ H: context[S (2 * ?x)] |- _ ] => replace (S (2 * x)) with (2 * x + 1) in * by (nliamega)
-    | [ H: 2 * _ = 2 * _ |- _ ] => apply even_fun in H
-    | [ H: 2 * _ + 1 = 2 * _ + 1 |- _ ] => apply odd_fun in H
-    | [ H: 2 * _     = 2 * _ + 1 |- _] => apply odd_neq_even in H; contradiction
-    | [ H: 2 * _ + 1 = 2 * _     |- _] => symmetry in H; apply odd_neq_even in H; contradiction
-  end).
 
-Section EnumTrace.
-  Definition Trace_on {ty} (e : Enum ty) (n : nat) : Trace :=
-    (snd (proj1_sig (Enumerates_from_dec e n))).
+Definition Trace_on {ty} (e : Enum ty) (n : nat) : Trace :=
+  (snd (proj1_sig (Enumerates_from_dec e n))).
 
-  Fixpoint Trace_lt {ty} (e : Enum ty) n : Trace :=
-    match n with
-      | 0 => ε
-      | S n' => (Trace_on e n') ⊔ (Trace_lt e n')
-    end.
+Fixpoint Trace_lt {ty} (e : Enum ty) n : Trace :=
+  match n with
+    | 0 => ε
+    | S n' => (Trace_on e n') ⊔ (Trace_lt e n')
+  end.
 
-  Fixpoint Trace_from_to {ty} (e : Enum ty) lo hi : Trace :=
-    if le_lt_dec hi lo
-    then ε
-    else match hi with
-           | 0 => ε
-           | S hi' => (Trace_on e hi') ⊔ (Trace_from_to e lo hi')
-         end.
-
+Fixpoint Trace_from_to {ty} (e : Enum ty) lo hi : Trace :=
+  if le_lt_dec hi lo
+  then ε
+  else match hi with
+         | 0 => ε
+         | S hi' => (Trace_on e hi') ⊔ (Trace_from_to e lo hi')
+       end.
   
-  Theorem trace_lt_from_to_0_same {ty} (e : Enum ty) n : (Trace_lt e n) ≡ (Trace_from_to e 0 n).
-  Proof.
-    induction n.
-    simpl.
-    split4; apply set_eq_refl.
+Theorem trace_lt_from_to_0_same {ty} (e : Enum ty) n : (Trace_lt e n) ≡ (Trace_from_to e 0 n).
+Proof.
+  induction n.
+  simpl.
+  split4; apply set_eq_refl.
 
-    simpl.
-    unfold trace_plus.
-    destruct (Trace_on e n).
-    destruct (Trace_lt e n).
-    destruct (Trace_from_to e 0 n).
-    destruct4 IHn.
-    split4; (apply set_union_cong; [apply set_eq_refl|]; auto).
-  Qed.
+  simpl.
+  unfold trace_plus.
+  destruct (Trace_on e n).
+  destruct (Trace_lt e n).
+  destruct (Trace_from_to e 0 n).
+  destruct4 IHn.
+  split4; (apply set_union_cong; [apply set_eq_refl|]; auto).
+Qed.
 
-  Theorem trace_from_to_ge {ty} (e:Enum ty) m n
-  : n <= m ->
-    Trace_from_to e m n = ε.
-  Proof.
-    intros H.
-    unfold Trace_from_to.
-    remember (le_lt_dec n m) as l.
-    destruct l; [| apply False_ind; nliamega ].
-    destruct n; rewrite <-Heql; reflexivity.
-  Qed.
+Theorem trace_from_to_ge {ty} (e:Enum ty) m n
+: n <= m ->
+  Trace_from_to e m n = ε.
+Proof.
+  intros H.
+  unfold Trace_from_to.
+  remember (le_lt_dec n m) as l.
+  destruct l; [| apply False_ind; nliamega ].
+  destruct n; rewrite <-Heql; reflexivity.
+Qed.
 
-  Theorem trace_from_to_self {ty} (e: Enum ty) m 
-  : Trace_from_to e m m = ε.
-  Proof. apply trace_from_to_ge; nliamega. Qed.
+Theorem trace_from_to_self {ty} (e: Enum ty) m 
+: Trace_from_to e m m = ε.
+Proof. apply trace_from_to_ge; nliamega. Qed.
 
-  Theorem trace_from_to_split1r {ty} (e:Enum ty) m n
-  : m <= n ->
-    (Trace_from_to e m (S n)) ≡ ((Trace_from_to e m n) ⊔ (Trace_on e n)).
-  Proof.
-    intros H.
-    unfold Trace_from_to at 1.
-    remember (le_lt_dec (S n) m).
-    destruct s.
-    assert (S n <= n).
-    apply le_trans with (m := m); auto.
-    apply le_Sn_n in H0.
-    contradiction.
-    fold (@Trace_from_to ty).
-    apply trace_plus_comm.
-  Qed.
+Theorem trace_from_to_split1r {ty} (e:Enum ty) m n
+: m <= n ->
+  (Trace_from_to e m (S n)) ≡ ((Trace_from_to e m n) ⊔ (Trace_on e n)).
+Proof.
+  intros H.
+  unfold Trace_from_to at 1.
+  remember (le_lt_dec (S n) m).
+  destruct s.
+  assert (S n <= n).
+  apply le_trans with (m := m); auto.
+  apply le_Sn_n in H0.
+  contradiction.
+  fold (@Trace_from_to ty).
+  apply trace_plus_comm.
+Qed.
 
-  Theorem trace_from_to_split1l' {ty} (e: Enum ty) m n
-  : (Trace_from_to e m (S (m + n))) ≡ ((Trace_on e m) ⊔ (Trace_from_to e (S m) (S (m + n)))).
-  Proof.
-    generalize dependent m.
-    induction n as [| n].
-    intros m.
-    replace (S (m + 0)) with (S m) by nliamega.
-    unfold Trace_from_to at 1.
-    remember (le_lt_dec (S m) m) as t.
-    destruct t.
-    clear Heqt.
-    apply le_Sn_n in l.
-    contradiction.
+Theorem trace_from_to_split1l' {ty} (e: Enum ty) m n
+: (Trace_from_to e m (S (m + n))) ≡ ((Trace_on e m) ⊔ (Trace_from_to e (S m) (S (m + n)))).
+Proof.
+  generalize dependent m.
+  induction n as [| n].
+  intros m.
+  replace (S (m + 0)) with (S m) by nliamega.
+  unfold Trace_from_to at 1.
+  remember (le_lt_dec (S m) m) as t.
+  destruct t.
+  clear Heqt.
+  apply le_Sn_n in l.
+  contradiction.
 
-    fold (@Trace_from_to ty).
-    rewrite trace_from_to_self.
-    rewrite trace_from_to_self.
-    apply trace_eq_refl.
-    intros m.
-    unfold Trace_from_to.
-    remember (le_lt_dec (S (m + S n)) m) as t.
-    destruct t.
-    assert (m < (S (m + S n))) by nliamega.
-    clear Heqt.
-    apply (le_not_gt) in l.
-    contradiction.
-    fold (@Trace_from_to ty).
-    clear l Heqt.
-    remember (le_lt_dec (S (m + S n)) (S m)).
-    destruct s.
-    assert ((S (m + S n)) > S m) by nliamega.
-    clear Heqs; apply le_not_gt in l; contradiction.
-    replace (m + S n) with (S (m + n)) by nliamega.
-    eapply trace_eq_trans.
-    apply trace_plus_cong; [apply trace_eq_refl | apply IHn ].
-    eapply trace_eq_trans.
-    apply trace_plus_assoc.
-    eapply trace_eq_trans.
-    apply trace_plus_cong.
-    apply trace_plus_comm.
-    apply trace_eq_refl.
-    eapply trace_eq_trans.
-    apply trace_eq_symm.
-    apply trace_plus_assoc.
-    apply trace_eq_refl.
-  Qed.
+  fold (@Trace_from_to ty).
+  rewrite trace_from_to_self.
+  rewrite trace_from_to_self.
+  apply trace_eq_refl.
+  intros m.
+  unfold Trace_from_to.
+  remember (le_lt_dec (S (m + S n)) m) as t.
+  destruct t.
+  assert (m < (S (m + S n))) by nliamega.
+  clear Heqt.
+  apply (le_not_gt) in l.
+  contradiction.
+  fold (@Trace_from_to ty).
+  clear l Heqt.
+  remember (le_lt_dec (S (m + S n)) (S m)).
+  destruct s.
+  assert ((S (m + S n)) > S m) by nliamega.
+  clear Heqs; apply le_not_gt in l; contradiction.
+  replace (m + S n) with (S (m + n)) by nliamega.
+  eapply trace_eq_trans.
+  apply trace_plus_cong; [apply trace_eq_refl | apply IHn ].
+  eapply trace_eq_trans.
+  apply trace_plus_assoc.
+  eapply trace_eq_trans.
+  apply trace_plus_cong.
+  apply trace_plus_comm.
+  apply trace_eq_refl.
+  eapply trace_eq_trans.
+  apply trace_eq_symm.
+  apply trace_plus_assoc.
+  apply trace_eq_refl.
+Qed.
 
-  Theorem trace_from_to_split1l {ty} (e : Enum ty) m n
-  : m < n ->
-    Trace_from_to e m n ≡ (Trace_on e m) ⊔ (Trace_from_to e (S m) n).
-  Proof.
-    intros H.
-    remember (pred (n - m)) as t.
-    assert (n = (S (m + t))) by nliamega.
-    subst n.
-    apply trace_from_to_split1l'.
-  Qed.
+Theorem trace_from_to_split1l {ty} (e : Enum ty) m n
+: m < n ->
+  Trace_from_to e m n ≡ (Trace_on e m) ⊔ (Trace_from_to e (S m) n).
+Proof.
+  intros H.
+  remember (pred (n - m)) as t.
+  assert (n = (S (m + t))) by nliamega.
+  subst n.
+  apply trace_from_to_split1l'.
+Qed.
 
+Theorem trace_from_to_split {ty} (e : Enum ty) m n p :
+  (m <= n < p)
+  -> Trace_from_to e m p ≡ (Trace_from_to e m n) ⊔ (Trace_from_to e n p).
+Proof.
+  generalize dependent p.
+  generalize dependent m.
 
-  Theorem trace_from_to_split {ty} (e : Enum ty) m n p :
-    (m <= n < p)
-    -> Trace_from_to e m p ≡ (Trace_from_to e m n) ⊔ (Trace_from_to e n p).
-  Proof.
-    generalize dependent p.
-    generalize dependent m.
+  induction n.
+  intros m p [Hmzero Hppos].
+  apply le_n_0_eq in Hmzero; subst.
+  remember (Trace_from_to e 0 0).
+  simpl in Heqt; subst.
+  apply trace_eq_symm.
+  apply trace_plus_unitl.
 
-    induction n.
-    intros m p [Hmzero Hppos].
-    apply le_n_0_eq in Hmzero; subst.
-    remember (Trace_from_to e 0 0).
-    simpl in Heqt; subst.
-    apply trace_eq_symm.
-    apply trace_plus_unitl.
+  intros m p [Hmn Hp].
+  inversion Hmn; subst.
+  clear Hmn.
+  apply trace_eq_symm.
+  rewrite (trace_from_to_self e (S n)).
+  apply trace_plus_unitl_gen.
+  apply trace_eq_refl.
 
-    intros m p [Hmn Hp].
-    inversion Hmn; subst.
-    clear Hmn.
-    apply trace_eq_symm.
-    rewrite (trace_from_to_self e (S n)).
-    apply trace_plus_unitl_gen.
-    apply trace_eq_refl.
-
-    apply trace_eq_trans with ((Trace_from_to e m n) ⊔ (Trace_from_to e n p));
-      [apply IHn; nliamega| ].
-    apply trace_eq_trans with ((Trace_from_to e m n)
+  apply trace_eq_trans with ((Trace_from_to e m n) ⊔ (Trace_from_to e n p));
+    [apply IHn; nliamega| ].
+  apply trace_eq_trans with ((Trace_from_to e m n)
                                  ⊔ ((Trace_on e n) ⊔ (Trace_from_to e (S n) p))).
-    apply trace_plus_cong; [apply trace_eq_refl| ].
-    apply trace_from_to_split1l; nliamega.
+  apply trace_plus_cong; [apply trace_eq_refl| ].
+  apply trace_from_to_split1l; nliamega.
 
-    eapply trace_eq_trans.
-    apply trace_plus_assoc.
-    apply trace_plus_cong; [| apply trace_eq_refl].
-    apply trace_eq_symm.
-    apply trace_from_to_split1r; nliamega.
-  Qed.
+  eapply trace_eq_trans.
+  apply trace_plus_assoc.
+  apply trace_plus_cong; [| apply trace_eq_refl].
+  apply trace_eq_symm.
+  apply trace_from_to_split1r; nliamega.
+Qed.
 
-  Theorem trace_from_to_0_split :
-    forall m n {ty} (e : Enum ty),
-      m < n ->
-      Trace_lt e n ≡ (Trace_lt e m) ⊔ (Trace_from_to e m n).
-  Proof.
-    intros m n ty e Hmn.
-    eapply trace_eq_trans.
-    apply trace_lt_from_to_0_same.
-    eapply trace_eq_trans.
-    apply (@trace_from_to_split ty) with (n := m); split; [nliamega | assumption].
-    apply trace_plus_cong.
-    apply trace_eq_symm.
-    apply trace_lt_from_to_0_same.
-    apply trace_eq_refl.
-  Qed.
+Theorem trace_from_to_0_split :
+  forall m n {ty} (e : Enum ty),
+    m < n ->
+    Trace_lt e n ≡ (Trace_lt e m) ⊔ (Trace_from_to e m n).
+Proof.
+  intros m n ty e Hmn.
+  eapply trace_eq_trans.
+  apply trace_lt_from_to_0_same.
+  eapply trace_eq_trans.
+  apply (@trace_from_to_split ty) with (n := m); split; [nliamega | assumption].
+  apply trace_plus_cong.
+  apply trace_eq_symm.
+  apply trace_lt_from_to_0_same.
+  apply trace_eq_refl.
+Qed.
 
-  Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
-  Proof.
-    unfold Trace_on.
-    destruct (Enumerates_from_dec _ _) as [[v t] Henum].
-    inversion Henum; subst.
-    reflexivity.
-  Qed.
+Theorem Trace_nat n tg : Trace_on (E_Trace tg E_Nat) n = trace_one n tg.
+Proof.
+  unfold Trace_on.
+  destruct (Enumerates_from_dec _ _) as [[v t] Henum].
+  inversion Henum; subst.
+  reflexivity.
+Qed.
 
-  Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = ∅.
-  Proof.
-    rewrite Trace_nat.
-    compute.
-    destruct tg1; destruct tg2; intuition.
-  Qed.
+Theorem trace_off tg1 tg2 n : tg1 <> tg2 -> trace_proj tg2 (Trace_on (E_Trace tg1 E_Nat) n) = ∅.
+Proof.
+  rewrite Trace_nat.
+  compute.
+  destruct tg1; destruct tg2; intuition.
+Qed.
 
-  Theorem trace_proj_plus_distrl tg t1 t2
-  : trace_proj tg (t1 ⊔ t2) = ((trace_proj tg t1) ∪ (trace_proj tg t2)).
-  Proof.
-    destruct t1; destruct t2; destruct tg; auto.
-  Qed.
+Theorem trace_proj_plus_distrl tg t1 t2
+: trace_proj tg (t1 ⊔ t2) = ((trace_proj tg t1) ∪ (trace_proj tg t2)).
+Proof.
+  destruct t1; destruct t2; destruct tg; auto.
+Qed.
 
-  Theorem Trace_on_correct {ty} (e: Enum ty) n x t : Enumerates e n x t -> Trace_on e n = t.
-  Proof.
-    intros H.
-    unfold Trace_on.
-    destruct (Enumerates_from_dec e n) as [[v tgaf] Henum].
-    simpl.
-    destruct (Enumerates_from_fun _ _ _ _ _ _ H Henum); auto.
-  Qed.
+Theorem Trace_on_correct {ty} (e: Enum ty) n x t : Enumerates e n x t -> Trace_on e n = t.
+Proof.
+  intros H.
+  unfold Trace_on.
+  destruct (Enumerates_from_dec e n) as [[v tgaf] Henum].
+  simpl.
+  destruct (Enumerates_from_fun _ _ _ _ _ _ H Henum); auto.
+Qed.
 
-  Theorem trace_lt_Nat n tg
-  : z_to_n n ≃ trace_proj tg (Trace_lt (E_Trace tg E_Nat) n).
-  Proof.
-    induction n as [| n IHn]; [destruct tg; compute; tauto|].
-    unfold Trace_lt. fold (@Trace_lt TNat).
-    unfold z_to_n. fold z_to_n.
-    rewrite trace_proj_plus_distrl.
-    rewrite Trace_nat.
-    eapply set_eq_trans.
-    apply set_eq_symm. apply set_add_cons_eq.
-    eapply set_eq_trans.
-    replace (n :: z_to_n n) with ((n :: nil) ++ z_to_n n) by reflexivity.
-    apply set_eq_symm; apply set_union_app_eq.
-    apply set_union_cong; auto.
-    destruct tg; compute; tauto.
-  Qed.
+Theorem trace_lt_Nat n tg
+: z_to_n n ≃ trace_proj tg (Trace_lt (E_Trace tg E_Nat) n).
+Proof.
+  induction n as [| n IHn]; [destruct tg; compute; tauto|].
+  unfold Trace_lt. fold (@Trace_lt TNat).
+  unfold z_to_n. fold z_to_n.
+  rewrite trace_proj_plus_distrl.
+  rewrite Trace_nat.
+  eapply set_eq_trans.
+  apply set_eq_symm. apply set_add_cons_eq.
+  eapply set_eq_trans.
+  replace (n :: z_to_n n) with ((n :: nil) ++ z_to_n n) by reflexivity.
+  apply set_eq_symm; apply set_union_app_eq.
+  apply set_union_cong; auto.
+  destruct tg; compute; tauto.
+Qed.
 
-  Theorem trace_lt_Nat_off n tg1 tg2
-  : tg1 <> tg2 ->
-    (trace_proj tg1 (Trace_lt (E_Trace tg2 E_Nat) n)) = nil.
-  Proof.
-    intros Hdiff.
-    induction n.
-    destruct tg1; auto.
-    unfold Trace_lt; fold (@Trace_lt TNat).
-    rewrite trace_proj_plus_distrl.
-    rewrite trace_off.
-    rewrite IHn; compute; auto.
-    auto.
-  Qed.
+Theorem trace_lt_Nat_off n tg1 tg2
+: tg1 <> tg2 ->
+  (trace_proj tg1 (Trace_lt (E_Trace tg2 E_Nat) n)) = nil.
+Proof.
+  intros Hdiff.
+  induction n.
+  destruct tg1; auto.
+  unfold Trace_lt; fold (@Trace_lt TNat).
+  rewrite trace_proj_plus_distrl.
+  rewrite trace_off.
+  rewrite IHn; compute; auto.
+  auto.
+Qed.
 
-  Lemma sub_trace_from_tol {ty} l m n (e: Enum ty)
-  : l <= m
-    -> (Trace_from_to e m n) ⊏ (Trace_from_to e l n).
-  Proof.
-    intros H; remember (m - l) as k; replace m with (l + k) by nliamega; clear dependent m.
-    induction k.
-    replace (l + 0) with l by nliamega; apply sub_trace_refl.
-    eapply sub_trace_trans; [| apply IHk].
-    destruct (le_dec n (l + S k)).
-    rewrite trace_from_to_ge by assumption;
-      apply sub_trace_zero.
-    eapply sub_trace_trans;
-      [| apply trace_eq_weakenl; apply trace_eq_symm; apply (@trace_from_to_split ty) with (n := l + S k); nliamega ];
-      apply sub_trace_plus_transr; apply sub_trace_refl.
-  Qed.
+Lemma sub_trace_from_tol {ty} l m n (e: Enum ty)
+: l <= m
+  -> (Trace_from_to e m n) ⊏ (Trace_from_to e l n).
+Proof.
+  intros H; remember (m - l) as k; replace m with (l + k) by nliamega; clear dependent m.
+  induction k.
+  replace (l + 0) with l by nliamega; apply sub_trace_refl.
+  eapply sub_trace_trans; [| apply IHk].
+  destruct (le_dec n (l + S k)).
+  rewrite trace_from_to_ge by assumption;
+    apply sub_trace_zero.
+  eapply sub_trace_trans;
+    [| apply trace_eq_weakenl; apply trace_eq_symm; apply (@trace_from_to_split ty) with (n := l + S k); nliamega ];
+    apply sub_trace_plus_transr; apply sub_trace_refl.
+Qed.
 
-  Theorem sub_trace_from_to l m n p {ty} (e : Enum ty)
-  : l <= m
-    -> n <= p
-    -> (Trace_from_to e m n) ⊏ (Trace_from_to e l p).
-  Proof.
-    intros Hlm Hnp.
-    remember (p - n) as k; replace p with (n + k) by nliamega; clear dependent p.
-    induction k.
-    replace (n+0) with n by nliamega; apply sub_trace_from_tol; auto.
-    replace (n + S k) with (S (n + k)) by nliamega.
-    unfold Trace_from_to at 2.
-    remember (le_lt_dec (S (n + k)) l) as Hlelt.
-    destruct Hlelt.
-    replace (Trace_from_to e l (n + k)) with ε in IHk; auto.
-    symmetry.
-    apply trace_from_to_ge; nliamega.
-    fold (@Trace_from_to ty).
-    apply sub_trace_plus_transr; auto.
-  Qed.
+Theorem sub_trace_from_to l m n p {ty} (e : Enum ty)
+: l <= m
+  -> n <= p
+  -> (Trace_from_to e m n) ⊏ (Trace_from_to e l p).
+Proof.
+  intros Hlm Hnp.
+  remember (p - n) as k; replace p with (n + k) by nliamega; clear dependent p.
+  induction k.
+  replace (n+0) with n by nliamega; apply sub_trace_from_tol; auto.
+  replace (n + S k) with (S (n + k)) by nliamega.
+  unfold Trace_from_to at 2.
+  remember (le_lt_dec (S (n + k)) l) as Hlelt.
+  destruct Hlelt.
+  replace (Trace_from_to e l (n + k)) with ε in IHk; auto.
+  symmetry.
+  apply trace_from_to_ge; nliamega.
+  fold (@Trace_from_to ty).
+  apply sub_trace_plus_transr; auto.
+Qed.
 
-  Theorem trace_from_to_Nat_off m n tg1 tg2
-  : tg1 <> tg2 ->
-    (trace_proj tg1 (Trace_from_to (E_Trace tg2 E_Nat) m n)) = ∅.
-  Proof.
-    intros Hdiff.
-    assert ((Trace_from_to (E_Trace tg2 E_Nat) m n) ⊏ (Trace_lt (E_Trace tg2 E_Nat) n)).
-    eapply sub_trace_trans.
-    apply sub_trace_from_to with (l := 0) (p := n); try nliamega.
-    apply trace_eq_weakenl; apply trace_eq_symm; apply trace_lt_from_to_0_same.
-    apply subset_nil_nil.
-    erewrite <-trace_lt_Nat_off; [ apply sub_trace_proj|]; eauto.
-  Qed.
+Theorem trace_from_to_Nat_off m n tg1 tg2
+: tg1 <> tg2 ->
+  (trace_proj tg1 (Trace_from_to (E_Trace tg2 E_Nat) m n)) = ∅.
+Proof.
+  intros Hdiff.
+  assert ((Trace_from_to (E_Trace tg2 E_Nat) m n) ⊏ (Trace_lt (E_Trace tg2 E_Nat) n)).
+  eapply sub_trace_trans.
+  apply sub_trace_from_to with (l := 0) (p := n); try nliamega.
+  apply trace_eq_weakenl; apply trace_eq_symm; apply trace_lt_from_to_0_same.
+  apply subset_nil_nil.
+  erewrite <-trace_lt_Nat_off; [ apply sub_trace_proj|]; eauto.
+Qed.
 
-  Ltac get_trace_ons :=
-    repeat (match goal with
-       | [ H: Enumerates _ _ _ _ |- _] => apply Trace_on_correct in H
-     end).
-  
-  Theorem trace_on_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2: Enum tyr) m
-  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
-    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
-    -> trace_proj tg (Trace_on (E_Pair e1 e2) m) = ∅.
-  Proof.
-    intros; unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
-    invert_Enumerates;
-    get_trace_ons; subst;
-    rewrite trace_proj_plus_distrl;
-    repeat (match goal with
-       | [H1: forall (x: ?t), _ = _,
-          x: ?t
-         |- _] => rewrite H1 in *
-     end); trivial.
-  Qed.
-
-  Theorem trace_lt_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
-  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
-    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
-    -> trace_proj tg (Trace_lt (E_Pair e1 e2) m) = ∅.
-  Proof.
-    induction m; [intros; destruct tg; reflexivity|].
-    intros H1 H2.
-    unfold Trace_lt; fold (@Trace_lt (TPair tyl tyr)).
-    rewrite trace_proj_plus_distrl.
-    apply subset_nil_nil.
-    apply subset_union_both.
-    rewrite trace_on_Pair_off; [apply subset_refl| |]; auto.
-    rewrite IHm; auto.
-  Qed.
-
-  Theorem trace_on_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
-  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
-    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
-    -> trace_proj tg (Trace_on (E_Sum e1 e2) m) = ∅.
-  Proof.
-    intros Hl Hr; unfold Trace_on;
-    remember (Enumerates_from_dec (E_Sum e1 e2) m) as x eqn:Heqx; clear Heqx; destruct x as [[v t] Henum]; simpl;
-    invert_Enumerates; get_trace_ons; subst; auto.
-  Qed.
-
-  Theorem trace_lt_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
-  : (forall n, trace_proj tg (Trace_on e1 n) = ∅)
-    -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
-    -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = ∅.
-  Proof.
-    induction m; [intros; compute; destruct tg; trivial|];
-    intros; unfold Trace_lt; (fold (@Trace_lt (TSum tyl tyr))); rewrite trace_proj_plus_distrl;
-    rewrite IHm; auto; apply trace_on_Sum_off; auto.
-  Qed.
-
-  Theorem set_In_trace' {ty} tg (e : Enum ty) x m n :
-    x ∈ (trace_proj tg (Trace_from_to e m (S (m + n))))
-    <->
-    (exists k,
-       m <= k < S (m + n) /\ x ∈ (trace_proj tg (Trace_on e k))).
-  Proof.
-    
-    split.
-    generalize dependent m.
-    induction n; intros m;
-    [
-      replace (S (m + 0)) with (S m) by nliamega;
-      destruct tg;
-      (intros H; exists m; split; [nliamega |];
-                        unfold Trace_from_to in H;
-                        destruct (le_lt_dec (S m) m);
-                        [apply le_Sn_n in l; contradiction
-                        |
-                        fold (@Trace_from_to ty) in H;
-                          rewrite trace_from_to_self in H;
-                          remember ((Trace_on e m) ⊔ ε) as t;
-                          destruct t;
-                          simpl in *;
-                          remember (Trace_on e m) as t';
-                          destruct t';
-                          simpl in *;
-                          inversion Heqt; subst; auto ])
-    | unfold Trace_from_to; fold (@Trace_from_to ty);
-      destruct (le_lt_dec (S (m + S n)) m) as [contra | _]; [ assert (~ (S (m + S n)) <= m) by (apply gt_not_le; nliamega); contradiction|];
-      unfold trace_plus;
-      remember (Trace_on e (m + S n))as t; destruct t as [tl tr];
-      remember (Trace_from_to e m (m + S n)) as t; destruct t as [t0' t1' t2' t3'];
-      replace (m + S n) with (S (m + n)) in * by nliamega;
-      destruct tg;
-      (simpl; intros Hin_union;
-       destruct (set_union_elim eq_nat_dec _ _ _ Hin_union);
-       [exists (S (m + n)); split; [nliamega|]; destruct Heqt; auto |]);
-      [ replace t0' with (trace_proj zero  (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
-      | replace t1' with (trace_proj one   (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
-      | replace t2' with (trace_proj two   (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
-      | replace t3' with (trace_proj three (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
-      ];
-      (destruct (IHn m H) as [k [Hless Hinn]]; exists k; (split; [nliamega | auto]))].
-
-    intros [k [[Hmk HkSmn] Hin]];
-      induction n as [| n].
-    replace (S (m + 0)) with (S m) in * by nliamega;
-      unfold Trace_from_to;
-      destruct (le_lt_dec (S m) m); [apply le_Sn_n in l; contradiction|];
-      fold (@Trace_from_to ty); rewrite trace_from_to_self; assert (k = m) by nliamega; subst;
-
-      remember ((Trace_on e m) ⊔ ε) as t;
-      destruct t; simpl in *;
-      remember (Trace_on e m) as t';
-      destruct t';
-      simpl in *;
-      inversion Heqt; subst; auto.
-
-    replace (S (m + n)) with (m + S n) in * by nliamega;
-      destruct (eq_nat_dec k (m + S n)); subst;
-      unfold Trace_from_to; fold (@Trace_from_to ty);
-      (destruct (le_lt_dec (S (m + S n)) m); [ assert (~ (S (m + S n) <= m)) by (apply le_not_gt; nliamega); contradiction| ]); (remember (Trace_on e (m + S n)) as t); destruct t as [t0 t1 t2 t3];
-      (remember (Trace_from_to e m (m + S n)) as t'); destruct t' as [t0' t1' t2' t3'].
-    destruct tg; (
-        simpl in *; apply set_union_intro1; auto).
-
-    destruct tg; simpl in *; apply set_union_intro2; apply IHn; nliamega.
-  Qed.
-
-  Theorem set_In_Trace_from_to {ty} (tg : tag) (e: Enum ty) x m n :
-    (m < n) ->
-    (x ∈ (trace_proj tg (Trace_from_to e m n)) <->
-     (exists k, m <= k < n /\ x ∈ (trace_proj tg (Trace_on e k)))).
-  Proof.
-    intros H; remember (pred (n - m)) as p; replace n with (S (m + p)) in * by nliamega; clear n;
-    apply set_In_trace'.
-  Qed.
-
-  Theorem set_In_Trace_lt {ty} tg (e: Enum ty) x n :
-    x ∈ (trace_proj tg (Trace_lt e (S n)))
-    <->
-    exists k, k < S n /\ x ∈ (trace_proj tg (Trace_on e k)).
-  Proof.
-    destruct (set_In_Trace_from_to tg e x 0 (S n)) as [Hl Hr]; try nliamega.
-    split; [clear Hr|clear Hl].
-    intros Hin.
-    assert (x ∈ (trace_proj tg (Trace_from_to e 0 (S n)))).
-    apply In_subset_def with (trace_proj tg (Trace_lt e (S n))); [| assumption].
-    apply sub_trace_proj; apply trace_eq_weakenl; apply trace_lt_from_to_0_same.
-    destruct (Hl H) as [k [? Hink]].
-    exists k; split; [nliamega| assumption].
-    
-    intros Hex; destruct Hex as [k [Hbound Hink]].
-    assert (x ∈ (trace_proj tg (Trace_from_to e 0 (S n)))).
-    apply Hr.
-    exists k; split; [nliamega| assumption].
-    apply In_subset_def with (trace_proj tg (Trace_from_to e 0 (S n))); [| assumption].
-    apply sub_trace_proj; apply trace_eq_weakenr; apply trace_lt_from_to_0_same.
-  Qed.
-
-  Theorem sub_trace_plus_introl t1 t2 t3
-  : t1 ⊏ t2 -> t1 ⊏ (t2 ⊔ t3).
-  Proof.
-    unfold sub_trace, trace_plus; destruct t1, t2, t3.
-    intros H; destruct H as [H1 [H2 [H3 H4]]].
-    Local Hint Resolve subset_union_transl.
-    split4; auto.
-  Qed.
-
-  Theorem sub_trace_plus_intror t1 t2 t3
-  : t1 ⊏ t3 -> t1 ⊏ (t2 ⊔ t3).
-  Proof.
-    unfold sub_trace, trace_plus; destruct t1, t2, t3.
-    intros H; destruct H as [H1 [H2 [H3 H4]]].
-    Local Hint Resolve subset_union_transr.
-    split4; auto.
-  Qed.
-
-  Theorem Trace_from_to_sub' {ty} (e : Enum ty) m n p : (Trace_from_to e m n) ⊏ (Trace_from_to e m (n + p)).
-  Proof.
-    induction p.
-    replace (n + 0) with n by nliamega; apply sub_trace_refl.
-    replace (n + S p) with (S (n + p)) by nliamega.
-    unfold Trace_from_to at 2; fold (@Trace_from_to ty).
-    destruct (le_lt_dec (S (n + p))).
-    replace (Trace_from_to e m n) with ε; [apply sub_trace_refl|].
-    unfold Trace_from_to.
-    destruct n.
-    destruct (le_lt_dec 0 m); auto.
-    destruct (le_lt_dec (S n) m); auto; nliamega.
-    apply sub_trace_plus_intror; auto.
-  Qed.
-
-  Theorem Trace_from_to_sub {ty} (e: Enum ty) m n p : n <= p -> (Trace_from_to e m n) ⊏ (Trace_from_to e m p).
-  Proof.
-    Local Hint Resolve Trace_from_to_sub'.
-    intros; replace p with (n + (p - n)) by nliamega; auto.
-  Qed.
-
-  Theorem Trace_lt_sub {ty} (e: Enum ty) m n : m <= n -> (Trace_lt e m) ⊏ (Trace_lt e n).
-  Proof.
-    intros H.
-    eapply sub_trace_trans; [apply trace_eq_weakenl; apply trace_lt_from_to_0_same| ].
-    eapply sub_trace_trans; [| apply trace_eq_weakenr; apply trace_lt_from_to_0_same].
-    apply Trace_from_to_sub; auto.
-  Qed.
-
-  Theorem Trace_lt_Enumerates m n {ty} (e: Enum ty) v t 
-  : m < n
-    -> Enumerates e m v t
-    -> t ⊏ (Trace_lt e n).
-  Proof.
-    intros Hmn Enum.
-    destruct n; [ nliamega|].
-    apply sub_trace_In_equiv.
-    intros x tg Hin.
-    apply set_In_Trace_lt.
-    exists m; split; auto.
-    unfold Trace_on.
-    destruct (Enumerates_from_dec _ _) as [[v' t'] Henum].
-    simpl.
-    destruct (Enumerates_from_fun _ _ _ _ _ _ Enum Henum); subst; assumption.
-  Qed.
-
-End EnumTrace.
 Ltac get_trace_ons :=
   repeat (match goal with
-            | [ H: Enumerates _ _ _ _ |- _] => apply Trace_on_correct in H
-          end).
-
-Section Fairness.
-  Definition Fair2 {tout} (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
-    forall n,
-    exists equilibrium,
-      match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
-        | Tracing l_uses r_uses _ _ =>
-          n < equilibrium /\ l_uses ≃ r_uses
-      end.
-
-  Definition Fair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
-    forall n,
-    exists equilibrium,
-      match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
-        | Tracing z_uses o_uses t_uses _ =>
-          n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses
-      end.
-
-  (* Definition Fair4 (k : Enum -> Enum -> Enum -> Enum -> Enum) := *)
-  (*   forall n, *)
-  (*   exists equilibrium, *)
-  (*     match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat) (E_Trace three E_Nat)) equilibrium with *)
-  (*       | Tracing z_uses o_uses tw_uses th_uses => *)
-  (*         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ tw_uses /\ tw_uses ≃ th_uses *)
-  (*     end. *)
-
-  Definition AltUnfair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
-    exists threshold,
-      forall eq_cand,
-        eq_cand > threshold ->
-        match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) eq_cand with
-          | Tracing use0 use1 use2 _ =>
-            (~ (use0 ≃ use1)) \/ (~ (use1 ≃ use2)) \/ (~ (use0 ≃ use2))
-        end.
-
-  Theorem AltUnfair3Suff {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) : AltUnfair3 (@k) -> ~ (Fair3 (@k)).
-  Proof.
-    unfold AltUnfair3, Fair3, not.
-    intros [thresh Halt] Hunf.
-    destruct (Hunf thresh) as [eq_cand Hblah].
-    clear Hunf.
-    remember (Halt eq_cand).
-    clear Halt Heqy.
-    destruct (Trace_lt (k _ _ _ (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
-                       eq_cand) as [t0 t1 t2 t3] in *.
-    intuition.
-    assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction.
-  Qed.
+     | [ H: Enumerates _ _ _ _ |- _] => apply Trace_on_correct in H
+   end).
   
-  Section SumFair.
-    Lemma Sum_precise
-    : forall {tyl tyr} n (e1: Enum tyl) (e2: Enum tyr),
-        Trace_lt (E_Sum e1 e2) (double n) ≡ (Trace_lt e1 n) ⊔ (Trace_lt e2 n).
-    Proof.
-      intros; induction n; [compute; tauto|];
-      rewrite double_S; unfold Trace_lt at 1; fold (@Trace_lt (TSum tyl tyr)); unfold Trace_on;
-      remember (Enumerates_from_dec (E_Sum e1 e2) (S (double n))) as Er; destruct Er as [[vr tr] Er];
-      remember (Enumerates_from_dec (E_Sum e1 e2) (double n)) as El; destruct El as [[vl tl] El]; simpl;
-      eapply trace_eq_trans; [apply trace_plus_assoc|];
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]|];
-      eapply trace_eq_trans; [apply trace_eq_symm; apply trace_plus_assoc|];
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|]; apply trace_plus_cong; [apply trace_eq_refl|]; apply IHn |];
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_assoc]|];
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl| apply trace_plus_cong; [apply trace_plus_comm | apply trace_eq_refl]]|];
-      eapply trace_eq_trans; [apply trace_plus_cong; [apply trace_eq_refl|apply trace_eq_symm; apply trace_plus_assoc ]|];
-      eapply trace_eq_trans; [apply trace_plus_assoc|];
-      apply trace_plus_cong; apply trace_plus_cong; [| apply trace_eq_refl | | apply trace_eq_refl];
-      [ unfold Trace_on; destruct (Enumerates_from_dec e1 n) as [[x' t'] Henum']; simpl;
-        clear HeqEr; clear dependent vr; clear tr HeqEl;
-        invert_Enumerates; subst; even_odd_crush; subst; Eff; subst; apply trace_eq_refl
-      | clear HeqEr HeqEl; unfold Trace_on;
-        destruct (Enumerates_from_dec e2 n) as [[x' t'] Henum']; simpl;
-        invert_Enumerates; subst; even_odd_crush; repeat subst;
-        Eff; subst; apply trace_eq_refl
-      ].
-    Qed.
+Theorem trace_on_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2: Enum tyr) m
+: (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+  -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+  -> trace_proj tg (Trace_on (E_Pair e1 e2) m) = ∅.
+Proof.
+  intros; unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
+  invert_Enumerates;
+  get_trace_ons; subst;
+  rewrite trace_proj_plus_distrl;
+  repeat (match goal with
+     | [H1: forall (x: ?t), _ = _,
+        x: ?t
+       |- _] => rewrite H1 in *
+   end); trivial.
+Qed.
 
-    (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
-    Theorem SumFair : Fair2 (@E_Sum).
-    Proof.
-      unfold Fair2.
-      intros n.
-      exists (double (S n)).
-      remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (double (S n))) as t; destruct t as [tz to ttw tth].
-      split; [unfold double; nliamega| ].
+Theorem trace_lt_Pair_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
+: (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+  -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+  -> trace_proj tg (Trace_lt (E_Pair e1 e2) m) = ∅.
+Proof.
+  induction m; [intros; destruct tg; reflexivity|].
+  intros H1 H2.
+  unfold Trace_lt; fold (@Trace_lt (TPair tyl tyr)).
+  rewrite trace_proj_plus_distrl.
+  apply subset_nil_nil.
+  apply subset_union_both.
+  rewrite trace_on_Pair_off; [apply subset_refl| |]; auto.
+  rewrite IHm; auto.
+Qed.
 
-      remember (Sum_precise (S n) (E_Trace zero E_Nat) (E_Trace one E_Nat)).
-      apply set_eq_trans with (z_to_n (S n));
-        [ replace tz with (trace_proj zero (Tracing tz to ttw tth)) by trivial
-        | replace to with (trace_proj one (Tracing tz to ttw tth)) by trivial; apply set_eq_symm
-        ];
-        (eapply set_eq_trans; [apply trace_eq_proj; rewrite Heqt; eassumption|]).
-      rewrite trace_proj_plus_distrl; rewrite (trace_lt_Nat_off _ zero one); [| discriminate].
-      eapply set_eq_trans; [apply set_union_unitr | apply set_eq_symm; apply trace_lt_Nat].
+Theorem trace_on_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
+: (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+  -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+  -> trace_proj tg (Trace_on (E_Sum e1 e2) m) = ∅.
+Proof.
+  intros Hl Hr; unfold Trace_on;
+  remember (Enumerates_from_dec (E_Sum e1 e2) m) as x eqn:Heqx; clear Heqx; destruct x as [[v t] Henum]; simpl;
+  invert_Enumerates; get_trace_ons; subst; auto.
+Qed.
 
-      rewrite trace_proj_plus_distrl; rewrite (trace_lt_Nat_off _ one zero); [| discriminate].
-      eapply set_eq_trans; [apply set_union_unitl | apply set_eq_symm; apply trace_lt_Nat].
-    Qed.
-  End SumFair.
+Theorem trace_lt_Sum_off {tyl tyr} tg (e1 : Enum tyl) (e2 : Enum tyr) m
+: (forall n, trace_proj tg (Trace_on e1 n) = ∅)
+  -> (forall n, trace_proj tg (Trace_on e2 n) = ∅)
+  -> trace_proj tg (Trace_lt (E_Sum e1 e2) m) = ∅.
+Proof.
+  induction m; [intros; compute; destruct tg; trivial|];
+  intros; unfold Trace_lt; (fold (@Trace_lt (TSum tyl tyr))); rewrite trace_proj_plus_distrl;
+  rewrite IHm; auto; apply trace_on_Sum_off; auto.
+Qed.
 
-  Section NaiveSum3Unfair.
-    Definition NaiveSum3 {ty1 ty2 ty3} (e1: Enum ty1) (e2: Enum ty2) (e3: Enum ty3) :=
-      E_Sum e1 (E_Sum e2 e3).
+Theorem set_In_trace' {ty} tg (e : Enum ty) x m n :
+  x ∈ (trace_proj tg (Trace_from_to e m (S (m + n))))
+  <->
+  (exists k,
+     m <= k < S (m + n) /\ x ∈ (trace_proj tg (Trace_on e k))).
+Proof.
+  
+  split.
+  generalize dependent m.
+  induction n; intros m;
+  [
+    replace (S (m + 0)) with (S m) by nliamega;
+    destruct tg;
+    (intros H; exists m; split; [nliamega |];
+                      unfold Trace_from_to in H;
+                      destruct (le_lt_dec (S m) m);
+                      [apply le_Sn_n in l; contradiction
+                      |
+                      fold (@Trace_from_to ty) in H;
+                        rewrite trace_from_to_self in H;
+                        remember ((Trace_on e m) ⊔ ε) as t;
+                        destruct t;
+                        simpl in *;
+                        remember (Trace_on e m) as t';
+                        destruct t';
+                        simpl in *;
+                        inversion Heqt; subst; auto ])
+  | unfold Trace_from_to; fold (@Trace_from_to ty);
+    destruct (le_lt_dec (S (m + S n)) m) as [contra | _]; [ assert (~ (S (m + S n)) <= m) by (apply gt_not_le; nliamega); contradiction|];
+    unfold trace_plus;
+    remember (Trace_on e (m + S n))as t; destruct t as [tl tr];
+    remember (Trace_from_to e m (m + S n)) as t; destruct t as [t0' t1' t2' t3'];
+    replace (m + S n) with (S (m + n)) in * by nliamega;
+    destruct tg;
+    (simpl; intros Hin_union;
+     destruct (set_union_elim eq_nat_dec _ _ _ Hin_union);
+     [exists (S (m + n)); split; [nliamega|]; destruct Heqt; auto |]);
+    [ replace t0' with (trace_proj zero  (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
+    | replace t1' with (trace_proj one   (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
+    | replace t2' with (trace_proj two   (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
+    | replace t3' with (trace_proj three (Trace_from_to e m (S (m + n)))) in H by (rewrite <-Heqt0; auto)
+    ];
+    (destruct (IHn m H) as [k [Hless Hinn]]; exists k; (split; [nliamega | auto]))].
 
-    Notation x4 n := (double (double n)).
-    
-    Lemma par4 : forall n, (n = x4 (div2 (div2 n)) /\ even n /\ even (div2 n))
-                           \/ (n = (x4 (div2 (div2 n))) + 1 /\ odd n /\ even (div2 n))
-                           \/ (n = (x4 (div2 (div2 n))) + 2 /\ even n /\ odd (div2 n))
-                           \/ (n = (x4 (div2 (div2 n))) + 3 /\ odd n /\ odd (div2 n)).
-    Proof.
-      intros.
-      destruct (even_odd_dec n).
-      - remember (even_div2 n e).
-        destruct (even_odd_dec (div2 n)).
-        + left; split; [| split]; try assumption.
-          rewrite <-even_double by assumption.
-          apply even_double; assumption.
-        + right; right; left; split; [| split]; try assumption.
-          replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
-          rewrite <-double_S.
-          rewrite <-odd_double by assumption.
-          apply even_double; assumption.
-      - destruct (even_odd_dec (div2 n)).
-        + right; left; split; [| split]; try assumption.
-          rewrite <-even_double by assumption.
-          replace (double (div2 n) + 1) with (S (double (div2 n))) by nliamega.
-          apply odd_double; assumption.
-        + right; right; right; split; [| split]; try assumption.
-          replace (double (double (div2 (div2 n))) + 3) with (S (S (S (double (double (div2 (div2 n))))))) by nliamega.
-          rewrite <-double_S.
-          rewrite <-odd_double by assumption.
-          apply odd_double; assumption.
-    Qed.
+  intros [k [[Hmk HkSmn] Hin]];
+    induction n as [| n].
+  replace (S (m + 0)) with (S m) in * by nliamega;
+    unfold Trace_from_to;
+    destruct (le_lt_dec (S m) m); [apply le_Sn_n in l; contradiction|];
+    fold (@Trace_from_to ty); rewrite trace_from_to_self; assert (k = m) by nliamega; subst;
 
-    Lemma div4big : forall n, n >= 8 -> (div2 (div2 n) >= 2).
-    Proof.
-      intros n ?; remember (n - 8) as k; replace n with (8 + k); simpl; nliamega.
-    Qed.
+    remember ((Trace_on e m) ⊔ ε) as t;
+    destruct t; simpl in *;
+    remember (Trace_on e m) as t';
+    destruct t';
+    simpl in *;
+    inversion Heqt; subst; auto.
 
-    Lemma div2div4 : forall n, n >= 8 -> exists m p, 2 * m <= n < 4 * p /\ p < m.
-    Proof.
-      intros n Hn4.
-      remember (S (div2 (S (div2 n)))) as p.
-      remember (S p) as m.
-      exists m.
-      exists p.
-      split; [| nliamega].
-      subst.
-      replace (4 * _) with (2 * (2 * (S (div2 (S (div2 n)))))) by nliamega.
-      assert (div2 (div2 n) >= 2) by (apply div4big; assumption).
-      repeat (rewrite <-double_twice).
-      destruct (par4 n) as [[Hpar [? ?]] | [[Hpar [? ?]] | [[Hpar [? ?]] | [Hpar [? ?]]]]]; rewrite Hpar at 2; rewrite Hpar at 3.
-      - clear H0; split.
-        + rewrite double_twice; rewrite double_twice.
-          apply mult_le_compat_l.
-          rewrite <-even_div2 by assumption.
-          unfold double.
-          nliamega.
-        + rewrite <-even_div2 by assumption.
-          (repeat (rewrite double_twice)).
-          nliamega.
-      - split.
-        + rewrite double_S.
-          replace (double (double (div2 (div2 n))) + 1 ) with (S (double (double (div2 (div2 n))))) by nliamega.
-          apply le_n_S.
-          rewrite <-even_div2 by assumption.
-          unfold double.
-          nliamega.
-        + rewrite <-even_div2 by assumption.
-          replace (_ + 1) with (S (double (double (div2 (div2 n))))) by nliamega.
-          unfold double; nliamega.
-      - split.
-        + rewrite double_S.
-          rewrite double_S.
-          rewrite <-odd_div2 by assumption.
-          rewrite double_S.
-          replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
-          repeat apply le_n_S.
-          unfold double; nliamega.
-        + rewrite <-odd_div2 by assumption.
-          repeat rewrite double_S.
-          nliamega.
-      - split.
-        + rewrite double_S.
-          rewrite double_S.
-          rewrite <-odd_div2 by assumption.
-          rewrite double_S.
-          replace (double (double (div2 (div2 n))) + 2) with (S (S (double (double (div2 (div2 n)))))) by nliamega.
-          repeat apply le_n_S.
-          unfold double; nliamega.
-        + rewrite <-odd_div2 by assumption.
-          repeat rewrite double_S.
-          nliamega.
-    Qed.
+  replace (S (m + n)) with (m + S n) in * by nliamega;
+    destruct (eq_nat_dec k (m + S n)); subst;
+    unfold Trace_from_to; fold (@Trace_from_to ty);
+    (destruct (le_lt_dec (S (m + S n)) m); [ assert (~ (S (m + S n) <= m)) by (apply le_not_gt; nliamega); contradiction| ]); (remember (Trace_on e (m + S n)) as t); destruct t as [t0 t1 t2 t3];
+    (remember (Trace_from_to e m (m + S n)) as t'); destruct t' as [t0' t1' t2' t3'].
+  destruct tg; (
+      simpl in *; apply set_union_intro1; auto).
 
-    Lemma SumSum_precise
-    : forall n {ty1 ty2 ty3} (e1: Enum ty1) (e2: Enum ty2) (e3: Enum ty3),
-        Trace_lt (E_Sum e1 (E_Sum e2 e3)) (double (double n))
-        ≡ (Trace_lt e1 (double n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
-    Proof.
-      intros.
-      eapply trace_eq_trans; [apply Sum_precise|].
-      apply trace_plus_cong; [apply trace_eq_refl|].
-      apply Sum_precise.
-    Qed.
+  destruct tg; simpl in *; apply set_union_intro2; apply IHn; nliamega.
+Qed.
 
-    Definition NS3T := NaiveSum3 (E_Trace zero E_Nat)
-                                 (E_Trace one  E_Nat)
-                                 (E_Trace two  E_Nat).
+Theorem set_In_Trace_from_to {ty} (tg : tag) (e: Enum ty) x m n :
+  (m < n) ->
+  (x ∈ (trace_proj tg (Trace_from_to e m n)) <->
+   (exists k, m <= k < n /\ x ∈ (trace_proj tg (Trace_on e k)))).
+Proof.
+  intros H; remember (pred (n - m)) as p; replace n with (S (m + p)) in * by nliamega; clear n;
+  apply set_In_trace'.
+Qed.
 
-    Lemma NS3Tl_precise
-    : forall n,
-        (trace_proj zero (Trace_lt NS3T (double n))) ≃ (z_to_n n).
-    Proof.
-      intros n.
-      eapply set_eq_trans; [apply trace_eq_proj; apply Sum_precise|].
-      rewrite trace_proj_plus_distrl.
-      eapply set_eq_trans; [| apply set_union_unitr].
-      apply set_union_cong.
-      apply set_eq_symm; apply trace_lt_Nat.
-      rewrite trace_lt_Sum_off; [apply set_eq_refl| | ]; (intros; rewrite trace_off; [trivial | discriminate ]).
-    Qed.
+Theorem set_In_Trace_lt {ty} tg (e: Enum ty) x n :
+  x ∈ (trace_proj tg (Trace_lt e (S n)))
+  <->
+  exists k, k < S n /\ x ∈ (trace_proj tg (Trace_on e k)).
+Proof.
+  destruct (set_In_Trace_from_to tg e x 0 (S n)) as [Hl Hr]; try nliamega.
+  split; [clear Hr|clear Hl].
+  intros Hin.
+  assert (x ∈ (trace_proj tg (Trace_from_to e 0 (S n)))).
+  apply In_subset_def with (trace_proj tg (Trace_lt e (S n))); [| assumption].
+  apply sub_trace_proj; apply trace_eq_weakenl; apply trace_lt_from_to_0_same.
+  destruct (Hl H) as [k [? Hink]].
+  exists k; split; [nliamega| assumption].
+  
+  intros Hex; destruct Hex as [k [Hbound Hink]].
+  assert (x ∈ (trace_proj tg (Trace_from_to e 0 (S n)))).
+  apply Hr.
+  exists k; split; [nliamega| assumption].
+  apply In_subset_def with (trace_proj tg (Trace_from_to e 0 (S n))); [| assumption].
+  apply sub_trace_proj; apply trace_eq_weakenr; apply trace_lt_from_to_0_same.
+Qed.
 
-    Lemma NS3Tr_precise
-    : forall n,
-        (trace_proj one (Trace_lt NS3T (double (double n)))) ≃ z_to_n n.
-    Proof.
-      intros n.
-      eapply set_eq_trans; [apply trace_eq_proj; apply SumSum_precise|].
-      eapply set_eq_trans; [apply trace_eq_proj; apply trace_plus_comm|].
-      eapply set_eq_trans; [apply trace_eq_proj; apply trace_eq_symm; apply trace_plus_assoc|].
-      rewrite trace_proj_plus_distrl.
-      eapply set_eq_trans; [| apply set_union_unitr].
-      apply set_union_cong; [apply set_eq_symm; apply trace_lt_Nat|].
-      rewrite trace_proj_plus_distrl.
-      repeat (rewrite trace_lt_Nat_off; [| discriminate]).
-      compute; tauto.
-    Qed.
+Theorem sub_trace_plus_introl t1 t2 t3
+: t1 ⊏ t2 -> t1 ⊏ (t2 ⊔ t3).
+Proof.
+  unfold sub_trace, trace_plus; destruct t1, t2, t3.
+  intros H; destruct H as [H1 [H2 [H3 H4]]].
+  Local Hint Resolve subset_union_transl.
+  split4; auto.
+Qed.
 
-    Theorem NaiveSum3Unfair : ~ (Fair3 (@NaiveSum3)).
-    Proof.
-      apply AltUnfair3Suff; unfold AltUnfair3; fold NS3T.
-      exists 7.
-      intros n H.
-      remember (Trace_lt NS3T n) as t; destruct t as [s0 s1 s2 s4].
-      assert (exists m p, 2 * m <= n < 4 * p /\ p < m) as [m [p [[Hmn Hnp] Hpn]]] by (apply div2div4; nliamega).
-      left.
-      
-      assert (~ s0 ⊂ s1); [| intros [? ?]; contradiction ].
+Theorem sub_trace_plus_intror t1 t2 t3
+: t1 ⊏ t3 -> t1 ⊏ (t2 ⊔ t3).
+Proof.
+  unfold sub_trace, trace_plus; destruct t1, t2, t3.
+  intros H; destruct H as [H1 [H2 [H3 H4]]].
+  Local Hint Resolve subset_union_transr.
+  split4; auto.
+Qed.
 
-      assert ((z_to_n m) ⊂ s0).
-      rewrite <-double_twice in *.
-      replace s0 with (trace_proj zero (Trace_lt NS3T n)) by (rewrite <-Heqt; trivial).
-      eapply subset_trans; [| apply sub_trace_proj; apply Trace_lt_sub; apply Hmn ].
-      apply set_subset_weaken; apply set_eq_symm; apply NS3Tl_precise.
-      
-      assert (s1 ⊂ (z_to_n p)).
-      replace (4 * p) with (double (double p)) in * by (simpl; unfold double; nliamega).
-      replace s1 with (trace_proj one (Trace_lt NS3T n)) by (rewrite <-Heqt; trivial).
-      eapply subset_trans.
-      apply sub_trace_proj.
-      apply (@Trace_lt_sub (TSum TNat (TSum TNat TNat)) )with (n := double (double p)); nliamega.
-      apply set_subset_weaken.
-      apply NS3Tr_precise.
-      
-      intros Hcontra.
-      eapply z_to_n_nosub; [apply Hpn|].
-      repeat (eapply subset_trans; [eassumption|]); apply subset_refl.
-    Qed.
-  End NaiveSum3Unfair.
+Theorem Trace_from_to_sub' {ty} (e : Enum ty) m n p : (Trace_from_to e m n) ⊏ (Trace_from_to e m (n + p)).
+Proof.
+  induction p.
+  replace (n + 0) with n by nliamega; apply sub_trace_refl.
+  replace (n + S p) with (S (n + p)) by nliamega.
+  unfold Trace_from_to at 2; fold (@Trace_from_to ty).
+  destruct (le_lt_dec (S (n + p))).
+  replace (Trace_from_to e m n) with ε; [apply sub_trace_refl|].
+  unfold Trace_from_to.
+  destruct n.
+  destruct (le_lt_dec 0 m); auto.
+  destruct (le_lt_dec (S n) m); auto; nliamega.
+  apply sub_trace_plus_intror; auto.
+Qed.
 
-  Section PairFair.
-    Definition E_PairNN := (E_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
-    Lemma Pair_layer {tyl tyr} (e1: Enum tyl) (e2: Enum tyr) n
-    : Trace_from_to (E_Pair e1 e2) (n * n) (S n * S n)
-      ≡ (Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n)).
-    Proof.
-      apply trace_eq_eq'_equiv; split.
-      (* trace (e1 x e2) n^2 (n+1)^2 < (trace ) *)
-      (* TODO: come at this hard with some Ltac *)
-      - apply sub_trace_In_equiv; intros x tg Hin;
-        rewrite set_In_Trace_from_to in Hin by nliamega; destruct Hin as [k [[Hnnk HkSnSn] Hin]];
-        unfold Trace_on in Hin;
-        destruct (Enumerates_from_dec (E_Pair e1 e2) k) as [[v t] Henum]; simpl in Hin;
-        invert_Enumerates; subst;
-        destruct (sub_trace_In_equiv (lt ⊔ rt)
-                                     ((Trace_lt e1 (S n)) ⊔ (Trace_lt e2 (S n))));
-        apply H; [| assumption];
-        clear H H0;
-        apply sub_trace_plus_cong;
-          eapply Trace_lt_Enumerates; [| eassumption | | eassumption];
-          destruct (Pairing_bound ln rn k n); auto.
-      - eapply sub_trace_trans; [|apply trace_eq_weakenl; apply sub_trace_plus_eq; apply sub_trace_refl];
-        apply sub_trace_plus_cong.
-        (* trace e1 0..n+1 < trace (e1 x e2) n^2 (n+1)^2 *)
-        + apply sub_trace_In_equiv; intros x tg Hin;
-          rewrite set_In_Trace_lt in Hin by nliamega;
-          destruct Hin as [k [Hkn Hin]];
-          apply set_In_Trace_from_to; [nliamega|];
-          destruct (le_lt_dec n k);
-            [exists (k*k + k + n) | exists (k + n * n)];
-            (split; [nliamega|]);
-            unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
-          invert_Enumerates;
-          rewrite trace_proj_plus_distrl; apply set_union_intro1;
-          [ assert (Pairing (k * k + k + n) k n) by (constructor; nliamega)
-          | assert (Pairing (k + n * n) k n) by (constructor; nliamega)];
-          rewrite_pairing_to_fun; get_trace_ons; subst; auto.
-        + apply sub_trace_In_equiv; intros x tg Hin;
-          rewrite set_In_Trace_lt in Hin by nliamega;
-          destruct Hin as [k [Hkn Hin]];
-          apply set_In_Trace_from_to; [nliamega|];
-          destruct (le_lt_dec k n);
-            [exists (n * n + n + k) | exists (n + k * k)]; (split; [nliamega|]);
-            unfold Trace_on; destruct (Enumerates_from_dec _ _) as [[v t] Henum]; simpl;
-            invert_Enumerates;
-            rewrite trace_proj_plus_distrl; apply set_union_intro2;
-            [ assert (Pairing (n * n + n + k) n k) by (constructor; nliamega)
-            | assert (Pairing (n + k * k) n k) by (constructor; nliamega) ];
-          rewrite_pairing_to_fun; get_trace_ons; subst; auto.
-    Qed.
+Theorem Trace_from_to_sub {ty} (e: Enum ty) m n p : n <= p -> (Trace_from_to e m n) ⊏ (Trace_from_to e m p).
+Proof.
+  Local Hint Resolve Trace_from_to_sub'.
+  intros; replace p with (n + (p - n)) by nliamega; auto.
+Qed.
 
-    Lemma PairNN_layer :
-      forall n,
-        Trace_from_to E_PairNN (n * n) (S n * S n)
-        ≡ Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅.
-    Proof.
-      intros n.
-      eapply trace_eq_trans.
-      unfold E_PairNN; apply Pair_layer.
-      apply trace_eq_symm.
-      apply trace_eq_trans with ((Tracing (z_to_n (S n)) ∅ ∅ ∅)
-                                   ⊔ (Tracing ∅ (z_to_n (S n)) ∅ ∅)).
-      remember (S n) as k; unfold trace_plus; split4; auto; apply set_eq_symm; apply set_union_unitl.
-      apply trace_plus_cong; rewrite trace_proj_reconstruct.
-      split4; [ apply trace_lt_Nat | | | ]; rewrite trace_lt_Nat_off by discriminate; auto.
-      split4; [ | apply trace_lt_Nat | | ]; rewrite trace_lt_Nat_off by discriminate; auto.
-    Qed.      
+Theorem Trace_lt_sub {ty} (e: Enum ty) m n : m <= n -> (Trace_lt e m) ⊏ (Trace_lt e n).
+Proof.
+  intros H.
+  eapply sub_trace_trans; [apply trace_eq_weakenl; apply trace_lt_from_to_0_same| ].
+  eapply sub_trace_trans; [| apply trace_eq_weakenr; apply trace_lt_from_to_0_same].
+  apply Trace_from_to_sub; auto.
+Qed.
 
-    Lemma Pair_precise
-    : forall n {ty1 ty2} e1 e2,
-        (Trace_lt (@E_Pair ty1 ty2 e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊔ (Trace_lt e2 n)).
-      intros n.
-      induction n as [| n IHn]; [  intros; compute; tauto| ].
-      intros.
-      eapply trace_eq_trans.
-      apply trace_from_to_0_split with (m := n * n) (n := S n * S n); nliamega.
-      eapply trace_eq_trans; [apply sub_trace_plus_eq| apply Pair_layer].
-      eapply sub_trace_trans; [| apply trace_eq_weakenl; apply trace_eq_symm; apply Pair_layer ].
-      eapply sub_trace_trans; [apply trace_eq_weakenl; apply IHn|].
-      apply sub_trace_plus_cong; apply Trace_lt_sub; nliamega.
-    Qed.
-
-    Lemma PairPair_precise
-    : forall {ty1 ty2 ty3} n e1 e2 e3,
-        Trace_lt (@E_Pair ty1 _ e1 (@E_Pair ty2 ty3 e2 e3)) ((n * n) * (n * n))
-        ≡ (Trace_lt e1 (n * n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
-    Proof.
-      intros.
-      eapply trace_eq_trans; [apply Pair_precise|].
-      apply trace_plus_cong; [apply trace_eq_refl| ].
-      apply Pair_precise.
-    Qed.
-
-    Lemma Pair_Fair_precise :
-      forall n, Trace_lt E_PairNN (n * n) ≡ Tracing (z_to_n n) (z_to_n n) ∅ ∅.
-    Proof.
-      induction n.
-      compute; tauto.
-      apply trace_eq_trans
-      with (t2 := ((Trace_lt E_PairNN (n * n)) ⊔ (Trace_from_to E_PairNN (n * n) (S n * S n)))).
-      apply trace_from_to_0_split; nliamega.
-      apply trace_eq_trans with (t2 := ((Tracing (z_to_n n) (z_to_n n) ∅ ∅)
-                                        ⊔ (Tracing (z_to_n (S n)) (z_to_n (S n)) ∅ ∅))).
-      apply trace_plus_cong; auto.
-      apply PairNN_layer.
-      apply trace_eq_trans with (t2 := (Tracing (z_to_n (S n)) (z_to_n (S n))) ∅ ∅).
-      unfold trace_eq.
-      split4;
-        [ (apply subset_union_eq; unfold z_to_n at 2; fold z_to_n; apply set_subset_add; apply subset_refl)
-        | (apply subset_union_eq; unfold z_to_n at 2; fold z_to_n; apply set_subset_add; apply subset_refl)
-        | apply set_eq_refl
-        | apply set_eq_refl ].
-
-      apply trace_eq_refl.
-    Qed.
-
-    Theorem PairFair : Fair2 (@E_Pair).
-      unfold Fair2.
-      intros n.
-      exists ((S n) * (S n)).
-
-      fold E_PairNN.
-      remember (Trace_lt E_PairNN (S n * S n)) as t.
-      destruct t as [t0 t1 t2 t3].
-      split; [nliamega|].
-      remember (Pair_Fair_precise (S n)) as Hteq; clear HeqHteq.
-      unfold trace_eq in Hteq.
-      remember (Trace_lt E_PairNN (S n * S n)) as t'.
-      destruct t'.
-      inversion Heqt; subst s s0.
-      destruct4 Hteq.
-      eapply set_eq_trans; [| apply set_eq_symm]; eauto.
-    Qed.
-  End PairFair.
-
-  Section NaiveTripleUnfair.
-
-    Definition NaiveTriple3 {ty1 ty2 ty3} e1 e2 e3 :=
-      @E_Pair ty1 _ e1 (@E_Pair ty2 ty3 e2 e3).
-
-    Definition traceNP3 := Trace_lt (NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
-
-    Definition NP3T := NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
-
-    Theorem NaiveTripleUnfair : ~ (Fair3 (@NaiveTriple3)).
-    Proof.
-      apply AltUnfair3Suff.
-      unfold AltUnfair3.
-      fold NP3T.
-      exists 15.
-      intros n H.
-      assert (16 <= n) as H' by nliamega ; clear H.
-      remember (Trace_lt NP3T n) as t; destruct t as [t0 t1 t2 t3].
-      destruct (sqrt_4th_root_spread n) as [m [p [[Hmn Hnp] Hppmm]]]; auto.
-
-      left.
-      assert (~ t0 ⊂ t1); [ | intros []; contradiction].
-
-      assert ((z_to_n m) ⊂ t0).
-      - remember (Trace_lt NP3T (m * m)) as t; destruct t as [mm0 mm1 mm2 mm3].
-        assert ((Trace_lt NP3T (m * m)) ⊏ (Trace_lt NP3T n))
-          by (apply Trace_lt_sub; auto).
-        unfold sub_trace in H.
-        rewrite <-Heqt in H.
-        rewrite <-Heqt0 in H.
-        destruct4 H.
-        eapply subset_trans; try eassumption.
-        clear H H0 H1 H2; clear dependent t0; clear t1 t2 t3.
-        unfold NP3T, NaiveTriple3 in *.
-        remember (Pair_precise m (E_Trace zero E_Nat) (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat))).
-        clear Heqt.
-        rewrite <-Heqt0 in t.
-        remember (((Trace_lt (E_Trace zero E_Nat) m) ⊔ (Trace_lt (E_Pair (E_Trace one E_Nat) (E_Trace two E_Nat)) m))).
-        destruct t0.
-        replace mm0 with (trace_proj zero (Tracing mm0 mm1 mm2 mm3)) by auto.
-        eapply subset_trans; [| apply trace_eq_proj;  eassumption].
-        rewrite Heqt1.
-        rewrite trace_proj_plus_distrl.
-        apply subset_union_transl.
-        apply trace_lt_Nat.
-
-      - assert (t1 ⊂ (z_to_n p)).
-        remember (Trace_lt NP3T ((p * p) * (p * p))) as p4t.
-        assert ((Trace_lt NP3T n) ⊏ p4t) by (subst; apply Trace_lt_sub; auto; nliamega).
-        destruct p4t as [pt0 pt1 pt2 pt3].
-        unfold sub_trace in H0.
-        rewrite <-Heqt in H0.
-        destruct4 H0.
-        eapply subset_trans; try eassumption.
-        clear H0 H1 H2 H3; clear dependent t0; clear t1 t2 t3; clear dependent m; clear dependent n.
-        unfold NP3T in Heqp4t.
-        unfold NaiveTriple3 in Heqp4t.
-        remember (PairPair_precise p (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
-        clear Heqt.
-        rewrite <-Heqp4t in t.
-        apply set_subset_weaken.
-        replace pt1 with (trace_proj one (Tracing pt0 pt1 pt2 pt3)) by trivial.
-        clear Heqp4t.
-        eapply set_eq_trans.
-        apply trace_eq_proj.
-        apply t.
-        apply set_eq_symm.
-        eapply set_eq_trans.
-        apply trace_lt_Nat with (tg := one).
-        rewrite trace_proj_plus_distrl.
-        rewrite trace_proj_plus_distrl.
-        rewrite trace_lt_Nat_off with (tg2 := zero); [| discriminate].
-        rewrite trace_lt_Nat_off with (tg2 := two); [| discriminate].
-        apply set_eq_symm.
-        eapply set_eq_trans; [apply set_union_unitl|].
-        eapply set_eq_trans; [apply set_union_unitr|].
-        apply set_eq_refl.
-
-        intros Hsub01.
-        eapply z_to_n_nosub; [apply Hppmm|].
-        repeat (eapply subset_trans; try eassumption); apply subset_refl.
-    Qed.
-  End NaiveTripleUnfair.
-End Fairness.
+Theorem Trace_lt_Enumerates m n {ty} (e: Enum ty) v t 
+: m < n
+  -> Enumerates e m v t
+  -> t ⊏ (Trace_lt e n).
+Proof.
+  intros Hmn Enum.
+  destruct n; [ nliamega|].
+  apply sub_trace_In_equiv.
+  intros x tg Hin.
+  apply set_In_Trace_lt.
+  exists m; split; auto.
+  unfold Trace_on.
+  destruct (Enumerates_from_dec _ _) as [[v' t'] Henum].
+  simpl.
+  destruct (Enumerates_from_fun _ _ _ _ _ _ Enum Henum); subst; assumption.
+Qed.
