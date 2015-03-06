@@ -13,6 +13,17 @@ Ltac inj_crush :=
         | [ x : sum ?t1 ?t2 |- _] => destruct x
       end).
 
+Ltac my_crush :=
+  repeat (
+      match goal with
+        | [ |- forall x, _ ] => intros
+        | [|- _ /\ _ ] => split
+        | [H: _ /\ _ |- _ ] => destruct H
+        | [ |- context[if ?x then _ else _] ] => destruct x
+        | _ => auto
+      end
+    ).
+
 (* Try possible contradictions *)
 Ltac mycontra :=
   match goal with
@@ -23,8 +34,8 @@ Ltac mycontra :=
 (* sumbool notation a la cpdt *)
 Notation Yes := (left _).
 Notation No := (right _).
-Notation "l &&& r" := (if l then r else No) (at level 70).
 Notation Refine x := (if x then Yes else No).
+Notation "l &&& r" := (if l then Refine r else No) (at level 70).
 
 (* sumor notation a la cpdt *)
 Notation "{{ x }}" := (exist _ x _).

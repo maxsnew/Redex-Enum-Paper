@@ -17,322 +17,125 @@ Fixpoint subset (s1 s2 : set nat) :=
       x ∈ s2 /\ subset more s2
   end.
 Hint Unfold subset.
+Hint Unfold set_In.
+Hint Unfold In.
 Notation "s1 ⊂ s2" := (subset s1 s2) (at level 70, no associativity).
-
-Theorem subset_nil : forall s, nil ⊂ s.
-Proof.
-  auto.
-Qed.
-
-Theorem subset_nil_nil : forall s, s ⊂ nil -> s = nil.
-Proof.
-  induction s.
-  auto.
-  intros contra.
-  unfold subset in contra.
-  destruct contra.
-  inversion H.
-Qed.
 
 Definition set_eq s1 s2 := s1 ⊂ s2 /\ s2 ⊂ s1.
 Hint Unfold set_eq.
 Notation "s1 ≃ s2" := (set_eq s1 s2) (at level 70, no associativity).
 
-Lemma subset_consr s1 s2 n : s1 ⊂ s2 -> s1 ⊂ (cons n s2).
-Proof.
-  generalize dependent s2.
-  generalize dependent n.
-  induction s1.
-  constructor.
+Hint Extern 1 (_ /\ _) => split.
+Ltac set_crush :=
+  repeat match goal with
+           | [ H: ?x ∈ nil |- _] => inversion H; fail
+           | [ H: ?y ∈ ?x :: ?s |- _ ] => destruct H; subst
+           | [ H: ?x :: ?s ⊂ ?s' |- _ ] => destruct H
+           | [ |- ?x :: ?s ⊂ ?s'] => unfold subset; fold subset
+           | [ H: ?s ≃ ?s' |- _ ] => destruct H
+           | [ |- ?s ≃ ?s' ] => split
+           | _ => my_crush
+         end.
 
-  intros n s2 H.
-  unfold subset.
-  unfold subset in H.
-  destruct H.
-  fold subset in *.
+Theorem subset_nil : forall s, nil ⊂ s.
+Proof. set_crush. Qed.
+Hint Immediate subset_nil.
 
-  split.
-  constructor 2; auto.
-  apply IHs1; auto.
-Defined.
+Theorem subset_nil_nil : forall s, s ⊂ nil -> s = nil.
+Proof. induction s; set_crush. Qed.
 
-Definition subset_dec s1 s2 : { s1 ⊂ s2 } + { ~ (s1 ⊂ s2) }.
-Proof.
-  generalize dependent s2.
-  induction s1.
-  left; auto.
-
-  intros s2.
-  destruct (In_dec eq_nat_dec a s2).
-
-  destruct (IHs1 s2).
-  left; constructor; auto.
-
-  right.
-  unfold subset; fold subset.
-  intros H; destruct H; contradiction.
-
-  right.
-  intros H; destruct H; contradiction.
-Defined.
-
-Definition subset_nn s1 s2 : ~~(s1 ⊂ s2) -> s1 ⊂ s2.
-Proof.
-  destruct (subset_dec s1 s2); tauto.
-Qed.
-
-Definition set_eq_dec s1 s2 : { s1 ≃ s2 } + { ~ (s1 ≃ s2) }.
-Proof.
-  destruct (subset_dec s1 s2).
-  destruct (subset_dec s2 s1).
-  left; auto.
-  right; intros contra; destruct contra; apply n; auto.
-  right; intros contra; destruct contra; apply n; auto.
-Qed.
+Lemma subset_consr : forall s1 s2 n, s1 ⊂ s2 -> s1 ⊂ (n :: s2).
+Proof. induction s1; set_crush. Qed.
+Hint Resolve subset_consr.
 
 Theorem subset_refl s : s ⊂ s.
-Proof.
-  induction s; unfold subset; auto.
-  fold subset.
-  split.
-  constructor 1; auto.
-  apply subset_consr; auto.
-Qed.
+Proof. induction s; set_crush. Qed.
 Hint Immediate subset_refl.
 
 Theorem set_eq_refl s : s ≃ s.
-Proof.
-  split; apply subset_refl.
-Qed.
+Proof. set_crush. Qed.
 Hint Immediate set_eq_refl.
 
+
 Theorem subset_In : forall x s s', x ∈ s -> s ⊂ s' -> x ∈ s'.
-Proof.
-  intros x s.
-  generalize dependent x.
-  induction s as [| x s].
-  intros y s contra.
-  inversion contra.
+Proof. induction s; set_crush. Qed.
 
-  intros y s' Hyinxs Hsub.
-  destruct Hsub as [Hxins' Hsub].
-  destruct Hyinxs; subst; auto.
-Qed.
+Theorem subset_In_def : forall s s', (forall x, x ∈ s -> x ∈ s') -> s ⊂ s'.
+Proof. induction s; set_crush; apply IHs; set_crush. Qed.
 
-Theorem subset_In_def s s' : (forall x, x ∈ s -> x ∈ s') -> s ⊂ s'.
-Proof.
-  generalize dependent s'.
-  induction s.
-  intros; apply subset_nil.
-  split.
-  apply H; auto.
-  constructor; auto.
-  apply IHs.
-  intros x Hins.
-  apply H.
-  constructor 2; auto.
-Qed.
-
-Theorem In_subset_def s s' : s ⊂ s' -> (forall x, x ∈ s -> x ∈ s').
-Proof.
-  generalize dependent s'.
-  induction s.
-  intros s' _ x contra.
-  inversion contra.
-
-  intros s' Hsub x Hin.
-  destruct Hin.
-  destruct Hsub; subst.
-  auto.
-
-  apply IHs.
-  destruct Hsub; subst; auto.
-  auto.
-Qed.
-
+Theorem In_subset_def : forall s s', s ⊂ s' -> (forall x, x ∈ s -> x ∈ s').
+Proof. induction s; set_crush. Qed.
 Hint Resolve subset_In_def In_subset_def.
+
 Theorem subset_In_equiv s s' : s ⊂ s' <-> (forall x, x ∈ s -> x ∈ s').
-Proof.
-  split; eauto.
-Qed.
+Proof. split; eauto. Qed.
 
 Lemma set_subset_weaken : forall s1 s2, s1 ≃ s2 -> s1 ⊂ s2.
-Proof.
-  unfold set_eq.
-  tauto.
-Qed.
+Proof. set_crush. Qed.
+Hint Resolve set_subset_weaken.
 
 Theorem not_subset_In_def s s' x : x ∈ s -> ~(x ∈ s') -> ~ s ⊂ s'.
-Proof.
-  intros; eauto.
-Qed.
+Proof. intros; eauto. Qed.
 
 Lemma subset_trans : forall s1 s2 s3, s1 ⊂ s2 -> s2 ⊂ s3 -> s1 ⊂ s3.
 Proof.
-  intros s1.
-  induction s1 as [| x s1].
-  intros; apply subset_nil.
-  induction s2 as [| y s2].
-  intros s3 contra.
-  inversion contra.
-  inversion H.
-
-  intros s3 Hxy12 Hy23.
-  unfold subset; fold subset.
-  destruct Hxy12 as [Hxy2 H1y2].
-  split.
-
-  eapply subset_In.
-  apply Hxy2.
-  auto.
-  apply IHs1 with (s2 := (y :: s2)); auto.
+  intros s1; induction s1; [| induction s2]; set_crush; eauto 6.
 Qed.
-
+Hint Resolve subset_trans : slow.
 
 Lemma set_eq_trans : forall s1 s2 s3, s1 ≃ s2 -> s2 ≃ s3 -> s1 ≃ s3.
-Proof.
-  unfold set_eq.
-  intros s1 s2 s3 H1 H2; destruct H1; destruct H2.
-  split; eapply subset_trans; eauto.
-Qed.
+Proof. set_crush; eauto. Qed.
 
 Lemma set_eq_symm : forall s1 s2, s1 ≃ s2 -> s2 ≃ s1.
-Proof.
-  intros s1 s2 H; inversion H; split; auto.
-Qed.
+Proof. set_crush; eauto. Qed.
 
 (* Theorem set_union_or : forall s1 s2, s1 ⊂ (s1 ∪ s2). *)
 
 Lemma set_add_subset : forall x s1 s2, x ∈ s2 -> s1 ⊂ s2 -> (set_add' x s1) ⊂ s2.
 Proof.
-
-  intros y s1.
-  induction s1 as [| x s1].
-  simpl; auto.
-  intros s2 Hy2 Hsub.
-  unfold set_add.
-  destruct (eq_nat_dec y x); subst; auto.
-  fold set_add.
-  unfold subset.
-  split; auto.
-  destruct Hsub; auto.
-  fold subset.
-  apply IHs1; auto.
-  destruct Hsub; auto.
+  intros ? s1; induction s1; my_crush; simpl; set_crush; eauto; split; eauto; apply IHs1; eauto.
 Qed.
 
 Lemma subset_cons_swap : forall x y s1 s2, s1 ⊂ s2 -> (x :: y :: s1) ⊂ (y :: x :: s2).
-Proof.
-  intros x y s1 s2.
-  destruct (eq_nat_dec x y).
-  simpl; subst.
-  split.
-  tauto.
-  split.
-  tauto.
-  apply subset_consr.
-  apply subset_consr.
-  assumption.
-
-  simpl.
-  split.
-  tauto.
-  split.
-  tauto.
-  apply subset_consr. apply subset_consr.
-  assumption.
-Qed.
+Proof. set_crush. Qed.
+Hint Resolve subset_cons_swap.
 
 Lemma set_eq_cons_swap : forall x y s1 s2, s1 ≃ s2 -> (x :: y :: s1) ≃ (y :: x :: s2).
-Proof.
-  split; destruct H; apply subset_cons_swap; auto.
-Qed.
+Proof. set_crush. Qed.
+Hint Resolve set_eq_cons_swap.
 
 Lemma set_cons_cons_subset : forall x s1 s2, s1 ⊂ s2 -> (x :: s1) ⊂ (x :: s2).
-Proof.
-  intros x s1 s2 Hsub.
-  unfold subset. fold subset.
-  split.
-  constructor; auto.
-  apply subset_consr; auto.
-Qed.
+Proof. set_crush. Defined.
+Hint Resolve set_cons_cons_subset.
 
 Lemma set_eq_cons_cons x s1 s2 : s1 ≃ s2 -> (x :: s1) ≃ (x :: s2).
-Proof.
-  intros H.
-  destruct H.
-  split; apply set_cons_cons_subset; auto.
-Qed.
+Proof. set_crush. Qed.
+Hint Resolve set_eq_cons_cons.
 
+Hint Unfold set_add.
 Lemma set_add_cons_eq : forall x s, (x :: s) ≃ (set_add' x s).
 Proof.
-  split.
-  generalize dependent x.
-  induction s as [| y s].
-  compute; tauto.
-  intros x.
-  simpl.
-  destruct (eq_nat_dec x y); subst.
-  split.
-  constructor; auto.
-  split.
-  constructor; auto.
-  apply subset_consr; auto.
-
-  split.
-  destruct (IHs x).
-  apply in_cons. apply H.
-  split.
-  constructor; auto.
-  apply subset_trans with (s2:= (x :: s)).
-  apply subset_consr; auto.
-
-  apply subset_trans with (s2 := (set_add' x s)).
-  apply IHs.
-  apply subset_consr; auto.
-
-  generalize dependent x.
-  induction s as [| y s].
-  compute; tauto.
-  intros x.
-  simpl.
-  destruct (eq_nat_dec x y).
-  apply subset_consr; auto.
-  apply subset_trans with (y :: x :: s).
-  apply set_cons_cons_subset.
-  apply IHs.
-  apply subset_cons_swap; auto.
+  split; generalize dependent x; induction s; set_crush; simpl; set_crush; eauto 6.
 Qed.
+Hint Immediate set_add_cons_eq.
 
 Lemma set_add_cons_subset : forall x s1 s2, s1 ⊂ s2 -> (x :: s1) ⊂ (set_add' x s2).
-Proof.
-  intros x s1 s2 Hsub.
-  apply subset_trans with (s2 := (x :: s2)).
-  apply set_cons_cons_subset; auto.
-  apply set_subset_weaken.
-  apply set_add_cons_eq.
-Qed.
+Proof. intros x s1 s2 Hsub; eauto with slow. Qed.
+Hint Resolve set_add_cons_subset.
 
 Lemma set_union_unitl : forall s, (∅ ∪ s) ≃ s.
 Proof.
   split.
-  induction s; auto.
-
-  unfold set_union in *.
+  induction s; auto;
+  unfold set_union in *;
   replace (((fix set_union (x y : set nat) {struct y} :
                set nat :=
                match y with
                  | nil => x
                  | a1 :: y1 => set_add eq_nat_dec a1 (set_union x y1)
                end) ∅ s
-           )) with (∅ ∪ s) in * by auto.
-  apply set_add_subset; auto.
-  constructor; auto.
-  apply subset_consr; auto.
-
-  induction s; auto.
-  unfold set_union.
-  apply set_add_cons_subset; auto.
+           )) with (∅ ∪ s) in * by auto; apply set_add_subset; auto.
+  induction s; auto; apply set_add_cons_subset; auto.  
 Qed.
 
 Lemma set_union_unitr : forall s, (s ∪ ∅) ≃ s.
@@ -685,3 +488,26 @@ Proof.
   unfold set_In.
   rewrite !z_to_n_correct; auto.
 Qed.
+
+Definition subset_dec s1 s2 : { s1 ⊂ s2 } + { ~ (s1 ⊂ s2) }.
+Proof.
+  generalize dependent s2; generalize dependent s1.
+  refine (fix F s1 : forall s2, { s1 ⊂ s2 } + { ~ s1 ⊂ s2 } :=
+            match s1 with
+              | nil => fun _ => Yes
+              | (cons x s1') =>
+                fun s2 =>
+                  if In_dec eq_nat_dec x s2
+                  then Refine (F s1' s2)
+                  else No
+            end
+         ); clear F; unfold not in *; set_crush.
+Defined.
+
+Definition subset_nn s1 s2 : ~~(s1 ⊂ s2) -> s1 ⊂ s2.
+Proof.
+  destruct (subset_dec s1 s2); tauto.
+Qed.
+
+Definition set_eq_dec s1 s2 : { s1 ≃ s2 } + { ~ (s1 ≃ s2) }.
+Proof. refine (subset_dec s1 s2 &&& subset_dec s2 s1) ;unfold not; set_crush. Qed.
