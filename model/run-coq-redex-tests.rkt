@@ -58,14 +58,16 @@
 (define coq-prefix
   @list{Unset Printing Notations.
         Set Printing Depth 10000.
-        Require Import Enum Arith.
-        
-        Definition from_nat @"{ty}" @"(e: Enum ty)" n := 
+        Require Import Enum.All.
+
+        Definition from_nat @"{ty}" @"(e: Enum ty)" n :=
           proj1_sig (Enumerates_from_dec e n).
-          
+
         Definition to_nat @"{ty}" @"(e : Enum ty)" v :=
           proj1_sig (Enumerates_to_dec e v).
-        Definition SwapConsBij' : Bijection (tdenote (TPair TNat TNat)) (tdenote (TPair TNat TNat))  := SwapConsBij.
+
+        Definition SwapConsBij' : Bijection (nat * nat) (nat * nat) :=
+          SwapConsBij.
         Definition Nat_To_Map_Of_Swap_Zero_With i :=
           E_Map (SwapWithZeroBijection i) E_Nat.
 
@@ -79,7 +81,7 @@
        (define (o-enum e)
          (match e
            [`natural/e (o "E_Nat")]
-           [`(or/e ,e1 ,e2) 
+           [`(or/e ,e1 ,e2)
             (o "(E_Sum ")
             (o-enum e1)
             (o " ")
@@ -147,13 +149,21 @@
             (o " ")
             (o (format "~a" n))
             (o " , ")
-            
+
             (fprintf port "to_nat ")
             (o-enum e)
             (o " ")
             (o-v e v)
             (o ").\n")])))))
   results)
+
+;; for debugging system* calls
+(define (psystem* . args)
+  (for ([arg (in-list args)])
+    (display arg)
+    (display " "))
+  (displayln "")
+  (apply system* args))
 
 (define (run-coq print-suffix)
   (call-with-output-file scratch.v
@@ -164,14 +174,15 @@
       (newline port)
       (print-suffix port))
     #:exists 'replace)
-  
+
   (define sp (open-output-string))
   (parameterize ([current-input-port (open-input-string "")]
                  [current-output-port sp])
-    (system* coqc 
+    (system* coqc
              "-R"
-             (simplify-path (let-values ([(base name dir?) (split-path scratch.v)])
-                              (build-path base 'up "model")))
+             (simplify-path
+              (let-values ([(base name dir?) (split-path scratch.v)])
+                              (build-path base 'up "model/Enum")))
              "Enum"
              scratch.v))
   (define resultsp (open-input-string (get-output-string sp)))
@@ -180,7 +191,7 @@
                                (display (get-output-string sp) (current-error-port))
                                (newline (current-error-port))
                                (raise x))])
-    
+
     (properly-parenthesize-and-convert-results
      (let loop ()
        (define r (read resultsp))

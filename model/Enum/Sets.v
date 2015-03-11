@@ -2,7 +2,7 @@ Require Import Coq.Arith.Arith_base.
 Require Import Coq.Lists.ListSet Coq.Lists.List.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 
-Require Import Util.
+Require Import Enum.Util.
 
 Notation set' := (set nat).
 Notation "∅" := (@empty_set nat).
@@ -511,3 +511,7 @@ Qed.
 
 Definition set_eq_dec s1 s2 : { s1 ≃ s2 } + { ~ (s1 ≃ s2) }.
 Proof. refine (subset_dec s1 s2 &&& subset_dec s2 s1) ;unfold not; set_crush. Qed.
+
+(* Local Variables: *)
+(* coq-load-path: (("." "Enum")) *)
+(* end: *)

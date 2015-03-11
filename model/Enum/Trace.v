@@ -1,4 +1,4 @@
-Require Import Sets Util.
+Require Import Enum.Sets Enum.Util.
 
 Inductive Trace :=
 | Tracing : set' -> set' -> set' -> set' -> Trace.
@@ -21,7 +21,7 @@ Definition trace_proj tg t :=
   end.
 
 Definition trace_zero : Trace := Tracing ∅ ∅ ∅ ∅.
-                                         Notation ε := trace_zero.
+Notation ε := trace_zero.
 Definition trace_plus (t1 t2 : Trace) : Trace :=
   match (t1, t2) with
     | (Tracing l1 l2 l3 l4, Tracing r1 r2 r3 r4) =>
@@ -230,3 +230,7 @@ Proof.
   generalize Hsub.
   apply sub_trace_In_equiv.
 Qed.
+
+(* Local Variables: *)
+(* coq-load-path: (("." "Enum")) *)
+(* end: *)

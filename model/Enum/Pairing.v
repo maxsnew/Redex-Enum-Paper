@@ -2,7 +2,7 @@ Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Arith_base.
 Require Import Psatz.
 
-Require Import Util.
+Require Import Enum.Util.
 Inductive Pairing : nat -> nat -> nat -> Prop :=
 | P_XBig :
     forall x y,
@@ -248,3 +248,6 @@ Ltac rewrite_pairing_from_fun :=
     | [ H1: Pairing ?n1 ?l ?r, H2: Pairing ?n2 ?l ?r |- _ ] =>
       erewrite (Pairing_from_fun _ _ _ _ H1 H2) in *; clear H1 H2
   end.
+(* Local Variables: *)
+(* coq-load-path: (("." "Enum")) *)
+(* end: *)

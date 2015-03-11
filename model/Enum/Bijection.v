@@ -114,3 +114,7 @@ Section BijExamples.
     refine ({{(SwapWithZero n, SwapWithZero n)}}); split; apply SwapWithZero_Swaps.
   Defined.
 End BijExamples.
+
+(* Local Variables: *)
+(* coq-load-path: (("." "Enum")) *)
+(* end: *)

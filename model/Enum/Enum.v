@@ -2,7 +2,7 @@ Require Import Coq.Arith.Arith_base  Coq.Arith.Div2.
 Require Import Coq.Lists.ListSet Coq.Lists.List.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 
-Require Import Bijection Pairing Sets Trace Util.
+Require Import Enum.Bijection Enum.Pairing Enum.Sets Enum.Trace Enum.Util.
 
 (* Notation notes:
 Sets
@@ -849,3 +849,7 @@ Proof.
   simpl.
   destruct (Enumerates_from_fun _ _ _ _ _ _ Enum Henum); subst; assumption.
 Qed.
+
+(* Local Variables: *)
+(* coq-load-path: (("." "Enum")) *)
+(* end: *)

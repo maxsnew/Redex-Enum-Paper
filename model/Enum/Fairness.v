@@ -3,7 +3,7 @@ Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Div2 Coq.Arith.Even.
 Require Import Coq.Lists.ListSet.
 
-Require Import Enum Pairing Sets Trace Util.
+Require Import Enum.Enum Enum.Pairing Enum.Sets Enum.Trace Enum.Util.
 
 Definition Fair2 {tout} (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
   forall n,
@@ -495,3 +495,7 @@ Section NaiveTripleUnfair.
   Qed.
 End NaiveTripleUnfair.
 Print Assumptions SumFair.
+
+(* Local Variables: *)
+(* coq-load-path: (("." "Enum")) *)
+(* end: *)
