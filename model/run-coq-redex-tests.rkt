@@ -182,7 +182,7 @@
              "-R"
              (simplify-path
               (let-values ([(base name dir?) (split-path scratch.v)])
-                              (build-path base 'up "model/Enum")))
+                              (build-path base 'up "model/coq")))
              "Enum"
              scratch.v))
   (define resultsp (open-input-string (get-output-string sp)))
