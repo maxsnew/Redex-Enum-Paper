@@ -5,21 +5,29 @@ Require Import Coq.Lists.ListSet.
 
 Require Import Enum.Enum Enum.Pairing Enum.Sets Enum.Trace Enum.Util.
 
-Definition Fair2 {tout} (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
+(* read as f-fairness *)
+Definition F_Fair2 {tout} (f : nat -> nat) (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
   forall n,
-  exists equilibrium,
-    match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
-      | Tracing l_uses r_uses _ _ =>
-        n < equilibrium /\ l_uses ≃ r_uses
-    end.
+    let equilibrium := f n
+    in match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) equilibrium with
+         | Tracing l_uses r_uses _ _ =>
+           n < equilibrium /\ l_uses ≃ r_uses
+       end.
 
-Definition Fair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
+Definition Fair2 {tout} (k : forall ty1 ty2 : Set, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
+  exists f, @F_Fair2 tout f k.
+
+Definition F_Fair3 {tout} (f : nat -> nat) (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
   forall n,
-  exists equilibrium,
+    let equilibrium := f n
+    in 
     match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)) equilibrium with
       | Tracing z_uses o_uses t_uses _ =>
         n < equilibrium /\ z_uses ≃ o_uses /\ o_uses ≃ t_uses
     end.
+
+Definition Fair3 {tout} (k : forall ty1 ty2 ty3, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
+  exists f, F_Fair3 f k.
 
 Definition Fair4 {tout} (k : forall {ty1 ty2 ty3 ty4}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum ty4 -> Enum (tout ty1 ty2 ty3 ty4)) :=
   forall n,
@@ -40,17 +48,25 @@ Definition AltUnfair3 {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> 
 
 Theorem AltUnfair3Suff {tout} (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) : AltUnfair3 (@k) -> ~ (Fair3 (@k)).
 Proof.
-  unfold AltUnfair3, Fair3, not.
-  intros [thresh Halt] Hunf.
-  destruct (Hunf thresh) as [eq_cand Hblah].
-  clear Hunf.
-  remember (Halt eq_cand).
-  clear Halt Heqy.
+  unfold AltUnfair3, Fair3, F_Fair3, not.
+  intros [thresh Halt] [f Hunf].
+  specialize (Hunf (thresh)).
+  specialize (Halt (f thresh)).
   destruct (Trace_lt (k _ _ _ (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat))
-                     eq_cand) as [t0 t1 t2 t3] in *.
+                     (f thresh)) as [t0 t1 t2 t3] in *.
   intuition.
   assert (t0 ≃ t2) by (eapply set_eq_trans; eauto); contradiction.
 Qed.
+
+Theorem F_Fair2_impl_Fair2 {tout} f (k : forall ty1 ty2 : Set, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :
+  F_Fair2 f k -> Fair2 k.
+Proof. unfold Fair2, F_Fair2; intuition; eauto. Qed.
+Hint Resolve F_Fair2_impl_Fair2 : fair.
+
+Theorem F_Fair3_impl_Fair3 {tout} f (k : forall ty1 ty2 ty3, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :
+  F_Fair3 f k -> Fair3 k.
+Proof. unfold Fair3, F_Fair3; intuition; eauto. Qed.
+Hint Resolve F_Fair3_impl_Fair3 : fair.
 
 Section SumFair.
   Lemma Sum_precise
@@ -81,11 +97,10 @@ Section SumFair.
   Qed.
 
   (* Proof idea: equilibrium = 2 * n + 2,  uses = 0..(S n) *)
-  Theorem SumFair : @Fair2 sum (@E_Sum).
+  Theorem SumFair_Linear : @F_Fair2 sum (fun n => double (S n)) (@E_Sum).
   Proof.
-    unfold Fair2.
+    unfold F_Fair2.
     intros n.
-    exists (double (S n)).
     remember (Trace_lt (E_Sum (E_Trace zero E_Nat) (E_Trace one E_Nat)) (double (S n))) as t; destruct t as [tz to ttw tth].
     split; [unfold double; nliamega| ].
 
@@ -101,6 +116,10 @@ Section SumFair.
     rewrite trace_proj_plus_distrl; rewrite (trace_lt_Nat_off _ one zero); [| discriminate].
     eapply set_eq_trans; [apply set_union_unitl | apply set_eq_symm; apply trace_lt_Nat].
   Qed.
+  Hint Resolve SumFair_Linear : fair.
+
+  Corollary SumFair : @Fair2 sum (@E_Sum).
+  Proof. eauto with fair. Qed.
 End SumFair.
 
 Section NaiveSum3Unfair.
@@ -392,11 +411,10 @@ Section PairFair.
     apply trace_eq_refl.
   Qed.
 
-  Theorem PairFair : @Fair2 prod (@E_Pair).
-    unfold Fair2.
+  Theorem PairFairSquare : @F_Fair2 prod (fun n => (S n) * (S n)) (@E_Pair).
+  Proof.    
+    unfold F_Fair2, Fair2.
     intros n.
-    exists ((S n) * (S n)).
-
     fold E_PairNN.
     remember (Trace_lt E_PairNN (S n * S n)) as t.
     destruct t as [t0 t1 t2 t3].
@@ -409,6 +427,10 @@ Section PairFair.
     destruct4 Hteq.
     eapply set_eq_trans; [| apply set_eq_symm]; eauto.
   Qed.
+  Hint Resolve PairFairSquare : fair.
+
+  Theorem PairFair : @Fair2 prod (@E_Pair).
+  Proof. eauto with fair. Qed.
 End PairFair.
 
 Section NaiveTripleUnfair.
