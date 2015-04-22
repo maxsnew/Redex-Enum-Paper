@@ -1,0 +1,60 @@
+Thanks to the reviewers for their time, energy, and helpful
+comments. For any comments that we don't address explicitly here, we
+plan to follow the reviewers advice and generally use the comments in
+the reviews to improve the paper. Thanks again.
+
+Reviewers A and B ask about the subset of the combinators that our
+formalization covers: we chose this subset because it covers the
+portion of our library that is fair. It would be straightforward to
+include all of the combinators our the library, but it distracts from
+our focus on fairness.
+
+Reviewer B asks a number of other excellent questions.
+
+Fair combinators that reach equilibrium points only very infrequently:
+yes, such a combinator would be fair, and we agree that that's not
+useful in practice. Our interest in fairness, however, is more focused
+on avoiding unfairness. That is, much like definitions of soundness
+that don't guarantee practicality, we are concerned with avoiding
+unfair enumerations as we know they are certainly problematic. We will
+clarify this in the paper.
+
+Fairness for dependent enumerations and fairness generally: we have
+thought about this some, but have not found a satisfactory way to
+generalize our notion of fairness to dependency. And yes, fairness
+doesn't compose; this is part of our interest in fairness. It is not
+an obvious property of enumeration combinators, it must be planned for
+from the start. We see this as adding value to our work, helping
+others interested in enumeration build better ones.
+
+Traces: we agree that this additional instrumentation is awkward in
+the formalism but it captures the precise property we are interested
+in, so we use it.
+
+Redex: we will work on the exposition in section 4.
+
+Elias coding, etc: sampling using Elias codes seems similar to what
+we're doing (choosing an exponent and the choosing the bits). The
+geometric distribution is not a good choice as it will tend to choose
+numbers near some fixed natural. Not having a fixed mean means that
+the average of the first X samples is likely to be smaller than the
+average of, say, the first 2*X samples (for any X).
+
+Reviewer C asks about contracts: we use contracts because they are
+like dependent types, giving us very fine-grained control, but
+without having the proof burden (which would be difficult to
+accommodate in the context of Redex).
+
+Reviewer D points out errors in our bibliography: thanks! We will fix them.
+
+Also, we very much like the suggestion about characterizing the
+distance between equilibrium points. We will try to work this into our
+Coq formalism. Thank you!
+
+And finally, since the submission deadline we have learned that we
+mischaracterized the original Feat work. In particular, it appears
+that the enumerator for (Integer,(Integer,Integer)) does not use
+nested pairing, contrary to our claim. The feat paper doesn't discuss
+the concept of fairness nor does it provide any proofs, so we do not
+think this error impacts the contribution of work. That said, we are
+ashamed of this mistake and will correct it.
