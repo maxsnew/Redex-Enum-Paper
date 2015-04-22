@@ -48,8 +48,11 @@ accommodate in the context of Redex).
 Reviewer D points out errors in our bibliography: thanks! We will fix them.
 
 Also, we very much like the suggestion about characterizing the
-distance between equilibrium points. We will try to work this into our
-Coq formalism. Thank you!
+distance between equilibrium points. Thank you! We have worked it into
+our Coq formalism, parameterizing our notion of fairness over a
+function that returns the position of the n-th equilibrium point. We
+updated the Coq proof to show that pairing reaches equilibrium at
+(n+1)^2 and alternation reaches equilibrium at 2*(n+1).
 
 And finally, since the submission deadline we have learned that we
 mischaracterized the original Feat work. In particular, it appears
