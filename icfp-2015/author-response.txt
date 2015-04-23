@@ -11,14 +11,23 @@ our focus on fairness.
 
 Reviewer B asks a number of other excellent questions.
 
-Fair combinators that reach equilibrium points only very infrequently:
-yes, such a combinator would be fair, and we agree that that's not
-useful in practice. Our interest in fairness, however, is more focused
-on avoiding unfairness. That is, much like how definitions of
-soundness must reject some correct programs and don't generally
-specify how big or useful the set of accepted programs is, we are
-concerned with avoiding unfair enumerations as we know they are
-certainly problematic. We will clarify this in the paper.
+Reviewers B and D both correctly identify that our notion of fairness
+is coarse, it does not rule out exponentially far apart equilibria or
+even massively constantly far apart equilibria.
+
+Our interest in fairness, however, is more focused on avoiding
+unfairness. That is, much like how definitions of soundness must
+reject some correct programs and don't generally specify how big or
+useful the set of accepted programs is, we are concerned with avoiding
+unfair enumerations as we know they are certainly problematic. We will
+clarify this in the paper.
+
+In addition, we can refine our notion of fairness to be parameterized
+over a function characterizing when equilibria occur, as reviewer D
+suggests. We like this suggestion and have worked this into our Coq
+formalism. We updated the Coq proof to show explicitly that pairing
+reaches equilibrium at (n+1)^2 and alternation reaches equilibrium at
+2*(n+1).
 
 Fairness for dependent enumerations and fairness generally: we have
 thought about this some, but have not found a satisfactory way to
@@ -49,13 +58,6 @@ accommodate in the context of Redex).
 
 Reviewer D points out errors in our bibliography: thanks! We will fix
 them.
-
-Also, we very much like the suggestion about characterizing the
-distance between equilibrium points. Thank you! We have worked it into
-our Coq formalism, parameterizing our notion of fairness over a
-function that returns the position of the n-th equilibrium point. We
-updated the Coq proof to show that pairing reaches equilibrium at
-(n+1)^2 and alternation reaches equilibrium at 2*(n+1).
 
 And finally, since the submission deadline we have learned that we
 mischaracterized the original Feat work. In particular, it appears
