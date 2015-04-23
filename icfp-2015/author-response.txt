@@ -66,3 +66,10 @@ nested pairing, contrary to our claim. The feat paper doesn't discuss
 the concept of fairness nor does it provide any proofs, so we do not
 think this error impacts the contribution of work. That said, we are
 ashamed of this mistake and will correct it.
+
+How fair Feat is depends on the underlying "cost" of constructors of a
+datatype. Given a natural number type where each successor call
+"costs" 1, pairing naturals reaches equilibria O(n^2) often. However,
+if you think of them as having binary representation and the cost
+being the number of bits needed to represent a number, then pairing
+natural numbers reaches equilibria O(2^n) often.
