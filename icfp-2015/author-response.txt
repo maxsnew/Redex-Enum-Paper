@@ -46,7 +46,7 @@ accommodate in Redex).
 Reviewer D points out errors in our bibliography: thanks! We will fix
 them.
 
-And finally, since the submission deadline we have learned that we
+And finally, since the submission deadline we learned that we
 mischaracterized the original Feat work. In particular,
 the enumerator for (Integer,(Integer,Integer)) does not use
 nested pairing, contrary to our claim. The feat paper doesn't discuss
@@ -54,9 +54,10 @@ the concept of fairness nor does it provide any proofs, so we do not
 think this error impacts the contribution of work. That said, we are
 ashamed of this mistake and will correct it.
 
-Feat's current implementation appears to reach equilibria much less
-frequently that our library. Given a natural number type where each
-successor call costs 1 (as in the Feat paper), pairing naturals
-reaches equilibria O(n^2) often. However, in their implementation,
-they use a binary representation with the cost being the number of bits
-in the number and thus reach equilibria O(2^n) often.
+Based on experimentation with Feat's implementation and discussion
+with others knowledgeable about Feat, we believe Feat reaches
+equilibria less frequently than our library. Pairing unary naturals
+(as in the paper), reaches equilibria O(n^2) often. In their
+implementation, the cost is the number of bits in a number and that
+reaches equilibria only O(2^n) often. Alternation also reaches
+equilibria O(2^n) often in Feat's implementation.
