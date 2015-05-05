@@ -73,7 +73,20 @@ essence not favouring one or other component of tuples in the ordering.
 
                           ===== Evaluation =====
 
-[At the Program Committee discussion it was felt that although all reviewers liked the ideas presented in this paper, the overall contribution is not sufficiently large, complete or polished for publication at this stage. The PC would like to encourage the authors to develop the ideas more fully, for example, expanding the semantics to a larger set of combinators, including recursion (as the title suggests), showing how to obtain fairness for more than that covered by Theorems 3-6, and tightening up the definitions and results. (There was still confusion about the formal definition of fairness just before Theorem 3: the existentially-quantified natural number M is not even used in the sentence.) It was also noted that little mention is made of the distinction between enumeration and sampling, the former being easier than the latter but perhaps equally good for random testing.]
+[At the Program Committee discussion it was felt that although all
+reviewers liked the ideas presented in this paper, the overall
+contribution is not sufficiently large, complete or polished for
+publication at this stage. The PC would like to encourage the authors
+to develop the ideas more fully, for example, expanding the semantics
+to a larger set of combinators, including recursion (as the title
+suggests), showing how to obtain fairness for more than that covered
+by Theorems 3-6, and tightening up the definitions and results. (There
+was still confusion about the formal definition of fairness just
+before Theorem 3: the existentially-quantified natural number M is not
+even used in the sentence.) It was also noted that little mention is
+made of the distinction between enumeration and sampling, the former
+being easier than the latter but perhaps equally good for random
+testing.]
 
 There is a lot to like here: the problem of enumerating values in a
 type is an interesting one, and in recent years many authors have
