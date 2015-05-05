@@ -1,0 +1,350 @@
+===========================================================================
+                           ICFP '15 Review #20A
+---------------------------------------------------------------------------
+     Paper #20: Ffeat: Fair Functional Enumeration of Algebraic Types
+---------------------------------------------------------------------------
+
+
+                      Overall merit: 3. Weak accept
+
+                         ===== Paper summary =====
+
+The paper explores the way in which values from algebraic types
+(recursive sums of products) can be enumerated in a way that optimally
+supports random property-based testing. This work is implemented in
+Redex, the Racket-based language toolkit. As well as presenting an
+implementation and some proof, the paper compares the work with that
+of others in the field, originated by QuickCheck for Haskell.
+
+                          ===== Evaluation =====
+
+The paper reads like a lengthy pearl. The authors use a number of
+algorithms from the literature and put them together in an elegant way
+to support "fair" enumeration of values. They draw on the literature
+(e.g. Lazy Small Check) to compare their work with existing work, and
+derive some weak conclusions.
+
+Unsurprisingly for a contribution in this area, different enumeration
+strategies work more effectively in different contexts, and it is hard
+to escape the (meta-)conclusion that the most effective strategy is to
+use a combination of strategies, random and enumeration based.
+
+Proof of fairness is presented (p5), but with a number of simplifying
+assumptions (e.g. no finite cases); ideally it would be best to
+eliminate these if the formalisation is to be convincing.
+
+                    ===== Comments for author(s) =====
+
+p2 
+
+bnumber
+
+p2 
+
+The gloss of the product enumeration when one or both is finite I found confusing.
+
+p2 
+
+laziness is used in handling recursion here. Do you have any comments
+on the way in which "laziness within a strict context" compares with
+"(strictness in) a lazy context" which is the default for
+Haskell-based implementations.
+
+How about: "enumerate in lexicographic ordering with the larger finite
+set or the infinite set as the more significant element in the pairs"?
+It's straightforward to see that this maps the enumeration into the
+ordinal \omega.
+
+===========================================================================
+                           ICFP '15 Review #20B
+                     Updated 3 May 2015 4:27:16pm EDT
+---------------------------------------------------------------------------
+     Paper #20: Ffeat: Fair Functional Enumeration of Algebraic Types
+---------------------------------------------------------------------------
+
+
+                      Overall merit: 2. Weak reject
+
+                         ===== Paper summary =====
+
+The paper develops a means of enumerating the values inhabiting some
+algebraic datatype, in such a way that the enumeration is "fair", in
+essence not favouring one or other component of tuples in the ordering.
+
+                          ===== Evaluation =====
+
+[At the Program Committee discussion it was felt that although all reviewers liked the ideas presented in this paper, the overall contribution is not sufficiently large, complete or polished for publication at this stage. The PC would like to encourage the authors to develop the ideas more fully, for example, expanding the semantics to a larger set of combinators, including recursion (as the title suggests), showing how to obtain fairness for more than that covered by Theorems 3-6, and tightening up the definitions and results. (There was still confusion about the formal definition of fairness just before Theorem 3: the existentially-quantified natural number M is not even used in the sentence.) It was also noted that little mention is made of the distinction between enumeration and sampling, the former being easier than the latter but perhaps equally good for random testing.]
+
+There is a lot to like here: the problem of enumerating values in a
+type is an interesting one, and in recent years many authors have
+shown that the application of ideas such as these to "random testing"
+is not as hopeless an approach as some have claimed. I enjoyed being
+introduced to the alternative enumeration of pairs of naturals, and
+the explanation of why it generalizes better to n-ary
+products. However, I found myself asking too many questions not
+addressed by the paper, and wishing that the topic had been
+investigated more fully and with greater rigor. This would make a nice
+workshop paper but is not ready for conference.
+
+In more detail:
+
+[Please answer this particular point in the author response.]
+* I don't think that the central definition of fairness stands up to
+  scrutiny. Suppose that I construct an enumeration for which
+  equilibrium is first reached only at some huge value e.g. a googol,
+  but nonetheless infinitely often after that. Then it is in theory
+  "fair" according to your definition, but in practice might be
+  terribly unfair. You introduced the notion of "infinitely many
+  places to reach an equilibrium" in order to get a definition of
+  fairness that can even be satisfied, but it doesn't seem very helpful!
+
+* It isn't explained how for any particular complex type fairness is
+  achieved. Fairness doesn't compose (e.g. pair of pairs isn't fair
+  even if pairing itself is fair); presumably there are many instances
+  of dep that are not fair, depending on the function that determines
+  the second component; and little is said about the fairness
+  properties of combinators such as except/e and no-dups/e.
+
+* The semantics is limited to a subset of the combinators. Finiteness
+  is not handled, and combinators fin/e, except/e, and delay/e are not
+  given a semantics. Indeed, delay/e seems like a "hack" that isn't
+  properly explained or formalized.
+
+* I was surprised that the semantics had to be "instrumented" with
+  traces in order to talk formally about fairness. This is a shame:
+  traces are not needed to implement enumeration; there should be some
+  "extrinsic" means of characterizing fairness, even though inevitably
+  it must look inside the structure of the combinator expression,
+  given that such expressions are not fair by construction.
+
+* For readers unfamiliar with Redex, Section 4 is sometimes a bit
+  mysterious. The whole thing could be rephrased in some more abstract
+  setting e.g. a sum-of-products recursive datatype, or some formal
+  notion of grammar.
+
+* Combinatorics is tricky stuff, yet the mathematics is dealt with in
+  a surprisingly informal way, with few formal definitions and
+  results. Mostly it is described only at a high-level in
+  text. (e.g. see my comments below about picking natural numbers.)
+
+Although the title talks of "algebraic types", the paper takes a
+untyped approach to the problem. Personally, I believe that the
+rigorous use of types would guide and illuminate. Enumerations could
+be constructed according to the structure of a type (e.g. a recursive
+algebraic type); [or] and [dep] would use sums and dependent pairs
+rather than the untyped "cons", and everything would become much more
+crisp.
+
+                    ===== Comments for author(s) =====
+
+Section 1. It's a bit strange that there is no section (other than the
+abstract) that motivates the problem, or describes briefly the
+*contributions* of the paper. The reader is left until Sections 4 and
+5 before properly understanding that random testing is the
+inspiration.
+
+Section 1, para beginning "One important point about". Grammar - the
+words preceding the colon are not a sentence! OK in an email (or
+referee report :-) ) but not a publication.
+
+Section 3. 
+
+The rules [cons x] and [cons y] make use of integer square
+root. Please address the computational complexity of this operation.
+
+"The Coq model ... called Fair2, Fair3 and Fair4". Yuck! It's easy
+enough in Coq to parameterize on n here (look in NaryFunctions for an
+example) and prove the general case.
+
+Section 4, fourth para. I would like to see a more precise description
+of the mapping. Why do you get unfair nesting? How do I know that the
+enumeration described is fair?
+
+Section 4, list without duplicates. I didn't fully understand the
+no-dups-without definition. Is it fair? How do we know? What does
+except/e* produce? (Types would help!)
+
+Section 4, ambiguous patterns. This paragraph made no sense to me at
+all.
+
+Section 5, "random" natural number. How do you pick a natural number
+exponent (why base 2?) at random (from "the geometric distribution")
+in the first place? If you can do this, haven't you solved the problem
+already? Why three times? What does "not have a fixed mean" mean?
+Surely mean is well-defined? By the way, you might be interested in
+"Elias codes" which are a way of encoding (or generating) natural
+numbers with no upper bound.
+
+===========================================================================
+                           ICFP '15 Review #20C
+                     Updated 5 May 2015 2:56:35am EDT
+---------------------------------------------------------------------------
+     Paper #20: Ffeat: Fair Functional Enumeration of Algebraic Types
+---------------------------------------------------------------------------
+
+
+                      Overall merit: 2. Weak reject
+
+                         ===== Paper summary =====
+
+This paper presents a library of enumeration combinators for fair
+enumeration of algebraic types.  The paper explores different
+enumeration algorithms, defines a notion of fairness, and shows when
+the combinators can achieve this fairness property.  The paper
+includes a number of examples and empirical results.
+
+The main results of the paper are the combinators, the notion of
+fairness, and the empirical results showing fairness of the
+combinators in practice.
+
+The strengths of the paper are the generally clear writing, useful
+notion of fairness, and the resulting useful enumeration combinators.
+
+Perhaps the greatest weakness of the paper is the numerous minor
+typographical errors.  The related work also seemed lackluster.
+
+                          ===== Evaluation =====
+
+Update: the Program Committee discussion convinced me that the paper
+is not yet at the level of quality expected at ICFP.  I revised my
+'overall merit' score accordingly.  I still think the paper describes
+interesting and promising work, and I hope that the authors will
+continue to improve upon both the research and the exposition in the
+paper.  Review #20B describes in detail the changes we think would
+improve the paper the most.
+
+-------
+
+The writing of the paper is generally very clear, although there are a
+number of minor typos.
+
+As far as I can tell, all the results are correct.
+
+The main novelty is apparently the notion of fairness.  Fairness comes
+up in many contexts, including in search.  I find it surprising that
+nothing like this notion of fairness already exists in the literature.
+
+A library of composable, fair combinators for enumeration seems very
+useful and important indeed.
+
+I like this paper for its clarity, examples, and for the usefulness of
+the resulting combinators.  As a result, I rate the paper as an
+'accept'.
+
+                    ===== Comments for author(s) =====
+
+Are space-filling curves, as used in HPC, related?
+
+Is there no future work?
+
+An example trace in Section 3 would be nice.
+
+I would like to see more about the role of contracts.
+
+The statement that the general impression is that randomized testing
+isn't useful for bug finding seems overly strong.  John Regehr, for
+example, seems to have gained much public attention in this area.
+Also, Microsoft apparently performs massive fuzz testing of its
+software continuously.
+
+The paper contains a number of minor grammatical mistakes, and could
+use a careful editing pass.
+
+===========================================================================
+                           ICFP '15 Review #20D
+---------------------------------------------------------------------------
+     Paper #20: Ffeat: Fair Functional Enumeration of Algebraic Types
+---------------------------------------------------------------------------
+
+
+                      Overall merit: 4. Accept
+
+                         ===== Paper summary =====
+
+The paper describes a novel method for generating random terms based
+on a Redex specification, using combinators over bijections from N
+(ranking/unranking functions).
+
+By defining combinators that cover fairly arbitrary Redex definitions,
+the authors provide a convenient way to the programmer to quickly and
+declaratively specify random tests.
+
+Important properties, critical for test generation like fairness and
+efficiency of the enumeration are ensured by clever choices of
+(un)pairing and (un)tupling bijections to NxN and N^n.
+
+The bijections are claimed to be designed such that computation from
+the natural number index to the corresponding data structure can be
+done efficiently.
+
+Empirically the claim seems to hold - i.e., numbers like 2^10000000
+are generated in milliseconds and a Coq proof of correctness is
+presented in the supplemental materials.
+
+                          ===== Evaluation =====
+
+The paper is well written, readable and the coverage of related work
+is one of the most accurate and extensive I have seen in a while.
+
+The work is important, the research direction is promising and
+supported by a freely available implementation and Coq proofs of
+correctness.
+
+Overall, as the paper is likely to be of significant interest to ICFP
+attendees as well as to practitioners of functional programming as it
+describes a set of new and practical techniques for random software
+testing, I recommend acceptance.
+
+                    ===== Comments for author(s) =====
+
+I would have liked a more precise description of some of the
+algorithms like the bijection between tuples and N that is claimed to
+be more efficient than Cantor's bijection, although the authors do a
+good job in explaining the geometric intuitions behind it.
+
+Discussing fairness, the authors say that:
+
+"Instead, we insist that there are infinitely many places in the
+enumeration where the combinators reach an equilibrium."
+
+As their examples show, what they might want to mean is that,
+depending on n, there's a (small) polynomial number of steps from an
+"equilibrium" to the next. Otherwise, an infinite number of
+equilibriums, with the first happening after a tower of exponents 100
+tall would not match their intended meaning for fairness.
+
+The two references to Tarau's work related to the Cantor N^n->N
+bijection seem incorrect, most likely the authors mean the following
+papers:
+
+
+@inproceedings{tarau:iclp12,
+	Address = {Budapest, Hungary},
+	Author = {Tarau, Paul},
+	Booktitle = {{28-th International Conference on Logic Programming - Technical Communications (ICLP'12)}},
+	Editor = {Dovier, Agostino and Costa, Vitor Santos},
+	Month = sep,
+	Title = {{Deriving a Fast Inverse of the Generalized Cantor N-tupling Bijection}},
+	Year = {2012}} 
+
+
+@article{tarau:iclp13,
+	Author = {Tarau, Paul},
+	Journal = {Theory and Practice of Logic Programming},
+	Number = {4-5},
+	Pages = {847-861},
+	Title = {{Compact Serialization of Prolog Terms (with Catalan Skeletons, 
+                  Cantor Tupling and G\"odel Numberings) }},
+	Volume = {13},
+	Year = {2013}}
+
+the later being the updated version of the 2011 workshop paper
+
+@inproceedings{tarau:ciclops11,
+	Address = {Lexington, KY},
+	Author = {Tarau, Paul},
+	Booktitle = {{CICLOPS'2011}},
+	Month = jul,
+	Title = {{Bijective Term Encodings}},
+	Year = {2011}}
+
