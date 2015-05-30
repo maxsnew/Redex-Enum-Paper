@@ -125,3 +125,145 @@
 
 ;(find-pair-equilibria (⊗ binat-enum binat-enum) 7)
 
+(define (check-same . enums)
+  (for ([enum1 (in-list enums)]
+        [enum2 (in-list (cdr enums))]
+        [enum-i (in-naturals 1)])
+    (for ([i (in-range 1000)])
+      (unless (equal? (enum1 i) (enum2 i))
+        (error 'check-same "enum ~a and ~a are different at position ~a: ~s vs ~s"
+               enum-i (+ enum-i 1)
+               i
+               (enum1 i)
+               (enum2 i))))))
+
+(time
+ (check-same
+  (λ (i) (index (⊗ binat-enum binat-enum) i))
+
+  (λ (i) (index 
+          (λ (p)
+            (concatF
+             (for/list ([k (in-range (+ p 1))])
+               (⊗F (binat-enum k)
+                   (binat-enum (- p k))))))
+          i))
+  
+  (λ (i) (index
+          (λ (p)
+            (concatF
+             (for/list ([k (in-range (+ p 1))])
+               (define f1 (binat-enum k))
+               (define f2 (binat-enum (- p k)))
+               (Finite (* (Finite-size f1) (Finite-size f2))
+                       (λ (i)
+                         (define-values (q r) (quotient/remainder i (card f2)))
+                         (cons (!! f1 q) (!! f2 r)))))))
+          i))
+
+  (λ (i) (index
+          (λ (p)
+            (concatF
+             (for/list ([k (in-range (+ p 1))])
+               (define f1
+                 (Finite (cond
+                           [(zero? k) 0]
+                           [(= k 1) 1]
+                           [else (expt 2 (- k 2))])
+                         (if (= k 1)
+                             (λ (i) 0)
+                             (λ (i) (+ (expt 2 (- k 2)) i)))))
+               (define f2
+                 (Finite (cond
+                           [(zero? (- p k)) 0]
+                           [(= (- p k) 1) 1]
+                           [else (expt 2 (- (- p k) 2))])
+                         (if (= (- p k) 1)
+                             (λ (i) 0)
+                             (λ (i) (+ (expt 2 (- (- p k) 2)) i)))))
+               (Finite (* (Finite-size f1) (Finite-size f2))
+                       (λ (i)
+                         (define-values (q r) (quotient/remainder i (card f2)))
+                         (cons (!! f1 q) (!! f2 r)))))))
+          i))
+
+  (λ (i) (index
+          (λ (p)
+            (concatF
+             (for/list ([k (in-range (+ p 1))])
+               (define f1s (cond
+                             [(zero? k) 0]
+                             [(= k 1) 1]
+                             [else (expt 2 (- k 2))]))
+               (define f1 (if (= k 1)
+                              (λ (i) 0)
+                              (λ (i) (+ (expt 2 (- k 2)) i))))
+               (define f2s (cond
+                             [(zero? (- p k)) 0]
+                             [(= (- p k) 1) 1]
+                             [else (expt 2 (- (- p k) 2))]))
+               (define f2
+                 (if (= (- p k) 1)
+                     (λ (i) 0)
+                     (λ (i) (+ (expt 2 (- (- p k) 2)) i))))
+               (Finite (* f1s f2s)
+                       (λ (i)
+                         (define-values (q r) (quotient/remainder i f2s))
+                         (cons (f1 q) (f2 r)))))))
+          i))
+
+  (λ (i) (index
+          (λ (p)
+            (concatF
+             (for/list ([k (in-range (+ p 1))])
+               (define f1s (cond
+                             [(zero? k) 0]
+                             [(= k 1) 1]
+                             [else (expt 2 (- k 2))]))
+               (define f1 (if (= k 1)
+                              (λ (i) 0)
+                              (λ (i) (+ (expt 2 (- k 2)) i))))
+               (define f2s (cond
+                             [(= k p) 0]
+                             [(= k (- p 1)) 1]
+                             [else (expt 2 (- (- p k) 2))]))
+               (define f2
+                 (if (= k (- p 1))
+                     (λ (i) 0)
+                     (λ (i) (+ (expt 2 (- (- p k) 2)) i))))
+               (Finite (* f1s f2s)
+                       (λ (i)
+                         (define-values (q r) (quotient/remainder i f2s))
+                         (cons (f1 q) (f2 r)))))))
+          i))
+
+  (λ (i) (index
+          (λ (p)
+            (cond
+              [(= p 0)
+               (Finite 0 (λ (x) (error 'ack)))]
+              [(= p 1)
+               (Finite 0 (λ (x) (error 'ack)))]
+              [else
+               (concatF
+                (for/list ([k (in-range (+ p 1))])
+                  (define f1s (cond
+                                [(zero? k) 0]
+                                [(= k 1) 1]
+                                [else (expt 2 (- k 2))]))
+                  (define f1 (if (= k 1)
+                                 (λ (i) 0)
+                                 (λ (i) (+ (expt 2 (- k 2)) i))))
+                  (define f2s (cond
+                                [(= k p) 0]
+                                [(= k (- p 1)) 1]
+                                [else (expt 2 (- (- p k) 2))]))
+                  (define f2
+                    (if (= k (- p 1))
+                        (λ (i) 0)
+                        (λ (i) (+ (expt 2 (- (- p k) 2)) i))))
+                  (Finite (* f1s f2s)
+                          (λ (i)
+                            (define-values (q r) (quotient/remainder i f2s))
+                            (cons (f1 q) (f2 r))))))]))
+          i))))
