@@ -21,9 +21,12 @@
      (map/e f f e)
      (dep/e e f)
      (except/e e v)
-     (trace/e n e))
+     (fix/e x e)
+     (trace/e n e)
+     x)
   (v ::= (cons v v) n)
   (n ::= integer)
+  (x ::= variable-not-otherwise-mentioned)
   
   (ae ::=
       (+ ae ae) (/ ae ae) (* ae ae)
@@ -88,11 +91,28 @@
   [(@ e_1 (ae-interp (+ n_2 1)) v_2 T) (side-condition (ae-interp (>= n_2 n_1)))
    ---------------------------------------- "ex>"
    (@ (except/e e_1 n_1) n_2 v_2 T)]
+
+  [(@ (subst e x (fix/e x e)) n v T)
+   --------------------------------- "fix"
+   (@ (fix/e x e) n v T)]
   
   [(@ e n_2 v T)
    ----------------------------------------------  "trace"
    (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
 
+;; assumes closed "e"s
+(define-metafunction L
+  subst : e x e -> e
+  [(subst e_2 x e_1)
+   ,(let loop ([e (term e_2)])
+      (match e
+        [`(fix/e ,x2 ,e)
+         (if (equal? x2 (term x))
+             `(fix/e ,x2 ,e)
+             `(fix/e ,x2 ,(loop e)))]
+        [(? list?) (map loop e)]
+        [(? symbol?) (if (equal? e (term x)) (term e_1) e)]))])
+ 
 (define-metafunction L
   ⊕ : T T -> T
   [(⊕ ∅ T) T]
@@ -192,7 +212,17 @@
   [(to-enum (except/e e n))
    ,(let ([e (term (to-enum e))])
       (:except/e e (:from-nat e (term n))))]
+  [(to-enum (fix/e x e))
+   ,(letrec ([d (:delay/e converted-e)]
+             [converted-e
+              (parameterize ([env (hash-set (env) (term x) d)])
+                (term (to-enum e)))])
+      converted-e)]
+  [(to-enum x)
+   ,(hash-ref (env) (term x))]
   [(to-enum (trace/e n e)) (to-enum e)])
+
+(define env (make-parameter (hash)))
 
 (define-metafunction L
   to-val : v -> any
@@ -347,6 +377,12 @@
        (define v (list-ref lws 4))
        (define T (list-ref lws 5))
        (list "" enum " @ " n " = " v " | " T ""))]
+    ['subst
+     (λ (lws)
+       (define replace-inside (list-ref lws 2))
+       (define x (list-ref lws 3))
+       (define new-thing (list-ref lws 4))
+       (list "" replace-inside "{" x " := " new-thing "}"))]
     ['⊕
      (λ (lws)
        (define arg1 (list-ref lws 2))
@@ -381,7 +417,7 @@
 (define linebreaking-with-cases2
   '(("trace" "or l" "or r")
     ("dep" "map" "natural")
-    ("ex<" "ex>")))
+    ("ex<" "ex>" "fix")))
 
 (define (semantics-figure)
   (define helv-font "Helvetica")
@@ -464,6 +500,15 @@
    (:from-nat (term (to-enum (cons/e natural/e natural/e)))
               1)
    '(0 . 1))
+
+  (check-equal? (term (subst (cons/e natural/e natural/e) x natural/e))
+                (term (cons/e natural/e natural/e)))
+  (check-equal? (term (subst (cons/e x x) x natural/e))
+                (term (cons/e natural/e natural/e)))
+  (check-equal? (term (subst (cons/e x (fix/e x x)) x natural/e))
+                (term (cons/e natural/e (fix/e x x))))
+  (check-equal? (term (subst (cons/e x (fix/e y x)) x natural/e))
+                (term (cons/e natural/e (fix/e y natural/e))))
   
   (try-many (term natural/e))
   (try-many (term (or/e natural/e (cons/e natural/e natural/e))))
@@ -473,6 +518,7 @@
   (try-many (term (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
   (try-many (term (dep/e natural/e nat->map-of-swap-zero-with)))
   (try-many (term (except/e natural/e 1)))
+  (try-many (term (fix/e bt (or/e natural/e (cons/e bt bt)))))
   (try-many (term (trace/e 0 natural/e)))
   
   (check-equal? (:enum->list
