@@ -79,15 +79,14 @@
 (define-syntax-rule (del e) (let ([p (delay e)]) (λ (n) ((force p) n))))
 
 (define unat-enum (del (pay (⊕ (singleton 0) (bimap add1 unat-enum)))))
-(define non-zero-binat-enum
-  (del (pay (⊕ (singleton 1)
-               (⊕ (bimap (λ (x) (* x 2)) non-zero-binat-enum)
-                  (bimap (λ (x) (+ (* x 2) 1)) non-zero-binat-enum))))))
-(define binat-enum (⊕ (singleton 0) non-zero-binat-enum))
-
-(define (binat-enum2 p)
-  (Finite (expt 2 p)
-          (λ (i) (+ (expt 2 p) i))))
+(define (binat-enum p)
+  (Finite (cond
+            [(zero? p) 0]
+            [(= p 1) 1]
+            [else (expt 2 (- p 2))])
+          (if (= p 1)
+              (λ (i) 0)
+              (λ (i) (+ (expt 2 (- p 2)) i)))))
 
 (define nat-pairs (⊗ unat-enum unat-enum))
 
@@ -124,19 +123,5 @@
 ;(find-pair-equilibria nat-pairs)
 ;(unary-nat-equilibria-points)
 
-(find-pair-equilibria (⊗ binat-enum binat-enum) 7)
-(find-pair-equilibria (⊗ binat-enum2 binat-enum2) 7)
-
-(define (check-same . enums)
-  (for ([enum1 (in-list enums)]
-        [enum2 (in-list (cdr enums))]
-        [enum-i (in-naturals 1)])
-    (for ([i (in-range 100)])
-      (unless (equal? (index enum1 i) (index enum2 i))
-        (error 'check-same "enum ~a and ~a are different at position ~a: ~s vs ~s"
-               enum-i (+ enum-i 1)
-               i
-               (index enum1 i)
-               (index enum2 i))))))
-
+;(find-pair-equilibria (⊗ binat-enum binat-enum) 7)
 
