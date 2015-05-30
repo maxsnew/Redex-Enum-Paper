@@ -1,3 +1,10 @@
+For POPL revision:
+ - write introduction
+ - future work (explain that this definition makes sense only for non-unary
+   combinators, but mention the two different list enumerations)
+ - add to model: except/e, fix/e, finite enumerations(?)
+ - prove feat combinators(?)
+
 * TODO
   1. [X] Model extension for trinary combinators
   2. [X] port coq model back to redex             (Robby)
