@@ -64,8 +64,11 @@
 (define ((⊕ e1 e2) p) (⊕F (e1 p) (e2 p)))
 (define ((⊗ e1 e2) p)
   (concatF
-   (for/list ([k (in-range p)])
+   (for/list ([k (in-range (+ p 1))])
      (⊗F (e1 k) (e2 (- p k))))))
+(module+ test
+  (check-equal? (index (⊗ (singleton 'x) (singleton 'y)) 0)
+                '(x . y)))
 
 (define ((pay e) n)
   (cond
