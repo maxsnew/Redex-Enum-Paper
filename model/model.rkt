@@ -20,6 +20,7 @@
      (cons/e e e)
      (map/e f f e)
      (dep/e e f)
+     (except/e e v)
      (trace/e n e))
   (v ::= (cons v v) n)
   (n ::= integer)
@@ -79,6 +80,14 @@
    (@ (Eval-enum (f v_1)) n_2 v_2 T_2)
    ----------------------------------------------  "dep"
    (@ (dep/e e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
+
+  [(@ e (ae-interp n_2) v_2 T) (side-condition (ae-interp (< n_2 n_1)))
+   ---------------------------------------- "ex<"
+   (@ (except/e e n_1) n_2 v_2 T)]
+
+  [(@ e_1 (ae-interp (+ n_2 1)) v_2 T) (side-condition (ae-interp (>= n_2 n_1)))
+   ---------------------------------------- "ex>"
+   (@ (except/e e_1 n_1) n_2 v_2 T)]
   
   [(@ e n_2 v T)
    ----------------------------------------------  "trace"
@@ -180,6 +189,9 @@
                   (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) natural/e)))
                   :natural/e)))]
   [(to-enum (dep/e e any)) (to-enum (cons/e e natural/e))]
+  [(to-enum (except/e e n))
+   ,(let ([e (term (to-enum e))])
+      (:except/e e (:from-nat e (term n))))]
   [(to-enum (trace/e n e)) (to-enum e)])
 
 (define-metafunction L
@@ -294,10 +306,17 @@
         [(? number?) (t (format "~a" ae))]
         [(? symbol-with-no-underscores?)
          (it (format "~a" ae))]
+        [`n_1
+         (hbl-append (it "n")
+                     (basic-text "1" (non-terminal-subscript-style)))]
+        [`n_2
+         (hbl-append (it "n")
+                     (basic-text "2" (non-terminal-subscript-style)))]
         [_ 
          (eprintf "missing ~s\n" ae)
          (blank)])))
-  
+  (define (basic-text str style) ((current-text) str style (default-font-size)))
+
   (define (hline w)
     (dc (λ (dc dx dy) (send dc draw-line dx dy (+ dx w) dy))
         w
@@ -361,7 +380,8 @@
 
 (define linebreaking-with-cases2
   '(("trace" "or l" "or r")
-    ("dep" "map" "natural")))
+    ("dep" "map" "natural")
+    ("ex<" "ex>")))
 
 (define (semantics-figure)
   (define helv-font "Helvetica")
@@ -452,6 +472,7 @@
   (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) natural/e)))
   (try-many (term (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
   (try-many (term (dep/e natural/e nat->map-of-swap-zero-with)))
+  (try-many (term (except/e natural/e 1)))
   (try-many (term (trace/e 0 natural/e)))
   
   (check-equal? (:enum->list
@@ -498,6 +519,3 @@
         (set! num-different (+ num-different 1))))
   (check-true (> num-same 20))
   (check-true (> num-different 10)))
-  
-  
-  
