@@ -33,6 +33,10 @@
                   (!! (⊗F x-and-y x-and-y) i))
                 (set (cons 'x 'x) (cons 'x 'y) (cons 'y 'x) (cons 'y 'y))))
 
+(define (valuesF F)
+  (for/list ([i (in-range (Finite-size F))])
+    ((Finite-enc F) i)))
+
 (define (concatF Fs)
   (for/fold ([tot-F emptyF]) ([F (in-list Fs)])
     (⊕F tot-F F)))
@@ -71,12 +75,22 @@
 (define ((bimap f e) n) (bimapF f (e n)))
 (define-syntax-rule (del e) (let ([p (delay e)]) (λ (n) ((force p) n))))
 
-(define nat-enum (del (pay (⊕ (singleton 0) (bimap add1 nat-enum)))))
-(define nat-pairs (⊗ nat-enum nat-enum))
+(define unat-enum (del (pay (⊕ (singleton 0) (bimap add1 unat-enum)))))
+(define non-zero-binat-enum
+  (del (pay (⊕ (singleton 1)
+               (⊕ (bimap (λ (x) (* x 2)) non-zero-binat-enum)
+                  (bimap (λ (x) (+ (* x 2) 1)) non-zero-binat-enum))))))
+(define binat-enum (⊕ (singleton 0) non-zero-binat-enum))
+
+(define (binat-enum2 p)
+  (Finite (expt 2 p)
+          (λ (i) (+ (expt 2 p) i))))
+
+(define nat-pairs (⊗ unat-enum unat-enum))
 
 (define num-points 20)
 
-(define (find-pair-equilibria)
+(define (find-pair-equilibria nat-pairs)
   (define arg1 (make-hash))
   (define arg2 (make-hash))
   (define (equilibrium?) (and (subset? arg1 arg2) (subset? arg2 arg1)))
@@ -100,9 +114,11 @@
          [else
           (loop (+ i 1) num-points)])])))
 
-(define (equilibria-points)
+(define (unary-nat-equilibria-points)
   (for/list ([i (in-range num-points)])
     (/ (* i (+ i 3)) 2)))
 
-(find-pair-equilibria)
-(equilibria-points)
+(find-pair-equilibria nat-pairs)
+(unary-nat-equilibria-points)
+
+;(find-pair-equilibria (⊗ binat-enum binat-enum))
