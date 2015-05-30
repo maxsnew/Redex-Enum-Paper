@@ -93,7 +93,7 @@
 
 (define num-points 20)
 
-(define (find-pair-equilibria nat-pairs)
+(define (find-pair-equilibria nat-pairs [num-points num-points])
   (define arg1 (make-hash))
   (define arg2 (make-hash))
   (define (equilibrium?) (and (subset? arg1 arg2) (subset? arg2 arg1)))
@@ -121,7 +121,22 @@
   (for/list ([i (in-range num-points)])
     (/ (* i (+ i 3)) 2)))
 
-(find-pair-equilibria nat-pairs)
-(unary-nat-equilibria-points)
+;(find-pair-equilibria nat-pairs)
+;(unary-nat-equilibria-points)
 
-;(find-pair-equilibria (⊗ binat-enum binat-enum))
+(find-pair-equilibria (⊗ binat-enum binat-enum) 7)
+(find-pair-equilibria (⊗ binat-enum2 binat-enum2) 7)
+
+(define (check-same . enums)
+  (for ([enum1 (in-list enums)]
+        [enum2 (in-list (cdr enums))]
+        [enum-i (in-naturals 1)])
+    (for ([i (in-range 100)])
+      (unless (equal? (index enum1 i) (index enum2 i))
+        (error 'check-same "enum ~a and ~a are different at position ~a: ~s vs ~s"
+               enum-i (+ enum-i 1)
+               i
+               (index enum1 i)
+               (index enum2 i))))))
+
+
