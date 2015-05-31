@@ -84,13 +84,15 @@
    ----------------------------------------------  "dep"
    (@ (dep/e e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
 
-  [(@ e (ae-interp n_2) v_2 T) (side-condition (ae-interp (< n_2 n_1)))
+  [(@<- e n_1 v_1 T_2)
+   (@ e (ae-interp n_2) v_2 T) (side-condition (ae-interp (< n_2 n_1)))
    ---------------------------------------- "ex<"
-   (@ (except/e e n_1) n_2 v_2 T)]
+   (@ (except/e e v_1) n_2 v_2 T)]
 
-  [(@ e_1 (ae-interp (+ n_2 1)) v_2 T) (side-condition (ae-interp (>= n_2 n_1)))
+  [(@<- e n_1 v_1 T_2)
+   (@ e (ae-interp (+ n_2 1)) v_2 T) (side-condition (ae-interp (>= n_2 n_1)))
    ---------------------------------------- "ex>"
-   (@ (except/e e_1 n_1) n_2 v_2 T)]
+   (@ (except/e e v_1) n_2 v_2 T)]
 
   [(@ (subst e x (fix/e x e)) n v T)
    --------------------------------- "fix"
@@ -100,6 +102,16 @@
    ----------------------------------------------  "trace"
    (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
 
+;; @, but with the other mode -- we don't model this explicitly,
+;; here in Redex, but just use the implementation in data/enumerate
+;; (since we don't really want to typeset this separately from the other)
+(define-judgment-form L
+  #:mode (@<- I O I O)
+  #:contract (@<- e n v T)
+  [(where n ,(:to-nat (term (to-enum e)) (term (to-val v))))
+   ---------------------------------------------------------
+   (@<- e n v ∅)])
+  
 ;; assumes closed "e"s
 (define-metafunction L
   subst : e x e -> e
@@ -367,16 +379,18 @@
     (and (symbol? x) (not (regexp-match? #rx"_" (symbol->string x)))))
   (define (t str) (text str))
   (define (it str) (text str '(italic . roman)))
+
+  (define (@-rewrite lws)
+    (define fn (list-ref lws 1))
+    (define enum (list-ref lws 2))
+    (define n (list-ref lws 3))
+    (define v (list-ref lws 4))
+    (define T (list-ref lws 5))
+    (list "" enum " @ " n " = " v " | " T ""))
   
   (with-compound-rewriters
-   (['@
-     (λ (lws)
-       (define fn (list-ref lws 1))
-       (define enum (list-ref lws 2))
-       (define n (list-ref lws 3))
-       (define v (list-ref lws 4))
-       (define T (list-ref lws 5))
-       (list "" enum " @ " n " = " v " | " T ""))]
+   (['@ @-rewrite]
+    ['@<- @-rewrite]
     ['subst
      (λ (lws)
        (define replace-inside (list-ref lws 2))
@@ -509,6 +523,11 @@
                 (term (cons/e natural/e (fix/e x x))))
   (check-equal? (term (subst (cons/e x (fix/e y x)) x natural/e))
                 (term (cons/e natural/e (fix/e y natural/e))))
+
+  (check-equal? (judgment-holds (@<- (cons/e natural/e natural/e) n (cons 0 0) T) n)
+                '(0))
+  (check-equal? (judgment-holds (@<- (cons/e natural/e natural/e) n (cons 3 4) T) n)
+                (list (:to-nat (:cons/e :natural/e :natural/e) (cons 3 4))))
   
   (try-many (term natural/e))
   (try-many (term (or/e natural/e (cons/e natural/e natural/e))))
