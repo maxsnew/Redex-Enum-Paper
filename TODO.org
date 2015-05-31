@@ -1,8 +1,9 @@
 For POPL revision:
  - write introduction
  - future work (explain that this definition makes sense only for non-unary
-   combinators, but mention the two different list enumerations)
- - add to model: except/e, fix/e, finite enumerations(?)
+   combinators (but mention the two different list enumerations) and infinite
+   enumerations)
+ - add to model: finite enumerations(?)
  - prove feat combinators(?)
 
 * TODO
