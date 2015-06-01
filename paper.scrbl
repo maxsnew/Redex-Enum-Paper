@@ -122,7 +122,7 @@ pairs of natural numbers. One such function is given by
 @texmath[bad-nn->n-string]. This is a bijection (the inverse
 simply counts the number of times that two is a factor of the
 input to separate the ``x'' and ``y'' parts) that is easy to
-explain and efficient to compute in both directions. It is
+explain and efficient (taking polylogarithmic time) to compute in both directions. It is
 a poor choice for an enumeration library, however, because it will
 explore ``y'' coordinate values much more quickly
 than the ``x'' coordinate. Indeed, in the first
