@@ -12,7 +12,9 @@
          render-enumerations
          enum-example
          except/e*
-         fin/e)
+         fin/e
+         lon/e-code lon/e
+         lon2/e-code lon2/e)
 
 (define (disj-sum-pict/good)
   (gen-table or/e 8 24 40 8 #:arrows? #t))
@@ -309,6 +311,26 @@
     (cond
       [(null? lst) enum]
       [else (loop (cdr lst) (except/e enum (car lst)))])))
+
+(define-syntax-rule
+  (define-lon/e/dup x1 x2 expr)
+  (begin (define x1 (racketblock expr))
+         (define x2 expr)))
+
+(define-lon/e/dup lon/e-code lon/e
+  (letrec ([lon/e
+            (or/e (fin/e null)
+                  (cons/e natural/e (delay/e lon/e)))])
+    lon/e))
+
+(define-lon/e/dup lon2/e-code lon2/e
+  (or/e (single/e '())
+        (dep/e natural/e
+               (λ (len)
+                 (define enums
+                   (for/list ([i (in-range (+ len 1))])
+                     natural/e))
+                 (apply list/e enums)))))
 
 (module+ main 
   (hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good)))

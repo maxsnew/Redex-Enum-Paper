@@ -177,6 +177,8 @@ sections discuss related work and conclude.
 
 @include-section["related.scrbl"]
 
+@include-section["future.scrbl"]
+
 @include-section["conclusion.scrbl"]
 
 @generate-bibliography[]

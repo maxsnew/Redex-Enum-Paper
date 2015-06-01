@@ -93,18 +93,9 @@ The combinator
 in order to build recursive enumerations.
 For example, we can construct an enumeration
 for lists of numbers:
-@racketblock[
-(letrec ([lon/e
-          (or/e (fin/e null)
-                (cons/e natural/e
-                        (delay/e lon/e)))])
-  lon/e)]
+@lon/e-code
 and here are its first 12 elements:
-@enum-example[(letrec ([lon/e
-                        (or/e (fin/e null)
-                              (cons/e natural/e (delay/e lon/e)))])
-                lon/e)
-               12]
+@enum-example[lon/e 12]
 An expression like @racket[(delay/e lon/e)] returns
 immediately, without evaluating the argument to @racket[delay/e].
 The first time encoding or decoding 
