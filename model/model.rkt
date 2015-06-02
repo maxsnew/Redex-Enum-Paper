@@ -15,7 +15,7 @@
 
 (define-language L
   (e ::= 
-     natural/e
+     (in/e 0 n+)
      (or/e e e)
      (cons/e e e)
      (map/e f f e)
@@ -24,8 +24,9 @@
      (fix/e x e)
      (trace/e n e)
      x)
+  (n+ ::= n ∞)
   (v ::= (cons v v) n)
-  (n ::= integer)
+  (n ::= natural)
   (x ::= variable-not-otherwise-mentioned)
   
   (ae ::=
@@ -33,7 +34,7 @@
       (- ae ae) (- ae ae ae)
       (integer-sqrt ae) (sqr ae)
       (< ae ae) (>= ae ae)
-      n)
+      n+)
   
   (T ::= ∅ (n ↦ (n n ...) T))
   
@@ -49,8 +50,9 @@
   #:mode (@ I I O O)
   #:contract (@ e natural v T)
   
-  [-------------------- "natural"
-   (@ natural/e n n ∅)]
+  [(side-condition (ae-interp (< n n+)))
+   ------------------------------------- "natural"
+   (@ (in/e 0 n+) n n ∅)]
   
   [(even n) (@ e_1 (ae-interp (/ n 2)) v T)
    ---------------------------------------------  "or l"
@@ -72,14 +74,14 @@
                         (integer-sqrt n)))) (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
    (@ e_2 (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))) v_2 T_2)
    ---------------------------------------------------------------------------------------- "cons y"
-   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))] 
+   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(@ e n v_1 T)
    (where v_2 (Eval-bij (f_1 v_1))) (where v_1 (Eval-bij (f_2 v_2)))
    -----------------------------------------------------------------  "map"
    (@ (map/e f_1 f_2 e) n v_2 T)]
   
-  [(@ (cons/e e natural/e) n_1 (cons v_1 n_2) T_1)
+  [(@ (cons/e e (in/e 0 ∞)) n_1 (cons v_1 n_2) T_1)
    (@ (Eval-enum (f v_1)) n_2 v_2 T_2)
    ----------------------------------------------  "dep"
    (@ (dep/e e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
@@ -123,7 +125,7 @@
              `(fix/e ,x2 ,e)
              `(fix/e ,x2 ,(loop e)))]
         [(? list?) (map loop e)]
-        [(? symbol?) (if (equal? e (term x)) (term e_1) e)]))])
+        [_ (if (equal? e (term x)) (term e_1) e)]))])
  
 (define-metafunction L
   ⊕ : T T -> T
@@ -152,8 +154,8 @@
 (define-metafunction L
   Eval-enum : (f any) -> any
   [(Eval-enum (nat->map-of-swap-zero-with natural))
-   (map/e (swap-zero-with natural) (swap-zero-with natural) natural/e)]
-  [(Eval-enum (f any)) natural/e])
+   (map/e (swap-zero-with natural) (swap-zero-with natural) (in/e 0 ∞))]
+  [(Eval-enum (f any)) (in/e 0 ∞)])
 
 (define-judgment-form L
   #:mode (odd I)
@@ -170,17 +172,29 @@
    (even n)])
 
 (define-metafunction L
-  ae-interp : ae -> natural or boolean
-  [(ae-interp (+ ae_1 ae_2)) ,(+ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
-  [(ae-interp (- ae_1 ae_2)) ,(- (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  ae-interp : ae -> n+ or boolean
+  [(ae-interp (+ ae_1 ae_2)) ,(+/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  [(ae-interp (- ae_1 ae_2)) ,(-/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
   [(ae-interp (- ae_1 ae_2 ae_3)) (ae-interp (- ae_1 (+ ae_2 ae_3)))]
   [(ae-interp (/ ae_1 ae_2)) ,(/ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
-  [(ae-interp (* ae_1 ae_2)) ,(* (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
-  [(ae-interp (< ae_1 ae_2)) ,(< (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
-  [(ae-interp (>= ae_1 ae_2)) ,(>= (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  [(ae-interp (* ae_1 ae_2)) ,(*/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  [(ae-interp (< ae_1 ae_2)) ,(</∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  [(ae-interp (>= ae_1 ae_2)) ,(>=/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
   [(ae-interp (integer-sqrt ae)) ,(integer-sqrt (term (ae-interp ae)))]
   [(ae-interp (sqr ae)) ,(sqr (term (ae-interp ae)))]
-  [(ae-interp n) n])
+  [(ae-interp n+) n+])
+
+(define (lift op a b) (if (or (equal? a '∞) (equal? b '∞)) a (op a b)))
+(define (+/∞ a b) (lift + a b))
+(define (-/∞ a b) (lift - a b))
+(define (*/∞ a b) (lift * a b))
+(define (</∞ a b) (and (<=/∞ a b) (not (equal? a b))))
+(define (>=/∞ a b) (<=/∞ b a))
+(define (<=/∞ a b)
+  (cond
+    [(equal? b '∞) #t]
+    [(equal? a '∞) #f]
+    [else (<= a b)]))
 
 (define-metafunction L
   to-enum : e -> any
@@ -198,7 +212,8 @@
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
-  [(to-enum natural/e) ,:natural/e]
+  [(to-enum (in/e 0 ∞)) ,:natural/e]
+  [(to-enum (in/e 0 n)) ,(:below/e (term n))]
   [(to-enum (map/e (swap-zero-with natural) (swap-zero-with natural) e))
    ,(let ([e (term (to-enum e))]
           [swapper
@@ -218,9 +233,9 @@
    ,(:dep/e (term (to-enum e))
             (λ (x)
               (if (exact-nonnegative-integer? x)
-                  (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) natural/e)))
+                  (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (in/e 0 ∞))))
                   :natural/e)))]
-  [(to-enum (dep/e e any)) (to-enum (cons/e e natural/e))]
+  [(to-enum (dep/e e any)) (to-enum (cons/e e (in/e 0 ∞)))]
   [(to-enum (except/e e n))
    ,(let ([e (term (to-enum e))])
       (:except/e e (:from-nat e (term n))))]
@@ -397,6 +412,9 @@
        (define x (list-ref lws 3))
        (define new-thing (list-ref lws 4))
        (list "" replace-inside "{" x " := " new-thing "}"))]
+    ['in/e
+     (λ (lws)
+       (list "[0," (list-ref lws 3) ")"))]
     ['⊕
      (λ (lws)
        (define arg1 (list-ref lws 2))
@@ -447,7 +465,7 @@
       20
       (ht-append 
        60
-       (inset (frame (inset (render-language L #:nts '(e v)) 4)) 4)
+       (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
        (some-rules linebreaking-with-cases1))
       (some-rules linebreaking-with-cases2)))))
 
@@ -483,7 +501,7 @@
     (define level (integer-sqrt n))
     (define mid-level (/ (- (sqr (+ level 1)) (sqr level) 1) 2))
     (define distance (- n (sqr level)))
-    (cond 
+    (cond
       [(< distance mid-level)
        (cons distance level)]
       [else
@@ -505,74 +523,86 @@
         (test-log! trial)
         (unless trial
           (eprintf "try-many: failed for ~s at ~s\n" e x)))))
+
+  (check-equal? (term (ae-interp (+ 1 2))) 3)
+  (check-equal? (term (ae-interp (< 1 2))) #t)
+  (check-equal? (term (ae-interp (< 1 1))) #f)
+  (check-equal? (term (ae-interp (< 2 1))) #f)
+  (check-equal? (term (ae-interp (>= 1 2))) #f)
+  (check-equal? (term (ae-interp (>= 1 1))) #t)
+  (check-equal? (term (ae-interp (>= 2 1))) #t)
+  (check-equal? (term (ae-interp (- 11 4))) 7)
+  (check-equal? (term (ae-interp (+ 11 4))) 15)
+  (check-equal? (term (ae-interp (* 11 4))) 44)
+  (check-equal? (term (ae-interp (/ 12 4))) 3)
   
   (check-equal? 
-   (:from-nat (term (to-enum (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
+   (:from-nat (term (to-enum (map/e swap-cons swap-cons (cons/e (in/e 0 ∞) (in/e 0 ∞)))))
               1)
    '(1 . 0))
   (check-equal? 
-   (:from-nat (term (to-enum (cons/e natural/e natural/e)))
+   (:from-nat (term (to-enum (cons/e (in/e 0 ∞) (in/e 0 ∞))))
               1)
    '(0 . 1))
 
-  (check-equal? (term (subst (cons/e natural/e natural/e) x natural/e))
-                (term (cons/e natural/e natural/e)))
-  (check-equal? (term (subst (cons/e x x) x natural/e))
-                (term (cons/e natural/e natural/e)))
-  (check-equal? (term (subst (cons/e x (fix/e x x)) x natural/e))
-                (term (cons/e natural/e (fix/e x x))))
-  (check-equal? (term (subst (cons/e x (fix/e y x)) x natural/e))
-                (term (cons/e natural/e (fix/e y natural/e))))
+  (check-equal? (term (subst (cons/e (in/e 0 ∞) (in/e 0 ∞)) x (in/e 0 ∞)))
+                (term (cons/e (in/e 0 ∞) (in/e 0 ∞))))
+  (check-equal? (term (subst (cons/e x x) x (in/e 0 ∞)))
+                (term (cons/e (in/e 0 ∞) (in/e 0 ∞))))
+  (check-equal? (term (subst (cons/e x (fix/e x x)) x (in/e 0 ∞)))
+                (term (cons/e (in/e 0 ∞) (fix/e x x))))
+  (check-equal? (term (subst (cons/e x (fix/e y x)) x (in/e 0 ∞)))
+                (term (cons/e (in/e 0 ∞) (fix/e y (in/e 0 ∞)))))
 
-  (check-equal? (judgment-holds (@<- (cons/e natural/e natural/e) n (cons 0 0) T) n)
+  (check-equal? (judgment-holds (@<- (cons/e (in/e 0 ∞) (in/e 0 ∞)) n (cons 0 0) T) n)
                 '(0))
-  (check-equal? (judgment-holds (@<- (cons/e natural/e natural/e) n (cons 3 4) T) n)
+  (check-equal? (judgment-holds (@<- (cons/e (in/e 0 ∞) (in/e 0 ∞)) n (cons 3 4) T) n)
                 (list (:to-nat (:cons/e :natural/e :natural/e) (cons 3 4))))
   
-  (try-many (term natural/e))
-  (try-many (term (or/e natural/e (cons/e natural/e natural/e))))
-  (try-many (term (or/e (cons/e natural/e natural/e) natural/e)))
-  (try-many (term (cons/e natural/e natural/e)))
-  (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) natural/e)))
-  (try-many (term (map/e swap-cons swap-cons (cons/e natural/e natural/e))))
-  (try-many (term (dep/e natural/e nat->map-of-swap-zero-with)))
-  (try-many (term (except/e natural/e 1)))
-  (try-many (term (fix/e bt (or/e natural/e (cons/e bt bt)))))
-  (try-many (term (trace/e 0 natural/e)))
+  (try-many (term (in/e 0 ∞)))
+  (try-many (term (or/e (in/e 0 ∞) (cons/e (in/e 0 ∞) (in/e 0 ∞)))))
+  (try-many (term (or/e (cons/e (in/e 0 ∞) (in/e 0 ∞)) (in/e 0 ∞))))
+  (try-many (term (cons/e (in/e 0 ∞) (in/e 0 ∞))))
+  (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) (in/e 0 ∞))))
+  (try-many (term (map/e swap-cons swap-cons (cons/e (in/e 0 ∞) (in/e 0 ∞)))))
+  (try-many (term (dep/e (in/e 0 ∞) nat->map-of-swap-zero-with)))
+  (try-many (term (except/e (in/e 0 ∞) 1)))
+  (try-many (term (fix/e bt (or/e (in/e 0 ∞) (cons/e bt bt)))))
+  (try-many (term (trace/e 0 (in/e 0 ∞))))
   
   (check-equal? (:enum->list
-                 (term (to-enum (map/e (swap-zero-with 3) (swap-zero-with 3) natural/e)))
+                 (term (to-enum (map/e (swap-zero-with 3) (swap-zero-with 3) (in/e 0 ∞))))
                  10)
                 '(3 1 2 0 4 5 6 7 8 9))
   
-  (check-equal? (get-trace (term natural/e) 0) (hash))
-  (check-equal? (get-trace (term (trace/e 0 natural/e)) 0) (hash 0 (set 0)))
-  (check-equal? (get-trace (term (cons/e (trace/e 0 natural/e)
-                                         (trace/e 1 natural/e)))
+  (check-equal? (get-trace (term (in/e 0 ∞)) 0) (hash))
+  (check-equal? (get-trace (term (trace/e 0 (in/e 0 ∞))) 0) (hash 0 (set 0)))
+  (check-equal? (get-trace (term (cons/e (trace/e 0 (in/e 0 ∞))
+                                         (trace/e 1 (in/e 0 ∞))))
                            0)
                 (hash 1 (set 0) 0 (set 0)))
-  (check-equal? (get-trace (term (or/e (trace/e 0 natural/e)
-                                       (trace/e 1 (cons/e natural/e natural/e))))
+  (check-equal? (get-trace (term (or/e (trace/e 0 (in/e 0 ∞))
+                                       (trace/e 1 (cons/e (in/e 0 ∞) (in/e 0 ∞)))))
                            100)
                 (hash 0 (set 50)))
-  (check-equal? (get-trace (term (or/e (trace/e 0 natural/e)
-                                       (trace/e 1 (cons/e natural/e natural/e))))
+  (check-equal? (get-trace (term (or/e (trace/e 0 (in/e 0 ∞))
+                                       (trace/e 1 (cons/e (in/e 0 ∞) (in/e 0 ∞)))))
                            101)
                 (hash 1 (set 50)))
-  (check-equal? (get-trace (term (cons/e (trace/e 0 natural/e)
-                                         (cons/e (trace/e 1 natural/e)
-                                                 (trace/e 2 natural/e))))
+  (check-equal? (get-trace (term (cons/e (trace/e 0 (in/e 0 ∞))
+                                         (cons/e (trace/e 1 (in/e 0 ∞))
+                                                 (trace/e 2 (in/e 0 ∞)))))
                            100)
                 (hash 0 (set 0) 1 (set 1) 2 (set 3)))
   
   ;; test that the dep/e construction is actually not just
-  ;; (cons/e natural/e natural/e) but that it shares a lot with it
+  ;; (cons/e (in/e 0 ∞) (in/e 0 ∞)) but that it shares a lot with it
   (define num-different 0)
   (define num-same 0)
   (for ([x (in-range 100)])
     (define l
       (judgment-holds 
-       (@ (dep/e natural/e nat->map-of-swap-zero-with)
+       (@ (dep/e (in/e 0 ∞) nat->map-of-swap-zero-with)
           ,x
           v
           T)
