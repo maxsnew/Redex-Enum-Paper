@@ -26,7 +26,7 @@
      x)
   (n+ ::= n ∞)
   (v ::= (cons v v) n)
-  (n ::= natural)
+  (n i j k ::= natural)
   (x ::= variable-not-otherwise-mentioned)
   
   (ae ::=
@@ -34,6 +34,8 @@
       (- ae ae) (- ae ae ae)
       (integer-sqrt ae) (sqr ae)
       (< ae ae) (>= ae ae)
+      (min ae ae) (max ae ae)
+      (mod ae ae) (div ae ae)
       n+)
   
   (T ::= ∅ (n ↦ (n n ...) T))
@@ -62,7 +64,7 @@
    -------------------------------------------------- "or r"
    (@ (or/e e_1 e_2) n (cons 1 v) T)]
 
-  [(where (× n_1 n_2) (unpair ∞ ∞ n))
+  [(where (× n_1 n_2) (unpair (size e_1) (size e_2) n))
    (@ e_1 n_1 v_1 T_1)
    (@ e_2 n_2 v_2 T_2)
    ----------------------------------------------------------- "cons"
@@ -107,13 +109,34 @@
    (@<- e n v ∅)])
 
 (define-metafunction L
+  size : e -> n+
+  [(size (in/e 0 n+)) n+]
+  [(size (or/e e_1 e_2)) (ae-interp (+ (size e_1) (size e_2)))]
+  [(size (cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
+  [(size (map/e f f e)) (size e)]
+  [(size (dep/e e f)) ∞]
+  [(size (except/e e v)) (ae-interp (- (size e) 1))]
+  [(size (fix/e x e)) ∞]
+  [(size (trace/e n e)) (size e)])
+
+(define-metafunction L
   unpair : n+ n+ n -> (× n n)
   [(unpair ∞ ∞ n)
    (× (ae-interp (- n (sqr (integer-sqrt n)))) (ae-interp (integer-sqrt n)))
    (side-condition (term (ae-interp (< (- n (sqr (integer-sqrt n)))
                                        (integer-sqrt n)))))]
   [(unpair ∞ ∞ n)
-   (× (ae-interp (integer-sqrt n)) (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))))])
+   (× (ae-interp (integer-sqrt n)) (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))))]
+  [(unpair i ∞ n)
+   (× (ae-interp (mod n i)) (ae-interp (div n i)))]
+  [(unpair ∞ j n)
+   (× (ae-interp (div n j)) (ae-interp (mod n j)))]
+  [(unpair i j n)
+   (× (ae-interp (mod n i)) (ae-interp (div n i)))
+   (side-condition (term (ae-interp (< i j))))]
+  [(unpair i j n)
+   (× (ae-interp (div n j)) (ae-interp (mod n j)))
+   (side-condition (term (ae-interp (>= i j))))])
 
     
 ;; assumes closed "e"s
@@ -184,12 +207,22 @@
   [(ae-interp (>= ae_1 ae_2)) ,(>=/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
   [(ae-interp (integer-sqrt ae)) ,(integer-sqrt (term (ae-interp ae)))]
   [(ae-interp (sqr ae)) ,(sqr (term (ae-interp ae)))]
+  [(ae-interp (div ae_1 ae_2)) ,(floor (/ (term (ae-interp ae_1)) (term (ae-interp ae_2))))]
+  [(ae-interp (mod ae_1 ae_2)) ,(modulo (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  [(ae-interp (min ae_1 ae_2)) ,(min/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
+  [(ae-interp (max ae_1 ae_2)) ,(max/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
   [(ae-interp n+) n+])
 
 (define (lift op a b) (if (or (equal? a '∞) (equal? b '∞)) a (op a b)))
 (define (+/∞ a b) (lift + a b))
 (define (-/∞ a b) (lift - a b))
 (define (*/∞ a b) (lift * a b))
+(define (max/∞ a b) (lift max a b))
+(define (min/∞ a b)
+  (cond
+    [(equal? a '∞) b]
+    [(equal? b '∞) a]
+    [else (min a b)]))
 (define (</∞ a b) (and (<=/∞ a b) (not (equal? a b))))
 (define (>=/∞ a b) (<=/∞ b a))
 (define (<=/∞ a b)
@@ -359,6 +392,18 @@
                      (t "⌋"))]
         [`(/ ,ae1 2)
          (hbl-append (loop #t ae1) (t "/2"))]
+        [`(div ,ae1 ,ae2)
+         (hbl-append
+          (t "⌊")
+          (loop #t ae1)
+          (t "/")
+          (loop #t ae2)
+          (t "⌋"))]
+        [`(mod ,ae1 ,ae2)
+         (hbl-append
+          (loop #t ae1)
+          (t "%")
+          (loop #t ae2))]
         [`(sqr ,ae)
          (define arg (loop #t ae))
          (hbl-append arg (t "²"))] 
@@ -520,14 +565,19 @@
      (equal? (n->nn x) (n->nn/e x))))
   
   (define (try-many e)
-    (with-handlers ([exn:fail? (λ (x) 
-                                 (printf "exn raised while trying ~s\n" e)
-                                 (raise x))])
-      (for ([x (in-range 1000)])
-        (define trial (try-one e x))
-        (test-log! trial)
-        (unless trial
-          (eprintf "try-many: failed for ~s at ~s\n" e x)))))
+    (let/ec k
+      (with-handlers ([exn:fail? (λ (x) 
+                                   (printf "exn raised while trying ~s\n" e)
+                                   (raise x))])
+        (define failures 0)
+        (for ([x (in-range (term (ae-interp (min (size ,e) 1000))))])
+          (define trial (try-one e x))
+          (test-log! trial)
+          (unless trial
+            (set! failures (+ failures 1))
+            (eprintf "try-many: failed for ~s at ~s\n" e x)
+            (when (> failures 5)
+              (k (void))))))))
 
   (check-equal? (term (ae-interp (+ 1 2))) 3)
   (check-equal? (term (ae-interp (< 1 2))) #t)
@@ -540,7 +590,20 @@
   (check-equal? (term (ae-interp (+ 11 4))) 15)
   (check-equal? (term (ae-interp (* 11 4))) 44)
   (check-equal? (term (ae-interp (/ 12 4))) 3)
-  
+  (check-equal? (term (ae-interp (mod 12 5))) 2)
+  (check-equal? (term (ae-interp (div 12 7))) 1)
+
+  (check-equal? (term (size (in/e 0 2))) 2)
+  (check-equal? (term (size (in/e 0 ∞))) (term ∞))
+  (check-equal? (term (size (cons/e (in/e 0 ∞) (in/e 0 11)))) (term ∞))
+  (check-equal? (term (size (cons/e (in/e 0 4) (in/e 0 11)))) 44)
+  (check-equal? (term (size (or/e (in/e 0 4) (in/e 0 11)))) 15)
+  (check-equal? (term (size (dep/e (in/e 0 ∞) nat->map-of-swap-zero-with))) (term ∞))
+  (check-equal? (term (size (except/e (in/e 0 10) 3))) 9)
+  (check-equal? (term (size (except/e (in/e 0 ∞) 3))) (term ∞))
+  ;; this is not a good test case...
+  (check-equal? (term (size (fix/e x (in/e 0 ∞)))) (term ∞))
+                
   (check-equal? 
    (:from-nat (term (to-enum (map/e swap-cons swap-cons (cons/e (in/e 0 ∞) (in/e 0 ∞)))))
               1)
@@ -574,7 +637,11 @@
   (try-many (term (except/e (in/e 0 ∞) 1)))
   (try-many (term (fix/e bt (or/e (in/e 0 ∞) (cons/e bt bt)))))
   (try-many (term (trace/e 0 (in/e 0 ∞))))
-  
+  (try-many (term (cons/e (in/e 0 3) (in/e 0 ∞))))
+  (try-many (term (cons/e (in/e 0 ∞) (in/e 0 3))))
+  (try-many (term (cons/e (in/e 0 3) (in/e 0 5))))
+  (try-many (term (cons/e (in/e 0 3) (in/e 0 2))))
+ 
   (check-equal? (:enum->list
                  (term (to-enum (map/e (swap-zero-with 3) (swap-zero-with 3) (in/e 0 ∞))))
                  10)
