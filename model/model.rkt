@@ -364,6 +364,10 @@
         [`(* ,(? simple? ae1) ,(? simple? ae2))
          (htl-append (loop #t ae1)
                      (loop #t ae2))]
+        [`(* ,ae1 ,ae2)
+         (htl-append (loop #t ae1)
+                     (t "·")
+                     (loop #t ae2))]
         [`(< ,ae1 ,ae2)
          (maybe-add-parens
           needs-parens?
@@ -406,7 +410,10 @@
           (loop #t ae2))]
         [`(sqr ,ae)
          (define arg (loop #t ae))
-         (hbl-append arg (t "²"))] 
+         (hbl-append arg (t "²"))]
+        [`(size ,ae)
+         (define arg (loop #f ae))
+         (hbl-append (t "‖") arg (t "‖"))]
         [(? number?) (t (format "~a" ae))]
         [(? symbol-with-no-underscores?)
          (it (format "~a" ae))]
@@ -415,6 +422,12 @@
                      (basic-text "1" (non-terminal-subscript-style)))]
         [`n_2
          (hbl-append (it "n")
+                     (basic-text "2" (non-terminal-subscript-style)))]
+        [`e_1
+         (hbl-append (it "e")
+                     (basic-text "1" (non-terminal-subscript-style)))]
+        [`e_2
+         (hbl-append (it "e")
                      (basic-text "2" (non-terminal-subscript-style)))]
         [_ 
          (eprintf "missing ~s\n" ae)
@@ -462,6 +475,12 @@
     ['×
      (λ (lws)
        (list "⟨" (list-ref lws 2) ", " (list-ref lws 3) "⟩"))]
+    ['size
+     (λ (lws)
+       (list "‖" (list-ref lws 2) "‖"))]
+    ['unpair
+     (λ (lws)
+       (list "unpair(" (list-ref lws 2) ", " (list-ref lws 3) ", " (list-ref lws 4) ")"))]
     ['in/e
      (λ (lws)
        (list "[0," (list-ref lws 3) ")"))]
@@ -502,10 +521,10 @@
 
 (define (semantics-figure)
   (define helv-font "Helvetica")
-  (define size 11)
-  (parameterize ([label-font-size size]
-                 [default-font-size size]
-                 [metafunction-font-size size]
+  (define font-size 11)
+  (parameterize ([label-font-size font-size]
+                 [default-font-size font-size]
+                 [metafunction-font-size font-size]
                  [metafunction-style helv-font]
                  [literal-style helv-font]
                  [grammar-style helv-font])
@@ -517,7 +536,8 @@
        (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
        (some-rules linebreaking-with-cases1))
       (some-rules linebreaking-with-cases2)
-      (render-metafunction unpair)))))
+      (hc-append (render-metafunction unpair)
+                 (render-metafunction size))))))
 
 (define (some-rules linebreaking)
   (apply
