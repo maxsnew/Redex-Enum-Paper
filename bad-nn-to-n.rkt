@@ -9,7 +9,7 @@
          bad-howmany
          bad-nn->n-string)
 
-(define bad-nn->n-string "\\lambda x. \\lambda y.\\ 2^x\\cdot{}(2\\cdot{}y + 1) - 1")
+(define bad-nn->n-string "\\lambda x. \\lambda y.\\ 2^x\\cdot{}(2y + 1) - 1")
 
 (define-empty-tokens the-tokens
   (t:eof
@@ -72,6 +72,7 @@
              ([add-exp t:- mult-exp] `(- ,$1 ,$3))
              ([mult-exp] $1))
     (mult-exp ([pow-exp t:· pow-exp] `(* ,$1 ,$3))
+              ([pow-exp pow-exp] `(* ,$1 ,$2))
               ([pow-exp] $1))
     (pow-exp ([base-exp t:^ base-exp] `(expt ,$1 ,$3))
              ([base-exp] $1))
