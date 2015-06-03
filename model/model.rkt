@@ -214,7 +214,11 @@
 
 (define (lift op a b) (if (or (equal? a '∞) (equal? b '∞)) a (op a b)))
 (define (+/∞ a b) (lift + a b))
-(define (-/∞ a b) (lift - a b))
+(define (-/∞ a b)
+  (cond
+    [(and (equal? a '∞) (not (equal? b '∞))) a]
+    [(and (number? a) (number? b)) (- a b)]
+    [else (error '- "cannot subtract: ~s - ~s" a b)]))
 (define (*/∞ a b) (lift * a b))
 (define (max/∞ a b) (lift max a b))
 (define (min/∞ a b)
