@@ -53,25 +53,25 @@
   #:contract (@ e natural v T)
   
   [(side-condition (ae-interp (< n n+)))
-   ------------------------------------- "natural"
+   ------------------------------------- "below/e"
    (@ (below/e n+) n n ∅)]
   
-  [(even n) (side-condition (ae-interp (< n (* 2 (min (size e_1) (size e_2))))))
+  [(even n) (side-condition (ae-interp (< n (* (min (size e_1) (size e_2)) 2))))
    (@ e_1 (ae-interp (/ n 2)) v T)
    ---------------------------------------------  "or alt l"
    (@ (or/e e_1 e_2) n (cons 0 v) T)]
   
-  [(odd n) (side-condition (ae-interp (< n (* 2 (min (size e_1) (size e_2))))))
+  [(odd n) (side-condition (ae-interp (< n (* (min (size e_1) (size e_2)) 2))))
    (@ e_2 (ae-interp (/ (- n 1) 2)) v T)
    -------------------------------------------------- "or alt r"
    (@ (or/e e_1 e_2) n (cons 1 v) T)]
 
-  [(side-condition (ae-interp (>= n (* 2 (min (size e_1) (size e_2)))))) (side-condition (ae-interp (< (size e_2) (size e_1))))
+  [(side-condition (ae-interp (>= n (* (min (size e_1) (size e_2)) 2)))) (side-condition (ae-interp (< (size e_2) (size e_1))))
    (@ e_1 (ae-interp (- n (size e_2))) v T)
    -------------------------------------------------- "or big l"
    (@ (or/e e_1 e_2) n (cons 0 v) T)]
 
-  [(side-condition (ae-interp (>= n (* 2 (min (size e_1) (size e_2)))))) (side-condition (ae-interp (< (size e_1) (size e_2))))
+  [(side-condition (ae-interp (>= n (* (min (size e_1) (size e_2)) 2)))) (side-condition (ae-interp (< (size e_1) (size e_2))))
    (@ e_2 (ae-interp (- n (size e_1))) v T)
    -------------------------------------------------- "or big r"
    (@ (or/e e_1 e_2) n (cons 1 v) T)]
@@ -98,7 +98,7 @@
 
   [(@<- e n_1 v_1 T_2)
    (@ e (ae-interp (+ n_2 1)) v_2 T) (side-condition (ae-interp (>= n_2 n_1)))
-   ---------------------------------------- "ex>"
+   ---------------------------------------- "ex≥"
    (@ (except/e e v_1) n_2 v_2 T)]
 
   [(@ (subst e x (fix/e x e)) n v T)
@@ -353,6 +353,7 @@
         [else (error 'to-sexp "unk ~s\n" lws)])))
   
   (define (ae->pict ae)
+    (define (d str) (text str (default-style)))
     (let loop ([needs-parens? #f]
                [ae ae])
       (match ae
@@ -360,78 +361,78 @@
          (maybe-add-parens
           needs-parens?
           (htl-append (loop #t ae1)
-                      (t " + ")
+                      (d " + ")
                       (loop #t ae2)))]
         [`(- ,ae1 ,ae2)
          (maybe-add-parens
           needs-parens?
           (htl-append (loop #t ae1)
-                      (t " - ")
+                      (d " - ")
                       (loop #t ae2)))]
         [`(- ,ae1 ,ae2 ,ae3)
          (maybe-add-parens
           needs-parens?
           (htl-append (loop #t ae1)
-                      (t " - ")
+                      (d " - ")
                       (loop #t ae2)
-                      (t " - ")
+                      (d " - ")
                       (loop #t ae3)))]
         [`(* ,(? simple? ae1) ,(? simple? ae2))
          (htl-append (loop #t ae1)
                      (loop #t ae2))]
         [`(* ,ae1 ,ae2)
          (htl-append (loop #t ae1)
-                     (t "·")
+                     (d "·")
                      (loop #t ae2))]
         [`(< ,ae1 ,ae2)
          (maybe-add-parens
           needs-parens?
           (htl-append (loop #f ae1)
-                      (t " < ")
+                      (d " < ")
                       (loop #f ae2)))]
         [`(>= ,ae1 ,ae2)
          (maybe-add-parens
           needs-parens?
           (htl-append (loop #f ae1)
-                      (t " ≥ ")
+                      (d " ≥ ")
                       (loop #f ae2)))]
         [`(integer-sqrt ,(? symbol? n))
          (define var (it (format "~a" n)))
          (define line (inset (hline (pict-width var)) 0 1 0 0))
-         (define left-side (t "√"))
-         (hbl-append (t "⌊")
+         (define left-side (d "√"))
+         (hbl-append (d "⌊")
                      left-side 
                      (lbl-superimpose 
                       (refocus 
                        (lbl-superimpose
-                        (lt-superimpose (ghost (inset left-side 0 0 (- (pict-width left-side)) 0))
+                        (lt-superimpose (ghost (inset left-side -2 3 (- (pict-width left-side)) 0))
                                         line)
                         var)
                        var))
-                     (t "⌋"))]
+                     (d "⌋"))]
         [`(/ ,ae1 2)
-         (hbl-append (loop #t ae1) (t "/2"))]
+         (hbl-append (loop #t ae1) (d "/2"))]
         [`(div ,ae1 ,ae2)
          (hbl-append
-          (t "⌊")
+          (d "⌊")
           (loop #t ae1)
-          (t "/")
+          (d "/")
           (loop #t ae2)
-          (t "⌋"))]
+          (d "⌋"))]
         [`(mod ,ae1 ,ae2)
          (hbl-append
           (loop #t ae1)
-          (t "%")
+          (d "%")
           (loop #t ae2))]
         [`(sqr ,ae)
          (define arg (loop #t ae))
-         (hbl-append arg (t "²"))]
+         (hbl-append arg (d "²"))]
         [`(size ,ae)
          (define arg (loop #f ae))
-         (hbl-append (t "‖") arg (t "‖"))]
+         (hbl-append (d "‖") arg (d "‖"))]
         [`(min ,ae1 ,ae2)
-         (hbl-append (t "min(") (loop #f ae1) (t ",") (loop #f ae1) (t ")"))]
-        [(? number?) (t (format "~a" ae))]
+         (hbl-append (d "min(") (loop #f ae1) (d ",") (loop #f ae1) (d ")"))]
+        [(? number?) (d (format "~a" ae))]
         [(? symbol-with-no-underscores?)
          (it (format "~a" ae))]
         [`n_1
@@ -532,8 +533,8 @@
 (define linebreaking-with-cases2
   '(("or alt l" "or alt r")
     ("or big l" "or big r")
-    ("dep" "map" "natural")
-    ("ex<" "ex>" "fix")))
+    ("dep" "map" "below/e")
+    ("ex<" "ex≥" "fix")))
 
 (define (semantics-figure)
   (define helv-font "Helvetica")
@@ -552,8 +553,13 @@
        (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
        (some-rules linebreaking-with-cases1))
       (some-rules linebreaking-with-cases2)
-      (hc-append (render-metafunction unpair)
-                 (render-metafunction size))))))
+      (htl-append 30
+                  (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
+                                 [where-make-prefix-pict
+                                  (λ ()
+                                    (text " if " (default-style)))])
+                    (render-metafunction unpair))
+                  (render-metafunction size))))))
 
 (define (some-rules linebreaking)
   (apply
@@ -629,6 +635,7 @@
   (check-equal? (term (ae-interp (mod 12 5))) 2)
   (check-equal? (term (ae-interp (div 12 7))) 1)
   (check-equal? (term (ae-interp (* 2 ∞))) (term ∞))
+  (check-equal? (term (ae-interp (* ∞ 2))) (term ∞))
 
   (check-equal? (term (size (below/e 2))) 2)
   (check-equal? (term (size (below/e ∞))) (term ∞))
