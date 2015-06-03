@@ -40,7 +40,7 @@
   
   (T ::= ∅ (n ↦ (n n ...) T))
   
-  (f ::= 
+  (f ::=
      swap-cons
      (swap-zero-with natural)
      nat->map-of-swap-zero-with))
@@ -56,12 +56,24 @@
    ------------------------------------- "natural"
    (@ (below/e n+) n n ∅)]
   
-  [(even n) (@ e_1 (ae-interp (/ n 2)) v T)
-   ---------------------------------------------  "or l"
+  [(even n) (side-condition (ae-interp (< n (* 2 (min (size e_1) (size e_2))))))
+   (@ e_1 (ae-interp (/ n 2)) v T)
+   ---------------------------------------------  "or alt l"
    (@ (or/e e_1 e_2) n (cons 0 v) T)]
   
-  [(odd n) (@ e_2 (ae-interp (/ (- n 1) 2)) v T)
-   -------------------------------------------------- "or r"
+  [(odd n) (side-condition (ae-interp (< n (* 2 (min (size e_1) (size e_2))))))
+   (@ e_2 (ae-interp (/ (- n 1) 2)) v T)
+   -------------------------------------------------- "or alt r"
+   (@ (or/e e_1 e_2) n (cons 1 v) T)]
+
+  [(side-condition (ae-interp (>= n (* 2 (min (size e_1) (size e_2)))))) (side-condition (ae-interp (< (size e_2) (size e_1))))
+   (@ e_1 (ae-interp (- n (size e_2))) v T)
+   -------------------------------------------------- "or big l"
+   (@ (or/e e_1 e_2) n (cons 0 v) T)]
+
+  [(side-condition (ae-interp (>= n (* 2 (min (size e_1) (size e_2)))))) (side-condition (ae-interp (< (size e_1) (size e_2))))
+   (@ e_2 (ae-interp (- n (size e_1))) v T)
+   -------------------------------------------------- "or big r"
    (@ (or/e e_1 e_2) n (cons 1 v) T)]
 
   [(where (× n_1 n_2) (unpair (size e_1) (size e_2) n))
@@ -212,7 +224,7 @@
   [(ae-interp (max ae_1 ae_2)) ,(max/∞ (term (ae-interp ae_1)) (term (ae-interp ae_2)))]
   [(ae-interp n+) n+])
 
-(define (lift op a b) (if (or (equal? a '∞) (equal? b '∞)) a (op a b)))
+(define (lift op a b) (if (or (equal? a (term ∞)) (equal? b (term ∞))) (term ∞) (op a b)))
 (define (+/∞ a b) (lift + a b))
 (define (-/∞ a b)
   (cond
@@ -223,15 +235,15 @@
 (define (max/∞ a b) (lift max a b))
 (define (min/∞ a b)
   (cond
-    [(equal? a '∞) b]
-    [(equal? b '∞) a]
+    [(equal? a (term ∞)) b]
+    [(equal? b (term ∞)) a]
     [else (min a b)]))
 (define (</∞ a b) (and (<=/∞ a b) (not (equal? a b))))
 (define (>=/∞ a b) (<=/∞ b a))
 (define (<=/∞ a b)
   (cond
-    [(equal? b '∞) #t]
-    [(equal? a '∞) #f]
+    [(equal? b (term ∞)) #t]
+    [(equal? a (term ∞)) #f]
     [else (<= a b)]))
 
 (define-metafunction L
@@ -417,6 +429,8 @@
         [`(size ,ae)
          (define arg (loop #f ae))
          (hbl-append (t "‖") arg (t "‖"))]
+        [`(min ,ae1 ,ae2)
+         (hbl-append (t "min(") (loop #f ae1) (t ",") (loop #f ae1) (t ")"))]
         [(? number?) (t (format "~a" ae))]
         [(? symbol-with-no-underscores?)
          (it (format "~a" ae))]
@@ -512,10 +526,12 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases1
-  '(("cons")))
+  '(("cons")
+    ("trace")))
 
 (define linebreaking-with-cases2
-  '(("trace" "or l" "or r")
+  '(("or alt l" "or alt r")
+    ("or big l" "or big r")
     ("dep" "map" "natural")
     ("ex<" "ex>" "fix")))
 
@@ -612,6 +628,7 @@
   (check-equal? (term (ae-interp (/ 12 4))) 3)
   (check-equal? (term (ae-interp (mod 12 5))) 2)
   (check-equal? (term (ae-interp (div 12 7))) 1)
+  (check-equal? (term (ae-interp (* 2 ∞))) (term ∞))
 
   (check-equal? (term (size (below/e 2))) 2)
   (check-equal? (term (size (below/e ∞))) (term ∞))
@@ -621,7 +638,6 @@
   (check-equal? (term (size (dep/e (below/e ∞) nat->map-of-swap-zero-with))) (term ∞))
   (check-equal? (term (size (except/e (below/e 10) 3))) 9)
   (check-equal? (term (size (except/e (below/e ∞) 3))) (term ∞))
-  ;; this is not a good test case...
   (check-equal? (term (size (fix/e x (below/e ∞)))) (term ∞))
                 
   (check-equal? 
@@ -661,6 +677,8 @@
   (try-many (term (cons/e (below/e ∞) (below/e 3))))
   (try-many (term (cons/e (below/e 3) (below/e 5))))
   (try-many (term (cons/e (below/e 3) (below/e 2))))
+  (try-many (term (or/e (cons/e (below/e 1) (below/e 100)) (below/e 10))))
+  (try-many (term (or/e (below/e 10) (cons/e (below/e 1) (below/e 100)))))
  
   (check-equal? (:enum->list
                  (term (to-enum (map/e (swap-zero-with 3) (swap-zero-with 3) (below/e ∞))))
