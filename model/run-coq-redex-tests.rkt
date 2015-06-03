@@ -80,7 +80,7 @@
        (define (o str) (display str port))
        (define (o-enum e)
          (match e
-           [`(in/e 0 ∞) (o "E_Nat")]
+           [`(below/e ∞) (o "E_Nat")]
            [`(or/e ,e1 ,e2)
             (o "(E_Sum ")
             (o-enum e1)
@@ -114,7 +114,7 @@
 
        (define (o-v e v)
          (match* (e v)
-           [(`(in/e 0 ∞) (? number?))
+           [(`(below/e ∞) (? number?))
             (o (format "~a" v))]
            [(`(cons/e ,e1 ,e2) (cons a b))
             (o "(pair ")
@@ -128,7 +128,7 @@
             (o "(pair ")
             (o-v e i)
             (o " ")
-            (o-v `(in/e 0 ∞) j)
+            (o-v `(below/e ∞) j)
             (o ")")]
            [(`(or/e ,e1 ,e2) (cons 0 b))
             (o "(inl ")
@@ -256,21 +256,21 @@
 
 
 (run-tests
- (build-test-cases '(in/e 0 ∞) 100)
- (build-test-cases '(cons/e (in/e 0 ∞) (in/e 0 ∞)) 100)
- (build-test-cases '(or/e (in/e 0 ∞) (in/e 0 ∞)) 100)
- (build-test-cases '(cons/e (cons/e (trace/e 0 (in/e 0 ∞))
-                                    (trace/e 1 (in/e 0 ∞)))
-                            (cons/e (trace/e 2 (in/e 0 ∞))
-                                    (trace/e 3 (in/e 0 ∞))))
+ (build-test-cases '(below/e ∞) 100)
+ (build-test-cases '(cons/e (below/e ∞) (below/e ∞)) 100)
+ (build-test-cases '(or/e (below/e ∞) (below/e ∞)) 100)
+ (build-test-cases '(cons/e (cons/e (trace/e 0 (below/e ∞))
+                                    (trace/e 1 (below/e ∞)))
+                            (cons/e (trace/e 2 (below/e ∞))
+                                    (trace/e 3 (below/e ∞))))
                    100)
- (build-test-cases '(or/e (cons/e (trace/e 0 (in/e 0 ∞))
-                                  (trace/e 1 (in/e 0 ∞)))
-                          (trace/e 2 (in/e 0 ∞)))
+ (build-test-cases '(or/e (cons/e (trace/e 0 (below/e ∞))
+                                  (trace/e 1 (below/e ∞)))
+                          (trace/e 2 (below/e ∞)))
                    100)
- (build-test-cases '(map/e swap-cons swap-cons (cons/e (in/e 0 ∞) (in/e 0 ∞)))
+ (build-test-cases '(map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))
                    100)
- (build-test-cases '(dep/e (in/e 0 ∞) nat->map-of-swap-zero-with)
+ (build-test-cases '(dep/e (below/e ∞) nat->map-of-swap-zero-with)
                    100))
 
 ;; missing dep/e
