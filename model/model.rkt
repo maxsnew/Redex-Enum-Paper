@@ -61,19 +61,11 @@
   [(odd n) (@ e_2 (ae-interp (/ (- n 1) 2)) v T)
    -------------------------------------------------- "or r"
    (@ (or/e e_1 e_2) n (cons 1 v) T)]
-  
-  [(side-condition (ae-interp
-                    (< (- n (sqr (integer-sqrt n)))
-                       (integer-sqrt n)))) (@ e_1 (ae-interp (- n (sqr (integer-sqrt n)))) v_1 T_1)
-   (@ e_2 (ae-interp (integer-sqrt n)) v_2 T_2)
-   ----------------------------------------------------------- "cons x"
-   (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
-  
-  [(side-condition (ae-interp
-                    (>= (- n (sqr (integer-sqrt n)))
-                        (integer-sqrt n)))) (@ e_1 (ae-interp (integer-sqrt n)) v_1 T_1)
-   (@ e_2 (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))) v_2 T_2)
-   ---------------------------------------------------------------------------------------- "cons y"
+
+  [(where (× n_1 n_2) (unpair ∞ ∞ n))
+   (@ e_1 n_1 v_1 T_1)
+   (@ e_2 n_2 v_2 T_2)
+   ----------------------------------------------------------- "cons"
    (@ (cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))]
   
   [(@ e n v_1 T)
@@ -113,7 +105,17 @@
   [(where n ,(:to-nat (term (to-enum e)) (term (to-val v))))
    ---------------------------------------------------------
    (@<- e n v ∅)])
-  
+
+(define-metafunction L
+  unpair : n+ n+ n -> (× n n)
+  [(unpair ∞ ∞ n)
+   (× (ae-interp (- n (sqr (integer-sqrt n)))) (ae-interp (integer-sqrt n)))
+   (side-condition (term (ae-interp (< (- n (sqr (integer-sqrt n)))
+                                       (integer-sqrt n)))))]
+  [(unpair ∞ ∞ n)
+   (× (ae-interp (integer-sqrt n)) (ae-interp (- n (sqr (integer-sqrt n)) (integer-sqrt n))))])
+
+    
 ;; assumes closed "e"s
 (define-metafunction L
   subst : e x e -> e
@@ -412,6 +414,9 @@
        (define x (list-ref lws 3))
        (define new-thing (list-ref lws 4))
        (list "" replace-inside "{" x " := " new-thing "}"))]
+    ['×
+     (λ (lws)
+       (list "⟨" (list-ref lws 2) ", " (list-ref lws 3) "⟩"))]
     ['in/e
      (λ (lws)
        (list "[0," (list-ref lws 3) ")"))]
@@ -443,8 +448,7 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases1
-  '(("cons x")
-    ("cons y")))
+  '(("cons")))
 
 (define linebreaking-with-cases2
   '(("trace" "or l" "or r")
@@ -467,7 +471,8 @@
        60
        (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
        (some-rules linebreaking-with-cases1))
-      (some-rules linebreaking-with-cases2)))))
+      (some-rules linebreaking-with-cases2)
+      (render-metafunction unpair)))))
 
 (define (some-rules linebreaking)
   (apply
