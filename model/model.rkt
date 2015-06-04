@@ -19,7 +19,7 @@
      (or/e e e)
      (cons/e e e)
      (map/e f f e)
-     (dep/e e f)
+     (dep/e fin-or-inf e f)
      (except/e e v)
      (fix/e x e)
      (trace/e n e)
@@ -43,7 +43,8 @@
   (f ::=
      swap-cons
      (swap-zero-with natural)
-     nat->map-of-swap-zero-with))
+     nat->map-of-swap-zero-with)
+  (fin-or-inf ::= fin inf))
 (define e? (redex-match L e))
 (define T? (redex-match L T))
 (define v? (redex-match L v))
@@ -87,9 +88,9 @@
    (@ (map/e f_1 f_2 e) n v_2 T)]
   
   [(@ (cons/e e (below/e ∞)) n_1 (cons v_1 n_2) T_1)
-   (@ (Eval-enum (f v_1)) n_2 v_2 T_2)
+   (@ (Eval-enum (f v_1)) n_2 v_2 T_2) (side-condition (inf? fin-or-inf e f))
    ----------------------------------------------  "dep"
-   (@ (dep/e e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
+   (@ (dep/e fin-or-inf e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
 
   [(@<- e n_1 v_1 T_2)
    (@ e (ae-interp n_2) v_2 T) (side-condition (ae-interp (< n_2 n_1)))
@@ -125,7 +126,7 @@
   [(size (or/e e_1 e_2)) (ae-interp (+ (size e_1) (size e_2)))]
   [(size (cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
   [(size (map/e f f e)) (size e)]
-  [(size (dep/e e f)) ∞]
+  [(size (dep/e fin-or-inf e f)) ∞ (side-condition (term (inf? fin-or-inf e f)))]
   [(size (except/e e v)) (ae-interp (- (size e) 1))]
   [(size (fix/e x e)) ∞]
   [(size (trace/e n e)) (size e)])
@@ -192,6 +193,16 @@
   [(Eval-enum (nat->map-of-swap-zero-with natural))
    (map/e (swap-zero-with natural) (swap-zero-with natural) (below/e ∞))]
   [(Eval-enum (f any)) (below/e ∞)])
+
+(define-metafunction L
+  inf? : fin-or-inf e f -> boolean
+  [(inf? inf e f) #t]
+  [(inf? fin e f) #f])
+(define-metafunction L
+  fin? : fin-or-inf e f -> boolean
+  [(fin? inf e f) #f]
+  [(fin? fin e f ) #t])
+
 
 (define-judgment-form L
   #:mode (odd I)
@@ -279,13 +290,13 @@
           [swap (λ (x) (if (pair? x) (cons (cdr x) (car x)) x))])
       (:map/e swap swap e #:contract (:enum-contract e)))]
   [(to-enum (map/e any any e)) (to-enum e)]
-  [(to-enum (dep/e e nat->map-of-swap-zero-with))
+  [(to-enum (dep/e inf e nat->map-of-swap-zero-with))
    ,(:dep/e (term (to-enum e))
             (λ (x)
               (if (exact-nonnegative-integer? x)
                   (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e ∞))))
                   :natural/e)))]
-  [(to-enum (dep/e e any)) (to-enum (cons/e e (below/e ∞)))]
+  [(to-enum (dep/e inf e any)) (to-enum (cons/e e (below/e ∞)))] ;; should this be an error?
   [(to-enum (except/e e n))
    ,(let ([e (term (to-enum e))])
       (:except/e e (:from-nat e (term n))))]
@@ -484,6 +495,19 @@
   (with-compound-rewriters
    (['@ @-rewrite]
     ['@<- @-rewrite]
+    ['dep/e
+     (λ (lws)
+       (list (list-ref lws 0)
+             (basic-text "dep/e " (metafunction-style)) ;(list-ref lws 0)
+             ;(list-ref lws 2)
+             (list-ref lws 3)
+             (list-ref lws 4)
+             (list-ref lws 5)))]
+    ['inf?
+     (λ (lws)
+       (define e (list-ref lws 3))
+       (define f (list-ref lws 4))
+       (list "∀ x ∈ " e ",  ‖" f "(x)‖ = ∞"))]
     ['subst
      (λ (lws)
        (define replace-inside (list-ref lws 2))
@@ -642,7 +666,7 @@
   (check-equal? (term (size (cons/e (below/e ∞) (below/e 11)))) (term ∞))
   (check-equal? (term (size (cons/e (below/e 4) (below/e 11)))) 44)
   (check-equal? (term (size (or/e (below/e 4) (below/e 11)))) 15)
-  (check-equal? (term (size (dep/e (below/e ∞) nat->map-of-swap-zero-with))) (term ∞))
+  (check-equal? (term (size (dep/e inf (below/e ∞) nat->map-of-swap-zero-with))) (term ∞))
   (check-equal? (term (size (except/e (below/e 10) 3))) 9)
   (check-equal? (term (size (except/e (below/e ∞) 3))) (term ∞))
   (check-equal? (term (size (fix/e x (below/e ∞)))) (term ∞))
@@ -676,7 +700,7 @@
   (try-many (term (cons/e (below/e ∞) (below/e ∞))))
   (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) (below/e ∞))))
   (try-many (term (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))
-  (try-many (term (dep/e (below/e ∞) nat->map-of-swap-zero-with)))
+  (try-many (term (dep/e inf (below/e ∞) nat->map-of-swap-zero-with)))
   (try-many (term (except/e (below/e ∞) 1)))
   (try-many (term (fix/e bt (or/e (below/e ∞) (cons/e bt bt)))))
   (try-many (term (trace/e 0 (below/e ∞))))
@@ -719,7 +743,7 @@
   (for ([x (in-range 100)])
     (define l
       (judgment-holds 
-       (@ (dep/e (below/e ∞) nat->map-of-swap-zero-with)
+       (@ (dep/e inf (below/e ∞) nat->map-of-swap-zero-with)
           ,x
           v
           T)
