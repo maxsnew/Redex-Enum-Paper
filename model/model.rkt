@@ -43,7 +43,8 @@
   (f ::=
      swap-cons
      (swap-zero-with natural)
-     nat->map-of-swap-zero-with)
+     nat->map-of-swap-zero-with
+     nat->below/e-of-that-nat)
   (fin-or-inf ::= fin inf))
 (define e? (redex-match L e))
 (define T? (redex-match L T))
@@ -127,9 +128,24 @@
   [(size (cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
   [(size (map/e f f e)) (size e)]
   [(size (dep/e fin-or-inf e f)) ∞ (side-condition (term (inf? fin-or-inf e f)))]
+  [(size (dep/e fin-or-inf e f))
+   (ae-interp (* (size e) (sum-all e f)))
+   (side-condition (term (ae-interp (< (size e) ∞))))]
   [(size (except/e e v)) (ae-interp (- (size e) 1))]
   [(size (fix/e x e)) ∞]
   [(size (trace/e n e)) (size e)])
+
+(define-metafunction L
+  sum-all : e f -> n
+  [(sum-all e f) (sum-all/acc 0 e f)])
+
+(define-metafunction L
+  sum-all/acc : n e f -> n
+  [(sum-all/acc n e f)
+   (ae-interp (+ (size (Eval-enum (f v))) (sum-all/acc (ae-interp (+ n 1)) e f)))
+   (judgment-holds (@ e n v T))
+   (side-condition (term (ae-interp (< n (size e)))))]
+  [(sum-all/acc n e f) 0])
 
 (define-metafunction L
   unpair : n+ n+ n -> (× n n)
@@ -190,8 +206,10 @@
 
 (define-metafunction L
   Eval-enum : (f any) -> any
-  [(Eval-enum (nat->map-of-swap-zero-with natural))
-   (map/e (swap-zero-with natural) (swap-zero-with natural) (below/e ∞))]
+  [(Eval-enum (nat->map-of-swap-zero-with n))
+   (map/e (swap-zero-with n) (swap-zero-with n) (below/e ∞))]
+  [(Eval-enum (nat->below/e-of-that-nat n)) (below/e n)]
+  [(Eval-enum (nat->below/e-of-that-nat any)) (below/e 0)]
   [(Eval-enum (f any)) (below/e ∞)])
 
 (define-metafunction L
@@ -201,7 +219,7 @@
 (define-metafunction L
   fin? : fin-or-inf e f -> boolean
   [(fin? inf e f) #f]
-  [(fin? fin e f ) #t])
+  [(fin? fin e f) #t])
 
 
 (define-judgment-form L
@@ -296,6 +314,12 @@
               (if (exact-nonnegative-integer? x)
                   (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e ∞))))
                   :natural/e)))]
+  [(to-enum (dep/e fin e nat->below/e-of-that-nat))
+   ,(:dep/e (term (to-enum e))
+            (λ (x)
+              (if (exact-nonnegative-integer? x)
+                  (:below/e x)
+                  (:below/e 0))))]
   [(to-enum (dep/e inf e any)) (to-enum (cons/e e (below/e ∞)))] ;; should this be an error?
   [(to-enum (except/e e n))
    ,(let ([e (term (to-enum e))])
@@ -392,9 +416,11 @@
          (htl-append (loop #t ae1)
                      (loop #t ae2))]
         [`(* ,ae1 ,ae2)
-         (htl-append (loop #t ae1)
-                     (d "·")
-                     (loop #t ae2))]
+         (maybe-add-parens
+          needs-parens?
+          (htl-append (loop #t ae1)
+                      (d "·")
+                      (loop #t ae2)))]
         [`(< ,ae1 ,ae2)
          (maybe-add-parens
           needs-parens?
@@ -441,6 +467,10 @@
         [`(size ,ae)
          (define arg (loop #f ae))
          (hbl-append (d "‖") arg (d "‖"))]
+        [`(sum-all ,e ,f)
+         (maybe-add-parens
+          needs-parens?
+          (hbl-append (d "Σ x ∈ ") (loop #t e) (d ". ‖") (loop #t f) (d "(x)‖")))]
         [`(min ,ae1 ,ae2)
          (hbl-append (d "min(") (loop #f ae1) (d ",") (loop #f ae1) (d ")"))]
         [(? number?) (d (format "~a" ae))]
@@ -485,7 +515,6 @@
   (define (it str) (text str '(italic . roman)))
 
   (define (@-rewrite lws)
-    (define fn (list-ref lws 1))
     (define enum (list-ref lws 2))
     (define n (list-ref lws 3))
     (define v (list-ref lws 4))
@@ -507,7 +536,22 @@
      (λ (lws)
        (define e (list-ref lws 3))
        (define f (list-ref lws 4))
+       (define @-rewritten
+         (@-rewrite (list '_ '_ e
+                          "n"
+                          "v"
+                          "T")))
        (list "∀ x ∈ " e ",  ‖" f "(x)‖ = ∞"))]
+    ['fin?
+     (λ (lws)
+       (define e (list-ref lws 3))
+       (define f (list-ref lws 4))
+       (define @-rewritten
+         (@-rewrite (list '_ '_ e
+                          "n"
+                          "v"
+                          "T")))
+       (list "∀ x ∈ " e ",  ‖" f "(x)‖ < ∞"))]
     ['subst
      (λ (lws)
        (define replace-inside (list-ref lws 2))
@@ -517,6 +561,11 @@
     ['×
      (λ (lws)
        (list "⟨" (list-ref lws 2) ", " (list-ref lws 3) "⟩"))]
+    ['sum-all
+     (λ (lws)
+       (define e (list-ref 2))
+       (define f (list-ref 3))
+       (list "Σ x ∈ " e ". ‖" f "(x)‖"))]
     ['size
      (λ (lws)
        (list "‖" (list-ref lws 2) "‖"))]
@@ -577,13 +626,13 @@
        (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
        (some-rules linebreaking-with-cases1))
       (some-rules linebreaking-with-cases2)
-      (htl-append 30
-                  (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
-                                 [where-make-prefix-pict
-                                  (λ ()
-                                    (text " if " (default-style)))])
-                    (render-metafunction unpair))
-                  (render-metafunction size))))))
+      (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
+                     [where-make-prefix-pict
+                      (λ ()
+                        (text " if " (default-style)))])
+        (htl-append 30
+                    (render-metafunction unpair)
+                    (render-metafunction size)))))))
 
 (define (some-rules linebreaking)
   (apply
@@ -667,6 +716,8 @@
   (check-equal? (term (size (cons/e (below/e 4) (below/e 11)))) 44)
   (check-equal? (term (size (or/e (below/e 4) (below/e 11)))) 15)
   (check-equal? (term (size (dep/e inf (below/e ∞) nat->map-of-swap-zero-with))) (term ∞))
+  (check-equal? (term (size (dep/e fin (below/e 10) nat->below/e-of-that-nat)))
+                450)
   (check-equal? (term (size (except/e (below/e 10) 3))) 9)
   (check-equal? (term (size (except/e (below/e ∞) 3))) (term ∞))
   (check-equal? (term (size (fix/e x (below/e ∞)))) (term ∞))
