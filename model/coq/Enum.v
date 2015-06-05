@@ -2,7 +2,7 @@ Require Import Coq.Arith.Arith_base  Coq.Arith.Div2.
 Require Import Coq.Lists.ListSet Coq.Lists.List.
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 
-Require Import Enum.Bijection Enum.Pairing Enum.Sets Enum.Trace Enum.Util.
+Require Import Enum.Bijection Enum.Pairing Enum.UnfairPairing Enum.Sets Enum.Trace Enum.Util.
 
 (* Notation notes:
 Sets
@@ -22,6 +22,7 @@ Traces
 Inductive Enum : Set -> Type :=
 | E_Nat : Enum nat
 | E_Pair {tl tr} : Enum tl -> Enum tr -> Enum (tl * tr)
+| E_Unfair_Pair {tl tr} : Enum tl -> Enum tr -> Enum (tl * tr)
 | E_Map {tyin tyout} : Bijection tyout tyin -> Enum tyin -> Enum tyout
 | E_Dep {t1 t2} : Enum t1 -> (t1 -> Enum t2) -> Enum (t1 * t2)
 | E_Sum {tl tr} : Enum tl -> Enum tr -> Enum (tl + tr)
@@ -39,6 +40,12 @@ Inductive Enumerates : forall {T : Set}, Enum T -> nat -> T -> Trace -> Prop :=
       Enumerates l ln lx lt ->
       Enumerates r rn rx rt ->
       Enumerates (E_Pair l r) n (lx, rx) (lt ⊔ rt)
+| ES_Unfair_Pair :
+    forall {tl tr} (l: Enum tl) (r: Enum tr) n ln rn lx rx lt rt,
+      Unfair_Pairing n ln rn ->
+      Enumerates l ln lx lt ->
+      Enumerates r rn rx rt ->
+      Enumerates (E_Unfair_Pair l r) n (lx, rx) (lt ⊔ rt)
 | ES_Map :
     forall {tl tr} (bi : Bijection tl tr) inner inner_x n x t,
       Bijects bi x inner_x ->
@@ -108,6 +115,7 @@ Ltac invert_Enumerates' :=
       match E with
         | E_Nat          => inversion H; subst; clear H
         | E_Pair _ _ => inversion H; subst; clear H
+        | E_Unfair_Pair _ _ => inversion H; subst; clear H
         | E_Map _ _  => inversion H; subst; clear H
         | E_Dep _ _  => inversion H; subst; clear H
         | E_Sum _ _  => inversion H; subst; clear H
@@ -139,6 +147,7 @@ Theorem Enumerates_from_fun :
 Proof.
   induction e; intros; invert_Enumerates;
   repeat rewrite_pairing_to_fun;
+  repeat rewrite_unfair_pairing_to_fun;
   repeat Eff_indHyp;
   try (even_odd_crush; subst);
   try match goal with
@@ -149,8 +158,7 @@ Proof.
           , H2 : Enumerates ?e _ _ _
           |- _ ] => destruct (IH _ _ _ _ _ _ H1 H2); clear IH H1 H2; subst
       end;
-  repeat Eff_indHyp;
-  try tauto.
+  repeat Eff_indHyp; tauto.
 Qed.
 
 Ltac Etf_indHyp :=
@@ -170,7 +178,9 @@ Theorem Enumerates_to_fun :
 Proof.
   induction e; intros;
   repeat invert_Enumerates; try sumbool_contra;
-  repeat Etf_indHyp; repeat rewrite_pairing_from_fun; try rewrite_biject_funr;
+  repeat Etf_indHyp; repeat rewrite_pairing_from_fun; 
+  repeat rewrite_unfair_pairing_from_fun;
+  try rewrite_biject_funr;
   try match goal with
         | [ IH: context[Enumerates _ _ _ _ -> Enumerates _ _ _ _ -> _ ]
           , H1 : Enumerates ?e _ _ _
@@ -179,8 +189,7 @@ Proof.
           erewrite (IH _ _ _ _ _ _ H1 H2) in *; clear IH H1 H2; subst
       end;
   repeat Etf_indHyp;
-  repeat rewrite_pairing_from_fun;
-  tauto.
+  repeat rewrite_pairing_from_fun; tauto.
 Qed.
 
 Theorem Enumerates_to_fun'
@@ -283,6 +292,14 @@ Proof.
               | E_Nat  => {{(n, ε)}}
               | E_Pair _ _ el er =>
                 match Pairing_from_dec n with
+                  | {{ p }} =>
+                    match F el (fst p), F er (snd p) with
+                      | {{ lxt }}, {{ rxt }} =>
+                        {{ ((fst lxt, fst rxt), (snd lxt ⊔ snd rxt)) }}
+                    end
+                end
+              | E_Unfair_Pair _ _ el er =>
+                match Unfair_Pairing_from_dec n with
                   | {{ p }} =>
                     match F el (fst p), F er (snd p) with
                       | {{ lxt }}, {{ rxt }} =>
