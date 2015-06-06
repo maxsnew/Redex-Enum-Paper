@@ -23,6 +23,109 @@ Proof.
   inversion P1; inversion P2; auto.
 Qed.
 
+Lemma pow_not_zero : forall n, 2^n=0 -> False.
+Proof.
+  induction n.
+  simpl.
+  intuition.
+  unfold pow. fold pow.
+  intro PROD.
+  apply mult_is_O in PROD;auto.
+  destruct PROD; intuition.
+Qed.
+
+Lemma pow_S_prod_false : forall n m, 0 = (pow 2 n) * (m + 1) -> False.
+Proof.
+  intros n m FACT.
+  destruct (mult_is_O (2 ^ n) (m + 1)) as [ZERO|ZERO]; auto.
+  apply pow_not_zero in ZERO; intuition.
+  replace (m+1) with (S m);nliamega.
+Qed.
+
+Lemma twice_two : forall x y, 2*x = 2*y -> x = y.
+Proof.
+  intros; nliamega.
+Qed.
+
+Lemma odd_and_even_dont_overlap:
+  forall n m, 2 * n = 2 * m + 1 -> False.
+Proof.
+  intros n m FACT.
+
+  assert (odd (2*m+1)) as ODD.
+  clear n FACT.
+  induction m.
+  simpl; repeat constructor.
+  replace (2 * S m + 1) with (S (S (2 * m + 1)));[|omega].
+  constructor.
+  constructor.
+  auto.
+
+  assert (even (2*n)) as EVEN.
+  clear m FACT ODD.
+  induction n.
+  simpl; constructor.
+  replace (2 * S n) with (S (S (2*n)));[|omega].
+  constructor.
+  constructor.
+  auto.
+
+  rewrite FACT in EVEN.
+  apply (not_even_and_odd (2*m+1)); auto.
+Qed.
+
+Lemma unfair_unique :
+  forall l1 l2 r1 r2,
+    2 ^ l2 * (2 * r2 + 1) - 1 = 2 ^ l1 * (2 * r1 + 1) - 1
+    -> l1 = l2 /\  r1 = r2.
+Proof.
+  intros l1 l2 r1 r2 MINUS.
+  assert (2 ^ l2 * (2 * r2 + 1) = 2 ^ l1 * (2 * r1 + 1)) as NO_MINUS.
+  remember (2 ^ l2 * (2 * r2 + 1)) as a2.
+  remember (2 ^ l1 * (2 * r1 + 1)) as a1.
+  destruct a2 as [|a2'].
+  apply pow_S_prod_false in Heqa2; intuition.
+  destruct a1 as [|a1'].
+  apply pow_S_prod_false in Heqa1; intuition.
+  nliamega.
+  clear MINUS.
+  generalize NO_MINUS; clear NO_MINUS.
+
+  generalize l1; clear l1.
+  induction l2; intros l1 FACT.
+  replace (2^0) with 1 in FACT;[|unfold pow;nliamega].
+  rewrite mult_1_l in FACT.
+  destruct l1.
+  split;auto.
+  replace (2^0) with 1 in FACT;[|unfold pow;nliamega].
+  nliamega.
+  unfold pow in FACT; fold pow in FACT.
+  symmetry in FACT.
+  rewrite <- mult_assoc in FACT.
+  apply odd_and_even_dont_overlap in FACT; intuition.
+
+  destruct l1.
+  clear IHl2.
+  replace (2^0) with 1 in FACT;[|unfold pow;nliamega].
+  rewrite mult_1_l in FACT.
+  unfold pow in FACT.
+  fold pow in FACT.
+  rewrite <- mult_assoc in FACT.
+  apply odd_and_even_dont_overlap in FACT; intuition.
+
+  remember (IHl2 l1) as HEREWEGO.
+  assert (l1 = l2 /\ r1 = r2).
+  apply HEREWEGO.
+  clear IHl2 HEREWEGO HeqHEREWEGO.
+  apply twice_two.
+  rewrite mult_assoc.
+  replace (2*2^l2) with (2^(S l2));[|unfold pow;nliamega].
+  rewrite mult_assoc.
+  replace (2*2^l1) with (2^(S l1));[|unfold pow;nliamega].
+  auto.
+  split;nliamega.
+Qed.
+
 Theorem Unfair_Pairing_to_fun :
   forall n l1 l2 r1 r2,
     Unfair_Pairing n l1 r1 ->
@@ -31,7 +134,7 @@ Theorem Unfair_Pairing_to_fun :
 Proof.
   intros n l1 l2 r1 r2 P1 P2.
   inversion P1; inversion P2; clear P1; clear P2; subst.
-  admit.
+  apply unfair_unique; auto.
 Qed.
 
 Theorem Unfair_Pairing_to_l_fun :
@@ -116,17 +219,6 @@ Proof.
   destruct n'; try (apply lt_n_S); auto.
 Qed.
 
-Lemma pow_not_zero : forall n, 2^n=0 -> False.
-Proof.
-  induction n.
-  simpl.
-  intuition.
-  unfold pow. fold pow.
-  intro PROD.
-  apply mult_is_O in PROD;auto.
-  destruct PROD; intuition.
-Qed.
-
 Lemma unfair_split_recombine : 
   forall n,
     n =
@@ -168,20 +260,13 @@ Proof.
   remember (2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1)) as m.
   destruct m.
 
-  destruct (mult_is_O (2 ^ unfair_split_x (S (div2 n)))
-                      (2 * unfair_split_y (S (div2 n)) + 1)) as [ZERO|ZERO]; auto.
-  apply pow_not_zero in ZERO.
-  intuition.
-
-  replace (2 * unfair_split_y (S (div2 n)) + 1) with (S (2 * unfair_split_y (S (div2 n))));[|omega].
-  intuition.
+  apply pow_S_prod_false in Heqm; intuition.
 
   replace (2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1)) 
   with ((2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1) - 1) + 1) in Heqm.
   rewrite <- (IND (div2 n)) in Heqm.
   rewrite Heqm; clear Heqm; clear m.
   unfold mult.
-  Type even_double.
   replace (div2 n + 1 + (div2 n + 1 + 0) - 1) with ((div2 n + div2 n) + 1);[|nliamega].
   replace (div2 n + div2 n) with (double (div2 n));[|unfold double;nliamega].
   rewrite <- even_double.
