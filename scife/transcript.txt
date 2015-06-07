@@ -1,0 +1,180 @@
+Welcome to Scala version 2.10.3 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0).
+Type in expressions to have them evaluated.
+Type :help for more information.
+
+scala> import insynth._
+import insynth._
+
+scala> import enumeration._
+import enumeration._
+
+scala> val natEnum : Enum[Int] = Stream.from(0)
+natEnum: insynth.enumeration.Enum[Int] = insynth.enumeration.WrapStream@72655e14
+
+scala> natEnum(0)
+res0: Int = 0
+
+scala> natEnum(1)
+res1: Int = 1
+
+scala> natEnum.size
+java.lang.UnsupportedOperationException: Getting size of an infinite enumerator will most probably result in diverging computation.
+	at insynth.enumeration.Infinite$class.size(Infinite.scala:8)
+	at insynth.enumeration.WrapStream.size(WrapStream.scala:7)
+	at insynth.enumeration.WrapStream.size(WrapStream.scala:7)
+	at .<init>(<console>:15)
+	at .<clinit>(<console>)
+	at .<init>(<console>:7)
+	at .<clinit>(<console>)
+	at $print(<console>)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:483)
+	at scala.tools.nsc.interpreter.IMain$ReadEvalPrint.call(IMain.scala:734)
+	at scala.tools.nsc.interpreter.IMain$Request.loadAndRun(IMain.scala:983)
+	at scala.tools.nsc.interpreter.IMain.loadAndRunReq$1(IMain.scala:573)
+	at scala.tools.nsc.interpreter.IMain.interpret(IMain.scala:604)
+	at scala.tools.nsc.interpreter.IMain.interpret(IMain.scala:568)
+	at scala.tools.nsc.interpreter.ILoop.reallyInterpret$1(ILoop.scala:756)
+	at scala.tools.nsc.interpreter.ILoop.interpretStartingWith(ILoop.scala:801)
+	at scala.tools.nsc.interpreter.ILoop.command(ILoop.scala:713)
+	at scala.tools.nsc.interpreter.ILoop.processLine$1(ILoop.scala:577)
+	at scala.tools.nsc.interpreter.ILoop.innerLoop$1(ILoop.scala:584)
+	at scala.tools.nsc.interpreter.ILoop.loop(ILoop.scala:587)
+	at scala.tools.nsc.interpreter.ILoop$$anonfun$process$1.apply$mcZ$sp(ILoop.scala:878)
+	at scala.tools.nsc.interpreter.ILoop$$anonfun$process$1.apply(ILoop.scala:833)
+	at scala.tools.nsc.interpreter.ILoop$$anonfun$process$1.apply(ILoop.scala:833)
+	at scala.tools.nsc.util.ScalaClassLoader$.savingContextLoader(ScalaClassLoader.scala:135)
+	at scala.tools.nsc.interpreter.ILoop.process(ILoop.scala:833)
+	at scala.tools.nsc.interpreter.ILoop.main(ILoop.scala:900)
+	at xsbt.ConsoleInterface.run(ConsoleInterface.scala:69)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:483)
+	at sbt.compiler.AnalyzingCompiler.call(AnalyzingCompiler.scala:102)
+	at sbt.compiler.AnalyzingCompiler.console(AnalyzingCompiler.scala:77)
+	at sbt.Console.sbt$Console$$console0$1(Console.scala:23)
+	at sbt.Console$$anonfun$apply$2$$anonfun$apply$1.apply$mcV$sp(Console.scala:24)
+	at sbt.Console$$anonfun$apply$2$$anonfun$apply$1.apply(Console.scala:24)
+	at sbt.Console$$anonfun$apply$2$$anonfun$apply$1.apply(Console.scala:24)
+	at sbt.Logger$$anon$4.apply(Logger.scala:90)
+	at sbt.TrapExit$App.run(TrapExit.scala:244)
+	at java.lang.Thread.run(Thread.java:744)
+
+
+scala> val natPairEnum = natEnum ** natEnum
+natPairEnum: insynth.enumeration.Enum[(Int, Int)] = insynth.enumeration.lzy.ProductInfinite@db6e7a6
+
+scala> natPairEnum(0)
+res7: (Int, Int) = (0,0)
+
+scala> natPairEnum(1)
+res8: (Int, Int) = (1,0)
+
+scala> natPairEnum(2)
+res9: (Int, Int) = (0,1)
+
+scala> natPairEnum(3)
+res10: (Int, Int) = (2,0)
+
+scala> natPairEnum(4)
+res11: (Int, Int) = (1,1)
+
+scala> natPairEnum(5)
+res12: (Int, Int) = (0,2)
+
+scala> natPairEnum(6)
+res13: (Int, Int) = (3,0)
+
+scala> natPairEnum(7)
+res14: (Int, Int) = (2,1)
+
+scala> natPairEnum(8)
+res15: (Int, Int) = (1,2)
+
+scala> natPairEnum(9)
+res16: (Int, Int) = (0,3)
+
+scala> val natTripleEnum = natEnum ** natEnum ** natEnum
+natTripleEnum: insynth.enumeration.Enum[((Int, Int), Int)] = insynth.enumeration.lzy.ProductInfinite@7175e332
+
+scala> natTripleEnum(0)
+res17: ((Int, Int), Int) = ((0,0),0)
+
+scala> natTripleEnum(1)
+res18: ((Int, Int), Int) = ((1,0),0)
+
+scala> natTripleEnum(2)
+res19: ((Int, Int), Int) = ((0,0),1)
+
+scala> natTripleEnum(3)
+res20: ((Int, Int), Int) = ((0,1),0)
+
+scala> natTripleEnum(4)
+res21: ((Int, Int), Int) = ((1,0),1)
+
+scala> natTripleEnum(5)
+res22: ((Int, Int), Int) = ((0,0),2)
+
+scala> natTripleEnum(6)
+res23: ((Int, Int), Int) = ((2,0),0)
+
+scala> natTripleEnum(7)
+res24: ((Int, Int), Int) = ((0,1),1)
+
+scala> natTripleEnum(8)
+res25: ((Int, Int), Int) = ((1,0),2)
+
+scala> natTripleEnum(9)
+res26: ((Int, Int), Int) = ((0,0),3)
+
+scala> natTripleEnum.size
+java.lang.UnsupportedOperationException: Getting size of an infinite enumerator will most probably result in diverging computation.
+	at insynth.enumeration.Infinite$class.size(Infinite.scala:8)
+	at insynth.enumeration.lzy.ProductInfinite.size(ProductInfinite.scala:8)
+	at insynth.enumeration.lzy.ProductInfinite.size(ProductInfinite.scala:8)
+	at .<init>(<console>:16)
+	at .<clinit>(<console>)
+	at .<init>(<console>:7)
+	at .<clinit>(<console>)
+	at $print(<console>)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:483)
+	at scala.tools.nsc.interpreter.IMain$ReadEvalPrint.call(IMain.scala:734)
+	at scala.tools.nsc.interpreter.IMain$Request.loadAndRun(IMain.scala:983)
+	at scala.tools.nsc.interpreter.IMain.loadAndRunReq$1(IMain.scala:573)
+	at scala.tools.nsc.interpreter.IMain.interpret(IMain.scala:604)
+	at scala.tools.nsc.interpreter.IMain.interpret(IMain.scala:568)
+	at scala.tools.nsc.interpreter.ILoop.reallyInterpret$1(ILoop.scala:756)
+	at scala.tools.nsc.interpreter.ILoop.interpretStartingWith(ILoop.scala:801)
+	at scala.tools.nsc.interpreter.ILoop.command(ILoop.scala:713)
+	at scala.tools.nsc.interpreter.ILoop.processLine$1(ILoop.scala:577)
+	at scala.tools.nsc.interpreter.ILoop.innerLoop$1(ILoop.scala:584)
+	at scala.tools.nsc.interpreter.ILoop.loop(ILoop.scala:587)
+	at scala.tools.nsc.interpreter.ILoop$$anonfun$process$1.apply$mcZ$sp(ILoop.scala:878)
+	at scala.tools.nsc.interpreter.ILoop$$anonfun$process$1.apply(ILoop.scala:833)
+	at scala.tools.nsc.interpreter.ILoop$$anonfun$process$1.apply(ILoop.scala:833)
+	at scala.tools.nsc.util.ScalaClassLoader$.savingContextLoader(ScalaClassLoader.scala:135)
+	at scala.tools.nsc.interpreter.ILoop.process(ILoop.scala:833)
+	at scala.tools.nsc.interpreter.ILoop.main(ILoop.scala:900)
+	at xsbt.ConsoleInterface.run(ConsoleInterface.scala:69)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:483)
+	at sbt.compiler.AnalyzingCompiler.call(AnalyzingCompiler.scala:102)
+	at sbt.compiler.AnalyzingCompiler.console(AnalyzingCompiler.scala:77)
+	at sbt.Console.sbt$Console$$console0$1(Console.scala:23)
+	at sbt.Console$$anonfun$apply$2$$anonfun$apply$1.apply$mcV$sp(Console.scala:24)
+	at sbt.Console$$anonfun$apply$2$$anonfun$apply$1.apply(Console.scala:24)
+	at sbt.Console$$anonfun$apply$2$$anonfun$apply$1.apply(Console.scala:24)
+	at sbt.Logger$$anon$4.apply(Logger.scala:90)
+	at sbt.TrapExit$App.run(TrapExit.scala:244)
+	at java.lang.Thread.run(Thread.java:744)
+
+
+scala> 
