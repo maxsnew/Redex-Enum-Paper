@@ -110,10 +110,10 @@ then SciFe for Scala in
 year.@note{http://plt.eecs.northwestern.edu/snapshots/current/doc/data/Enumerations.html}
 
 These libraries are all efficient, generally providing the
-ability to extract the @texmath{2^{100}}-th element of the
-enumerations of data structures in milliseconds. What they
+ability to extract the @texmath{2^{100}}-th element of an
+enumeration of a data structure in milliseconds. What they
 lack, however, is a mathematically precise notion of the
-quality of their enumerations. As an example, all of
+quality of their combinators. As an example, all of
 these libraries provide a pairing combinator that accepts
 two enumerations and returns an enumeration of pairs of the
 elements of the given enumeration. There are many ways one
@@ -138,7 +138,7 @@ combinator goes equally deeply into all the arguments to the
 combinator. Our definition rules out a pairing operation
 based on the function above, but accepts one based on the
 standard Cantor bijection and many others, including ones
-whose inverses are easier to compute in n-tuple case (as
+whose inverses are easier to compute in the n-tuple case (as
 explained later).
 
 We also report on an empirical study of the bug-finding
@@ -146,10 +146,13 @@ capabilities of enumeration libraries for bugs in formal
 models of type systems and operational semantics. We built a
 benchmark suite of 50 bugs (based on our experience writing
 Redex models and the experience of others mined from git
-repositories of Redex models) and compare the bugs/second
-rate for a generator that enumerates terms in order, one
-that randomly selects a natural number and uses that to find
-a term and an existing, ad hoc random generator that's been
+repositories of Redex models) and compare the bug/second
+rate with three different generators. Two of the generators are based
+on a bijection between the expressions of the language and the
+naturals: one enumerates terms in order and the other that selects a
+random (possibly large) natural number and uses that with the
+bijection between, and the third is an existing, ad hoc random
+generator that's been
 tuned for bug-finding in Redex models for more than a
 decade. Our results show that in-order enumeration and ad
 hoc generation have complementary strengths, but that
