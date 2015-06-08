@@ -52,6 +52,7 @@
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   Fair Enumeration Combinators
 }
+@;{
 @authorinfo["Max New"
             "Northwestern University"
             "max.new@eecs.northwestern.edu"]
@@ -67,7 +68,7 @@
 @authorinfo["Robert Bruce Findler"
             "Northwestern University"
             "robby@eecs.northwestern.edu"]
-
+}
 @abstract{
   This paper reports on the design of combinators
   for building efficient bijections between the 
