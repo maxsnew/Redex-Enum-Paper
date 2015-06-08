@@ -518,6 +518,18 @@ Section NaiveTripleUnfair.
 End NaiveTripleUnfair.
 Print Assumptions SumFair.
 
+Section Unfair_Unfair.
+  Theorem Unfair_Pair_Unfair : ~ (@Fair2 prod (@E_Unfair_Pair)).
+  Proof.
+    unfold Fair2.
+    unfold F_Fair2.
+    intro THING; destruct THING as [f THING2].
+    remember (THING2 8) as UNLIKELY; clear THING2 HeqUNLIKELY.
+    admit.
+  Qed.
+
+End Unfair_Unfair.
+
 (* Local Variables: *)
 (* coq-load-path: (("." "Enum")) *)
 (* end: *)
