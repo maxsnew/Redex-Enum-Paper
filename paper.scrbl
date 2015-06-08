@@ -2,7 +2,7 @@
 
 @(require "cite.rkt" 
           "util.rkt"
-          "bad-nn-to-n.rkt"
+          "unfair-pairing.rkt"
           scribble/core
           scribble/latex-properties
           scriblib/footnote
