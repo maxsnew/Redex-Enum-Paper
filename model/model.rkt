@@ -388,7 +388,6 @@
         [else (error 'to-sexp "unk ~s\n" lws)])))
   
   (define (ae->pict ae)
-    (define (d str) (text str (default-style)))
     (let loop ([needs-parens? #f]
                [ae ae])
       (match ae
@@ -491,6 +490,8 @@
         [_ 
          (eprintf "missing ~s\n" ae)
          (blank)])))
+
+  (define (d str) (basic-text str (default-style)))
   (define (basic-text str style) ((current-text) str style (default-font-size)))
 
   (define (hline w)
@@ -527,8 +528,7 @@
     ['dep/e
      (λ (lws)
        (list (list-ref lws 0)
-             (basic-text "dep/e " (metafunction-style)) ;(list-ref lws 0)
-             ;(list-ref lws 2)
+             (basic-text "dep/e " (metafunction-style))
              (list-ref lws 3)
              (list-ref lws 4)
              (list-ref lws 5)))]
@@ -595,7 +595,9 @@
        (list "" arg " is odd"))]
     ['Eval-enum (λ (lws) (list "" (list-ref lws 2) ""))]
     ['Eval-bij (λ (lws) (list "" (list-ref lws 2) ""))])
-   (thunk)))
+   (with-atomic-rewriter
+    '∞ (λ () (d "∞"))
+    (thunk))))
 
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
@@ -752,6 +754,7 @@
   (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) (below/e ∞))))
   (try-many (term (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))
   (try-many (term (dep/e inf (below/e ∞) nat->map-of-swap-zero-with)))
+  ;(try-many (term (dep/e fin (below/e 10) nat->below/e-of-that-nat)))
   (try-many (term (except/e (below/e ∞) 1)))
   (try-many (term (fix/e bt (or/e (below/e ∞) (cons/e bt bt)))))
   (try-many (term (trace/e 0 (below/e ∞))))
