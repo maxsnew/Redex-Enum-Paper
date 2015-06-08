@@ -141,4 +141,25 @@
   (plot
    (list
     (lines (to-lines x-ht) #:color "red" #:label "x")
-    (lines (to-lines y-ht) #:color "blue" #:label "y"))))
+    (lines (to-lines y-ht) #:color "blue" #:label "y")))
+
+
+
+  (define (find-equilibria n->nn)
+    (define x-ht (make-hash))
+    (define y-ht (make-hash))
+    (define (hash-inc! ht n) (hash-set! ht n (+ 1 (hash-ref ht n 0))))
+    (define (equilibria?) (equal? x-ht y-ht))
+    (define limit 100000)
+    (for ([i (in-range limit)])
+      (define-values (x y) (n->nn i))
+      (hash-inc! x-ht x)
+      (hash-inc! y-ht y)
+      (when (equilibria?)
+        (printf "equilibria @ ~a:\n  x: ~s\n  y: ~s\n"
+                i
+                (sort (hash-map x-ht list) < #:key car)
+                (sort (hash-map y-ht list) < #:key car))))
+    (printf "stopped searching at ~a\n" limit))
+
+  (find-equilibria bad-n->nn))
