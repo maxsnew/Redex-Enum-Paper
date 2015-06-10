@@ -9,7 +9,7 @@
          bad-howmany
          bad-nn->n-string)
 
-(define bad-nn->n-string "\\lambda x. \\lambda y.\\ 2^x\\cdot{}(2y + 1) - 1")
+(define bad-nn->n-string "\\lambda x. \\lambda y.\\ 2^y\\cdot{}(2x + 1) - 1")
 
 (define-empty-tokens the-tokens
   (t:eof
@@ -107,7 +107,7 @@
          (set! twos (+ twos 1))
          (loop (/ n 2))]
         [else n])))
-  (values twos (/ (- leftover 1) 2)))
+  (values (/ (- leftover 1) 2) twos))
 
 (for ([i (in-range 100000)])
   (define-values (x y) (bad-n->nn i))

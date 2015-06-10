@@ -125,8 +125,8 @@ simply counts the number of times that two is a factor of the
 input to separate the ``x'' and ``y'' parts) that is easy to
 explain and efficient (taking polylogarithmic time) to compute in both directions. It is
 a poor choice for an enumeration library, however, because it will
-explore ``y'' coordinate values much more quickly
-than the ``x'' coordinate. Indeed, in the first
+explore ``x'' coordinate values much more quickly
+than the ``y'' coordinate. Indeed, in the first
 @(add-commas bad-howmany) pairs, the biggest ``x'' coordinate
 seen is @(add-commas bad-max-x) and the biggest ``y'' coordinate
 seen is @(add-commas bad-max-y).
