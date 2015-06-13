@@ -1,3 +1,4 @@
+
 #lang racket
 (require redex
          pict
@@ -90,7 +91,14 @@
   
   [(@ (cons/e e (below/e ∞)) n_1 (cons v_1 n_2) T_1)
    (@ (Eval-enum (f v_1)) n_2 v_2 T_2) (side-condition (inf? fin-or-inf e f))
-   ----------------------------------------------  "dep"
+   ----------------------------------------------  "dep inf"
+   (@ (dep/e fin-or-inf e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
+
+  [(side-condition (fin? fin-or-inf e f)) ;; condition has to come before sum-up-to-find-k
+   (sum-up-to-find-k n_1 f e n_2)
+   (@ e n_2 v_1 T_1)
+   (@ (Eval-enum (f v_1)) (ae-interp (- n_1 (sum-up-to e f n_2))) v_2 T_2)
+   ----------------------------------------------  "dep fin"
    (@ (dep/e fin-or-inf e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
 
   [(@<- e n_1 v_1 T_2)
@@ -121,6 +129,25 @@
    ---------------------------------------------------------
    (@<- e n v ∅)])
 
+(define-judgment-form L
+  #:mode (sum-up-to-find-k I I I O)
+  #:contract (sum-up-to-find-k n f e k)
+  [(where k (sum-up-to-find-k/fun n f e))
+   --------------------------------------
+   (sum-up-to-find-k n f e k)])
+
+(define-metafunction L
+  [(sum-up-to-find-k/fun n f e)
+   ,(let ([:e (term (to-enum e))])
+      (let loop ([k 0]
+                 [sum 0])
+        (define ith-size (term (size (Eval-enum (f ,(:from-nat :e k))))))
+        (cond
+          [(and (<= sum (term n)) (< (term n) (+ sum ith-size)))
+           k]
+          [else
+           (loop (+ k 1) (+ sum ith-size))])))])
+
 (define-metafunction L
   size : e -> n+
   [(size (below/e n+)) n+]
@@ -148,6 +175,18 @@
   [(sum-all/acc n e f) 0])
 
 (define-metafunction L
+  sum-up-to : e f n -> n
+  [(sum-up-to e f n)
+   (sum-up-to/render f e n)])
+
+(define-metafunction L
+  sum-up-to/render : f e n -> n
+  [(sum-up-to/render f e n)
+   ,(let ([:e (term (to-enum e))])
+      (for/sum ([i (in-range (term n))])
+        (term (size (Eval-enum (f ,(:from-nat :e i)))))))])
+
+(define-metafunction L
   unpair : n+ n+ n -> (× n n)
   [(unpair ∞ ∞ n)
    (× (ae-interp (- n (sqr (integer-sqrt n)))) (ae-interp (integer-sqrt n)))
@@ -166,7 +205,7 @@
    (× (ae-interp (div n j)) (ae-interp (mod n j)))
    (side-condition (term (ae-interp (>= i j))))])
 
-    
+
 ;; assumes closed "e"s
 (define-metafunction L
   subst : e x e -> e
@@ -319,7 +358,8 @@
             (λ (x)
               (if (exact-nonnegative-integer? x)
                   (:below/e x)
-                  (:below/e 0))))]
+                  (:below/e 0)))
+            #:f-range-finite? #t)]
   [(to-enum (dep/e inf e any)) (to-enum (cons/e e (below/e ∞)))] ;; should this be an error?
   [(to-enum (except/e e n))
    ,(let ([e (term (to-enum e))])
@@ -593,6 +633,15 @@
      (λ (lws)
        (define arg (list-ref lws 2))
        (list "" arg " is odd"))]
+    ['sum-up-to
+     (λ (lws)
+       (list "sum_up_to(" (list-ref lws 2) ", " (list-ref lws 3) ", " (list-ref lws 4) ")"))]
+    ['sum-up-to/render
+     (λ (lws)
+       (define f (list-ref lws 2))
+       (define e (list-ref lws 3))
+       (define n (list-ref lws 4))
+       (list (d "Σ{‖") f (d "(v)‖ | ") e (d "@ i = v and i < ") n (d "}")))]
     ['Eval-enum (λ (lws) (list "" (list-ref lws 2) ""))]
     ['Eval-bij (λ (lws) (list "" (list-ref lws 2) ""))])
    (with-atomic-rewriter
@@ -633,7 +682,10 @@
                       (λ ()
                         (text " if " (default-style)))])
         (htl-append 30
-                    (render-metafunction unpair)
+                    (vl-append
+                     20
+                     (render-metafunction unpair)
+                     (render-metafunction sum-up-to))
                     (render-metafunction size)))))))
 
 (define (some-rules linebreaking)
@@ -733,6 +785,39 @@
               1)
    '(0 . 1))
 
+  (check-equal? (term (sum-up-to (below/e ∞) nat->below/e-of-that-nat 10))
+                (+ 0 1 2 3 4 5 6 7 8 9))
+
+  ;; this property matches up to the way that sum-up-to-find-k is typeset
+  (define (sum-up-to-find-k-prop n f e)
+    (define ks (judgment-holds (sum-up-to-find-k ,n ,f ,e k) k))
+    (cond
+      [(= (length ks) 1)
+       (define k (car ks))
+       (and (<= (term (sum-up-to ,e ,f ,k)) n)
+            (< n (term (sum-up-to ,e ,f ,(+ k 1)))))]
+      [else #f]))
+  
+  (check-true (sum-up-to-find-k-prop 0
+                                     (term nat->below/e-of-that-nat)
+                                     (term (below/e ∞))))
+  (check-true (sum-up-to-find-k-prop 1
+                                     (term nat->below/e-of-that-nat)
+                                     (term (below/e ∞))))
+  (check-true (sum-up-to-find-k-prop 2
+                                     (term nat->below/e-of-that-nat)
+                                     (term (below/e ∞))))
+  (check-true (sum-up-to-find-k-prop 10
+                                     (term nat->below/e-of-that-nat)
+                                     (term (below/e ∞))))
+  (check-true (sum-up-to-find-k-prop 20
+                                     (term nat->below/e-of-that-nat)
+                                     (term (below/e ∞))))
+  (check-true (sum-up-to-find-k-prop 50
+                                     (term nat->below/e-of-that-nat)
+                                     (term (below/e ∞))))
+  
+  
   (check-equal? (term (subst (cons/e (below/e ∞) (below/e ∞)) x (below/e ∞)))
                 (term (cons/e (below/e ∞) (below/e ∞))))
   (check-equal? (term (subst (cons/e x x) x (below/e ∞)))
@@ -754,7 +839,7 @@
   (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) (below/e ∞))))
   (try-many (term (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))
   (try-many (term (dep/e inf (below/e ∞) nat->map-of-swap-zero-with)))
-  ;(try-many (term (dep/e fin (below/e 10) nat->below/e-of-that-nat)))
+  (try-many (term (dep/e fin (below/e 10000) nat->below/e-of-that-nat)))
   (try-many (term (except/e (below/e ∞) 1)))
   (try-many (term (fix/e bt (or/e (below/e ∞) (cons/e bt bt)))))
   (try-many (term (trace/e 0 (below/e ∞))))
