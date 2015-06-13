@@ -9,10 +9,7 @@
           plot
           scriblib/figure
           redex/pict
-          "model/model.rkt"
-          "unfairness-hist.rkt"
-          "cite.rkt"
-          "enum-util.rkt"
+          "model/redex-model-typesetting.rkt"
           "util.rkt")
 
 @title[#:tag "sec:fair-formal"]{Enumeration Semantics}

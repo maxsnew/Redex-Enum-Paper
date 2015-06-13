@@ -9,7 +9,6 @@
           plot
           scriblib/figure
           redex/pict
-          "model/model.rkt"
           "unfairness-hist.rkt"
           "cite.rkt"
           "enum-util.rkt"

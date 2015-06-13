@@ -13,8 +13,9 @@ clean:
 	rm -f supp.tar.gz
 
 test: coq
-	raco make -v model/model.rkt model/run-coq-redex-tests.rkt
-	raco test model/model.rkt
+	raco make -v model/redex-model.rkt model/redex-model-test.rkt \
+                     model/redex-model-typesetting.rkt model/run-coq-redex-tests.rkt
+	raco test model/redex-model-test.rkt
 	raco test model/run-coq-redex-tests.rkt
 
 coq:
