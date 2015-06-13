@@ -70,21 +70,24 @@
             "robby@eecs.northwestern.edu"]
 }
 @abstract{
-  This paper reports on the design of combinators
-  for building efficient bijections between the 
-  naturals numbers (or a prefix of them) and algebraic
-  datatypes constructed by sums, recursion, and (possibly
-  dependent) pairs.
+
+This paper offers a new property of enumeration combinators
+ called @emph{fairness} that accepts enumeration combinators
+ whose results are well-behaved with respect to their
+ arguments and rejects others.
   
-  Our enumeration combinators support a new property
-  we call fairness. Intuitively the result of fair combinator 
+Intuitively the result of fair combinator 
   indexes into its argument combinators equally when constructing
   its result. For example, extracting the
   @raw-latex{$n$}th element from our enumeration of three-tuples
   indexes about @raw-latex{$\sqrt[3]{n}$} elements into each
   of its components instead of, say, indexing @raw-latex{$\sqrt[2]{n}$}
   into one and @raw-latex{$\sqrt[4]{n}$} into the other two as you would 
-  if you build a three-tuple out of nested pairs. The paper
+  if you build a three-tuple out of nested pairs. Similarly,
+  extracting the @raw-latex{$n$}th element from our enumeration of
+  a union of three enumerators returns an element that is
+  @raw-latex{$\frac{n}{3}$} into one of the argument enumerators.
+  The paper
   develops the theory of fairness and contains proofs establishing
   fairness of our combinators and a proof that some combinations of 
   fair combinators are not fair.
@@ -113,7 +116,7 @@ These libraries are all efficient, generally providing the
 ability to extract the @texmath{2^{100}}-th element of an
 enumeration of a data structure in milliseconds. What they
 lack, however, is a mathematically precise notion of the
-quality of their combinators. As an example, all of
+quality of their combinators. To be concrete, all of
 these libraries provide a pairing combinator that accepts
 two enumerations and returns an enumeration of pairs of the
 elements of the given enumeration. There are many ways one
@@ -123,12 +126,12 @@ pairs of natural numbers. One such function is given by
 @texmath[bad-nn->n-string]. This is a bijection (the inverse
 simply counts the number of times that two is a factor of the
 input to separate the ``x'' and ``y'' parts) that is easy to
-explain and efficient (taking polylogarithmic time) to compute in both directions. It is
+explain and efficient (taking logarithmic time in @texmath{n}) to compute in both directions. It is
 a poor choice for an enumeration library, however, because it will
 explore ``x'' coordinate values much more quickly
 than the ``y'' coordinate. Indeed, in the first
-@(add-commas bad-howmany) pairs, the biggest ``x'' coordinate
-seen is @(add-commas bad-max-x) and the biggest ``y'' coordinate
+@(add-commas bad-howmany) pairs, the ``x'' coordinate
+has seen @(add-commas bad-max-x) but the biggest ``y'' coordinate
 seen is @(add-commas bad-max-y).
 
 In this paper, we offer a criterion called @emph{fairness}
@@ -149,7 +152,7 @@ Redex models and the experience of others mined from git
 repositories of Redex models) and compare the bug/second
 rate with three different generators. Two of the generators are based
 on a bijection between the expressions of the language and the
-naturals: one enumerates terms in order and the other that selects a
+natural numbers: one enumerates terms in order and the other that selects a
 random (possibly large) natural number and uses that with the
 bijection between, and the third is an existing, ad hoc random
 generator that's been
