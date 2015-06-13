@@ -102,6 +102,14 @@
          (maybe-add-parens
           needs-parens?
           (hbl-append (d "Σ x ∈ ") (loop #t e) (d ". ‖") (loop #t f) (d "(x)‖")))]
+        [`(sum-up-to ,e ,f ,n)
+         (hbl-append (d "sum_up_to(")
+                     (loop #t e)
+                     (d ", ")
+                     (loop #t f)
+                     (d ", ")
+                     (loop #t n)
+                     (d ")"))]
         [`(min ,ae1 ,ae2)
          (hbl-append (d "min(") (loop #f ae1) (d ",") (loop #f ae1) (d ")"))]
         [(? number?) (d (format "~a" ae))]
@@ -227,13 +235,57 @@
        (list "" arg " is odd"))]
     ['sum-up-to
      (λ (lws)
-       (list "sum_up_to(" (list-ref lws 2) ", " (list-ref lws 3) ", " (list-ref lws 4) ")"))]
+       (define e (list-ref lws 2))
+       (define f (list-ref lws 3))
+       (define n (list-ref lws 4))
+       (list "sum_up_to(" e ", " f ", " n ")"))]
     ['sum-up-to/render
      (λ (lws)
        (define f (list-ref lws 2))
        (define e (list-ref lws 3))
        (define n (list-ref lws 4))
-       (list (d "Σ{‖") f (d "(v)‖ | ") e (d "@ i = v and i < ") n (d "}")))]
+       (list (d "Σ{‖")
+             f
+             (hbl-append (d "(")
+                         (ae->pict 'v)
+                         (d ")‖ | ("))
+             e
+             (hbl-append (d " @ ")
+                         (ae->pict 'i)
+                         (d " = ")
+                         (ae->pict 'v)
+                         (d " | ")
+                         (ae->pict 'T)
+                         (d ") and ")
+                         (ae->pict 'i)
+                         (d " < "))
+             n
+             (d "}")))]
+    ['sum-up-to-find-k
+     (λ (lws)
+       (define n (list-ref lws 2))
+       (define f (list-ref lws 3))
+       (define e (list-ref lws 4))
+       (define k (list-ref lws 5))
+       (define (ae-sym lw)
+         (cond
+           [(symbol? (lw-e lw)) (ae->pict (lw-e lw))]
+           [else (error 'ae-sym "non symbol: ~s" (lw-e lw))]))
+       (list (hbl-append (d "sum_up_to(")
+                         (ae-sym e)
+                         (d ", ")
+                         (ae-sym f)
+                         (d ", ")
+                         (ae-sym k)
+                         (d ") ≤ ")
+                         (ae-sym n)
+                         (d "< sum_up_to(")
+                         (ae-sym e)
+                         (d ", ")
+                         (ae-sym f)
+                         (d ", ")
+                         (ae-sym k)
+                         (d " + 1)"))))]
     ['Eval-enum (λ (lws) (list "" (list-ref lws 2) ""))]
     ['Eval-bij (λ (lws) (list "" (list-ref lws 2) ""))])
    (with-atomic-rewriter
@@ -243,14 +295,15 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases1
-  '(("cons")
-    ("trace")))
+  '(("map" "below/e")
+    ("cons")))
 
 (define linebreaking-with-cases2
   '(("or alt l" "or alt r")
     ("or big l" "or big r")
-    ("dep" "map" "below/e")
-    ("ex<" "ex≥" "fix")))
+    ("ex<" "dep inf")
+    ("ex≥" "dep fin")
+    ("trace" "fix")))
 
 (define (semantics-figure)
   (define helv-font "Helvetica")

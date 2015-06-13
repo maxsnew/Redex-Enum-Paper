@@ -90,10 +90,10 @@
    ----------------------------------------------  "dep inf"
    (@ (dep/e fin-or-inf e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
 
-  [(side-condition (fin? fin-or-inf e f)) ;; condition has to come before sum-up-to-find-k
+  [;; side-condition has to come before sum-up-to-find-k
+   (side-condition (fin? fin-or-inf e f))
    (sum-up-to-find-k n_1 f e n_2)
-   (@ e n_2 v_1 T_1)
-   (@ (Eval-enum (f v_1)) (ae-interp (- n_1 (sum-up-to e f n_2))) v_2 T_2)
+   (@ e n_2 v_1 T_1) (@ (Eval-enum (f v_1)) (ae-interp (- n_1 (sum-up-to e f n_2))) v_2 T_2)
    ----------------------------------------------  "dep fin"
    (@ (dep/e fin-or-inf e f) n_1 (cons v_1 v_2) (⊕ T_1 T_2))]
 
