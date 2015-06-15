@@ -24,7 +24,7 @@ coq:
 admit: coq
 	@echo ""
 	@echo ""
-	@ ! grep -i admit model/*.v
+	@ ! grep -i admit model/coq/*.v
 
 supp: DNE
 	cp Makefile supp/
