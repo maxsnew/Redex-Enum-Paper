@@ -70,34 +70,41 @@
             "robby@eecs.northwestern.edu"]
 }
 @abstract{
-
 This paper offers a new property of enumeration combinators
- called @emph{fairness} that accepts enumeration combinators
- whose results are well-behaved with respect to their
- arguments and rejects others.
-  
-Intuitively the result of fair combinator 
-  indexes into its argument combinators equally when constructing
-  its result. For example, extracting the
-  @raw-latex{$n$}th element from our enumeration of three-tuples
-  indexes about @raw-latex{$\sqrt[3]{n}$} elements into each
-  of its components instead of, say, indexing @raw-latex{$\sqrt[2]{n}$}
-  into one and @raw-latex{$\sqrt[4]{n}$} into the other two as you would 
-  if you build a three-tuple out of nested pairs. Similarly,
-  extracting the @raw-latex{$n$}th element from our enumeration of
-  a union of three enumerators returns an element that is
-  @raw-latex{$\frac{n}{3}$} into one of the argument enumerators.
-  The paper
-  develops the theory of fairness and contains proofs establishing
-  fairness of our combinators and a proof that some combinations of 
-  fair combinators are not fair.
-  
-  The design of our combinators is driven by our primary
-  application, property-based testing in Redex. The paper also
-  reports on how our combinators can support enumeration for arbitrary
-  Redex models and an empirical comparison between enumeration-based 
-  property generation and ad hoc random generation, showing
-  that the strategies are complementary. 
+called @emph{fairness} that accepts enumeration combinators
+whose results are well-behaved with respect to their
+arguments and rejects others.
+Intuitively the result of fair combinator indexes into its
+argument enumerations equally when constructing its result.
+For example, extracting the @raw-latex{$n$}th element from
+our enumeration of three-tuples indexes about
+@raw-latex{$\sqrt[3]{n}$} elements into each of its
+components instead of, say, indexing
+@raw-latex{$\sqrt[2]{n}$} into one and
+@raw-latex{$\sqrt[4]{n}$} into the other two as you would if
+you build a three-tuple out of nested pairs. Similarly,
+extracting the @raw-latex{$n$}th element from our
+enumeration of a union of three enumerators returns an
+element that is @raw-latex{$\frac{n}{3}$} into one of the
+argument enumerators.
+
+The paper develops the theory of
+fairness and contains proofs establishing fairness of our
+new combinators and proofs that certain combinations
+of fair combinators are not fair.
+
+We also report on an evaluation of fairness for the purpose
+of finding bugs in operational semantics and type systems.
+More precisely, we implemented generators for arbitrary
+Redex grammars using our enumeration library. We then used
+an existing bug benchmark suite to compare the bug finding
+capabilities of the original, ad hoc random generator to a
+generator based on fair enumeration combinators and one
+based on unfair enumeration combinators. The enumeration
+using the fair combinators has complementary strengths to
+the ad hoc generator (better on short time scales and worse
+on long time scales) and using unfair combinators
+is significantly worse across the board.
 }
 
 @section{Introduction}
