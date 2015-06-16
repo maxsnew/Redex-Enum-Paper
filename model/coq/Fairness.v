@@ -546,58 +546,6 @@ Section Unfair_Unfair.
     auto.
   Qed.
 
-  Lemma even_is_double : forall n, even (double n).
-  Proof.
-    induction n.
-    unfold double; simpl; constructor.
-    replace (S n) with (n+1);[|omega].
-    rewrite double_plus.
-    unfold double at 2; simpl.
-    replace (double n + 2) with (S (S (double n)));[|omega].
-    constructor.
-    constructor.
-    auto.
-  Qed.
-
-  Lemma odds_have_no_powers_of_two : forall x y, odd (2 ^ y * (2 * x + 1)) -> y = 0.
-  Proof.
-    intros x y OD.
-    destruct y; auto.
-    unfold pow in OD; fold pow in OD.
-    replace (2 * 2 ^ y * (2 * x + 1)) with (double (2 ^ y * (2 * x + 1))) in OD;
-      [|unfold double;nliamega].
-    remember (2 ^ y * (2 * x + 1)) as n.
-    assert (even (double n)).
-    apply even_is_double.
-    assert False;[|intuition].
-    apply (not_even_and_odd (double n));auto.
-  Qed.
-
-  Lemma even_prod_lt : 
-    forall x y, even (2^y * (2 * x + 1)) -> x < div2 (2^y * (2 * x + 1)).
-  Proof.
-    intros x y EV.
-    remember (2^y * (2 * x + 1)) as n; rename Heqn into NEQ.
-    destruct y.
-    unfold pow in NEQ.
-    rewrite mult_1_l in NEQ.
-    assert (odd n).
-    replace (2*x+1) with (S (2*x)) in NEQ;[|nliamega].
-    subst n.
-    constructor.
-    replace (2*x) with (double x);[|unfold double;nliamega].
-    apply even_is_double.
-    assert False;[|intuition].
-    apply (not_even_and_odd n); auto.
-    unfold pow in NEQ; fold pow in NEQ.
-    subst n.
-    rewrite <- mult_assoc.
-    rewrite div2_double.
-    assert (2^y >= 1);[|nliamega].
-    clear x EV.
-    induction y; try (unfold pow; fold pow);nliamega.
-  Qed.
-
   Lemma Unfair_Pair_right_precise : 
     forall n, trace_proj zero (Trace_lt UPTN n) ≃ (z_to_n (div2 (S n))).
   Proof.
