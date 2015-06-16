@@ -3,7 +3,7 @@ Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Div2 Coq.Arith.Even.
 Require Import Coq.Lists.ListSet.
 
-Require Import Enum.Enum Enum.Pairing Enum.Sets Enum.Trace Enum.Util.
+Require Import Enum.Enum Enum.Pairing Enum.Sets Enum.Trace Enum.Util Enum.UnfairPairing.
 
 (* read as f-fairness *)
 Definition F_Fair2 {tout} (f : nat -> nat) (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
@@ -519,14 +519,286 @@ End NaiveTripleUnfair.
 Print Assumptions SumFair.
 
 Section Unfair_Unfair.
+
+  Definition UPTN := (E_Unfair_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)).
+
+  Lemma Trace_on_UPTN :
+    forall n s0 s1 s2 s3,  
+      Tracing s0 s1 s2 s3 = Trace_on UPTN n -> 
+      exists x y,
+        n = (2 ^ x * (2 * y + 1) - 1) /\ 
+        s0 = (x :: nil)%list /\ 
+        s1 = (y :: nil)%list.
+  Proof.
+    intros n s0 s1 s2 s3 TR.
+    unfold Trace_on in TR.
+    unfold Enumerates_from_dec in TR; simpl in TR.
+    remember (Unfair_Pairing_from_dec n) as UPn.
+    destruct UPn as [[x y] B]. 
+    clear HeqUPn.
+    simpl fst in *.
+    simpl snd in *.
+    unfold trace_plus in TR.
+    inversion TR; subst; clear TR.
+    exists x.
+    exists y.
+    inversion B.
+    auto.
+  Qed.
+
+  Lemma even_is_double : forall n, even (double n).
+  Proof.
+    induction n.
+    unfold double; simpl; constructor.
+    replace (S n) with (n+1);[|omega].
+    rewrite double_plus.
+    unfold double at 2; simpl.
+    replace (double n + 2) with (S (S (double n)));[|omega].
+    constructor.
+    constructor.
+    auto.
+  Qed.
+
+  Lemma odds_have_no_powers_of_two : forall x y, odd (2 ^ y * (2 * x + 1)) -> y = 0.
+  Proof.
+    intros x y OD.
+    destruct y; auto.
+    unfold pow in OD; fold pow in OD.
+    replace (2 * 2 ^ y * (2 * x + 1)) with (double (2 ^ y * (2 * x + 1))) in OD;
+      [|unfold double;nliamega].
+    remember (2 ^ y * (2 * x + 1)) as n.
+    assert (even (double n)).
+    apply even_is_double.
+    assert False;[|intuition].
+    apply (not_even_and_odd (double n));auto.
+  Qed.
+
+  Lemma even_prod_lt : 
+    forall x y, even (2^y * (2 * x + 1)) -> x < div2 (2^y * (2 * x + 1)).
+  Proof.
+    intros x y EV.
+    remember (2^y * (2 * x + 1)) as n; rename Heqn into NEQ.
+    destruct y.
+    unfold pow in NEQ.
+    rewrite mult_1_l in NEQ.
+    assert (odd n).
+    replace (2*x+1) with (S (2*x)) in NEQ;[|nliamega].
+    subst n.
+    constructor.
+    replace (2*x) with (double x);[|unfold double;nliamega].
+    apply even_is_double.
+    assert False;[|intuition].
+    apply (not_even_and_odd n); auto.
+    unfold pow in NEQ; fold pow in NEQ.
+    subst n.
+    rewrite <- mult_assoc.
+    rewrite div2_double.
+    assert (2^y >= 1);[|nliamega].
+    clear x EV.
+    induction y; try (unfold pow; fold pow);nliamega.
+  Qed.
+
+  Lemma Unfair_Pair_right_precise : 
+    forall n, trace_proj one (Trace_lt UPTN n) ≃ (z_to_n (div2 (S n))).
+  Proof.
+    apply (well_founded_ind
+             lt_wf
+             (fun n => trace_proj one (Trace_lt UPTN n) ≃ z_to_n (div2 (S n)))).
+
+    intros n IND.
+    destruct n.
+
+    (* n=0 *) 
+    simpl; auto.
+
+    unfold Trace_lt; fold @Trace_lt.
+
+    destruct n.
+
+    (* n=1 *)
+    clear IND.
+    simpl.
+    unfold Trace_on.
+    unfold Enumerates_from_dec; simpl.
+    remember (Unfair_Pairing_from_dec 0) as UP0; clear HeqUP0.
+    destruct UP0 as [[x y] u].
+    simpl fst in *; simpl snd in *.
+    unfold trace_proj.
+    unfold trace_plus.
+    simpl.
+    assert (y=0);[|subst;auto].
+    inversion u; subst.
+    remember (2 ^ x * (y + (y + 0) + 1)) as n.
+    symmetry in Heqn.
+    destruct n.
+    simpl.
+    apply mult_is_O in Heqn.
+    destruct Heqn.
+    apply pow_not_zero in H; intuition.
+    intuition.
+    nliamega.
+
+    (* inductive case *)
+    replace (div2 (S (S (S n)))) with (S (div2 (S n))); [|unfold div2;auto].
+
+    unfold trace_plus.
+    remember (Trace_on UPTN (S n)) as X1; destruct X1.
+    remember (Trace_lt UPTN (S n)) as X2; destruct X2.
+    unfold trace_proj.
+
+    unfold Trace_lt in HeqX2; fold @Trace_lt in HeqX2.
+    remember (Trace_on UPTN n) as TonN.
+    remember (Trace_lt UPTN n) as TltN.
+    unfold trace_plus in HeqX2.
+    destruct TonN.
+    destruct TltN.
+    inversion HeqX2; subst;clear HeqX2.
+    
+    apply Trace_on_UPTN in HeqX1.
+    destruct HeqX1 as [SNx [SNy [SNeq [Seq s0eq]]]]. 
+    apply Trace_on_UPTN in HeqTonN.
+    destruct HeqTonN as [Nx [Ny [Neq [s7eq s8eq]]]].
+    subst s0 s8.
+    clear s1 s2 s9 s10 Seq s s7 s7eq.
+
+    assert (trace_proj one (Trace_lt UPTN n) ≃ z_to_n (div2 (S n))) as S12EQN;
+      [apply IND; auto|clear IND].
+    rewrite <- HeqTltN in S12EQN.
+    unfold trace_proj in S12EQN.
+    clear HeqTltN s11 s13 s14.
+
+    apply (set_eq_trans ((SNy :: nil)%list ∪ ((Ny :: nil)%list ∪ s12))
+                        ((SNy :: nil)%list ∪ ((Ny :: nil)%list ∪ (z_to_n (div2 (S n)))))).
+    repeat (apply set_union_cong); auto.
+    clear s12 S12EQN.
+
+    destruct n.
+    assert (Ny = 0). 
+    remember (2 ^ Nx * (2 * Ny + 1)) as n.
+    destruct n.
+    apply pow_S_prod_false in Heqn; intuition.
+    assert (n=0). nliamega.
+    subst n.
+    symmetry in Heqn.
+    apply mult_is_one in Heqn.
+    nliamega.
+
+    assert (SNy = 0). 
+    assert (2 = 2 ^ SNx * (2 * SNy + 1)); nliamega.
+
+    simpl.
+    destruct (eq_nat_dec Ny SNy); subst; auto; intuition.
+
+    assert (S (S (S n)) = 2 ^ SNx * (2 * SNy + 1)) as SSSNeq;[nliamega|clear SNeq].
+    assert (S (S n) = 2 ^ Nx * (2 * Ny + 1)) as SSNeq;[nliamega|clear Neq].
+
+    destruct (even_odd_dec n).
+
+    (* even case *)
+    assert (SNx=0).
+    assert (odd (S (S (S n))));[repeat constructor; auto|].
+    apply (odds_have_no_powers_of_two SNy SNx).
+    rewrite SSSNeq in H; auto.
+    subst SNx.
+    unfold pow in SSSNeq; rewrite mult_1_l in SSSNeq.
+    assert ((2 * SNy) = S (S n)) as SNy2.
+    nliamega.
+    unfold z_to_n; fold z_to_n.
+    rewrite <- SNy2.
+    rewrite div2_double.
+    constructor.
+    
+    apply subset_union_both; auto.
+    apply subset_union_both.
+    assert (Ny < div2 (2 ^ Nx * (2 * Ny + 1))).
+    apply even_prod_lt.
+    rewrite <- SSNeq.
+    repeat constructor; auto.
+    rewrite <- SSNeq in H.
+    rewrite <- SNy2 in H.
+    rewrite div2_double in H.
+    replace (set_add' SNy (z_to_n SNy)) with (z_to_n (S SNy));[|unfold z_to_n;auto].
+    apply subset_In_equiv; intros x IN.
+    apply z_to_n_correct.
+    destruct IN as [EQ|ELE].
+    nliamega.
+    inversion ELE.
+
+    apply set_subset_add; auto.
+    apply set_add_subset.
+    apply (subset_In SNy (cons SNy nil));auto.
+    apply subset_union_transl; auto.
+    apply subset_union_transr.
+    apply subset_union_transr.
+    auto.
+
+    (* odd case *)
+
+    assert (Nx=0).
+    apply (odds_have_no_powers_of_two Ny Nx).
+    rewrite <- SSNeq.
+    repeat constructor; auto.
+    subst Nx.
+    unfold pow in SSNeq; rewrite mult_1_l in SSNeq.
+    assert ((2*Ny) = S n) as Ny2;[nliamega|].
+
+    constructor.
+
+    replace (S (div2 (S (S n)))) with (div2 (S (S (S n))));
+      [|rewrite <- odd_div2;repeat constructor;auto].
+
+    assert (SNy < (div2 (2 ^ SNx * (2 * SNy + 1)))) as questionable.
+    apply even_prod_lt.
+    rewrite <- SSSNeq.
+    repeat constructor;auto.
+
+    apply subset_union_both; auto.
+    rewrite <- SSSNeq in questionable.
+    apply subset_In_equiv; intros x IN.
+    apply z_to_n_correct.
+    destruct IN as [EQ|ELE].
+    nliamega.
+    destruct ELE.
+
+    apply subset_union_both; auto.
+    apply subset_In_equiv; intros x IN.
+    destruct IN as [EQ|ELE];[|destruct ELE].
+    subst x.
+    apply z_to_n_correct.
+    rewrite <- Ny2.
+    unfold div2; fold div2.
+    rewrite div2_double.
+    auto.
+    replace (div2 (S (S (S n)))) with (S (div2 (S (S n))));
+      [|apply odd_div2; repeat constructor; auto].
+    unfold z_to_n; fold z_to_n.
+    apply set_subset_add;auto.
+    unfold z_to_n; fold z_to_n.
+    apply set_add_subset.
+    rewrite <- even_div2 at 1; [|repeat constructor;auto].
+    rewrite <- Ny2.
+    rewrite div2_double.
+    apply elem_union.
+    apply (subset_In Ny ((Ny :: nil)%list)); auto.
+    apply subset_union_transl; auto.
+    apply subset_union_transr; auto.
+    apply subset_union_transr; auto.
+Qed.
+
+(*
   Theorem Unfair_Pair_Unfair : ~ (@Fair2 prod (@E_Unfair_Pair)).
   Proof.
     unfold Fair2.
     unfold F_Fair2.
     intro THING; destruct THING as [f THING2].
-    remember (THING2 8) as UNLIKELY; clear THING2 HeqUNLIKELY.
-    admit.
+    remember (THING2 8) as UNLIKELY; clear THING2 HeqUNLIKELY. 
+    remember (Trace_lt
+                (E_Unfair_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat))
+                (f 8)) as TRACING; destruct TRACING as [s0 s1 s2 s3].
+    remember (f 8) as n; clear Heqn f; destruct UNLIKELY as [LB UNLIKELY].
+    .....more here!
   Qed.
+*)
 
 End Unfair_Unfair.
 

@@ -3,7 +3,8 @@
 (require parser-tools/lex
          parser-tools/cfg-parser
          parser-tools/yacc
-         rackunit)
+         rackunit
+         racket/set racket/contract)
 
 (provide bad-max-x bad-max-y
          bad-howmany
@@ -122,6 +123,30 @@
             ([i (in-range bad-howmany)])
     (define-values (x y) (bad-n->nn i))
     (values (max x max-x) (max y max-y))))
+
+(define/contract (z_to_n n)
+  (-> exact-nonnegative-integer?
+      (set/c exact-nonnegative-integer?))
+  (cond
+    [(zero? n) (set)]
+    [else (set-add (z_to_n (- n 1)) (- n 1))]))
+(define (div2 n) (floor (/ n 2)))
+
+(define (Trace_lt-unfair-pair n)
+  (cond
+    [(zero? n) (values (set) (set))]
+    [else
+     (define-values (x y) (bad-n->nn (- n 1)))
+     (define-values (sx sy) (Trace_lt-unfair-pair (- n 1)))
+     (values (set-add sx x)
+             (set-add sy y))]))
+
+(for ([n (in-range 0 100)])
+  (define-values (explored-x explored-y) (Trace_lt-unfair-pair n))
+  (define claimed-x (z_to_n (div2 (+ n 1))))
+  (unless (equal? explored-x claimed-x)
+    (error 'unfair-pairing.rkt "x ~a wrong: claimed ~s vs explored ~s\n"
+           n claimed-x explored-x)))
 
 (module+ main
   (require plot)
