@@ -526,7 +526,7 @@ Section Unfair_Unfair.
     forall n s0 s1 s2 s3,  
       Tracing s0 s1 s2 s3 = Trace_on UPTN n -> 
       exists x y,
-        n = (2 ^ x * (2 * y + 1) - 1) /\ 
+        n = (2 ^ y * (2 * x + 1) - 1) /\ 
         s0 = (x :: nil)%list /\ 
         s1 = (y :: nil)%list.
   Proof.
@@ -599,11 +599,11 @@ Section Unfair_Unfair.
   Qed.
 
   Lemma Unfair_Pair_right_precise : 
-    forall n, trace_proj one (Trace_lt UPTN n) ≃ (z_to_n (div2 (S n))).
+    forall n, trace_proj zero (Trace_lt UPTN n) ≃ (z_to_n (div2 (S n))).
   Proof.
     apply (well_founded_ind
              lt_wf
-             (fun n => trace_proj one (Trace_lt UPTN n) ≃ z_to_n (div2 (S n)))).
+             (fun n => trace_proj zero (Trace_lt UPTN n) ≃ z_to_n (div2 (S n)))).
 
     intros n IND.
     destruct n.
@@ -626,16 +626,20 @@ Section Unfair_Unfair.
     unfold trace_proj.
     unfold trace_plus.
     simpl.
-    assert (y=0);[|subst;auto].
+    assert (x=0);[|subst;auto].
     inversion u; subst.
-    remember (2 ^ x * (y + (y + 0) + 1)) as n.
-    symmetry in Heqn.
+    remember (2 ^ y * (x + (x + 0) + 1)) as n.
+    replace (x+(x+0)+1) with ((2*x)+1) in Heqn;[|nliamega].
     destruct n.
+    apply pow_S_prod_false in Heqn; intuition.
+    assert(S n=1) as SNone;[nliamega|].
+    rewrite SNone in *.
     simpl.
-    apply mult_is_O in Heqn.
-    destruct Heqn.
-    apply pow_not_zero in H; intuition.
-    intuition.
+    assert (y=0).
+    apply (odds_have_no_powers_of_two x).
+    rewrite <- Heqn.
+    repeat constructor; auto.
+    subst.
     nliamega.
 
     (* inductive case *)
@@ -655,69 +659,75 @@ Section Unfair_Unfair.
     inversion HeqX2; subst;clear HeqX2.
     
     apply Trace_on_UPTN in HeqX1.
-    destruct HeqX1 as [SNx [SNy [SNeq [Seq s0eq]]]]. 
+    destruct HeqX1 as [SNx [SNy [SNeq [Seq s0eq]]]].
     apply Trace_on_UPTN in HeqTonN.
     destruct HeqTonN as [Nx [Ny [Neq [s7eq s8eq]]]].
-    subst s0 s8.
-    clear s1 s2 s9 s10 Seq s s7 s7eq.
+    subst s s7.
+    clear s1 s2 s9 s10 s0eq s0 s8 s8eq.
 
-    assert (trace_proj one (Trace_lt UPTN n) ≃ z_to_n (div2 (S n))) as S12EQN;
+    assert (trace_proj zero (Trace_lt UPTN n) ≃ z_to_n (div2 (S n))) as S11EQN;
       [apply IND; auto|clear IND].
-    rewrite <- HeqTltN in S12EQN.
-    unfold trace_proj in S12EQN.
-    clear HeqTltN s11 s13 s14.
+    rewrite <- HeqTltN in S11EQN.
+    unfold trace_proj in S11EQN.
+    clear HeqTltN s12 s13 s14.
 
-    apply (set_eq_trans ((SNy :: nil)%list ∪ ((Ny :: nil)%list ∪ s12))
-                        ((SNy :: nil)%list ∪ ((Ny :: nil)%list ∪ (z_to_n (div2 (S n)))))).
+    apply (set_eq_trans ((SNx :: nil)%list ∪ ((Nx :: nil)%list ∪ s11))
+                        ((SNx :: nil)%list ∪ ((Nx :: nil)%list ∪ (z_to_n (div2 (S n)))))).
     repeat (apply set_union_cong); auto.
-    clear s12 S12EQN.
+    clear s11 S11EQN.
 
     destruct n.
     assert (Ny = 0). 
-    remember (2 ^ Nx * (2 * Ny + 1)) as n.
+    remember (2 ^ Ny * (2 * Nx + 1)) as n.
     destruct n.
     apply pow_S_prod_false in Heqn; intuition.
     assert (n=0). nliamega.
     subst n.
     symmetry in Heqn.
-    apply mult_is_one in Heqn.
-    nliamega.
+    apply (odds_have_no_powers_of_two Nx).
+    rewrite Heqn.
+    repeat constructor; auto.
 
-    assert (SNy = 0). 
-    assert (2 = 2 ^ SNx * (2 * SNy + 1)); nliamega.
+    (* confusion here! *)
+    assert (SNx = 0).
+    assert (2 = 2 ^ SNy * (2 * SNx + 1)); nliamega.
 
     simpl.
-    destruct (eq_nat_dec Ny SNy); subst; auto; intuition.
+    destruct (eq_nat_dec Nx SNx); subst; auto; intuition.
+    simpl in Neq.
+    assert (Nx=0).
+    nliamega.
+    intuition.
 
-    assert (S (S (S n)) = 2 ^ SNx * (2 * SNy + 1)) as SSSNeq;[nliamega|clear SNeq].
-    assert (S (S n) = 2 ^ Nx * (2 * Ny + 1)) as SSNeq;[nliamega|clear Neq].
+    assert (S (S (S n)) = 2 ^ SNy * (2 * SNx + 1)) as SSSNeq;[nliamega|clear SNeq].
+    assert (S (S n) = 2 ^ Ny * (2 * Nx + 1)) as SSNeq;[nliamega|clear Neq].
 
     destruct (even_odd_dec n).
 
     (* even case *)
-    assert (SNx=0).
+    assert (SNy=0).
     assert (odd (S (S (S n))));[repeat constructor; auto|].
-    apply (odds_have_no_powers_of_two SNy SNx).
+    apply (odds_have_no_powers_of_two SNx SNy).
     rewrite SSSNeq in H; auto.
-    subst SNx.
+    subst SNy.
     unfold pow in SSSNeq; rewrite mult_1_l in SSSNeq.
-    assert ((2 * SNy) = S (S n)) as SNy2.
+    assert ((2 * SNx) = S (S n)) as SNx2.
     nliamega.
     unfold z_to_n; fold z_to_n.
-    rewrite <- SNy2.
+    rewrite <- SNx2.
     rewrite div2_double.
     constructor.
     
     apply subset_union_both; auto.
     apply subset_union_both.
-    assert (Ny < div2 (2 ^ Nx * (2 * Ny + 1))).
+    assert (Nx < div2 (2 ^ Ny * (2 * Nx + 1))).
     apply even_prod_lt.
     rewrite <- SSNeq.
     repeat constructor; auto.
     rewrite <- SSNeq in H.
-    rewrite <- SNy2 in H.
+    rewrite <- SNx2 in H.
     rewrite div2_double in H.
-    replace (set_add' SNy (z_to_n SNy)) with (z_to_n (S SNy));[|unfold z_to_n;auto].
+    replace (set_add' SNx (z_to_n SNx)) with (z_to_n (S SNx));[|unfold z_to_n;auto].
     apply subset_In_equiv; intros x IN.
     apply z_to_n_correct.
     destruct IN as [EQ|ELE].
@@ -726,7 +736,7 @@ Section Unfair_Unfair.
 
     apply set_subset_add; auto.
     apply set_add_subset.
-    apply (subset_In SNy (cons SNy nil));auto.
+    apply (subset_In SNx (cons SNx nil));auto.
     apply subset_union_transl; auto.
     apply subset_union_transr.
     apply subset_union_transr.
@@ -734,20 +744,20 @@ Section Unfair_Unfair.
 
     (* odd case *)
 
-    assert (Nx=0).
-    apply (odds_have_no_powers_of_two Ny Nx).
+    assert (Ny=0).
+    apply (odds_have_no_powers_of_two Nx Ny).
     rewrite <- SSNeq.
     repeat constructor; auto.
-    subst Nx.
+    subst Ny.
     unfold pow in SSNeq; rewrite mult_1_l in SSNeq.
-    assert ((2*Ny) = S n) as Ny2;[nliamega|].
+    assert ((2*Nx) = S n) as Nx2;[nliamega|].
 
     constructor.
 
     replace (S (div2 (S (S n)))) with (div2 (S (S (S n))));
       [|rewrite <- odd_div2;repeat constructor;auto].
 
-    assert (SNy < (div2 (2 ^ SNx * (2 * SNy + 1)))) as questionable.
+    assert (SNx < (div2 (2 ^ SNy * (2 * SNx + 1)))) as questionable.
     apply even_prod_lt.
     rewrite <- SSSNeq.
     repeat constructor;auto.
@@ -765,7 +775,7 @@ Section Unfair_Unfair.
     destruct IN as [EQ|ELE];[|destruct ELE].
     subst x.
     apply z_to_n_correct.
-    rewrite <- Ny2.
+    rewrite <- Nx2.
     unfold div2; fold div2.
     rewrite div2_double.
     auto.
@@ -776,10 +786,10 @@ Section Unfair_Unfair.
     unfold z_to_n; fold z_to_n.
     apply set_add_subset.
     rewrite <- even_div2 at 1; [|repeat constructor;auto].
-    rewrite <- Ny2.
+    rewrite <- Nx2.
     rewrite div2_double.
     apply elem_union.
-    apply (subset_In Ny ((Ny :: nil)%list)); auto.
+    apply (subset_In Nx ((Nx :: nil)%list)); auto.
     apply subset_union_transl; auto.
     apply subset_union_transr; auto.
     apply subset_union_transr; auto.

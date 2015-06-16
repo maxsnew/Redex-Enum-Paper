@@ -10,7 +10,7 @@ Include WfExtensionality.
 Inductive Unfair_Pairing : nat -> nat -> nat -> Prop :=
 | UnfairPair :
     forall x y,
-      Unfair_Pairing ((pow 2 x) * (2 * y + 1) - 1) x y.
+      Unfair_Pairing ((pow 2 y) * (2 * x + 1) - 1) x y.
 Hint Constructors Unfair_Pairing.
 
 Theorem Unfair_Pairing_from_fun :
@@ -75,14 +75,14 @@ Proof.
 Qed.
 
 Lemma unfair_unique :
-  forall l1 l2 r1 r2,
-    2 ^ l2 * (2 * r2 + 1) - 1 = 2 ^ l1 * (2 * r1 + 1) - 1
-    -> l1 = l2 /\  r1 = r2.
+  forall x1 x2 y1 y2,
+    2 ^ y2 * (2 * x2 + 1) - 1 = 2 ^ y1 * (2 * x1 + 1) - 1
+    -> x1 = x2 /\ y1 = y2.
 Proof.
-  intros l1 l2 r1 r2 MINUS.
-  assert (2 ^ l2 * (2 * r2 + 1) = 2 ^ l1 * (2 * r1 + 1)) as NO_MINUS.
-  remember (2 ^ l2 * (2 * r2 + 1)) as a2.
-  remember (2 ^ l1 * (2 * r1 + 1)) as a1.
+  intros x1 x2 y1 y2 MINUS.
+  assert (2 ^ y2 * (2 * x2 + 1) = 2 ^ y1 * (2 * x1 + 1)) as NO_MINUS.
+  remember (2 ^ y2 * (2 * x2 + 1)) as a2.
+  remember (2 ^ y1 * (2 * x1 + 1)) as a1.
   destruct a2 as [|a2'].
   apply pow_S_prod_false in Heqa2; intuition.
   destruct a1 as [|a1'].
@@ -91,11 +91,11 @@ Proof.
   clear MINUS.
   generalize NO_MINUS; clear NO_MINUS.
 
-  generalize l1; clear l1.
-  induction l2; intros l1 FACT.
+  generalize y1; clear y1.
+  induction y2; intros y1 FACT.
   replace (2^0) with 1 in FACT;[|unfold pow;nliamega].
   rewrite mult_1_l in FACT.
-  destruct l1.
+  destruct y1.
   split;auto.
   replace (2^0) with 1 in FACT;[|unfold pow;nliamega].
   nliamega.
@@ -104,8 +104,8 @@ Proof.
   rewrite <- mult_assoc in FACT.
   apply odd_and_even_dont_overlap in FACT; intuition.
 
-  destruct l1.
-  clear IHl2.
+  destruct y1.
+  clear IHy2.
   replace (2^0) with 1 in FACT;[|unfold pow;nliamega].
   rewrite mult_1_l in FACT.
   unfold pow in FACT.
@@ -113,26 +113,26 @@ Proof.
   rewrite <- mult_assoc in FACT.
   apply odd_and_even_dont_overlap in FACT; intuition.
 
-  remember (IHl2 l1) as HEREWEGO.
-  assert (l1 = l2 /\ r1 = r2).
+  remember (IHy2 y1) as HEREWEGO.
+  assert (x1 = x2 /\ y1 = y2).
   apply HEREWEGO.
-  clear IHl2 HEREWEGO HeqHEREWEGO.
+  clear IHy2 HEREWEGO HeqHEREWEGO.
   apply twice_two.
   rewrite mult_assoc.
-  replace (2*2^l2) with (2^(S l2));[|unfold pow;nliamega].
+  replace (2*2^y2) with (2^(S y2));[|unfold pow;nliamega].
   rewrite mult_assoc.
-  replace (2*2^l1) with (2^(S l1));[|unfold pow;nliamega].
+  replace (2*2^y1) with (2^(S y1));[|unfold pow;nliamega].
   auto.
   split;nliamega.
 Qed.
 
 Theorem Unfair_Pairing_to_fun :
-  forall n l1 l2 r1 r2,
-    Unfair_Pairing n l1 r1 ->
-    Unfair_Pairing n l2 r2 ->
-    (l1 = l2) /\ (r1 = r2).
+  forall n x1 x2 y1 y2,
+    Unfair_Pairing n x1 y1 ->
+    Unfair_Pairing n x2 y2 ->
+    (x1 = x2) /\ (y1 = y2).
 Proof.
-  intros n l1 l2 r1 r2 P1 P2.
+  intros n x1 x2 y1 y2 P1 P2.
   inversion P1; inversion P2; clear P1; clear P2; subst.
   apply unfair_unique; auto.
 Qed.
@@ -193,12 +193,12 @@ Proof.
 Qed.
 Hint Resolve lt_div2'.
 
-Program Fixpoint unfair_split_x (n : nat) {measure n} :=
+Program Fixpoint unfair_split_y (n : nat) {measure n} :=
   match n with
     | 0 => 0
     | S n' =>
       if (even_odd_dec n)
-      then unfair_split_x (div2 n) + 1
+      then unfair_split_y (div2 n) + 1
       else 0
   end.
 Next Obligation.
@@ -206,12 +206,12 @@ Proof.
   destruct n'; try (apply lt_n_S); auto.
 Qed.
 
-Program Fixpoint unfair_split_y (n : nat) {measure n} :=
+Program Fixpoint unfair_split_x (n : nat) {measure n} :=
   match n with
     | 0 => 0
     | S n' => 
       if (even_odd_dec n)
-      then unfair_split_y (div2 n) 
+      then unfair_split_x (div2 n) 
       else div2 (n-1)
   end.
 Next Obligation.
@@ -222,20 +222,20 @@ Qed.
 Lemma unfair_split_recombine : 
   forall n,
     n =
-    ((2 ^ (unfair_split_x (S n))) * (2 * (unfair_split_y (S n)) + 1)) - 1.
+    ((2 ^ (unfair_split_y (S n))) * (2 * (unfair_split_x (S n)) + 1)) - 1.
 Proof.
   intros n.
   apply (well_founded_ind
            lt_wf
            (fun n => n =
-                     2 ^ unfair_split_x (S n) * (2 * unfair_split_y (S n) + 1)- 1)).
+                     2 ^ unfair_split_y (S n) * (2 * unfair_split_x (S n) + 1)- 1)).
   clear n; intros n IND.
 
   remember (S n) as m.
-  unfold_sub unfair_split_x (unfair_split_x m).
-  fold unfair_split_x.
   unfold_sub unfair_split_y (unfair_split_y m).
   fold unfair_split_y.
+  unfold_sub unfair_split_x (unfair_split_x m).
+  fold unfair_split_x.
   destruct m.
   intuition.
   rewrite Heqm; clear Heqm; clear m.
@@ -247,23 +247,23 @@ Proof.
   
   simpl div2.
 
-  replace (2 ^ (unfair_split_x (S (div2 n)) + 1)) with
-  (2 * (2 ^ (unfair_split_x (S (div2 n)))));
-    [|(replace (unfair_split_x (S (div2 n)) + 1) 
-       with (S (unfair_split_x (S (div2 n))));[|omega]);
+  replace (2 ^ (unfair_split_y (S (div2 n)) + 1)) with
+  (2 * (2 ^ (unfair_split_y (S (div2 n)))));
+    [|(replace (unfair_split_y (S (div2 n)) + 1) 
+       with (S (unfair_split_y (S (div2 n))));[|omega]);
        simpl pow;
        nliamega].
 
-  replace (2 * 2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1) - 1)
-  with    (2 * (2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1)) - 1);[|nliamega].
+  replace (2 * 2 ^ unfair_split_y (S (div2 n)) * (2 * unfair_split_x (S (div2 n)) + 1) - 1)
+  with    (2 * (2 ^ unfair_split_y (S (div2 n)) * (2 * unfair_split_x (S (div2 n)) + 1)) - 1);[|nliamega].
 
-  remember (2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1)) as m.
+  remember (2 ^ unfair_split_y (S (div2 n)) * (2 * unfair_split_x (S (div2 n)) + 1)) as m.
   destruct m.
 
   apply pow_S_prod_false in Heqm; intuition.
 
-  replace (2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1)) 
-  with ((2 ^ unfair_split_x (S (div2 n)) * (2 * unfair_split_y (S (div2 n)) + 1) - 1) + 1) in Heqm.
+  replace (2 ^ unfair_split_y (S (div2 n)) * (2 * unfair_split_x (S (div2 n)) + 1)) 
+  with ((2 ^ unfair_split_y (S (div2 n)) * (2 * unfair_split_x (S (div2 n)) + 1) - 1) + 1) in Heqm.
   rewrite <- (IND (div2 n)) in Heqm.
   rewrite Heqm; clear Heqm; clear m.
   unfold mult.
