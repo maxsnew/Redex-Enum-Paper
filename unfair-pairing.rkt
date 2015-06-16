@@ -132,6 +132,19 @@
     [else (set-add (z_to_n (- n 1)) (- n 1))]))
 (define (div2 n) (floor (/ n 2)))
 
+(define (fl_log n)
+  (cond
+    [(zero? n) 0]
+    [else (+ (fl_log (floor (/ (- n 1) 2))) 1)]))
+(check-equal? (fl_log 0) 0)
+(check-equal? (fl_log 1) 1)
+(check-equal? (fl_log 2) 1)
+(check-equal? (fl_log 3) 2)
+(check-equal? (fl_log 4) 2)
+(check-equal? (fl_log 5) 2)
+(check-equal? (fl_log 6) 2)
+(check-equal? (fl_log 7) 3)
+
 (define (Trace_lt-unfair-pair n)
   (cond
     [(zero? n) (values (set) (set))]
@@ -144,9 +157,15 @@
 (for ([n (in-range 0 100)])
   (define-values (explored-x explored-y) (Trace_lt-unfair-pair n))
   (define claimed-x (z_to_n (div2 (+ n 1))))
+  (define claimed-y (if (zero? n)
+                        (set)
+                        (z_to_n (+ (fl_log (- n 1)) 1))))
   (unless (equal? explored-x claimed-x)
     (error 'unfair-pairing.rkt "x ~a wrong: claimed ~s vs explored ~s\n"
-           n claimed-x explored-x)))
+           n claimed-x explored-x))
+  (unless (equal? explored-y claimed-y)
+    (error 'unfair-pairing.rkt "x ~a wrong: claimed ~s vs explored ~s\n"
+           n claimed-y explored-y)))
 
 (module+ main
   (require plot)
