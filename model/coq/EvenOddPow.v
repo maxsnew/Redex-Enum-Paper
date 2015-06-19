@@ -390,36 +390,40 @@ Lemma fl_log_add1_when_not_power_of_two_doesnt_matter:
     (forall m, 2 ^ m <> S (S n)) ->
     fl_log n = fl_log (S n).
 Proof.
-  intros n FACT.
+  apply (well_founded_ind
+           lt_wf
+           (fun n =>
+              (forall m, 2 ^ m <> S (S n)) ->
+              fl_log n = fl_log (S n))).
+  intros n IND NOTPOWTWO.
   destruct n.
-  remember (FACT 1) as THING; simpl in THING; intuition.
-  destruct n.
-  compute; auto.
-  destruct n.
-  remember (FACT 2) as THING; simpl in THING; intuition.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  remember (FACT 3) as THING; simpl in THING; intuition.
+  remember (NOTPOWTWO 1) as BAD.
+  simpl in BAD.
+  intuition.
+
   destruct n.
   compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  admit.
+
+  rewrite fl_log_div2'.
+  replace (fl_log (S (S (S n)))) with (S (fl_log (div2 (S (S n)))))
+    by (rewrite fl_log_div2';auto).
+  assert (fl_log (div2 (S n)) = fl_log (div2 (S (S n))));[|nliamega].
+  rewrite div2_SSn.
+  destruct (even_odd_dec n);[|rewrite odd_div2; auto].
+
+  rewrite (even_div2 n); auto.
+  apply IND; auto; clear IND.
+  rewrite <- even_div2; auto.
+  unfold not.
+  intros m NPTWO.
+  remember (NOTPOWTWO (S m)) as M1NPT; clear HeqM1NPT.
+  assert (2* (2^m) = 2* (S (S (div2 n)))) by nliamega.
+  unfold pow in M1NPT; fold pow in M1NPT.
+  replace (2 * (S (S (div2 n)))) with (S (S (S (S (2 * (div2 n)))))) in H
+    by nliamega.
+  replace (2 * div2 n) with (double (div2 n)) in H
+    by (unfold double; nliamega).
+  rewrite <- even_double in H; auto.
 Qed.
 
 Lemma fl_log_add1_when_big_enough_and_even_doesnt_matter:
