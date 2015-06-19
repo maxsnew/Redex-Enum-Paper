@@ -311,80 +311,6 @@ Proof.
   simpl;auto.
 Qed.
 
-Lemma fl_log_pow : forall n, (fl_log (2^(S n))) = (S n).
-Proof.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  admit.
-Qed.
-
-Lemma fl_log_pow' : forall n, (fl_log (2^(S n) - 2)) = n.
-Proof.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-(*
-  apply (well_founded_ind
-           lt_wf
-           (fun n => (fl_log (2^(S n) - 2)) = n)).
-*)
-  admit.
-Qed.
-
-Lemma fl_log_pow'' : forall n, S n = fl_log (2^(S n) - 1).
-Proof.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  admit.
-Qed.
-
 Lemma fl_log_add1_when_not_power_of_two_doesnt_matter:
   forall n,
     (forall m, 2 ^ m <> S (S n)) ->
@@ -448,7 +374,119 @@ Proof.
   rewrite div2_double.
   auto.
 Qed.
-  
+
+Lemma fl_log_pow : forall n, (fl_log (2^(S n))) = (S n).
+Proof.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  admit.
+Qed.
+
+Lemma fl_log_pow' : forall n, (fl_log (2^(S n) - 2)) = n.
+Proof.
+  apply (well_founded_ind
+           lt_wf
+           (fun n => (fl_log (2^(S n) - 2)) = n)).
+  intros n IND.
+  destruct n.
+  compute; auto.
+  rewrite <- (IND n) at 2; auto; clear IND.
+  replace (2^(S n) - 2) with (div2 (2* (2^(S n) - 2)))
+      by (rewrite div2_double; auto).
+  rewrite <- fl_log_div2'; auto.
+  replace (S (2 * (2 ^ S n - 2)))
+  with (S (2 * 2 ^ S n - 4))
+    by nliamega.
+  replace (2*2^(S n)) with (2^(S (S n))) by (unfold pow; nliamega).
+  replace (fl_log (S (2 ^ S (S n) - 4)))
+  with (fl_log (S (S (2 ^ S (S n) - 4)))).
+  replace (S (S (2 ^ S (S n) - 4))) with (2 ^ S (S n) - 2); auto.
+  remember (2 ^ S (S n)) as m.
+  destruct m.
+  symmetry in Heqm; apply pow_not_zero in Heqm; intuition.
+  assert (m>=3);[|nliamega].
+  destruct m.
+  unfold pow in Heqm; fold pow in Heqm.
+  nliamega.
+  destruct m.
+  unfold pow in Heqm; fold pow in Heqm.
+  nliamega.
+  destruct m.
+  unfold pow in Heqm; fold pow in Heqm.
+  nliamega.
+  nliamega.
+
+  rewrite <- fl_log_add1_when_not_power_of_two_doesnt_matter; auto.
+  intros m FACT.
+  unfold pow in FACT; fold pow in FACT.
+  assert (2 * (2 * 2 ^ n) >= 4) as GT.
+  clear FACT m.
+  induction n.
+  compute; auto.
+  unfold pow; fold pow.
+  eapply (le_trans _ (2 * (2 * 2 ^ n))); auto.
+  nliamega.
+
+  replace (S (S (S (2 * (2 * 2 ^ n) - 4)))) with (2 * 2 * 2^n - 1) in FACT by nliamega.
+
+  replace (2 * 2 * 2 ^ n - 1) with (2 ^ (S (S n)) - 1) in FACT by (unfold pow; nliamega).
+  destruct m.
+  simpl in FACT.
+  nliamega.
+  destruct m.
+  simpl in FACT.
+  nliamega.
+  replace (2 * (2 * 2 ^ n)) with (2 ^ (S (S n))) in GT by (unfold pow; nliamega).
+  assert (S (2 ^ S (S m)) = 2 ^ S (S n)) as FACT' by nliamega.
+  assert (even (2^(S (S n)))).
+  unfold pow.
+  apply times_two_is_even.
+  assert (odd (S (2^(S (S m))))).
+  constructor.
+  apply times_two_is_even.
+  rewrite FACT' in H0.
+  apply (not_even_and_odd (2^(S (S n)))); auto.
+Qed.
+
+Lemma fl_log_pow'' : forall n, S n = fl_log (2^(S n) - 1).
+Proof.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  admit.
+Qed.
+
 Lemma fl_log_double :
   forall n,
     fl_log (2*(S n)) = S (fl_log (S n - 1)).
