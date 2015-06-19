@@ -423,27 +423,52 @@ Proof.
   auto.
 Qed.
 
+Lemma fl_log_double :
+  forall n,
+    fl_log (2*(S n)) = S (fl_log (S n - 1)).
+Proof.
+  intros n.
+  replace (S n - 1) with n by nliamega.
+  replace n with (div2 (2 * n)) at 2 by (rewrite div2_double;auto).
+  rewrite <- fl_log_div2'.
+  replace (2 * S n) with (S (S (2 * n))) by nliamega.
+  apply fl_log_add1_when_big_enough_and_even_doesnt_matter.
+Qed.
+
+Lemma two_pow_non_zero : forall n, S (2^(S n)-1) = 2^(S n).
+Proof.
+  intros n.
+  remember (2^(S n)) as m.
+  destruct m;[|nliamega].
+  symmetry in Heqm.
+  apply pow_not_zero in Heqm.
+  intuition.
+Qed.
+
 Lemma fl_log_pow : forall n, (fl_log (2^(S n))) = (S n).
 Proof.
+  apply (well_founded_ind
+           lt_wf
+           (fun n => fl_log (2^(S n)) = S n)).
+  intros n IND.
   destruct n.
   compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  admit.
+  replace (2^(S (S n))) with (2*2^(S n)) by (unfold pow;nliamega).
+  remember (2^(S n)) as m.
+  destruct m.
+  symmetry in Heqm.
+  apply pow_not_zero in Heqm; intuition.
+  rewrite fl_log_double.
+  rewrite Heqm; clear Heqm m.
+  assert (fl_log (2^S n - 1) = S n);[|nliamega].
+  rewrite fl_log_add1_when_not_power_of_two_doesnt_matter.
+  replace (S (2^(S n)-1)) with (2^(S n)) by (rewrite two_pow_non_zero; nliamega).
+  apply IND; auto.
+  intros m FACT.
+  rewrite two_pow_non_zero in FACT.
+  replace (S (2^(S n))) with (2^(S n)+1) in FACT by nliamega.
+  apply pow_of_two_off_by_one in FACT.
+  intuition.
 Qed.
 
 Lemma fl_log_pow' : forall n, (fl_log (2^(S n) - 2)) = n.
@@ -532,18 +557,6 @@ Proof.
   replace (S (S (2^(S n) - 1))) with (2^(S n)+1) in FACT by nliamega.
   apply pow_of_two_off_by_one in FACT.
   intuition.
-Qed.
-
-Lemma fl_log_double :
-  forall n,
-    fl_log (2*(S n)) = S (fl_log (S n - 1)).
-Proof.
-  intros n.
-  replace (S n - 1) with n by nliamega.
-  replace n with (div2 (2 * n)) at 2 by (rewrite div2_double;auto).
-  rewrite <- fl_log_div2'.
-  replace (2 * S n) with (S (S (2 * n))) by nliamega.
-  apply fl_log_add1_when_big_enough_and_even_doesnt_matter.
 Qed.
 
 Lemma bound_on_y_in_unfair_pair :
