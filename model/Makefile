@@ -1,4 +1,4 @@
-MODULES := Bijection Enum Fairness Pairing Sets Trace Util All
+MODULES := Bijection Enum Fairness Pairing UnfairPairing Sets Trace Util EvenOddPow All
 VS      := $(MODULES:%=coq/%.v)
 
 .PHONY: coq clean

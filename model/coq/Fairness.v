@@ -3,7 +3,8 @@ Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Div2 Coq.Arith.Even.
 Require Import Coq.Lists.ListSet.
 
-Require Import Enum.Enum Enum.Pairing Enum.Sets Enum.Trace Enum.Util Enum.UnfairPairing.
+Require Import Enum.Enum Enum.Pairing Enum.Sets Enum.Trace.
+Require Import Enum.EvenOddPow Enum.Util Enum.UnfairPairing.
 
 (* read as f-fairness *)
 Definition F_Fair2 {tout} (f : nat -> nat) (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
@@ -741,8 +742,120 @@ Section Unfair_Unfair.
     apply subset_union_transl; auto.
     apply subset_union_transr; auto.
     apply subset_union_transr; auto.
-Qed.
+  Qed.
 
+  Lemma Unfair_Pair_left_precise : 
+    trace_proj one (Trace_lt UPTN 0) ≃ ∅ /\
+    forall n, trace_proj one (Trace_lt UPTN (S n)) ≃ (z_to_n (S (fl_log n))).
+  Proof.
+    constructor.
+    simpl; auto.
+    apply (well_founded_ind
+             lt_wf
+             (fun n => trace_proj one (Trace_lt UPTN (S n)) ≃ z_to_n (S (fl_log n)))).
+    intros n IND.
+    destruct n.
+
+    (* n = 0 *)
+    unfold Trace_lt.
+    unfold trace_proj.
+    unfold trace_plus.
+    remember ε as EMPTY.
+    destruct EMPTY.
+    inversion HeqEMPTY.
+    remember (Trace_on UPTN 0) as TO0.
+    destruct TO0.
+    apply Trace_on_UPTN in HeqTO0.
+    destruct HeqTO0 as [x [y [EQ [S3EQ S4EQ]]]].
+    subst.
+    clear HeqEMPTY.
+
+    remember (2 ^ y * (2 * x + 1)) as n.
+    destruct n.
+    apply pow_S_prod_false in Heqn.
+    intuition.
+    assert (n=0) by nliamega.
+    subst n.
+    assert (y=0).
+    apply (odds_have_no_powers_of_two x).
+    rewrite <- Heqn.
+    constructor.
+    constructor.
+    subst.
+    simpl.
+    unfold fl_log; simpl; auto.
+
+    (* n =/= 0 *)
+    replace (Trace_lt UPTN (S (S n)))
+    with (Trace_on UPTN (S n) ⊔ (Trace_lt UPTN (S n))) ;[|unfold Trace_lt;auto].
+    rewrite fl_log_div2'.
+    unfold trace_plus.
+    unfold trace_proj.
+    remember (Trace_on UPTN (S n)) as TOnSn.
+    remember (Trace_lt UPTN (S n)) as TLtSn.
+    destruct TOnSn.
+    destruct TLtSn.
+    assert (trace_proj one (Trace_lt UPTN (S n)) ≃ z_to_n (S (fl_log n))) as TLT;
+      [apply IND;auto|clear IND].
+    unfold trace_proj in TLT.
+    rewrite <- HeqTLtSn in TLT.
+    apply (set_eq_trans (s0 ∪ s4) (s0 ∪ z_to_n (S (fl_log n)))).
+    apply set_union_cong; auto.
+    clear TLT HeqTLtSn.
+    apply Trace_on_UPTN in HeqTOnSn.
+    destruct HeqTOnSn as [x [y [Sneq [seq s0eq]]]].
+    subst s0.
+    clear s s1 s2 seq s3 s4 s5 s6.
+    assert (S (S n) = 2 ^ y * (2 * x+1)) as SSneq;[nliamega|clear Sneq].
+
+    destruct (pow_dec (S (S n))).
+    (* is a power of two *)
+    destruct s as [m SSneq'].
+    assert (x=0) by (apply (power_of_two_and_odd_equality m y); nliamega).
+    subst x.
+    simpl in SSneq.
+    rewrite mult_1_r in SSneq.
+    clear SSneq' m.
+
+    destruct y.
+    unfold pow in SSneq.
+    assert False; intuition.
+
+    assert (n=2^(S y) - 2) by nliamega.
+    replace (fl_log n) with y by (subst n; symmetry; apply fl_log_pow').
+    rewrite <- fl_log_div2'.
+    subst n.
+    replace (S (2 ^ S y - 2)) with (2 ^ S y - 1) by nliamega.
+    rewrite <- fl_log_pow''.
+    replace (z_to_n (S (S y))) with (set_add' (S y) (z_to_n (S y)))
+      by (unfold z_to_n; fold z_to_n; auto).
+    Type set_add_cons_eq.
+    eapply (set_eq_trans _ (cons (S y) (z_to_n (S y)))); auto.
+    eapply (set_eq_trans _ (app (cons (S y) nil) (z_to_n (S y)))); auto.
+    apply set_union_app_eq.
+
+    (* is not a power of two *)
+    rewrite <- fl_log_div2'.
+    rewrite <-  fl_log_add1_when_not_power_of_two_doesnt_matter; auto.
+    apply subset_union_eq.
+    apply subset_In_def.
+    intros ele IN.
+    destruct IN.
+    subst ele.
+    apply z_to_n_correct.
+
+    destruct n.
+    remember (n0 1) as BAD.
+    simpl in BAD; intuition.
+    assert (S n = 2 ^ y * (2 * x + 1) - 2) by nliamega.
+    rewrite H.
+    destruct x.
+    remember (n0 y).
+    intuition.
+    remember (bound_on_y_in_unfair_pair x y).
+    nliamega.
+    destruct H.
+Qed.
 (*
   Theorem Unfair_Pair_Unfair : ~ (@Fair2 prod (@E_Unfair_Pair)).
   Proof.

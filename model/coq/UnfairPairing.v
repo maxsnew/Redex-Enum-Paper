@@ -1,7 +1,7 @@
 Require Import Coq.Numbers.Natural.Peano.NPeano.
 Require Import Coq.Arith.Arith_base Coq.Arith.Even Coq.Arith.Div2.
 Require Import Psatz.
-Require Import Enum.Util.
+Require Import Enum.Util Enum.EvenOddPow.
 Require Import Coq.Program.Wf Init.Wf.
 Require Coq.Program.Wf.
 Include WfExtensionality.
@@ -21,57 +21,6 @@ Theorem Unfair_Pairing_from_fun :
 Proof.
   intros l r n1 n2 P1 P2.
   inversion P1; inversion P2; auto.
-Qed.
-
-Lemma pow_not_zero : forall n, 2^n=0 -> False.
-Proof.
-  induction n.
-  simpl.
-  intuition.
-  unfold pow. fold pow.
-  intro PROD.
-  apply mult_is_O in PROD;auto.
-  destruct PROD; intuition.
-Qed.
-
-Lemma pow_S_prod_false : forall n m, 0 = (pow 2 n) * (m + 1) -> False.
-Proof.
-  intros n m FACT.
-  destruct (mult_is_O (2 ^ n) (m + 1)) as [ZERO|ZERO]; auto.
-  apply pow_not_zero in ZERO; intuition.
-  replace (m+1) with (S m);nliamega.
-Qed.
-
-Lemma twice_two : forall x y, 2*x = 2*y -> x = y.
-Proof.
-  intros; nliamega.
-Qed.
-
-Lemma odd_and_even_dont_overlap:
-  forall n m, 2 * n = 2 * m + 1 -> False.
-Proof.
-  intros n m FACT.
-
-  assert (odd (2*m+1)) as ODD.
-  clear n FACT.
-  induction m.
-  simpl; repeat constructor.
-  replace (2 * S m + 1) with (S (S (2 * m + 1)));[|omega].
-  constructor.
-  constructor.
-  auto.
-
-  assert (even (2*n)) as EVEN.
-  clear m FACT ODD.
-  induction n.
-  simpl; constructor.
-  replace (2 * S n) with (S (S (2*n)));[|omega].
-  constructor.
-  constructor.
-  auto.
-
-  rewrite FACT in EVEN.
-  apply (not_even_and_odd (2*m+1)); auto.
 Qed.
 
 Lemma unfair_unique :
@@ -174,77 +123,6 @@ Proof.
 Qed.
 Hint Resolve Unfair_Pairing_to_sound.
 
-Lemma div2_monotone_Sn : 
-  forall n, 
-    (div2 n <= div2 (S n)).
-Proof.
-  apply (ind_0_1_SS (fun n => div2 n <= div2 (S n)));
-  [ | | intros n IndHyp; simpl in IndHyp];
-  simpl; omega.
-Qed.
-Hint Resolve div2_monotone_Sn.
-
-Lemma lt_div2' : forall n, div2 n < S n.
-Proof.
-  intros n.
-  apply (le_lt_trans (div2 n) (div2 (S n)) (S n));
-    [ apply div2_monotone_Sn |  apply lt_div2 ] ;
-    omega.
-Qed.
-Hint Resolve lt_div2'.
-
-Lemma even_is_double : forall n, even (double n).
-Proof.
-  induction n.
-  unfold double; simpl; constructor.
-  replace (S n) with (n+1);[|omega].
-  rewrite double_plus.
-  unfold double at 2; simpl.
-  replace (double n + 2) with (S (S (double n)));[|omega].
-  constructor.
-  constructor.
-  auto.
-Qed.
-
-Lemma odds_have_no_powers_of_two : forall x y, odd (2 ^ y * (2 * x + 1)) -> y = 0.
-Proof.
-  intros x y OD.
-  destruct y; auto.
-  unfold pow in OD; fold pow in OD.
-  replace (2 * 2 ^ y * (2 * x + 1)) with (double (2 ^ y * (2 * x + 1))) in OD;
-    [|unfold double;nliamega].
-  remember (2 ^ y * (2 * x + 1)) as n.
-  assert (even (double n)).
-  apply even_is_double.
-  assert False;[|intuition].
-  apply (not_even_and_odd (double n));auto.
-Qed.
-
-Lemma even_prod_lt : 
-  forall x y, even (2^y * (2 * x + 1)) -> x < div2 (2^y * (2 * x + 1)).
-Proof.
-  intros x y EV.
-  remember (2^y * (2 * x + 1)) as n; rename Heqn into NEQ.
-  destruct y.
-  unfold pow in NEQ.
-  rewrite mult_1_l in NEQ.
-  assert (odd n).
-  replace (2*x+1) with (S (2*x)) in NEQ;[|nliamega].
-  subst n.
-  constructor.
-  replace (2*x) with (double x);[|unfold double;nliamega].
-  apply even_is_double.
-  assert False;[|intuition].
-  apply (not_even_and_odd n); auto.
-  unfold pow in NEQ; fold pow in NEQ.
-  subst n.
-  rewrite <- mult_assoc.
-  rewrite div2_double.
-  assert (2^y >= 1);[|nliamega].
-  clear x EV.
-  induction y; try (unfold pow; fold pow);nliamega.
-Qed.
-
 Program Fixpoint unfair_split_y (n : nat) {measure n} :=
   match n with
     | 0 => 0
@@ -253,10 +131,6 @@ Program Fixpoint unfair_split_y (n : nat) {measure n} :=
       then unfair_split_y (div2 n) + 1
       else 0
   end.
-Next Obligation.
-Proof.
-  destruct n'; try (apply lt_n_S); auto.
-Qed.
 
 Program Fixpoint unfair_split_x (n : nat) {measure n} :=
   match n with
@@ -266,10 +140,6 @@ Program Fixpoint unfair_split_x (n : nat) {measure n} :=
       then unfair_split_x (div2 n) 
       else div2 (n-1)
   end.
-Next Obligation.
-Proof.
-  destruct n'; try (apply lt_n_S); auto.
-Qed.
 
 Lemma unfair_split_recombine : 
   forall n,
