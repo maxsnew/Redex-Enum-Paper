@@ -67,6 +67,17 @@ Proof.
   destruct PROD; intuition.
 Qed.
 
+Lemma pow_one : forall n,  2^n = 1 -> n=0.
+Proof.
+  destruct n.
+  auto.
+  intros FACT.
+  unfold pow in FACT; fold pow in FACT.
+  assert (2^n=0) by nliamega.
+  apply pow_not_zero in H.
+  intuition.
+Qed.
+
 Lemma pow_S_prod_false : forall n m, 0 = (pow 2 n) * (m + 1) -> False.
 Proof.
   intros n m FACT.
@@ -267,6 +278,43 @@ Proof.
   nliamega.
 Qed.
 
+Lemma pow_of_two_off_by_one :
+  forall n m, 2^m = 2^n + 1 -> m = 1 /\ n = 0.
+Proof.
+  intros n m.
+  generalize n; clear n.
+  destruct m.
+  intros n FACT.
+  simpl in FACT.
+  assert (2^n=0) by nliamega.
+  apply pow_not_zero in H; intuition.
+
+  intros n FACT.
+  destruct m.
+  simpl in FACT.
+  assert (2^n=1) by nliamega.
+  Type pow_one.
+  apply pow_one in H.
+  auto.
+
+  destruct n.
+  unfold pow in FACT; fold pow in FACT.
+  assert (2^m=0) by nliamega.
+  apply pow_not_zero in H; intuition.
+
+  assert (even (2^(S (S m)))).
+  unfold pow; fold pow.
+  apply times_two_is_even.
+  assert (odd (2^(S n) + 1)).
+  replace (2^(S n)+1) with (S (2^(S n))) by nliamega.
+  constructor.
+  unfold pow; fold pow.
+  apply times_two_is_even.
+  assert False;[|intuition].
+  apply (not_even_and_odd (2^S (S m))); auto.
+  rewrite FACT; auto.
+Qed.
+
 Lemma powers_of_two_have_no_odd_factors :
   forall y' y n, odd n -> 2^y = 2^y' * (S (S n)) -> False.
 Proof.
@@ -444,7 +492,6 @@ Proof.
   nliamega.
 
   replace (S (S (S (2 * (2 * 2 ^ n) - 4)))) with (2 * 2 * 2^n - 1) in FACT by nliamega.
-
   replace (2 * 2 * 2 ^ n - 1) with (2 ^ (S (S n)) - 1) in FACT by (unfold pow; nliamega).
   destruct m.
   simpl in FACT.
@@ -466,25 +513,25 @@ Qed.
 
 Lemma fl_log_pow'' : forall n, S n = fl_log (2^(S n) - 1).
 Proof.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  admit.
+  intros n.
+  rewrite <- fl_log_pow at 1.
+  assert (2^(S n)>=1).
+  unfold pow; fold pow.
+  assert (2^n>0);[|nliamega].
+  remember (2^n) as m.
+  destruct m.
+  symmetry in Heqm.
+  apply pow_not_zero in Heqm.
+  intuition.
+  nliamega.
+
+  replace (2^(S n)) with (S (2^(S n) - 1)) at 1 by nliamega.
+  symmetry.
+  apply fl_log_add1_when_not_power_of_two_doesnt_matter.
+  intros m FACT.
+  replace (S (S (2^(S n) - 1))) with (2^(S n)+1) in FACT by nliamega.
+  apply pow_of_two_off_by_one in FACT.
+  intuition.
 Qed.
 
 Lemma fl_log_double :
