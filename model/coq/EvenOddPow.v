@@ -32,6 +32,13 @@ Proof.
 Qed.
 Hint Resolve lt_div2''.
 
+Lemma div2_monotone : forall n m, n <= m -> div2 n <= div2 m.
+Proof.
+  intros n m.
+  induction 1; auto.
+  apply (le_trans (div2 n) (div2 m) (div2 (S m))); auto.
+Qed.
+
 Program Fixpoint fl_log n {wf lt n} : nat :=
   match n with
     | 0 => 0

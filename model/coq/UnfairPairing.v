@@ -260,6 +260,20 @@ Proof.
   intuition.
   intros _.
 
+  unfold div2; fold div2.
+  rewrite fl_log_div2'.
+  replace (div2 (S (S (S (S (S (S (S n)))))))) with (S (S (S (div2 (S n)))))
+    by (unfold div2;auto).
+  rewrite fl_log_div2'.
+  replace (div2 (S (S (div2 (S n))))) with (S (div2 (div2 (S n))))
+    by (unfold div2; auto).
+  rewrite fl_log_div2'.
+  repeat (apply gt_n_S).
+
+  apply (well_founded_ind
+           lt_wf
+           (fun n =>  S (div2 n) > fl_log (div2 (div2 (div2 (S n)))))).
+  clear n; intros n IND.
   destruct n.
   compute; auto.
   destruct n.
@@ -278,87 +292,23 @@ Proof.
   compute; auto.
   destruct n.
   compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; auto.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  destruct n.
-  compute; omega.
-  admit.
+
+  replace (div2 (div2 (div2 (S (S (S (S (S (S (S (S (S (S n)))))))))))))
+  with (S (div2 (div2 (div2 (S (S n)))))) by (unfold div2;auto).
+  rewrite fl_log_div2'.
+  replace (div2 (S (S n))) with (S (div2 n)) by (unfold div2;auto).
+  apply gt_n_S.
+  eapply (le_gt_trans _ (S (div2 (div2 n)))).
+
+  replace (div2 (S (S (S (S (S (S (S (S (S n)))))))))) with
+  (S (div2 (S (S (S (S (S (S (S n))))))))) by (unfold div2; auto).
+  apply le_n_S.
+  apply div2_monotone.
+  remember (lt_div2' n).
+  eapply (le_trans _ (S n)); nliamega.
+  apply IND.
+  apply (lt_le_trans _ (S n));auto.
+  nliamega.
 Qed.
 
 (* Local Variables: *)
