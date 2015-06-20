@@ -117,7 +117,7 @@ Feat for Haskell in
 then SciFe for Scala in
 2014@note{http://kaptoxic.github.io/SciFe/}, and
 @tt{data/enumerate} for Racket this
-year.@note{http://plt.eecs.northwestern.edu/snapshots/current/doc/data/Enumerations.html}
+year.@note{http://docs.racket-lang.org/data/Enumerations.html}
 
 These libraries are all efficient, generally providing the
 ability to extract the @texmath{2^{100}}-th element of an
