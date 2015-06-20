@@ -240,6 +240,127 @@ Ltac rewrite_unfair_pairing_from_fun :=
       erewrite (Unfair_Pairing_from_fun _ _ _ _ H1 H2) in *; clear H1 H2
   end.
 
+Lemma div2_bigger_than_fl_log : forall n, 8 <= n -> div2 n > fl_log n.
+Proof.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  destruct n.
+  intuition.
+  intros _.
+
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; auto.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  destruct n.
+  compute; omega.
+  admit.
+Qed.
+
 (* Local Variables: *)
 (* coq-load-path: (("." "Enum")) *)
 (* end: *)

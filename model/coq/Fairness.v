@@ -855,8 +855,8 @@ Section Unfair_Unfair.
     remember (bound_on_y_in_unfair_pair x y).
     nliamega.
     destruct H.
-Qed.
-(*
+  Qed.
+
   Theorem Unfair_Pair_Unfair : ~ (@Fair2 prod (@E_Unfair_Pair)).
   Proof.
     unfold Fair2.
@@ -867,9 +867,42 @@ Qed.
                 (E_Unfair_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat))
                 (f 8)) as TRACING; destruct TRACING as [s0 s1 s2 s3].
     remember (f 8) as n; clear Heqn f; destruct UNLIKELY as [LB UNLIKELY].
-    .....more here!
+    remember (E_Unfair_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) as UPTN.
+
+    assert (s1 = trace_proj one (Trace_lt UPTN n)).
+    unfold trace_proj.
+    destruct (Trace_lt UPTN n).
+    inversion HeqTRACING.
+    auto.
+
+    assert (s0 = trace_proj zero (Trace_lt UPTN n)).
+    unfold trace_proj.
+    destruct (Trace_lt UPTN n).
+    inversion HeqTRACING.
+    auto.
+    subst s0 s1.
+    destruct n.
+    intuition.
+    assert (z_to_n (S (fl_log n)) ≃ z_to_n (div2 (S (S n)))) as ZTONUNLIKELY.
+    eapply (set_eq_trans _ (trace_proj one (Trace_lt UPTN (S n)))); auto.
+    apply set_eq_symm.
+    destruct Unfair_Pair_left_precise as [_ B].
+    subst UPTN; apply (B n).
+    eapply (set_eq_trans _ (trace_proj zero (Trace_lt UPTN (S n)))); auto.
+    apply set_eq_symm; auto.
+    subst UPTN; apply Unfair_Pair_right_precise.
+    clear UPTN HeqUPTN HeqTRACING UNLIKELY.
+    destruct ZTONUNLIKELY as [_ UNLIKELYSUBSET].
+    generalize UNLIKELYSUBSET.
+    assert (not (z_to_n (div2 (S (S n))) ⊂ z_to_n (S (fl_log n)))); auto.
+    eapply (not_subset_In_def _ _ (div2 n)).
+    apply z_to_n_correct; auto.
+    unfold not; intros UNLIKELYLT.
+    apply z_to_n_correct in UNLIKELYLT.
+    assert (8<=n) as EIGHTN by nliamega.
+    apply div2_bigger_than_fl_log in EIGHTN.
+    intuition.
   Qed.
-*)
 
 End Unfair_Unfair.
 
