@@ -213,7 +213,7 @@ Proof.
   exists (unfair_split_x (S n), unfair_split_y (S n)).
   rewrite unfair_split_recombine at 1.
   apply UnfairPair.
-Qed.
+Defined.
 
 Definition Unfair_Pairing_from n : (nat * nat) := proj1_sig (Unfair_Pairing_from_dec n).
 Corollary Pairing_from_sound :

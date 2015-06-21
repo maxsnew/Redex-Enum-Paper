@@ -8,7 +8,8 @@
 (provide
  (contract-out
   [from-nat+trace
-   (-> e? exact-nonnegative-integer? 
+   (-> e/unfair?
+       exact-nonnegative-integer? 
        (values any/c
                (hash/c exact-nonnegative-integer?
                        (set/c exact-nonnegative-integer?))))])
@@ -35,7 +36,7 @@
        (equal? (car ans) (:from-nat enum n))))
 
 (define (from-nat+trace e i)
-  (define trs (judgment-holds (@ ,e ,i v T) (v T)))
+  (define trs (judgment-holds (@* ,e ,i v T) (v T)))
   (unless (and (pair? trs) (= 1 (length trs)))
     (error 'get-trace "got bad judgment-form result ~s" trs))
   (define ht (make-hash))

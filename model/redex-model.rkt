@@ -1,13 +1,14 @@
 #lang racket
 (require redex
          pict
-         (prefix-in : data/enumerate/lib))
+         (prefix-in : data/enumerate/lib)
+         (prefix-in : data/enumerate/private/unfair))
 
 (provide L
-         e? T? v?
+         e? T? v? e/unfair?
          sum-up-to sum-up-to-find-k
          unpair size ae-interp
-         @ @<-
+         @ @<- @*
          to-enum subst to-val)
 
 (define-language L
@@ -43,6 +44,7 @@
      nat->map-of-swap-zero-with
      nat->below/e-of-that-nat)
   (fin-or-inf ::= fin inf))
+
 (define e? (redex-match L e))
 (define T? (redex-match L T))
 (define v? (redex-match L v))
@@ -115,6 +117,7 @@
    ----------------------------------------------  "trace"
    (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
 
+
 ;; @, but with the other mode -- we don't model this in Redex
 ;; instead, just use the implementation in data/enumerate
 ;; (since we don't need to typeset this direction separately)
@@ -124,6 +127,26 @@
   [(where n ,(:to-nat (term (to-enum e)) (term (to-val v))))
    ---------------------------------------------------------
    (@<- e n v ∅)])
+
+(define-extended-language unfair-L L
+  (e ::= .... (unfair-cons/e e e)))
+
+(define-extended-judgment-form unfair-L @
+  #:mode (@* I I O O)
+  #:contract (@* e natural v T)
+  [(unfair-n->n*n n n_2 n_1) (@* e_1 n_1 v_1 T_1) (@* e_2 n_2 v_2 T_2)
+   -----------------------------------------------------------
+   (@* (unfair-cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))])
+
+(define-judgment-form unfair-L
+  #:mode (unfair-n->n*n I O O)
+  [(where (n_x n_y)
+          ,(let-values ([(nx ny) (:unfair-n->n*n (term n))])
+             (term (,nx ,ny))))
+   ----------------------------------------------------------
+   (unfair-n->n*n n n_y n_x)])
+
+(define e/unfair? (redex-match unfair-L e))
 
 (define-judgment-form L
   #:mode (sum-up-to-find-k I I I O)
@@ -312,7 +335,7 @@
 
 
 
-(define-metafunction L
+(define-metafunction unfair-L
   to-enum : e -> any
   [(to-enum (or/e e_1 e_2))
    ,(let ([e1 (term (to-enum e_1))]
@@ -328,6 +351,19 @@
   [(to-enum (cons/e e_1 e_2))
    ,(:cons/e (term (to-enum e_1))
              (term (to-enum e_2)))]
+  [(to-enum (unfair-cons/e e_1 e_2))
+   ,(let ([:e1 (term (to-enum e_1))]
+          [:e2 (term (to-enum e_2))])
+      (:map/e (λ (n)
+                (define-values (x y) (:unfair-n->n*n n))
+                (cons (:from-nat :e1 x)
+                      (:from-nat :e1 y)))
+              (λ (pr)
+                (:unfair-n*n->n (:to-nat :e1 (car pr))
+                                (:to-nat :e2 (cdr pr))))
+              :natural/e
+              #:contract
+              (cons/c (:enum-contract :e1) (:enum-contract :e2))))]
   [(to-enum (below/e ∞)) ,:natural/e]
   [(to-enum (below/e n)) ,(:below/e (term n))]
   [(to-enum (map/e (swap-zero-with natural) (swap-zero-with natural) e))
@@ -378,3 +414,4 @@
   to-val : v -> any
   [(to-val n) n]
   [(to-val (cons v_1 v_2)) ,(cons (term (to-val v_1)) (term (to-val v_2)))])
+

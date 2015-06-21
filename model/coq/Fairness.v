@@ -535,15 +535,14 @@ Section Unfair_Unfair.
     unfold Trace_on in TR.
     unfold Enumerates_from_dec in TR; simpl in TR.
     remember (Unfair_Pairing_from_dec n) as UPn.
-    destruct UPn as [[x y] B]. 
-    clear HeqUPn.
-    simpl fst in *.
-    simpl snd in *.
+    remember (unfair_split_recombine n).
+    clear HeqUPn Heqe.
+    remember (unfair_split_x (S n)) as x.
+    remember (unfair_split_y (S n)) as y.
     unfold trace_plus in TR.
-    inversion TR; subst; clear TR.
+    inversion TR.
     exists x.
     exists y.
-    inversion B.
     auto.
   Qed.
 

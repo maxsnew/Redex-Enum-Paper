@@ -164,6 +164,7 @@
   
   (with-compound-rewriters
    (['@ @-rewrite]
+    ['@* @-rewrite]
     ['@<- @-rewrite]
     ['dep/e
      (λ (lws)
@@ -287,7 +288,13 @@
                          (ae-sym k)
                          (d " + 1)"))))]
     ['Eval-enum (λ (lws) (list "" (list-ref lws 2) ""))]
-    ['Eval-bij (λ (lws) (list "" (list-ref lws 2) ""))])
+    ['Eval-bij (λ (lws) (list "" (list-ref lws 2) ""))]
+    ['unfair-n->n*n
+     (λ (lws)
+       (define n (list-ref lws 2))
+       (define y (list-ref lws 3))
+       (define x (list-ref lws 4))
+       (list "" n " = (2^" y ")·(2" x " + 1)"))])
    (with-atomic-rewriter
     '∞ (λ () (d "∞"))
     (thunk))))
@@ -305,7 +312,10 @@
     ("ex≥" "dep fin")
     ("trace" "fix")))
 
-(define (semantics-figure)
+(define-syntax-rule
+  (w/fonts e)
+  (w/fonts/proc (λ () e)))
+(define (w/fonts/proc thunk)
   (define helv-font "Helvetica")
   (define font-size 11)
   (parameterize ([label-font-size font-size]
@@ -314,24 +324,33 @@
                  [metafunction-style helv-font]
                  [literal-style helv-font]
                  [grammar-style helv-font])
-    (w/rewriters
-     (vc-append
-      20
-      (ht-append 
-       60
-       (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
-       (some-rules linebreaking-with-cases1))
-      (some-rules linebreaking-with-cases2)
-      (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
-                     [where-make-prefix-pict
-                      (λ ()
-                        (text " if " (default-style)))])
-        (htl-append 30
-                    (vl-append
-                     20
-                     (render-metafunction unpair)
-                     (render-metafunction sum-up-to))
-                    (render-metafunction size)))))))
+    (thunk)))
+
+(define (semantics-figure)
+  (w/rewriters
+   (w/fonts
+    (vc-append
+     20
+     (ht-append 
+      60
+      (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
+      (some-rules linebreaking-with-cases1))
+     (some-rules linebreaking-with-cases2)
+     (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
+                    [where-make-prefix-pict
+                     (λ ()
+                       (text " if " (default-style)))])
+       (htl-append 30
+                   (vl-append
+                    20
+                    (render-metafunction unpair)
+                    (render-metafunction sum-up-to))
+                   (render-metafunction size)))))))
+
+(define (unfair-rule)
+  (w/rewriters
+   (w/fonts
+    (render-judgment-form @*))))
 
 (define (some-rules linebreaking)
   (apply
@@ -356,4 +375,5 @@
 (module+ main 
   (define sf (semantics-figure))
   sf
-  (pict-width sf))
+  (pict-width sf)
+  (unfair-rule))

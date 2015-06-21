@@ -1,6 +1,7 @@
 #lang at-exp racket
 
-(require (prefix-in m: "model.rkt" )
+(require (prefix-in m: "redex-model.rkt" )
+         (prefix-in m: "redex-model-test.rkt" )
          racket/runtime-path
          redex/reduction-semantics
          rackunit/log
@@ -21,7 +22,7 @@
 
 ;; builds a list of test cases for the nats up to `n'
 (define/contract (build-test-cases e n)
-  (-> m:e? exact-nonnegative-integer? (listof test-case?))
+  (-> m:e/unfair? exact-nonnegative-integer? (listof test-case?))
   (for/list ([i (in-range n)])
     (build-test-case e i)))
 
@@ -93,6 +94,12 @@
             (o " ")
             (o-enum e2)
             (o ")")]
+           [`(unfair-cons/e ,e1 ,e2)
+            (o "(E_Unfair_Pair ")
+            (o-enum e1)
+            (o " ")
+            (o-enum e2)
+            (o ")")]
            [`(map/e swap-cons swap-cons ,e)
             (o "(E_Map SwapConsBij' ")
             (o-enum e)
@@ -116,7 +123,7 @@
          (match* (e v)
            [(`(below/e ∞) (? number?))
             (o (format "~a" v))]
-           [(`(cons/e ,e1 ,e2) (cons a b))
+           [(`(,(or 'cons/e 'unfair-cons/e) ,e1 ,e2) (cons a b))
             (o "(pair ")
             (o-v e1 a)
             (o " ")
@@ -253,11 +260,10 @@
        ;; left sums in the Coq model match up to the `or l' rule in the Redex model
        (cons 0 (loop v))])))
 
-
-
 (run-tests
  (build-test-cases '(below/e ∞) 100)
  (build-test-cases '(cons/e (below/e ∞) (below/e ∞)) 100)
+ (build-test-cases '(unfair-cons/e (below/e ∞) (below/e ∞)) 100)
  (build-test-cases '(or/e (below/e ∞) (below/e ∞)) 100)
  (build-test-cases '(cons/e (cons/e (trace/e 0 (below/e ∞))
                                     (trace/e 1 (below/e ∞)))
