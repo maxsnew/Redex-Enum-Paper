@@ -31,6 +31,10 @@
     #:contract (list/c exact-nonnegative-integer? exact-nonnegative-integer?
                        exact-nonnegative-integer? exact-nonnegative-integer?)))
 
+This section introduces our definition of fairness in a precise
+but informal way. The subsequent section makes it precise and
+gives proofs of various related properties.
+
 A fair enumeration combinator is one that indexes into its
 argument enumerations roughly equally, instead of indexing
 deeply into one and shallowly into another one. For

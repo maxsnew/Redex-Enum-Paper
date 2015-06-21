@@ -27,30 +27,34 @@ this is challenging because of the way each pairing of an element on
 the left with a set on the right consumes an unpredictable number of
 positions in the enumeration.
 
-@citet[feat]'s Feat is a system for enumeration that distinguishes
-itself from ``list'' perspectives on enumeration by focusing on the
-``function'' perspective. We also use the ``function'' perspective. 
-While our approach is closer to Tarau's, we share support for
-finite sets with Feat, but are distinct from Feat in our support for
-dependent pairing and fairness. Also, Feat has only one half of the
-bijection and thus cannot support @racket[except/e] (and thus cannot
-easily support identifiers that contain all strings, except without a
-small set of keywords like we need for Redex).  
+@citet[feat]'s Feat is a system for enumeration that
+distinguishes itself from ``list'' perspectives on
+enumeration by focusing on the ``function'' perspective like
+we do. Unlike our approach, however, Feat's enumerations are
+not just bijective functions directly on naturals, but
+instead a sequence of finite bijections that, when strung
+together, combine into a bijection on the naturals. In other
+words, the Feat combinators get more information from their
+inputs than ours do, namely a partitioning of the naturals
+into consecutive finite subsets. This additional information
+means that our precise, technical definition of fairness
+does not apply directly to Feat's combinators. The intuition
+of fairness, however, does apply and Feat's pairing
+and alternation combinators are fair in the sense that they
+reach equilibrium infinitely often. Unfortunately, the distance
+between consecutive equilibrium points doubles at each step, meaning that
+equilibrium points are exponentially far apart, while ours
+are linearly far apart for alternation combinators or polynomially
+far apart for pairing combinators.
 
-It is tempting to think of Feat as supporting fairness because of the
-way it partitions the values to be enumerated into finite subsets,
-in such a way that the element of each finite subset has a fixed number
-of constructors. Unfortunately, this is not the same as fairness because
-Feat inserts ``dummy'' constructors in a way that makes all pairing
-operations be binary pairs. Put another way, it is not possible to 
-fairly enumerate a three-tuple of natural numbers using Feat. Feat
-can enumerate such tuples, but it effectively
-gives you an enumeration of nested pairs which is, as discussed in 
-@secref["sec:fair-informal"] and @secref["sec:fair-formal"], unfair.
-
-@citet[scife] is similar to Feat, but with
-the addition of a dependent combinator. Like Feat, it does not support
-@racket[except/e] or fairness.
+@citet[scife]'s SciFe library is closer to our library than
+Feat, but it has only one half of the bijection so it does
+not support @racket[except/e]. It has fair binary pairing
+and alternation combinators, but no n-ary fair combinators,
+and its paring operation is based on the Cantor pairing
+function, meaning that computing the n-ary fair version of
+it is expensive, as discussed in 
+@secref["sec:fair-informal"].
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages
@@ -66,7 +70,7 @@ elements of the set being encoded.
 
 @citet[bit-monad-transformers] explicitly discuss fairness in the
 context of logic programming, but talk about it in the specific cases
-of fair disjunction and fair conjunction, but they do not have a
+of fair disjunction and fair conjunction, and they do not have a
 unification of these two different types of fairness, nor do they have
 a concept of n-ary fair operators for n > 2.
 

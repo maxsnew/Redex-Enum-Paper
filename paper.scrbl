@@ -151,29 +151,40 @@ standard Cantor bijection and many others, including ones
 whose inverses are easier to compute in the n-tuple case (as
 explained later).
 
-We also report on an empirical study of the bug-finding
-capabilities of enumeration libraries for bugs in formal
-models of type systems and operational semantics. We built a
-benchmark suite of 50 bugs (based on our experience writing
-Redex models and the experience of others mined from git
-repositories of Redex models) and compare the bug/second
-rate with three different generators. Two of the generators are based
-on a bijection between the expressions of the language and the
-natural numbers: one enumerates terms in order and the other that selects a
-random (possibly large) natural number and uses that with the
-bijection between, and the third is an existing, ad hoc random
-generator that's been
-tuned for bug-finding in Redex models for more than a
-decade. Our results show that in-order enumeration and ad
-hoc generation have complementary strengths, but that
-selecting a random natural and using it with an enumeration
-is almost always worse than one of the other two choices.
+The motivation for the developing these enumeration
+libraries is bug-finding. Accordingly we tested our concept
+of fairness via an empirical study of the capability of
+enumeration libraries to find bugs in formal models of type
+systems and operational semantics in
+Redex@~cite[run-your-research]. We built a benchmark suite of 50
+bugs (based on our experience writing Redex models and the
+experience of others mined from git repositories of Redex
+models) and compare the bug/second rate with three different
+generators. Two of the generators are based on a bijection
+between the expressions of the language and the natural
+numbers: one enumerates terms in order and the other that
+selects a random (possibly large) natural number and uses
+that with the bijection between, and the third is an
+existing, ad hoc random generator that's been tuned for
+bug-finding in Redex models for more than a decade.
+
+As a baseline comparison, our
+results show that in-order enumeration and ad hoc generation
+have complementary strengths, and that selecting a random
+natural and using it with an enumeration is almost always
+slight worse than one of the other two choices. We also replaced
+fair combinators with unfair ones and show that the the bug-finding
+capabilities become much worse.
 
 The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction
 concrete. Then, in @secref["sec:fair-informal"] we give an
-intuition-based definition of fairness and follow up in 
-@secref["sec:fair-formal"] with a formal definition. Our
+intuition-based definition of fairness and discuss our
+our new n-tuple combinator, who design is motivated by fairness.
+We follow up in 
+@secref["sec:fair-formal"] with a formal definition of fairness
+and proofs that our combinators are fair and that a commonly used
+combinator is unfair. Our
 evaluation of the different random generation strategies is
 discussed in @secref["sec:evaluation"], and the last two
 sections discuss related work and conclude.

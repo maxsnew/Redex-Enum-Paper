@@ -15,12 +15,7 @@
 @title[#:tag "sec:enum"]{Introduction to Enumeration}
 
 This section gives a tour of our enumeration library and
-introduces the basics of enumeration. 
-@Secref["sec:fair-informal"] explains the concept of
-fairness and @secref["sec:fair-formal"] gives our formal
-model and an overview of the proofs. The rest of the paper
-discusses our evaluation, related work, and concludes.
-
+introduces the basics of enumeration.
 Our library provides basic enumerations and combinators
 that build up more complex ones. Each enumeration consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
@@ -68,9 +63,9 @@ a natural bnumber.
 The next combinator is the pairing operator 
 @racket[cons/e]. It takes two enumerations and returns an
 enumeration of pairs of those values. If one of the
-enumerations is finite, the enumeration loops through the
+input enumerations is finite, the result enumeration loops through the
 finite enumeration, pairing each with an element from the
-other enumeration. If both are finite, we loop through the
+infinite enumeration. If both are finite, it loops through the
 one with lesser cardinality. This corresponds to taking the
 quotient with remainder of the index with the lesser size.
 
@@ -98,15 +93,15 @@ and here are its first 12 elements:
 @enum-example[lon/e 12]
 An expression like @racket[(delay/e lon/e)] returns
 immediately, without evaluating the argument to @racket[delay/e].
-The first time encoding or decoding 
-happens, the value of the expression is computed (and cached). 
+The first time a value is extracted from the enumeration,
+the expression is evaluated (and its result is cached). 
 This means that a use of
 @racket[fix/e] that is too eager, e.g.:
-@racket[(letrec ([e (fix/e e)]) e)] will cause @racket[from-nat]
+@racket[(define e (fix/e e))] will cause @racket[from-nat]
 to fail to terminate.
 Indeed, switching the order of the arguments to @racket[or/e]
 in the above example also produces an enumeration
-that fails to terminate when decoding or encoding happens.
+that fails to terminate.
 
 Our combinators rely on knowing the
 sizes of their arguments as they are constructed, but in a recursive enumeration
@@ -136,8 +131,8 @@ when passed through the two functions.
 We exploit the bidirectionality of our enumerations to define
 the @racket[except/e] enumeration. It accepts an element and an
 enumeration, and returns an enumeration that doesn't have the given element. For
-example, the first 8 elements of @racket[(except/e natural/e 4)] are
-@enum-example[(except/e natural/e 4) 8] 
+example, the first 9 elements of @racket[(except/e natural/e 4)] are
+@enum-example[(except/e natural/e 4) 9] 
 The @racket[from-nat] function for @racket[except/e] simply
 uses the original enumeration's @racket[to-nat] on the given
 element and then either subtracts one before passing the

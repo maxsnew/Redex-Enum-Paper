@@ -74,13 +74,14 @@ the model actually defines two functions.
          and we can compute either the existential witness of @sr[n] or
          its absence.}
 @proof{As with the previous theorem, we recursively process
-       the rules to compute @sr[n], but this is complicated
-       by the fact that we need inverse functions for the 
-       formulas in the premises of the rules to go from the
-       given @sr[n] to the one to use in the recursive call,
-       but these inverses exist.
-       The full proof is given as @tt{Enumerates_to_dec_uniq} in
-       the supplementary material.}
+ the rules to compute @sr[n], but this is complicated by the
+ fact that we need inverse functions for the formulas in the
+ premises of the rules to go from the given @sr[n] to the
+ one to use in the recursive call, but these inverses
+ exist. The full proof is given as
+ @tt{Enumerates_to_dec_uniq} in the supplementary material,
+ and it includes proofs of the bijective nature of the
+ formulas.}
 
 Although we don't prove it formally, the situation when there is no
 @sr[n] in the second theorem corresponds to the situation where the value that 
