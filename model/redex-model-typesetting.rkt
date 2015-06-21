@@ -3,7 +3,7 @@
          pict
          "redex-model.rkt")
 
-(provide semantics-figure sr)
+(provide semantics-figure sr unfair-rule)
 
 (define (w/rewriters/proc thunk)
   

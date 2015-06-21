@@ -170,3 +170,21 @@ these sets are different, so @racket[triple/e] is unfair.
 The full proof is @tt{NaiveTripleUnfair} in the Coq model.
 }
 
+@theorem{A pairing operator defined using the unfair bijection
+ from the introduction, as in this rule:
+@centered{@(unfair-rule)}
+is unfair.}
+@proof{
+A complete trace from @texmath{0} to @texmath{n}
+will contain
+all of the values from @texmath{0} to
+@texmath{\lfloor n/2+1\rfloor} in the first component and
+all of the values from @texmath{0} to
+@texmath{\lfloor\log(n)\rfloor+1} in the second component.
+For any @texmath{n}
+greater than @texmath{8}, the first component will always
+have more values than the second component.
+The full proof is @tt{Unfair_Pair_Unfair} in the Coq model.
+}
+
+
