@@ -162,6 +162,11 @@
     (define T (list-ref lws 5))
     (list "" enum " @ " n " = " v " | " T ""))
   
+  (define (ae-sym lw)
+    (cond
+      [(symbol? (lw-e lw)) (ae->pict (lw-e lw))]
+      [else (error 'ae-sym "non symbol: ~s" (lw-e lw))]))
+  
   (with-compound-rewriters
    (['@ @-rewrite]
     ['@* @-rewrite]
@@ -268,10 +273,6 @@
        (define f (list-ref lws 3))
        (define e (list-ref lws 4))
        (define k (list-ref lws 5))
-       (define (ae-sym lw)
-         (cond
-           [(symbol? (lw-e lw)) (ae->pict (lw-e lw))]
-           [else (error 'ae-sym "non symbol: ~s" (lw-e lw))]))
        (list (hbl-append (d "sum_up_to(")
                          (ae-sym e)
                          (d ", ")
@@ -294,7 +295,15 @@
        (define n (list-ref lws 2))
        (define y (list-ref lws 3))
        (define x (list-ref lws 4))
-       (list "" n " = (2^" y ")·(2" x " + 1)"))])
+       (define y-p (ae-sym y))
+       (list ""
+             n
+             (hbl-append
+              (t " = 2")
+              (lift-above-baseline y-p (/ (pict-height y-p) 3))
+              (t "(2"))
+             x
+             " + 1)"))])
    (with-atomic-rewriter
     '∞ (λ () (d "∞"))
     (thunk))))
@@ -333,7 +342,7 @@
      20
      (ht-append 
       60
-      (inset (frame (inset (render-language L #:nts '(e n+ v)) 4)) 4)
+      (inset (frame (inset (render-language L #:nts '(e n+ v n i j k)) 4)) 4)
       (some-rules linebreaking-with-cases1))
      (some-rules linebreaking-with-cases2)
      (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]

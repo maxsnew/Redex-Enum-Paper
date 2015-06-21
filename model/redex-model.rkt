@@ -134,7 +134,7 @@
 (define-extended-judgment-form unfair-L @
   #:mode (@* I I O O)
   #:contract (@* e natural v T)
-  [(unfair-n->n*n n n_2 n_1) (@* e_1 n_1 v_1 T_1) (@* e_2 n_2 v_2 T_2)
+  [(unfair-n->n*n n i j) (@* e_1 j v_1 T_1) (@* e_2 i v_2 T_2)
    -----------------------------------------------------------
    (@* (unfair-cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))])
 
