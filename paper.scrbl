@@ -81,7 +81,7 @@ components instead of, say, indexing
 @texmath{\sqrt[2]{n}} into one and
 @texmath{\sqrt[4]{n}} into the other two as you would if
 you build a three-tuple out of nested pairs. Similarly,
-extracting the @raw-latex{$n$}th element from our
+extracting the @raw-latex{n}th element from our
 enumeration of a union of three enumerators returns an
 element that is @texmath{\frac{n}{3}} into one of the
 argument enumerators.

@@ -85,5 +85,5 @@ We follow up in
 and proofs that our combinators are fair and that a commonly used
 combinator is unfair. Our
 evaluation of the different random generation strategies is
-discussed in @secref["sec:evaluation"], and the last two
-sections discuss related work and conclude.
+discussed in @secref["sec:evaluation"]. The next two
+sections discuss related and future work, and the last section concludes.
