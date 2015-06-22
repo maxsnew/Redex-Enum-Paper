@@ -62,8 +62,8 @@ expressions like this:
               (cons/e natural/e natural/e)
               (cons/e natural/e natural/e))]
 (and then use @racket[map/e] to adjust the elements of
-the enumeration to be lists), then the
-@(add-commas one-billion) element is
+the enumeration to be lists), then the element at position
+@(add-commas one-billion) is
 @code{@(format "~v" (from-nat fair-four-tuple one-billion))},
 which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
