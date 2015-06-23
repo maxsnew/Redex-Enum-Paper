@@ -1,6 +1,7 @@
 #lang racket
 (require data/enumerate/lib
          pict
+         redex/pict
          scribble/manual
          rackunit)
 
@@ -24,8 +25,8 @@
     (or/e a (or/e b c)))
   (gen-table bad-disj-sum/e 8 32 40 8 #:arrows? #t #:last-arrow 15))
 
-(define (gen-table or/e y-count num-points size-per-cell arrow-head-size #:arrows? arrows? #:last-arrow [last-arrow +inf.0] 
-                   )
+(define (gen-table or/e y-count num-points size-per-cell arrow-head-size
+                   #:arrows? arrows? #:last-arrow [last-arrow +inf.0])
   (define x-count 3)
   (define width (* size-per-cell x-count))
   (define height (* size-per-cell y-count))
@@ -320,7 +321,8 @@
 (define-lon/e/dup lon/e-code lon/e
   (letrec ([lon/e
             (or/e (fin/e null)
-                  (cons/e natural/e (delay/e lon/e)))])
+                  (cons/e (below/e +inf.0)
+                          (delay/e lon/e)))])
     lon/e))
 
 (define-lon/e/dup lon2/e-code lon2/e

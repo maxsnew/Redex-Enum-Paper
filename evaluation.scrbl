@@ -91,11 +91,11 @@ than the other two.
 
 For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned
-based on our experience programming in Redex, but not
-recently. The most recent change to it was a bug fix in
+based on experience programming in Redex, but not
+recently. From the git logs, the most recent change to it was a bug fix in
 April of 2011 and the most recent change that affected
 the generation of random terms was in January of 2011,
-both well before we started working on the enumerations. 
+both well before we started investigating enumeration. 
 
 This generator, which is based on the method of recursively
 unfolding non-terminals, is parameterized over the depth at

@@ -11,18 +11,20 @@ In the past few years a number of different libraries have
 appeared that provide generic ways to build bijections
 between data structures and the natural numbers. First was
 Feat for Haskell in
-2012@note{https://hackage.haskell.org/package/testing-feat},
+2012@note{@url{https://hackage.haskell.org/package/testing-feat}},
 then SciFe for Scala in
-2014@note{http://kaptoxic.github.io/SciFe/}, and
+2014@note{@url{http://kaptoxic.github.io/SciFe/}}, and
 @tt{data/enumerate} for Racket this
-year.@note{http://docs.racket-lang.org/data/Enumerations.html}
+year.@note{@url{http://docs.racket-lang.org/data/Enumerations.html}}
+(The last library is ours and was written as part of the work in this paper.)
 
 These libraries are all efficient, generally providing the
 ability to extract the @texmath{2^{100}}-th element of an
 enumeration of a data structure in milliseconds. What they
 lack, however, is a mathematically precise notion of the
-quality of their combinators. To be concrete, all of
-these libraries provide a pairing combinator that accepts
+quality of their combinators. To be concrete consider the pairing
+combinator (which all of the libraries provide).
+It accepts
 two enumerations and returns an enumeration of pairs of the
 elements of the given enumeration. There are many ways one
 might build such an enumeration, based on the many ways that
@@ -40,15 +42,15 @@ than the ``y'' coordinate. Indeed, in the first
 has seen @(add-commas bad-max-x) but the biggest ``y'' coordinate
 seen is @(add-commas bad-max-y).
 
-In this paper, we offer a criterion called @emph{fairness}
-that classifies enumeration combinators. Intuitively, a
+This paper offers a criterion called @emph{fairness}
+that classifies enumeration combinators, rejecting the one
+in the previous paragraph as unfair and accepting accepting
+ones based on the standard Cantor bijection and many others,
+including ones whose inverses are easier to compute in the
+n-tuple case (as explained later). Intuitively, a
 combinator is fair if indexing deeply into the result of the
 combinator goes equally deeply into all the arguments to the
-combinator. Our definition rules out a pairing operation
-based on the function above, but accepts one based on the
-standard Cantor bijection and many others, including ones
-whose inverses are easier to compute in the n-tuple case (as
-explained later).
+combinator.
 
 The motivation for the developing these enumeration
 libraries is bug-finding. Accordingly we tested our concept

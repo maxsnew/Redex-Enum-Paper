@@ -14,31 +14,31 @@
 
 @title[#:tag "sec:enum"]{Introduction to Enumeration}
 
-This section gives a tour of our enumeration library and
-introduces the basics of enumeration.
+This section introduces the basics of enumeration
+via a tour of our enumeration library.
 Our library provides basic enumerations and combinators
 that build up more complex ones. Each enumeration consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
 a @racket[from-nat] function that computes a value from an index, the size
 of the enumeration, which can be either a natural number or positive infinity 
 (written @racket[+inf.0]),
-and a contract that captures all of the values in the enumeration precisely.
+and a contract that captures exactly the values in the enumeration.
 Each enumeration has the invariant that
 the @racket[to-nat] and @racket[from-nat] functions form a bijection between
-the natural numbers (up to the size) and the values that are being 
-enumerated.@note{Our library also supports one-way enumerations as
+the natural numbers (up to the size) and the values that satisfy
+the contract.@note{Our library also supports one-way enumerations as
                  they can be useful in practice, but we do not talk
                  about them here.}
 
-The most basic enumeration is @racket[natural/e]. Its @racket[to-nat]
-and @racket[from-nat] functions are simply the identity function
-and its size is @racket[+inf.0]. The combinator @racket[fin/e]
-builds a finite enumeration 
-from its arguments, so @racket[(fin/e 1 2 3 "a" "b" "c")] is
-an enumeration with the six given elements, where the elements
-are put in correspondence with the naturals in order they are
-given.
-
+The most basic enumeration is @racket[below/e]. It accepts a
+natural number or @racket[+inf.0] and returns an enumeration
+of that size. Its @racket[to-nat] and @racket[from-nat]
+functions are simply the identity functions. The combinator
+@racket[fin/e] builds a finite enumeration from its
+arguments, so @racket[(fin/e 1 2 3 "a" "b" "c")] is an
+enumeration with the six given elements, where the elements
+are put in correspondence with the naturals in order they
+are given.
 
 @figure["fig:pair-pict" "Pairing Order"]{
   @centered{@pair-pict[]}
@@ -53,12 +53,13 @@ every @racket[n] positions.  For example, the following is the
 beginning of the disjoint union of an enumeration of natural numbers
 and an enumeration of strings:
 
-@enum-example[(or/e natural/e string/e)
+@enum-example[(or/e (below/e +inf.0) string/e)
               16]
 
-The contracts associated with the enumerations are used to determine
-which enumeration a value came from when going from a value back to
-a natural bnumber.
+To compute the natural number given an element of the enumeration,
+each of the contracts on the input enumerations are tested. Accordingly,
+the @racket[or/e] enumeration is a true union, not requiring explicit
+injection and projection into a new datatype.
 
 The next combinator is the pairing operator 
 @racket[cons/e]. It takes two enumerations and returns an
@@ -74,9 +75,9 @@ imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening
 squares to enumerate all pairs (using @citet[elegant-pairing-function]'s
 bijection), as shown in @figure-ref["fig:pair-pict"].
-The first 12 elements of @racket[(cons/e natural/e natural/e)]
+The first 12 elements of @racket[(cons/e (below/e +inf.0) (below/e +inf.0))]
 enumerator are:
-@enum-example[(cons/e natural/e natural/e) 12]
+@enum-example[(cons/e (below/e +inf.0) (below/e +inf.0)) 12]
 
 The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
@@ -112,17 +113,17 @@ correct size, defaulting to infinite if not specified.
 
 To build up more complex enumerations, it is useful to be able to 
 adjust the elements of an existing enumeration. We use @racket[map/e] 
-which composes a bijection between any two
-sets with the bijection in an enumeration, so we can, for example, construct 
+which composes a bijection between elements of the contract of
+a given enumeration and a new contract. Using this we can, for example, construct 
 enumerations of natural numbers that start at some natural @racket[i] beyond zero:
 @racketblock/define[(define (naturals-above/e i)
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
-                             natural/e
+                             (below/e +inf.0)
                              #:contract (and/c exact-integer? (>=/c i))))]
 The first two arguments to @racket[map/e] are functions that
 form a bijection between the values in the enumeration argument
-and the contract given as the final argument (the @racket[#:contract]
+and the contract given as the final argument (@racket[#:contract]
 is a keyword argument specifier). As it is easy to make simple mistakes
 when building the bijection, @racket[map/e]'s contract randomly checks
 a few values of the enumeration to make sure they map back to themselves
@@ -131,8 +132,8 @@ when passed through the two functions.
 We exploit the bidirectionality of our enumerations to define
 the @racket[except/e] enumeration. It accepts an element and an
 enumeration, and returns an enumeration that doesn't have the given element. For
-example, the first 9 elements of @racket[(except/e natural/e 4)] are
-@enum-example[(except/e natural/e 4) 9] 
+example, the first 9 elements of @racket[(except/e (below/e +inf.0) 4)] are
+@enum-example[(except/e (below/e +inf.0) 4) 9] 
 The @racket[from-nat] function for @racket[except/e] simply
 uses the original enumeration's @racket[to-nat] on the given
 element and then either subtracts one before passing the
@@ -142,25 +143,25 @@ simply passes it along (if it is below). Similarly, the
 enumeration's @racket[to-nat] function.
 
 One important point about the combinators used so far: the
-decoding function is linear in the number of bits in the
+conversion from a natural to a value takes time that is linear in the number of bits in the
 number it is given. This means, for example, that it takes only
 a few milliseconds to compute the
 @raw-latex{$2^{100,000}$}th element
-in the list of natural numbers enumeration given above, for example.
+in the list of natural numbers enumeration given above.
 
 Our next combinator, @racket[cons/de], does not always have this property.
 It builds enumerations of pairs, but where the enumeration on one
 side of the pair depends on the element in the other side of the pair.
 For example, we can define an enumeration of ordered pairs 
 (where the first position is smaller than the second) like this:
-@racketblock[(cons/de [hd natural/e]
+@racketblock[(cons/de [hd (below/e +inf.0)]
                       [tl (hd) (naturals-above/e hd)])]
-A @racket[cons/de] has two subexpressions (@racket[natural/e] and @racket[(naturals-above/e i)]
+A @racket[cons/de] has two subexpressions (@racket[(below/e +inf.0)] and @racket[(naturals-above/e i)]
 in this example), each of which is named (@racket[hd] and @racket[tl] in this example).
 And one of the expressions may refer to the other's variable by putting it
 into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd]).
 Here are the first 12 elements of the enumeration:
-@enum-example[(cons/de [hd natural/e] 
+@enum-example[(cons/de [hd (below/e +inf.0)] 
                        [tl (hd) (naturals-above/e hd)])
               12]
 The implementation of @racket[dep/e] has three different
@@ -187,3 +188,7 @@ all of the enumerations for the second component as soon
 as a single (sufficiently large) number is passed to @racket[from-nat],
 which can, in the worst case, take time proportional to the
 magnitude of the number.
+
+Our library has a number of other combinators not discussed here, but
+these are the most important ones and give a flavor of the capabilities
+of enumerations one can build with the library.

@@ -74,7 +74,7 @@ whose results are well-behaved with respect to their
 arguments and rejects others.
 Intuitively the result of fair combinator indexes into its
 argument enumerations equally when constructing its result.
-For example, extracting the @texmath{$n$}th element from
+For example, extracting the @texmath{n}th element from
 our enumeration of three-tuples indexes about
 @texmath{\sqrt[3]{n}} elements into each of its
 components instead of, say, indexing

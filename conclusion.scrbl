@@ -7,7 +7,7 @@ This paper presents a new concept for enumeration,
 fairness, backing it up with a theoretical development
 of fair combinators, an implementation, and an empirical
 study showing that fair enumeration can support an 
-effective testing tool. 
+effective testing tool and that unfair enumerations do not.
 
 Indeed, the results of our empirical study have convinced us
 to modify Redex's default random testing functionality. The new

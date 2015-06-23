@@ -3,7 +3,8 @@
          pict
          "redex-model.rkt")
 
-(provide semantics-figure sr unfair-rule)
+(provide semantics-figure sr unfair-rule
+         mf-name)
 
 (define (w/rewriters/proc thunk)
   
@@ -97,11 +98,15 @@
          (hbl-append arg (d "²"))]
         [`(size ,ae)
          (define arg (loop #f ae))
-         (hbl-append (d "‖") arg (d "‖"))]
+         (hbl-append (left-double-bar) arg (right-double-bar))]
         [`(sum-all ,e ,f)
          (maybe-add-parens
           needs-parens?
-          (hbl-append (d "Σ x ∈ ") (loop #t e) (d ". ‖") (loop #t f) (d "(x)‖")))]
+          (hbl-append (d "Σ x ∈ ") (loop #t e) (d ". ")
+                      (left-double-bar)
+                      (loop #t f)
+                      (d "(x)")
+                      (right-double-bar)))]
         [`(sum-up-to ,e ,f ,n)
          (hbl-append (d "sum_up_to(")
                      (loop #t e)
@@ -141,7 +146,7 @@
   
   (define (maybe-add-parens add? p)
     (cond
-      [add? (hbl-append (t "(") p (t ")"))]
+      [add? (hbl-append (d "(") p (d ")"))]
       [else p]))
   
   (define (simple? x) (or (number? x) (symbol? x)))
@@ -160,7 +165,35 @@
     (define n (list-ref lws 3))
     (define v (list-ref lws 4))
     (define T (list-ref lws 5))
-    (list "" enum " @ " n " = " v " | " T ""))
+    (list "" enum " @ " n " = " v (single-bar) T ""))
+
+  (define (bar/s left? x-off)
+    (define pipe (d "|"))
+    (define w (* (pict-width pipe) (if x-off 2 3)))
+    (define h (pict-height pipe))
+    (define descent (pict-descent pipe))
+    (define a (pict-ascent pipe))
+    (dc (λ (dc dx dy)
+          (define pen (send dc get-pen))
+          (send dc set-pen "black" 1/2 'solid)
+          (define (draw-line x-offset)
+            (send dc draw-line
+                  (+ dx (/ w 2) x-offset)
+                  dy
+                  (+ dx (/ w 2) x-offset)
+                  (+ dy h)))
+          (cond
+            [x-off
+             (draw-line 0)
+             (draw-line (if left? (- x-off) x-off))]
+            [else
+             (draw-line 0)])
+          (send dc set-pen pen))
+        w h a descent))
+
+  (define (left-double-bar) (bar/s #f 1))
+  (define (right-double-bar) (bar/s #t 1))
+  (define (single-bar) (bar/s #f #f))
   
   (define (ae-sym lw)
     (cond
@@ -187,7 +220,12 @@
                           "n"
                           "v"
                           "T")))
-       (list "∀ x ∈ " e ",  ‖" f "(x)‖ = ∞"))]
+       (list "∀ x ∈ " e
+             (hbl-append (d ",  ") (left-double-bar))
+             f
+             (hbl-append (d "(x)")
+                         (right-double-bar)
+                         (d " = ∞"))))]
     ['fin?
      (λ (lws)
        (define e (list-ref lws 3))
@@ -197,7 +235,11 @@
                           "n"
                           "v"
                           "T")))
-       (list "∀ x ∈ " e ",  ‖" f "(x)‖ < ∞"))]
+       (list "∀ x ∈ "
+             e
+             (hbl-append (d ",  ") (left-double-bar))
+             f
+             (hbl-append (d "(x)") (right-double-bar) (d " < ∞"))))]
     ['subst
      (λ (lws)
        (define replace-inside (list-ref lws 2))
@@ -211,10 +253,13 @@
      (λ (lws)
        (define e (list-ref 2))
        (define f (list-ref 3))
-       (list "Σ x ∈ " e ". ‖" f "(x)‖"))]
+       (list "Σ x ∈ " e
+             (hbl-append (d ". ") (left-double-bar))
+             f
+             (hbl-append (d "(x)") (right-double-bar))))]
     ['size
      (λ (lws)
-       (list "‖" (list-ref lws 2) "‖"))]
+       (list (left-double-bar) (list-ref lws 2) (right-double-bar)))]
     ['unpair
      (λ (lws)
        (list "unpair(" (list-ref lws 2) ", " (list-ref lws 3) ", " (list-ref lws 4) ")"))]
@@ -250,11 +295,14 @@
        (define f (list-ref lws 2))
        (define e (list-ref lws 3))
        (define n (list-ref lws 4))
-       (list (d "Σ{‖")
+       (list (hbl-append (d "Σ{")
+                         (left-double-bar))
              f
              (hbl-append (d "(")
                          (ae->pict 'v)
-                         (d ")‖ | ("))
+                         (d ")")
+                         (right-double-bar)
+                         (d " | ("))
              e
              (hbl-append (d " @ ")
                          (ae->pict 'i)
@@ -299,9 +347,9 @@
        (list ""
              n
              (hbl-append
-              (t " = 2")
+              (d " = 2")
               (lift-above-baseline y-p (/ (pict-height y-p) 3))
-              (t "(2"))
+              (d "(2"))
              x
              " + 1)"))])
    (with-atomic-rewriter
@@ -319,7 +367,7 @@
     ("or big l" "or big r")
     ("ex<" "dep inf")
     ("ex≥" "dep fin")
-    ("trace" "fix")))
+    ("fix" "trace")))
 
 (define-syntax-rule
   (w/fonts e)
@@ -342,7 +390,7 @@
      20
      (ht-append 
       60
-      (inset (frame (inset (render-language L #:nts '(e n+ v n i j k)) 4)) 4)
+      (inset (frame (inset (render-language L #:nts '(e n+ v n i j)) 4)) 4)
       (some-rules linebreaking-with-cases1))
      (some-rules linebreaking-with-cases2)
      (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
@@ -378,8 +426,12 @@
   (sr/proc (λ () (render-term L e))))
 (define (sr/proc t) 
   (parameterize ([default-font-size 11])
-    (w/rewriters
-     (t))))
+    (w/fonts
+     (w/rewriters
+      (t)))))
+(define (mf-name mf)
+  (w/fonts
+   ((current-text) mf (metafunction-style) (metafunction-font-size))))
 
 (module+ main 
   (define sf (semantics-figure))
