@@ -18,6 +18,17 @@ Definition F_Fair2 {tout} (f : nat -> nat) (k : forall {ty1 ty2}, Enum ty1 -> En
 Definition Fair2 {tout} (k : forall ty1 ty2 : Set, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
   exists f, @F_Fair2 tout f k.
 
+Definition F_Unfair2 {tout} (f : nat -> nat)
+  (k : forall {ty1 ty2}, Enum ty1 -> Enum ty2 -> Enum (tout ty1 ty2)) :=
+  (~ (@Fair2 tout (fun a b => @k a b)))
+  /\
+  forall n,
+    match Trace_lt (k (E_Trace zero E_Nat) (E_Trace one E_Nat)) n with
+      | Tracing l_uses r_uses _ _ =>
+        f (min (set_size l_uses) (set_size r_uses)) =
+        max (set_size l_uses) (set_size r_uses)
+    end.
+
 Definition F_Fair3 {tout} (f : nat -> nat) (k : forall {ty1 ty2 ty3}, Enum ty1 -> Enum ty2 -> Enum ty3 -> Enum (tout ty1 ty2 ty3)) :=
   forall n,
     let equilibrium := f n
@@ -856,7 +867,7 @@ Section Unfair_Unfair.
     destruct H.
   Qed.
 
-  Theorem Unfair_Pair_Unfair : ~ (@Fair2 prod (@E_Unfair_Pair)).
+  Lemma Unfair_Pair_Unfair : ~ (@Fair2 prod (@E_Unfair_Pair)).
   Proof.
     unfold Fair2.
     unfold F_Fair2.
@@ -903,6 +914,60 @@ Section Unfair_Unfair.
     intuition.
   Qed.
 
+  Theorem Unfair_Pair_F_Unfair : (@F_Unfair2 prod (fun n => n*11) (@E_Unfair_Pair)).
+  Proof.
+    split.
+    apply Unfair_Pair_Unfair.
+    intros n.
+    remember (E_Unfair_Pair (E_Trace zero E_Nat) (E_Trace one E_Nat)) as UPTN.
+    remember (Trace_lt UPTN n) as TRACING.
+    destruct TRACING as [s0 s1 s2 s3].
+
+    assert (s0 = trace_proj zero (Trace_lt UPTN n)) as ZERO.
+    unfold trace_proj.
+    inversion HeqTRACING.
+    auto.
+
+    assert (s1 = trace_proj one (Trace_lt UPTN n)) as ONE.
+    unfold trace_proj.
+    inversion HeqTRACING.
+    auto.
+
+    clear HeqTRACING s2 s3.
+
+    destruct n.
+    destruct Unfair_Pair_left_precise as [LZERO _].
+    remember (Unfair_Pair_right_precise 0) as RZERO.
+    replace (set_size s0) with (set_size ∅) by (subst; apply equiv_set_size;auto).
+    simpl div2 in RZERO.
+    simpl z_to_n in RZERO.
+    replace (set_size s1) with (set_size ∅) by (subst; apply equiv_set_size;auto).
+    admit.
+
+    assert (Unfair_Unfair.UPTN = UPTN) by (subst;auto).
+
+    destruct Unfair_Pair_left_precise as [_ LNZ].
+    remember (LNZ n).
+    replace (set_size s1) with (set_size (z_to_n (S (fl_log n))))
+      by (subst UPTN s1;
+          apply equiv_set_size;
+          apply set_eq_symm;
+          auto).
+    
+    remember (Unfair_Pair_right_precise (S n)).
+    replace (set_size s0) with (set_size (z_to_n (div2 (S (S n)))))
+      by (subst UPTN s0;
+          apply equiv_set_size;
+          apply set_eq_symm;
+          auto).
+    repeat (rewrite set_size_z_to_n).
+
+    (* note that the *11 here is just a placeholder so we can
+       see where the function we would need would go *)
+
+    admit.
+  Qed.
+    
 End Unfair_Unfair.
 
 (* Local Variables: *)

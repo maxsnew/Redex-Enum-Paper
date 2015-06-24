@@ -512,6 +512,39 @@ Qed.
 Definition set_eq_dec s1 s2 : { s1 ≃ s2 } + { ~ (s1 ≃ s2) }.
 Proof. refine (subset_dec s1 s2 &&& subset_dec s2 s1) ;unfold not; set_crush. Qed.
 
+Fixpoint set_size (s : set') : nat :=
+  match s with
+    | nil => 0
+    | (ele :: s') =>
+      if (set_In_dec eq_nat_dec ele s')
+      then (set_size s')
+      else (S (set_size s'))
+  end.
+
+Lemma subset_set_size : forall s1 s2, s1 ⊂ s2 -> set_size s1 <= set_size s2.
+Proof.
+  intros s1 s2 SUBSET.
+  admit.
+Qed.
+
+Lemma equiv_set_size : forall s1 s2, s1 ≃ s2 -> set_size s1 = set_size s2.
+Proof.
+  intros s1 s2 EQUIV.
+  destruct EQUIV as [L R].
+  apply subset_set_size in L.
+  apply subset_set_size in R.
+  nliamega.
+Qed.
+
+Lemma set_size_z_to_n : forall n, set_size(z_to_n n) = n.
+Proof.
+  intros n.
+  induction n.
+  simpl;auto.
+  simpl.
+  admit.
+Qed.  
+
 (* Local Variables: *)
 (* coq-load-path: (("." "Enum")) *)
 (* end: *)
