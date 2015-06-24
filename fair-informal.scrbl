@@ -102,9 +102,13 @@ be impossible to do fairly.
 Instead, we insist that there are infinitely many places in
 the enumeration where the combinators reach an equilibrium. That is,
 there are infinitely many points where the result of the combinator
-has used all of the argument enumerations equally. We also refine
-fair combinators, saying that a combinator is @texmath{f}-fair if
-the distance between consecutive equilibrium point is @texmath{O(f)}.
+has used all of the argument enumerations equally.
+
+We also refine fair combinators, saying that a combinator is
+@texmath{f}-fair if the @texmath{n}th equilibrium point is at
+@texmath{f(n)}. Parameterizing fairness by this function gives us
+a way to say to quantify fair combinators, preferring those that
+reach equilibrium more often.
 
 As an example, consider the fair nested @racket[cons/e]
 from the beginning of the section. As we saw, at the point @(add-commas one-billion),
