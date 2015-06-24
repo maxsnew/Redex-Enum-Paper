@@ -1,0 +1,6 @@
+(start 2015-06-16T22:33:30 (#:model "stlc-7" #:type enum-mildly-unfair))
+(counterexample 2015-06-16T22:36:48 (#:model "stlc-7" #:type enum-mildly-unfair #:counterexample ((λ (r (int → int)) -213) ((λ (c int) (λ (a int) a)) 161)) #:iterations 14794 #:time 196544))
+(new-average 2015-06-16T22:36:48 (#:model "stlc-7" #:type enum-mildly-unfair #:average 196544.0 #:stderr +nan.0))
+(counterexample 2015-06-17T21:43:30 (#:model "stlc-7" #:type enum-mildly-unfair #:counterexample ((λ (a int) cons) (hd nil)) #:iterations 6511254 #:time 83222852))
+(new-average 2015-06-17T21:43:30 (#:model "stlc-7" #:type enum-mildly-unfair #:average 41709698.0 #:stderr 41513154.0))
+(finished 2015-06-17T22:33:08 (#:model "stlc-7" #:type enum-mildly-unfair #:time-ms 86400009 #:attempts 6818022 #:num-counterexamples 2 #:rate-terms/s 78.91228344663715 #:attempts/cexp 3409011.0))
