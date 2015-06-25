@@ -56,40 +56,40 @@
        (list type (reverse (cons (list max-t (/ (length pts) 2)) pts))))
      <
      #:key (λ (x) (hash-ref order (car x)))))
+
+  ;; x-coordinate-map : hash[y -o> hash[type -o> x]]
+  ;; maps each bug count total to a table of the time that
+  ;; it took each attempt to find that many bugs
+  (define bug-count-to-times-map (make-hash))
+  (define max-bug-count 0)
+  (for ([type+data (in-list types+datas)])
+    (define type (list-ref type+data 0))
+    (for ([point (in-list (list-ref type+data 1))])
+      (define bug-count (list-ref point 1))
+      (define time (list-ref point 0))
+      (define ht (hash-ref! bug-count-to-times-map bug-count (λ () (make-hash))))
+      (hash-set! ht type time)
+      (set! max-bug-count (max bug-count max-bug-count))))
   
-  (unless (= 3 (length types+datas)) 
-    (eprintf "ack: assuming that there are only three competitors ... crossovers are wrong!\n"))
   (define-values (_ crossover-points)
     (for/fold ([last-winner #f]
                [crossover-points '()])
-      ([grammar-pr (in-list (list-ref (assoc 'grammar types+datas) 1))]
-       [enum-pr (in-list (list-ref (assoc 'enum types+datas) 1))]
-       [ordered-pr (in-list (list-ref (assoc 'ordered types+datas) 1))])
-      (unless (and (= (list-ref grammar-pr 1)
-                      (list-ref enum-pr 1))
-                   (= (list-ref grammar-pr 1)
-                      (list-ref ordered-pr 1)))
-        (error 'plot-lines.rkt "ack: expected points to match up ~s ~s ~s"
-               grammar-pr
-               enum-pr
-               ordered-pr))
-      (define y-position (list-ref grammar-pr 1))
-      (define grammar-time (list-ref grammar-pr 0))
-      (define enum-time (list-ref enum-pr 0))
-      (define ordered-time (list-ref ordered-pr 0))
-      (define best (min grammar-time enum-time ordered-time))
-      (define current-winner
-        (cond
-          [(= grammar-time best) 'grammar]
-          [(= ordered-time best) 'ordered]
-          [(= enum-time best) 'enum]))
-      (values current-winner
+              ([bug-count (in-range (+ max-bug-count 1))])
+      (define y-table (hash-ref bug-count-to-times-map bug-count))
+      (define-values (current-best-type current-best-time)
+        (for/fold ([current-best-time #f]
+                   [current-best-y #f])
+                  ([(type time) (in-hash y-table)])
+          (if (or (not current-best-time) (<= time current-best-y))
+              (values type time)
+              (values current-best-time current-best-y))))
+      (values current-best-type
               (cond
-                [(and last-winner (not (equal? last-winner current-winner)))
-                 (cons (point-label (vector best y-position)
+                [(and last-winner (not (equal? last-winner current-best-type)))
+                 (cons (point-label (vector current-best-time bug-count)
                                     (format "~a, ~a"
-                                            (number+unit/s y-position "bug")
-                                            (format-time best))
+                                            (number+unit/s bug-count "bug")
+                                            (format-time current-best-time))
                                     #:anchor 'bottom-right)
                        crossover-points)]
                 [else
