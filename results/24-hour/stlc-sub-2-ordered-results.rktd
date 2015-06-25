@@ -1,1 +1,0 @@
-("/files2/scratch/robby/racket/pkgs/redex-pkgs/redex-examples/redex/examples/benchmark/stlc-sub/stlc-sub-2.rkt" ordered 9235)

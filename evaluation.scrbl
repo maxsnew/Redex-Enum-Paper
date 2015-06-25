@@ -10,8 +10,6 @@
           racket/runtime-path
           (only-in pict scale))
 
-@(define-runtime-path 2-25-15 "results/2-25-15")
-
 @title[#:tag "sec:evaluation"]{Empirical Evaluation}
 
 We compared three types of test-case generation using a set
@@ -41,7 +39,7 @@ until 24 hours elapses, whichever comes first.
          @list{Overview of random testing performance of ad hoc generation,
                in-order enumeration, and random indexing into an enumeration,
                on a benchmark of Redex models.}
-         (plot-lines-from-directory 2-25-15)]
+         (plot-lines-from-directory)]
 
 @; TODO: decide if we want to be more specific
 We used two identical 64 core AMD machines with Opteron
@@ -87,7 +85,7 @@ than the other two.
          @list{The mean time each generator takes to find the bugs,
                for each bug that some generator found; bars indicate
                90% confidence intervals}
-         (plot-points-from-directory 2-25-15)]
+         (plot-points-from-directory)]
 
 For the ad hoc random generation, we use Redex's existing 
 random generator@~cite[sfp2009-kf]. It has been tuned

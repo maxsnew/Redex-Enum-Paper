@@ -2,18 +2,20 @@
 
 (require redex/benchmark/private/graph-data
          plot/pict pict
-         "process-data.rkt")
+         "process-data.rkt"
+         racket/runtime-path)
+
+(define-runtime-path all "all")
 
 (provide plot-lines-from-directory
-         type-name->description)
+         type-name->description
+         all)
 
 (module+ main
-  (require racket/cmdline)
-  (command-line
-   #:args (directory)
-   (plot-lines-from-directory directory "line-plot.pdf")))
+  (plot-lines-from-directory "line-plot.pdf"))
 
-(define (plot-lines-from-directory directory [output #f])
+(define (plot-lines-from-directory [output #f])
+  (define directory all)
   (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
     (apply values (read-data-for-directory directory)))
   (parameterize ([plot-x-transform log-transform]
@@ -56,7 +58,7 @@
      #:key (λ (x) (hash-ref order (car x)))))
   
   (unless (= 3 (length types+datas)) 
-    (error 'plot-lines.rkt "ack: assuming that there are only three competitors"))
+    (eprintf "ack: assuming that there are only three competitors ... crossovers are wrong!\n"))
   (define-values (_ crossover-points)
     (for/fold ([last-winner #f]
                [crossover-points '()])
@@ -102,16 +104,24 @@
       (reverse pts)
       ;#:width 2
       #:color ((type-colors) type)
-      #:style (list-ref line-styles n)
+      #:style (list-ref line-styles (modulo n (length line-styles)))
       #:label (type-name->description type)))))
 
-(define order (hash 'grammar 0 'ordered 1 'enum 2))
+(define order (hash 'grammar 0 'ordered 1 'enum 2
+                    'enum-mildly-unfair 3
+                    'enum-brutally-unfair 4
+                    'ordered-mildly-unfair 5
+                    'ordered-brutally-unfair 6))
   
 (define (type-name->description name)
   (case name
     [(grammar) "Ad Hoc Random Generation"]
     [(ordered) "In-Order Enumeration"]
-    [(enum) "Uniform, Random Selection via Enumerators"]))
+    [(enum) "Uniform, Random Selection via Enumerators"]
+    [(enum-mildly-unfair) "Uniform, Random Mildly Unfair"]
+    [(enum-brutally-unfair) "Uniform, Random Brutally Unfair"]
+    [(ordered-mildly-unfair) "In-Order Mildly Unfair"]
+    [(ordered-brutally-unfair) "In-Order Brutally Unfair"]))
 
 (define (format-time number)
   (cond
