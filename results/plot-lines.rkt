@@ -9,12 +9,25 @@
 
 (provide plot-lines-from-directory
          type-name->description
-         all)
+         all
+         order)
 
 (module+ main
-  (plot-lines-from-directory "line-plot.pdf"))
+  (plot-lines-from-directory '("line-plot-enum.pdf" "line-plot-ordered.pdf")))
 
-(define (plot-lines-from-directory [output #f])
+(define (plot-lines-from-directory [outputs #f])
+  (define fst
+    (plot-one-set-of-lines-from-directory
+     (set 'grammar 'ordered 'ordered-mildly-unfair 'ordered-brutally-unfair)
+     (and outputs (list-ref outputs 0))))
+  (define snd
+    (plot-one-set-of-lines-from-directory
+     (set 'grammar 'enum 'enum-mildly-unfair 'enum-brutally-unfair)
+     (and outputs (list-ref outputs 1))))
+  (unless outputs
+    (vc-append fst snd)))
+
+(define (plot-one-set-of-lines-from-directory types-to-include output)
   (define directory all)
   (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
     (apply values (read-data-for-directory directory)))
@@ -22,22 +35,16 @@
                  [plot-x-label "Time in Seconds"]
                  [plot-y-label "Number of Bugs Found"]
                  [plot-width 630] 
-                 [plot-height 400]
+                 [plot-height 380]
                  [plot-x-ticks (log-ticks #:number 20 #:base 10)])
     (if output
-        (plot-file (make-renderers data-stats)
+        (plot-file (make-renderers data-stats types-to-include)
                    output
                    #:x-min 0.05)
-        (rotate
-         (plot-pict (make-renderers data-stats)
-                    #:x-min 0.05)
-         (/ pi 2)))))
+        (plot-pict (make-renderers data-stats types-to-include)
+                   #:x-min 0.05))))
 
-(define line-styles
-  (list 'solid 'dot 'long-dash
-        'short-dash 'dot-dash))
-
-(define (make-renderers stats)
+(define (make-renderers stats types-to-include)
   (define max-t (apply max (map third stats)))
   
   ;; (listof (list/c type data))
@@ -64,12 +71,13 @@
   (define max-bug-count 0)
   (for ([type+data (in-list types+datas)])
     (define type (list-ref type+data 0))
-    (for ([point (in-list (list-ref type+data 1))])
-      (define bug-count (list-ref point 1))
-      (define time (list-ref point 0))
-      (define ht (hash-ref! bug-count-to-times-map bug-count (λ () (make-hash))))
-      (hash-set! ht type time)
-      (set! max-bug-count (max bug-count max-bug-count))))
+    (when (set-member? types-to-include type)
+      (for ([point (in-list (list-ref type+data 1))])
+        (define bug-count (list-ref point 1))
+        (define time (list-ref point 0))
+        (define ht (hash-ref! bug-count-to-times-map bug-count (λ () (make-hash))))
+        (hash-set! ht type time)
+        (set! max-bug-count (max bug-count max-bug-count)))))
   
   (define-values (_ crossover-points)
     (for/fold ([last-winner #f]
@@ -97,31 +105,61 @@
   (append 
    crossover-points
    (for/list ([type+pts (in-list types+datas)]
-              [n (in-naturals)])
+              [n (in-naturals)]
+              #:when (set-member? types-to-include (list-ref type+pts 0)))
      (define type (list-ref type+pts 0))
      (define pts (list-ref type+pts 1))
      (lines
       (reverse pts)
-      ;#:width 2
-      #:color ((type-colors) type)
-      #:style (list-ref line-styles (modulo n (length line-styles)))
+      #:color (hash-ref line-color type)
+      #:width (hash-ref line-width type)
+      #:style (hash-ref line-style type)
       #:label (type-name->description type)))))
 
-(define order (hash 'grammar 0 'ordered 1 'enum 2
-                    'enum-mildly-unfair 3
-                    'enum-brutally-unfair 4
-                    'ordered-mildly-unfair 5
-                    'ordered-brutally-unfair 6))
+(define line-width
+  (hash 'grammar 3
+        'ordered 1
+        'ordered-mildly-unfair 1
+        'ordered-brutally-unfair 1
+        'enum 1
+        'enum-mildly-unfair 1
+        'enum-brutally-unfair 1))
+
+(define line-style
+  (hash 'grammar 'solid
+        'ordered 'solid
+        'ordered-mildly-unfair 'long-dash
+        'ordered-brutally-unfair 'dot
+        'enum 'solid
+        'enum-mildly-unfair 'long-dash
+        'enum-brutally-unfair 'dot))
+
+(define line-color
+  (hash 'grammar 0
+        'ordered 1
+        'ordered-mildly-unfair 1
+        'ordered-brutally-unfair 1
+        'enum 2
+        'enum-mildly-unfair 2
+        'enum-brutally-unfair 2))
+
+(define order (hash 'grammar 0
+                    'ordered 1
+                    'ordered-mildly-unfair 2
+                    'ordered-brutally-unfair 3
+                    'enum 4
+                    'enum-mildly-unfair 5
+                    'enum-brutally-unfair 6))
   
 (define (type-name->description name)
   (case name
     [(grammar) "Ad Hoc Random Generation"]
     [(ordered) "In-Order Enumeration"]
-    [(enum) "Uniform, Random Selection via Enumerators"]
-    [(enum-mildly-unfair) "Uniform, Random Mildly Unfair"]
-    [(enum-brutally-unfair) "Uniform, Random Brutally Unfair"]
-    [(ordered-mildly-unfair) "In-Order Mildly Unfair"]
-    [(ordered-brutally-unfair) "In-Order Brutally Unfair"]))
+    [(ordered-mildly-unfair) "In-Order Enumeration, Mildly Unfair"]
+    [(ordered-brutally-unfair) "In-Order Enumeration, Brutally Unfair"]
+    [(enum) "Uniform Random Selection"]
+    [(enum-mildly-unfair) "Uniform Random Selection, Mildly Unfair"]
+    [(enum-brutally-unfair) "Uniform Random Selection, Brutally Unfair"]))
 
 (define (format-time number)
   (cond
@@ -152,82 +190,6 @@
     (hash-set h (second s)
               (cons (third s)
                     (hash-ref h (second s) '())))))
-#;
-(define (correlation-plot filenames)
-  (vl-append 10
-             (single-correlation-plot filenames 'grammar 1)
-             (single-correlation-plot filenames 'enum 2)
-             (single-correlation-plot filenames 'ordered 3)))
-#;
-(define (single-correlation-plot directory type color)
-  (define-values (d-stats b) (process-data
-     (extract-data/log-directory directory)
-     (extract-names/log-directory directory)))
-  (define type/index (hash 'S 0
-                           'SM 1
-                           'M 2
-                           ;'MD 3
-                           'D 3
-                           'U 4))
-  (define index/type (for/hash ([(k v) (in-hash type/index)])
-                       (values v k)))
-
-  (define the-y-ticks
-    (ticks 
-     (λ (r1 r2) 
-       (for/list ([i (in-range (hash-count type/index))])
-         (pre-tick i #t)))
-     (λ (r1 r2 pre-ticks)
-       (for/list ([n (in-range (hash-count type/index))])
-         (format "~a" (hash-ref index/type n))))))
-  
-  (parameterize ([plot-x-transform log-transform]
-                 [plot-y-ticks the-y-ticks]
-                 [plot-x-ticks (log-ticks #:number 20 #:base 10)]
-                 [plot-x-label (hash-ref type-names type)]
-                 [plot-y-label "Human Estimate of Bug Complexity"]
-                 [plot-width 240]
-                 [plot-height 240])
-    (define unknowns (make-hash))
-    (define unknown-x-position #e1e5)
-    (define known-pts 
-      (points 
-       #:y-min -1
-       #:y-max (hash-count type/index)
-       #:x-max #e18e4
-       #:sym (hash-ref type-symbols type)
-       #:size (* (point-size) 1.5)
-       #:color color
-       (filter
-        values
-        (for/list ([base+num (in-list all-types/nums)])
-          (define base (list-ref base+num 0))
-          (define num (list-ref base+num 1))
-          (define time (type+num+method->average
-                        d-stats 
-                        (cond
-                          [(equal? base 'rvm)
-                           'verification]
-                          [else base])
-                        num type))
-          (define cat (hash-ref (hash-ref type->num->cat base) num))
-          ;; no time => no success; collect them to put on the rhs
-          (unless time 
-            (hash-set! unknowns cat (+ 1 (hash-ref unknowns cat 0))))
-          (define (fail)
-            (error 'plot-lines.rkt "unknown category ~s ~s" cat base+num))
-          (and time
-               (list time
-                     (hash-ref type/index 
-                               cat 
-                               fail)))))))
-    (define unknown-pts
-      (for/list ([(cat count) (in-hash unknowns)])
-        (point-label (list unknown-x-position (hash-ref type/index cat))
-                     (format "~a" count)
-                     #:anchor 'right)))
-    (define pts (cons known-pts unknown-pts))
-    (plot-pict pts #:x-min 0.05 #:x-max #e18e4)))
 
 (define/contract (type+num+method->average d-stats base num method)
   (-> any/c
@@ -242,32 +204,3 @@
     (and (equal? (path->string name) fn)
          (equal? method (list-ref ele 1))
          (list-ref ele 2))))
-#;
-(define/contract (unique-sucesses filenames)
-  (-> (listof any/c)
-      (hash/c (or/c 'grammar 'ordered 'enum)
-              (listof (list/c symbol? number?))))
-  
-  ;; success-table : hash[(list/c base num) -o> (setof method)])
-  (define success-table (make-hash))
-  
-  (define-values (d-stats b) (process-data
-                              (extract-data/log-directory directory)
-                              (extract-names/log-directory directory)))
-  (for ([base+num (in-list all-types/nums)])
-    (define base (list-ref base+num 0))
-    (define num (list-ref base+num 1))
-    (for ([method (in-list '(grammar ordered enum))])
-      (when (type+num+method->average d-stats base num method)
-        (define key (list base num))
-        (hash-set! success-table key
-                   (set-add (hash-ref success-table key (set))
-                            method)))))
-  
-  (define inverted-table (make-hash '((grammar . ()) (ordered . ()) (enum . ()))))
-  (for ([(k v) (in-hash success-table)])
-    (when (= (set-count v) 1)
-      (define method (car (set->list v)))
-      (hash-set! inverted-table method (cons k (hash-ref inverted-table method '())))))
-  (for/hash ([(k v) (in-hash inverted-table)])
-    (values k (sort v string<=? #:key (λ (x) (format "~s" x))))))
