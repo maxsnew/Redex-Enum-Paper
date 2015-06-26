@@ -20,7 +20,8 @@ complementary benefits of in-order and random enumeration as
 shown in our results, without the need for any
 configuration.
 
-@(element (style "paragraph" '()) '("Acknowledgements."))
+@;{
+ @(element (style "paragraph" '()) '("Acknowledgements."))
 
 Thanks to Neil Toronto for helping
 us find a way to select from the natural numbers at random.
@@ -29,5 +30,6 @@ fits.
 Thanks to Hai Zhou, Li Li, Yuankai Chen, and Peng Kang for
 graciously sharing their compute servers with us. Thanks to
 Matthias Felleisen and Ben Greenman for helpful comments on the writing. 
+}
 
 @(element (style "newpage" '()) '())
