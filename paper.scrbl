@@ -86,23 +86,22 @@ enumeration of a union of three enumerators returns an
 element that is @texmath{\frac{n}{3}} into one of the
 argument enumerators.
 
-The paper develops the theory of
-fairness and contains proofs establishing fairness of our
-new combinators and proofs that certain combinations
-of fair combinators are not fair.
+The paper develops presents a semantics of enumeration
+combinators, a theory of fairness, proofs establishing
+fairness of our new combinators, and proofs that certain
+combinations of fair combinators are not fair.
 
 We also report on an evaluation of fairness for the purpose
 of finding bugs in operational semantics and type systems.
 More precisely, we implemented generators for arbitrary
 Redex grammars using our enumeration library. We then used
 an existing bug benchmark suite to compare the bug finding
-capabilities of the original, ad hoc random generator to a
-generator based on fair enumeration combinators and one
-based on unfair enumeration combinators. The enumeration
-using the fair combinators has complementary strengths to
-the ad hoc generator (better on short time scales and worse
-on long time scales) and using unfair combinators
-is significantly worse across the board.
+capabilities of the original, ad hoc random generator to
+generators based on fair and unfair enumeration
+combinators. The enumeration using the fair combinators has
+complementary strengths to the ad hoc generator (better on
+short time scales and worse on long time scales) and using
+unfair combinators is worse across the board.
 }
 
 @include-section["intro.scrbl"]
