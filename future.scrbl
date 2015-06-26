@@ -8,42 +8,33 @@
 
 @title{Future Work}
 
-There are two ways in which our definitions of fairness
-fails to satisfy: for finite enumerations and for
-combinators that build enumerations of recursively specified
-data structures.
-
-Consider the enumeration of a finite disjoint sum where
-the result enumeration first exhausts the first argument
-before considering any of the other arguments. This enumerator
-feels like it should be considered unfair and an enumerator
-that interleaves the arguments should be considered fair.
-Unfortunately, our definition of fairness requires an infinite
-number of equilibrium points to make sense and finite enumerations
-eventually run out.
+We are unsatisfied with one aspect of our definition of
+fairness, namely that it does not capture what intuitively
+seems to be unfair behavior in enumerations of recursively
+specified data structures.
 
 @(define listof/e-limit 500)
 
-For recursive data structures, our definition of fairness
-requires (at least) binary combinators. That is, our
-definition of enumerations of, for example, lists
-is not a candidate for fairness because it accepts only
-one argument. That said, however, there is more than one way
-to define an enumeration of lists that seem to be either fair
-or not. For example, the @racket[lon/e] enumeration
-from @secref["sec:enum"] tends to bias towards shorter lists
-that have bigger numbers at the front of the list in an unfair way.
-In contrast, this enumeration:
+Our definition of fairness requires (at least) binary
+combinators. That is, our definition of enumerations of, for
+example, lists is not a candidate for our fairness definition because it
+accepts only one argument. There is, however, more
+than one way to define an enumeration of lists that seem to
+be either fair or not. For example, the @racket[lon/e]
+enumeration from @secref["sec:enum"] tends to bias towards
+shorter lists that have bigger numbers at the front of the
+list in an unfair way. In contrast, this enumeration:
 @lon2/e-code
 uses a dependent pair to first select the length of a list
 and then to generate an enumeration of lists of that length.
-This enumeration balances the length of the list with the elements
-of the list in a way that seems more fair. Concretely, here
-is a histogram of the lengths of the lists from the first
-@(add-commas listof/e-limit) elements of the two enumerations. The
-red circles are the lengths of the @racket[lon/e] enumeration and the
-blue stars are the lengths of the enumeration that uses the dependent
-pair. 
+This enumeration balances the length of the list with the
+elements of the list in a way that seems more fair.
+Concretely, here is a histogram of the lengths of the lists
+from the first
+@(add-commas listof/e-limit) elements of the two
+enumerations. The red circles are the lengths of the 
+@racket[lon/e] enumeration and the blue stars are the
+lengths of the enumeration that uses the dependent pair. 
 
 @(define (build-length-stats)
    (define (get-points e color sym)
@@ -72,7 +63,6 @@ pair.
     #:y-max (+ 10 (max lon-y-max lon2-y-max))
     (list lon-points lon2-points)))
 
-
 @(scale (build-length-stats) .9)
 
 The idea of using dependent pairing to first select a
@@ -82,3 +72,11 @@ is general and can be used to generate trees of arbitrary
 shapes. And this approach seems like it should be considered
 fair, but we do not yet have a formal characterization of
 fairness that captures this difference.
+
+We hope that someday someone is able to capture this notion;
+it's characterization has eluded us for three years. One
+other wrinkle: the seemingly fair enumeration is
+significantly slower. Enough that the built-in list combinator
+in our enumeration library does not provide that enumeration
+strategy by default (although it is an option that is easy
+to use).
