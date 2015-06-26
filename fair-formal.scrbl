@@ -119,7 +119,7 @@ in the enumeration in our implementation.
 
 We use these two results to connect the Coq code to our implementation.
 Specifically, we use Coq's @tt{Eval} @tt{compute} facility to print out
-specific values of the enumeration at specific points and then
+values of the enumeration at specific points and then
 compare that to what our implementation produces. This is the same
 mechanism we use to test our Redex model against the Coq model.
 The testing code is in the supplementary material.
@@ -137,8 +137,9 @@ expressions to sets of natural numbers indicating which naturals
 the enumeration has been used with.
 
 Furthermore, we also need to be able to collect all of the
-numbers traced of an enumeration for all naturals up to some
-given @sr[n]. So, for some enumeration expression @sr[e], the complete
+traces for all naturals up to some
+given @sr[n]. We call this the ``complete trace up to @sr[n]''.
+So, for some enumeration expression @sr[e], the complete
 trace up to @sr[n] is the union of all of the @sr[T] components
 for @sr[(|@| e i v T)], for all values @sr[v] and @sr[i] strictly 
 less than @sr[n].
@@ -243,5 +244,3 @@ greater than @texmath{8}, the first component will always
 have more values than the second component.
 The full proof is @tt{UnfairPairUnfair} in the Coq model.
 }
-
-

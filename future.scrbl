@@ -74,8 +74,8 @@ fair, but we do not yet have a formal characterization of
 fairness that captures this difference.
 
 We hope that someday someone is able to capture this notion;
-it's characterization has eluded us for three years. One
-other wrinkle: the seemingly fair enumeration is
+its characterization has eluded us for years. One
+other wrinkle worth mentioning: the seemingly fair enumeration is
 significantly slower. Enough that the built-in list combinator
 in our enumeration library does not provide that enumeration
 strategy by default (although it is an option that is easy
