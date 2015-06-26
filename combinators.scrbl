@@ -143,7 +143,8 @@ simply passes it along (if it is below). Similarly, the
 enumeration's @racket[to-nat] function.
 
 One important point about the combinators used so far: the
-conversion from a natural to a value takes time that is linear in the number of bits in the
+conversion from a natural to a value takes time that is (a low-order)
+polynomial in the number of bits in the
 number it is given. This means, for example, that it takes only
 a few milliseconds to compute the
 @raw-latex{$2^{100,000}$}th element
@@ -164,7 +165,7 @@ Here are the first 12 elements of the enumeration:
 @enum-example[(cons/de [hd (below/e +inf.0)] 
                        [tl (hd) (naturals-above/e hd)])
               12]
-The implementation of @racket[dep/e] has three different
+The implementation of @racket[cons/de] has three different
 cases, depending on the cardinality of the enumerations it
 receives. If all of the enumerations are infinite, then it
 is just like @racket[cons/e], except

@@ -5,11 +5,15 @@
           racket/draw
           racket/list
           racket/contract
+          racket/format
+          racket/set
           data/enumerate/lib
           plot
           scriblib/figure
+          redex/reduction-semantics
           redex/pict
           "model/redex-model-typesetting.rkt"
+          "model/redex-model-test.rkt"
           "util.rkt")
 
 @title[#:tag "sec:fair-formal"]{Enumeration Semantics}
@@ -56,7 +60,13 @@ Below the @sr[or/e] rules are the @sr[except/e] rules and
 the the @sr[dep/e] rules. The rules for @sr[except/e] behave
 as discussed in @secref["sec:enum"], one rule for the
 situation where the value is below the excepted value and
-one for where it above. The @sr[dep/e] rule exploits 
+one for where it above. The @sr[dep/e] combinator is a simplified,
+functional interface to the @racket[cons/de] combinator. It accepts
+an enumeration and a function from elements of the first enumeration
+to new enumerations. It produces pairs where the first position of the
+pair comes from the first enumeration and the second position's elements
+come from the enumeration returned by passing the first element of the
+pair to the given funtion. The @sr[dep/e] rule exploits 
 @sr[cons/e] to get two indicies when it deals with infinite
 enumerations and uses @mf-name{sum_up_to} for finite enumerations, again
 as discussed in @secref["sec:enum"].
@@ -132,6 +142,34 @@ given @sr[n]. So, for some enumeration expression @sr[e], the complete
 trace up to @sr[n] is the union of all of the @sr[T] components
 for @sr[(|@| e i v T)], for all values @sr[v] and @sr[i] strictly 
 less than @sr[n].
+
+@(define trace-size 16)
+@(define-syntax-rule
+   (define-ex x y e)
+   (define-values (x y) (values (sr e) (complete-trace (term e) trace-size))))
+
+@(define-ex fair-pair-sr fair-pair-trace
+   (cons/e (trace/e 0 (below/e ∞))
+           (trace/e 1 (below/e ∞))))
+@(define-ex unfair-pair-sr unfair-pair-trace
+   (unfair-cons/e (trace/e 0 (below/e ∞))
+                  (trace/e 1 (below/e ∞))))
+@(define (show-set s)
+   (string-append
+    "{"
+    (apply string-append (add-between (map ~a (sort (set->list s) <)) ", "))
+    "}"))
+
+For example, the complete trace of
+@centered{@fair-pair-sr}
+up to @(add-commas trace-size)
+maps @sr[0] to @(show-set (hash-ref fair-pair-trace 0))
+and @sr[1] to @(show-set (hash-ref fair-pair-trace 1))
+whereas the complete trace of
+@centered{@unfair-pair-sr}
+up to @(add-commas trace-size)
+maps @sr[0] to @(show-set (hash-ref unfair-pair-trace 0))
+and @sr[1] to @(show-set (hash-ref unfair-pair-trace 1)).
 
 We say that an enumeration combinator @texmath{c^k : enum ... \rightarrow enum}
 of arity @texmath{k} is fair if, for every

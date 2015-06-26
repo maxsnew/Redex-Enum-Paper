@@ -53,6 +53,8 @@
   "Communications of the ACM")
 (define tcs
   "Theoretical Computer Science")
+(define tplp
+  "Theory and Practice of Logic Programming")
 
 (define sfp2009-kf
   (make-bib
@@ -159,6 +161,15 @@
    #:author "Paul Tarau"
    #:date 2011
    #:location (proceedings-location ciclops)))
+
+(define compact-serialization-of-prolog-terms
+  (make-bib
+   #:title (string-append
+            "Compact Serialization of Prolog Terms"
+            " (with Catalan Skeletons, Cantor Tupling and Gödel Numberings)")
+   #:author "Paul Tarau"
+   #:date 2013
+   #:location (journal-location tplp #:volume 13 #:number "4--5")))
 
 (define inverting-cantor-n-tupling
   (make-bib

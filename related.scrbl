@@ -8,7 +8,7 @@ enumeration and papers with studies about random testing.
 
 @section{Enumeration Methods}
 
-@citet[bijective-term-encodings]'s work on bijective encoding schemes for 
+@citet[compact-serialization-of-prolog-terms]'s work on bijective encoding schemes for 
 Prolog terms is most
 similar to ours. However, we differ in three main ways. 
 First, our n-ary enumerations are fair (not just the binary ones).
