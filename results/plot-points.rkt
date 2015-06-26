@@ -1,6 +1,7 @@
 #lang racket
 
-(provide plot-points-from-directory)
+(provide plot-points-from-directory
+         maximum-bugs-found)
 (require racket/draw
          pict
          plot
@@ -23,8 +24,6 @@
 
   (set! data-stats (sort data-stats <
                          #:key (λ (x) (hash-ref order (list-ref x 1)))))
-                         
-  
   (parameterize ([type-names type-name->description]
                  [plot-width 600]
                  [plot-height 500]
@@ -44,6 +43,15 @@
        (send dc end-page)
        (send dc end-doc)]
       [else pict])))
+
+(define (maximum-bugs-found)
+  (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
+    (apply values (read-data-for-directory all)))
+  (define ht (make-hash))
+  (for ([data-stat (in-list data-stats)])
+    (define k (list-ref data-stat 1))
+    (hash-set! ht k (+ (hash-ref ht k 0) 1)))
+  (apply max (hash-values ht)))
 
 (module+ main
   (plot-points-from-directory "points-plot.pdf"))

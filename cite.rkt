@@ -41,6 +41,8 @@
   "International Colloquium on Implementation of Constraint Logic Programming Systems")
 (define tose
   "IEEE Transactions of Software Engineering")
+(define rta
+  "International Conference on Rewriting Techniques and Applications")
 (define ml
   "Workshop on ML")
 (define haskell
@@ -69,6 +71,20 @@
    #:location (proceedings-location popl)
    #:date 2012))
 
+(define redex-book
+  (make-bib
+   #:title "Semantics Engineering with PLT Redex"
+   #:author (authors "Matthias Felleisen" "Robert Bruce Findler" "Matthew Flatt")
+   #:location (book-location #:publisher "MIT Press")
+   #:date 2009))
+
+(define redex-rta
+  (make-bib
+   #:title "A Visual Environment for Developing Context-Sensitive Term Rewriting Systems"
+   #:author (authors "Jacob Matthews" "Robert Bruce Findler" "Matthew Flatt" "Matthias Felleisen")
+   #:location (proceedings-location rta)
+   #:date 2004))
+   
 (define scife
   (make-bib
    #:author (authors "Ivan Kuraj" "Viktor Kuncak")

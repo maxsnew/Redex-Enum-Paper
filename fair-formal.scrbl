@@ -199,7 +199,7 @@ A complete trace from @texmath{0} to @texmath{n}
 contains all of the values from @texmath{0} to
 @texmath{\lfloor n/2+1\rfloor} in the first component and
 all of the values from @texmath{0} to
-@texmath{\lfloor\log(n)\rfloor+1} in the second component.
+@texmath{\lfloor\log_2(n)\rfloor+1} in the second component.
 For any @texmath{n}
 greater than @texmath{8}, the first component will always
 have more values than the second component.

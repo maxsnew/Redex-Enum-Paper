@@ -3,9 +3,8 @@
 
 @title[#:tag "sec:related-work"]{Related Work}
 
-The related work divides into two categories: papers 
-about enumeration and papers with studies about
-random testing.
+The related work divides into two categories: papers about
+enumeration and papers with studies about random testing.
 
 @section{Enumeration Methods}
 
@@ -76,9 +75,16 @@ a concept of n-ary fair operators for n > 2.
 
 @section{Testing Studies}
 
-The literature has few studies that specifically
-compare random testing and enumeration. We are aware of only
-one other, namely in @citet[small-check]'s original paper on
+Our empirical evaluation is focused on the question of
+fairness, but it also sheds some light on the relative
+quality of enumeration and random-based generation
+strategies.
+
+Even though enumeration-based testing methods has been
+explored in the literature, there are few studies that
+specifically contain empirical studies comparing random
+testing and enumeration. We are aware of only one other,
+namely in @citet[small-check]'s original paper on
 SmallCheck. SmallCheck is an enumeration-based testing
 library for Haskell and the paper contains a comparison with
 QuickCheck, a Haskell random testing library.

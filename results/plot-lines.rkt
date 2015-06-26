@@ -154,10 +154,10 @@
 (define (type-name->description name)
   (case name
     [(grammar) "Ad Hoc Random Generation"]
-    [(ordered) "In-Order Enumeration"]
+    [(ordered) "In-Order Enumeration, Fair"]
     [(ordered-mildly-unfair) "In-Order Enumeration, Mildly Unfair"]
     [(ordered-brutally-unfair) "In-Order Enumeration, Brutally Unfair"]
-    [(enum) "Uniform Random Selection"]
+    [(enum) "Uniform Random Selection, Fair"]
     [(enum-mildly-unfair) "Uniform Random Selection, Mildly Unfair"]
     [(enum-brutally-unfair) "Uniform Random Selection, Brutally Unfair"]))
 
