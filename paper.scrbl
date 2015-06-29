@@ -69,11 +69,12 @@
 }
 @abstract{
 This paper offers a new property of enumeration combinators
-called @emph{fairness} that accepts enumeration combinators
-whose results are well-behaved with respect to their
-arguments and rejects others.
-Intuitively the result of fair combinator indexes into its
-argument enumerations equally when constructing its result.
+called @emph{fairness}. Enumeration combinators operate on
+bijections between the natural numbers and elements of some
+given type and have recently garnered interest in property-based testing.
+
+Intuitively, the result of fair combinator indexes into its
+argument enumerations roughly equally when constructing its result.
 For example, extracting the @texmath{n}th element from
 our enumeration of three-tuples indexes about
 @texmath{\sqrt[3]{n}} elements into each of its
@@ -86,22 +87,23 @@ enumeration of a union of three enumerators returns an
 element that is @texmath{\frac{n}{3}} into one of the
 argument enumerators.
 
-The paper develops presents a semantics of enumeration
+The paper presents a semantics of enumeration
 combinators, a theory of fairness, proofs establishing
 fairness of our new combinators, and proofs that certain
 combinations of fair combinators are not fair.
 
 We also report on an evaluation of fairness for the purpose
 of finding bugs in operational semantics and type systems.
-More precisely, we implemented generators for arbitrary
-Redex grammars using our enumeration library. We then used
-an existing bug benchmark suite to compare the bug finding
-capabilities of the original, ad hoc random generator to
-generators based on fair and unfair enumeration
-combinators. The enumeration using the fair combinators has
-complementary strengths to the ad hoc generator (better on
-short time scales and worse on long time scales) and using
-unfair combinators is worse across the board.
+More precisely, we implemented a general-purpose enumeration
+library for Racket and used it to build generators for
+arbitrary Redex grammars. We then used an existing
+benchmark suite of buggy programs to compare the bug finding capabilities of
+the original, ad hoc random generator to generators based on
+fair and unfair enumeration combinators. The enumeration
+using the fair combinators has complementary strengths to
+the ad hoc generator (better on short time scales and worse
+on long time scales) and using unfair combinators is worse
+across the board.
 }
 
 @include-section["intro.scrbl"]
