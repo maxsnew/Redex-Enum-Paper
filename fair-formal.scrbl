@@ -144,7 +144,7 @@ trace up to @sr[n] is the union of all of the @sr[T] components
 for @sr[(|@| e i v T)], for all values @sr[v] and @sr[i] strictly 
 less than @sr[n].
 
-@(define trace-size 16)
+@(define trace-size 256)
 @(define-syntax-rule
    (define-ex x y e)
    (define-values (x y) (values (sr e) (complete-trace (term e) trace-size))))
@@ -155,17 +155,27 @@ less than @sr[n].
 @(define-ex unfair-pair-sr unfair-pair-trace
    (unfair-cons/e (trace/e 0 (below/e ∞))
                   (trace/e 1 (below/e ∞))))
+@(unless (equal? (hash-ref fair-pair-trace 0)
+                 (hash-ref fair-pair-trace 1))
+   (error 'fair-pair-not-equal "(need to revise text that claims otherwise)"))
+
 @(define (show-set s)
-   (string-append
-    "{"
-    (apply string-append (add-between (map ~a (sort (set->list s) <)) ", "))
-    "}"))
+   (define eles (set->list s))
+   (cond
+     [(empty? eles) "∅"]
+     [else
+      (define sm (apply min eles))
+      (define bg (apply max eles))
+      (for ([i (in-range sm (+ bg 1))])
+        (unless (set-member? s i)
+          (error 'fair-formal.scbrl "got a set that's isn't a contiguous range; doesn't have ~a"
+                 i)))
+      (format "{x:nat | ~a ≤ x ≤ ~a}" sm bg)]))
 
 For example, the complete trace of
 @centered{@fair-pair-sr}
 up to @(add-commas trace-size)
-maps @sr[0] to @(show-set (hash-ref fair-pair-trace 0))
-and @sr[1] to @(show-set (hash-ref fair-pair-trace 1))
+maps both @sr[0] and @sr[1] to @(show-set (hash-ref fair-pair-trace 0))
 whereas the complete trace of
 @centered{@unfair-pair-sr}
 up to @(add-commas trace-size)
