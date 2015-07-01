@@ -60,7 +60,7 @@
             "burke.fetscher@eecs.northwestern.edu"]
 
 @authorinfo["Jay McCarthy"
-            "Vassar College"
+            "UMass Lowell"
             "jay.mccarthy@gmail.com"]
 
 @authorinfo["Robert Bruce Findler"
