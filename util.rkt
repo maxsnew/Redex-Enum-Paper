@@ -14,7 +14,16 @@
          theorem
          proof
          definition
-         qed)
+         qed
+         assert)
+
+(define-syntax (assert stx)
+  (syntax-case stx ()
+    [(_ e)
+     #`(assert/proc '#,(syntax-source stx) #,(syntax-line stx) (λ () e) 'e)]))
+(define (assert/proc source line thunk exp)
+  (unless (thunk)
+    (error 'assert "assertion ~a:~a failed:\n  ~s" source line exp)))
 
 (define (texmath arg)
   (raw-latex (string-append "$" arg "$")))

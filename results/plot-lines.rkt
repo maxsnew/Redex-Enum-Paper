@@ -183,7 +183,7 @@
 
 (define (sort-stats stats)
   (for/fold ([h (hash)])
-    ([s (in-list stats)])
+            ([s (in-list stats)])
     (hash-set h (second s)
               (cons (third s)
                     (hash-ref h (second s) '())))))

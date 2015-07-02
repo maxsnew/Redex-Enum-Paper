@@ -1,7 +1,11 @@
 #lang racket
 
 (provide plot-points-from-directory
-         maximum-bugs-found)
+         maximum-bugs-found
+         (contract-out
+          [way-betters
+           (-> (hash/c (apply or/c (hash-keys type-syms))
+                       (listof string?)))]))
 (require racket/draw
          pict
          plot
@@ -53,5 +57,38 @@
     (hash-set! ht k (+ (hash-ref ht k 0) 1)))
   (apply max (hash-values ht)))
 
+(define (way-betters)
+  (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
+    (apply values (read-data-for-directory)))
+
+  ;; info : [bug -o> (listof (cons generator time))]
+  (define info (make-hash))
+  
+  (for ([data-stat (in-list data-stats)])
+    (define bug (list-ref data-stat 0))
+    (define gen-method (list-ref data-stat 1))
+    (define time-taken (list-ref data-stat 2))
+    (hash-set! info bug (cons (cons gen-method time-taken) (hash-ref info bug '()))))
+
+  (define (<< a b)
+    (define amag (/ (log a) (log 10)))
+    (define bmag (/ (log b) (log 10)))
+    (< (+ amag 1) bmag))
+
+  (define ans (make-hash))
+  
+  (for ([(bug time/gens) (in-hash info)])
+    (define best (argmin cdr time/gens))
+    (define sorted (sort time/gens < #:key cdr))
+    (define much-better?
+      (and (> (length time/gens) 1)
+           (for/and ([i (in-list time/gens)])
+             (or (equal? (car i) (car best))
+                 (<< (cdr best) (cdr i))))))
+    (when much-better?
+      (hash-set! ans (car best) (cons bug (hash-ref ans (car best) '())))))
+
+  ans)
+  
 (module+ main
   (plot-points-from-directory "points-plot.pdf"))

@@ -8,6 +8,7 @@
           scriblib/figure
           scriblib/footnote
           racket/runtime-path
+          racket/set racket/list
           (only-in pict scale))
 
 @title[#:tag "sec:evaluation"]{Empirical Evaluation}
@@ -188,11 +189,29 @@ Specifically, the circled points are the ones with unfair
 combinators and they are never significantly below their
 uncircled counterparts and often significantly above.
 
+@(define wb (way-betters))
+@(assert (equal? (set 'ordered 'grammar)
+                 (apply set (hash-keys wb))))
+@(define (betters who)
+   (define with-commas (add-between (sort (hash-ref wb who) string<?) ", "))
+   (assert (> (length with-commas) 2))
+   (define last-one (last with-commas))
+   (define with-and (reverse (list* last-one ", and " (cddr (reverse with-commas)))))
+   (assert (= (length with-and) (length with-commas)))
+   (apply string-append with-and))
+
 @Figure-ref["fig:benchmark-overview"] also shows that, for
 the most part, bugs that were easy (could be found in less
-than a few seconds) for either the ad hoc generator or the
+than a few seconds) for the
 generator that selected at random from the enumerations
-were easy for all three generators. The
-in-order enumeration, however, was able to find several bugs
-(such as bug #8 in poly-stlc and #7 in let-poly) in much
-shorter times than the other approaches.
+were easy for all three generators.
+The ad hoc random generator and the fair in-order enumeration
+generator each had a number of bugs where they were at least
+one decimal order of magnitude faster than all of the other
+generators (and multiple generators found the bug).
+The ad hoc random generator was significantly better on:
+@(betters 'grammar),
+and the fair in-order enumerator was significantly better on:
+@(betters 'ordered). The unfair enumerators were never significantly
+better on any bug.
+
