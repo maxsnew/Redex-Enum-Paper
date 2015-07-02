@@ -51,7 +51,7 @@ new generators to each model and bug pair, as well as a
 built-in ad hoc, random generator. We used the enumeration
 library described in @secref["sec:enum"] to build two
 generators based on enumeration, one that just chooses
-terms in the order induced by the natural's ordering,
+terms in the order induced by the naturals ordering,
 and one that selects a random natural and uses that
 to index into the enumeration.
 
@@ -86,7 +86,7 @@ sure that the numbers are not always small.
                on a benchmark of Redex models.}
          (plot-lines-from-directory)]
 
-We choose this distribution because it does not have a fixed
+We chose this distribution because it does not have a fixed
 mean. That is, if you take the mean of some number of
 samples and then add more samples and take the mean again,
 the mean of the new numbers is likely to be larger than from

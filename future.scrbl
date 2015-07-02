@@ -66,7 +66,7 @@ lengths of the enumeration that uses the dependent pair.
 @(scale (build-length-stats) .9)
 
 The idea of using dependent pairing to first select a
-``shape'' for a the data structure and then to stitch it
+``shape'' for the data structure and then to stitch it
 together with enumerations for content of the data-structure
 is general and can be used to generate trees of arbitrary
 shapes. And this approach seems like it should be considered

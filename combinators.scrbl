@@ -97,8 +97,8 @@ immediately, without evaluating the argument to @racket[delay/e].
 The first time a value is extracted from the enumeration,
 the expression is evaluated (and its result is cached). 
 This means that a use of
-@racket[fix/e] that is too eager, e.g.:
-@racket[(define e (fix/e e))] will cause @racket[from-nat]
+@racket[delay/e] that is too eager, e.g.:
+@racket[(define e (delay/e e))] will cause @racket[from-nat]
 to fail to terminate.
 Indeed, switching the order of the arguments to @racket[or/e]
 in the above example also produces an enumeration

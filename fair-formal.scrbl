@@ -32,17 +32,17 @@ index argument as given and computing the other one.
 The contents of @Figure-ref["fig:semantics"] are automatically generated
 from a Redex model and we also build a Coq model of this 
 semantics. All of the theorems stated in this section
-are proven with respect to the Coq model and the Redex model,
+are proven with respect to the Coq model. The Redex model,
 Coq model, and our implementation are all tested against each other.
 
 The simplest rule is for @sr[(below/e n+)], in the upper
 right; it is just the identity. To its left is the 
 @sr[map/e] rule, showing how its bijection is used.
-Below those two is the @racket[cons/e] rule. 
+Below those two is the @sr[cons/e] rule. 
 It defers to the @mf-name{unpair} function, shown at the bottom of
 the figure. It accepts the sizes of the two enumerations (computed
 by the size function in the bottom right of the figure) and the index.
-It maps indicies in the way discussed in @secref["sec:enum"].
+It maps indices in the way discussed in @secref["sec:enum"].
 
 The upper middle section of the figure contains four rules
 that govern the @sr[or/e] combinator. The idea for how these work
@@ -67,7 +67,7 @@ to new enumerations. It produces pairs where the first position of the
 pair comes from the first enumeration and the second position's elements
 come from the enumeration returned by passing the first element of the
 pair to the given funtion. The @sr[dep/e] rule exploits 
-@sr[cons/e] to get two indicies when it deals with infinite
+@sr[cons/e] to get two indices when it deals with infinite
 enumerations and uses @mf-name{sum_up_to} for finite enumerations, again
 as discussed in @secref["sec:enum"].
 
@@ -80,7 +80,7 @@ The Coq model is simpler than the model presented here in three ways.
 The Coq model does not have the @racket[fix/e] combinator or
 the @racket[except/e] combinator and the Coq model does not have
 the finite enumerations. Nevertheless, it
-is enough for us to state and and prove some results about fairness.
+is enough for us to state and prove some results about fairness.
 
 Before we define fairness, however, we first need to prove that
 the model actually defines two functions. 

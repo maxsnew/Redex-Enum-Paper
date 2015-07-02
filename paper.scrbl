@@ -128,4 +128,3 @@ across the board.
 @generate-bibliography[]
 
 @include-section["appendix.scrbl"]
-

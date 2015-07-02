@@ -81,7 +81,7 @@ The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction
 concrete. Then, in @secref["sec:fair-informal"] we give an
 intuition-based definition of fairness and discuss our
-our new n-tuple combinator, who design is motivated by fairness.
+our new n-tuple combinator, whose design is motivated by fairness.
 We follow up in 
 @secref["sec:fair-formal"] with a formal definition of fairness
 and proofs that our combinators are fair and that a commonly used

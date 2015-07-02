@@ -139,7 +139,7 @@ in general, how do we define a fair tupling operation?
 As we saw in @secref["sec:enum"], the fair pair operation
 traces out two of the edges of ever-increasing squares in the plane.
 These ever-increasing squares are at the heart of its fairness.
-In particular, the bottom-right most point in each square is
+In particular, the bottom-right-most point in each square is
 the equilibrium point, where it has used the two argument
 enumerations on exactly the same set of values. 
 
@@ -180,20 +180,21 @@ just a recursive process at this point, however, since the
 the enumeration always produce @raw-latex{$n-1$} tuples containing
 at least one @raw-latex{$n$} and no values larger than @raw-latex{$n$}.
 
-We can, however, produce the enumerations inside the layers recursively.
-In the general case, we need to enumerate sequences of naturals with
-whose elements have a fixed maximum (i.e. the elements of the sequence
-are all less than the maximum and yet the maximum definitely appears). 
-This enumeration can be handled with the combinators discussed in
-@secref["sec:enum"]. Specifically, an @raw-latex{$n$} tuple that contains
-a maximum of @raw-latex{$m$} is either @raw-latex{$m$} consed onto the front of an
-@raw-latex{$n-1$} tuple that has values between 0 and @raw-latex{$m$} or
-it is a number less than @raw-latex{$m$} combined with an @raw-latex{$n-1$}
-tuple that has a maximum of @raw-latex{$m$}.
+We can, however, produce the enumerations inside the layers
+recursively.  In the general case, we need to enumerate sequences of
+naturals whose elements have a fixed maximum (i.e. the elements of the
+sequence are all less than the maximum and yet the maximum definitely
+appears).  This enumeration can be handled with the combinators
+discussed in @secref["sec:enum"]. Specifically, an @raw-latex{$n$}
+tuple that contains a maximum of @raw-latex{$m$} is either
+@raw-latex{$m$} consed onto the front of an @raw-latex{$n-1$} tuple
+that has values between 0 and @raw-latex{$m$} or it is a number less
+than @raw-latex{$m$} combined with an @raw-latex{$n-1$} tuple that has
+a maximum of @raw-latex{$m$}.
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
 pairing function, which can be interpreted as a more
-triangular grid walk: @centered{@cantor-cons-pict[]}
+triangular grid walk: @centered{@scale[@cantor-cons-pict[] 0.8]}
 
 The two bijections are quite similar; they are both quadratic
 functions with similar geometric interpretations.
@@ -209,17 +210,17 @@ straightforward inverse, but its generalization does not. This is
 the generalization of the cantor pairing function to length
 @texmath{k} tuples:
 @centered{@raw-latex{\vspace*{-.02in}}
-           @raw-latex{$cantor\_tuple(n_1,n_2,\ldots,n_k) =$}
+           @raw-latex{\textit{cantor\_tuple}$(n_1,n_2,\ldots,n_k) =$}
            @raw-latex{\vspace*{.05in}}
 @raw-latex{${{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
 {{n_1}\choose{1}}$}}
 We can easily define a inefficient (but correct) way to compute
 the inverse by systematically trying every tuple by using a different untupling function, applying the
-original @raw-latex{$cantor\_tuple$} function to see if it was the
+original @raw-latex{\textit{cantor\_tuple}} function to see if it was the
 argument given. @citet[inverting-cantor-n-tupling] gives
 the best known algorithm that shrinks the search space considerably, 
 but the algorithm there is still a search procedure, and we found it
-too slow to use in practice. That said, our library uses 
+too slow to use in practice. That said, our library implements 
 @citet[inverting-cantor-n-tupling]'s algorithm (via 
 a keyword argument to @racket[cons/e] and @racket[list/e]), in
 case someone finds it useful.
