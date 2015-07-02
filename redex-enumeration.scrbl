@@ -255,7 +255,7 @@ use our enumerations. In Redex, our main application of
 enumeration combinators, fairness ensures that when a Redex
 programmer makes an innocuous change to the grammar of
 the language (e.g. changing the relative order of two
-subexpressions in an expression form) the enumeration
+sub-expressions in an expression form) the enumeration
 quality is not significantly affected. For example, consider
 an application expression. From the perspective of the
 enumeration, an application expression looks just like a list

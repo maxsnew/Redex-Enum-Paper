@@ -23,7 +23,7 @@ describes the setup of our evaluation and its results.
 @section{Setup}
 
 We conducted the evaluation in the context of
-Redex@~cite[redex-rta redex-book], a domain-specific programming langauge
+Redex@~cite[redex-rta redex-book], a domain-specific programming language
 for operational semantics, type systems, and their
 associated machinery. Redex gives semantics engineers the
 ability to formulate and check claims about their semantics
@@ -179,7 +179,7 @@ was found. Each point indicates the average number of seconds
 required to find that bug, with the bars indicating a 95%
 confidence interval. The different shapes and colors of the points
 indicate which method was used. The bugs are sorted along
-the x-axies by the average amount of time required to find
+the x-axis by the average amount of time required to find
 the bug across all strategies.
 
 @Figure-ref["fig:benchmark-overview"]'s chart confirms the

@@ -157,7 +157,7 @@ For example, we can define an enumeration of ordered pairs
 (where the first position is smaller than the second) like this:
 @racketblock[(cons/de [hd (below/e +inf.0)]
                       [tl (hd) (naturals-above/e hd)])]
-A @racket[cons/de] has two subexpressions (@racket[(below/e +inf.0)] and @racket[(naturals-above/e i)]
+A @racket[cons/de] has two sub-expressions (@racket[(below/e +inf.0)] and @racket[(naturals-above/e i)]
 in this example), each of which is named (@racket[hd] and @racket[tl] in this example).
 And one of the expressions may refer to the other's variable by putting it
 into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd]).

@@ -21,7 +21,7 @@ shown in our results, without the need for any
 configuration.
 
 @;{
- @(element (style "paragraph" '()) '("Acknowledgements."))
+ @(element (style "paragraph" '()) '("Acknowledgments."))
 
 Thanks to Neil Toronto for helping
 us find a way to select from the natural numbers at random.
