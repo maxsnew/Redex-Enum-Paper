@@ -13,10 +13,8 @@ a directory that checks to make sure the data isn't out of date
 (require redex/benchmark/private/graph-data)
 
 (module+ main
-  (require racket/cmdline racket/pretty)
-  (define directory
-    (command-line
-     #:args (directory) directory))
+  (require racket/cmdline racket/pretty racket/runtime-path)
+  (define-runtime-path directory "all")
   (define all-names (extract-names/log-directory directory))
   (define data (extract-data/log-directory directory))
   

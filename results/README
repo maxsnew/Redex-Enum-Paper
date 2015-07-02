@@ -6,3 +6,5 @@ that causes the plot script to choke.
 (Look in fair-24/rbtrees-3-enum.rktd to see the huge timeout.)
 
 The other subdirectories contain the full outputs from the 24 hour runs
+
+run 'racket process-data.rkt' to rebuild all.process-data
