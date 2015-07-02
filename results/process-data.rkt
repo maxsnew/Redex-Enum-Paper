@@ -10,11 +10,13 @@ a directory that checks to make sure the data isn't out of date
 
 |#
 
-(require redex/benchmark/private/graph-data)
+(require redex/benchmark/private/graph-data
+         racket/runtime-path)
+
+(define-runtime-path directory "all")
 
 (module+ main
-  (require racket/cmdline racket/pretty racket/runtime-path)
-  (define-runtime-path directory "all")
+  (require racket/cmdline racket/pretty)
   (define all-names (extract-names/log-directory directory))
   (define data (extract-data/log-directory directory))
   
@@ -31,14 +33,14 @@ a directory that checks to make sure the data isn't out of date
     #:exists 'truncate))
 
 (provide read-data-for-directory)
-(define (read-data-for-directory dir)
-  (define data-file (format "~a.process-data" dir))
+(define (read-data-for-directory)
+  (define data-file (format "~a.process-data" directory))
   (unless (file-exists? data-file)
     (error 'read-data-for-directory "expected file ~a to exist" data-file))
-  (unless (directory-exists? dir)
-    (error 'read-data-for-directory "expected directory ~a to exist" dir))
+  (unless (directory-exists? directory)
+    (error 'read-data-for-directory "expected directory ~a to exist" directory))
   (define data-file-mod (file-or-directory-modify-seconds data-file))
-  (for ([file (in-directory dir)])
+  (for ([file (in-directory directory)])
     (when (file-exists? file)
       (unless (<= (file-or-directory-modify-seconds file) data-file-mod)
         (error 'read-data-for-directory 

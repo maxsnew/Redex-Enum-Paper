@@ -1,15 +1,13 @@
 #lang racket
 
 (require redex/benchmark/private/graph-data
-         plot/pict pict
+         plot/pict
+         pict
          "process-data.rkt"
          racket/runtime-path)
 
-(define-runtime-path all "all")
-
 (provide plot-lines-from-directory
          type-name->description
-         all
          order)
 
 (module+ main
@@ -28,9 +26,8 @@
     (vc-append fst snd)))
 
 (define (plot-one-set-of-lines-from-directory types-to-include output)
-  (define directory all)
   (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
-    (apply values (read-data-for-directory directory)))
+    (apply values (read-data-for-directory)))
   (parameterize ([plot-x-transform log-transform]
                  [plot-x-label "Time in Seconds"]
                  [plot-y-label "Number of Bugs Found"]
@@ -111,12 +108,12 @@
      (define pts (list-ref type+pts 1))
      (lines
       (reverse pts)
-      #:color (hash-ref line-color type)
-      #:width (hash-ref line-width type)
-      #:style (hash-ref line-style type)
+      #:color (hash-ref line-colors type)
+      #:width (hash-ref line-widths type)
+      #:style (hash-ref line-styles type)
       #:label (type-name->description type)))))
 
-(define line-width
+(define line-widths
   (hash 'grammar 3
         'ordered 1
         'ordered-mildly-unfair 1
@@ -125,7 +122,7 @@
         'enum-mildly-unfair 1
         'enum-brutally-unfair 1))
 
-(define line-style
+(define line-styles
   (hash 'grammar 'solid
         'ordered 'solid
         'ordered-mildly-unfair 'long-dash
@@ -134,7 +131,7 @@
         'enum-mildly-unfair 'long-dash
         'enum-brutally-unfair 'dot))
 
-(define line-color
+(define line-colors
   (hash 'grammar 0
         'ordered 1
         'ordered-mildly-unfair 1

@@ -20,7 +20,7 @@
         
 (define (plot-points-from-directory [output #f])
   (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
-    (apply values (read-data-for-directory all)))
+    (apply values (read-data-for-directory)))
 
   (set! data-stats (sort data-stats <
                          #:key (λ (x) (hash-ref order (list-ref x 1)))))
@@ -46,7 +46,7 @@
 
 (define (maximum-bugs-found)
   (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)
-    (apply values (read-data-for-directory all)))
+    (apply values (read-data-for-directory)))
   (define ht (make-hash))
   (for ([data-stat (in-list data-stats)])
     (define k (list-ref data-stat 1))
