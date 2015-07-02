@@ -103,7 +103,7 @@ the model actually defines two functions.
          and we can compute either the existential witness of @sr[n] or
          its absence.}
 @proof{As with the previous theorem, we recursively process
- the rules to compute @sr[n], but this is complicated by the
+ the rules to compute @sr[n]. This is complicated by the
  fact that we need inverse functions for the formulas in the
  premises of the rules to go from the given @sr[n] to the
  one to use in the recursive call, but these inverses
@@ -181,6 +181,7 @@ whereas the complete trace of
 up to @(add-commas trace-size)
 maps @sr[0] to @(show-set (hash-ref unfair-pair-trace 0))
 and @sr[1] to @(show-set (hash-ref unfair-pair-trace 1)).
+(See Theorem 7 for the definition of @sr[unfair-cons/e]).
 
 We say that an enumeration combinator @texmath{c^k : enum ... \rightarrow enum}
 of arity @texmath{k} is fair if, for every

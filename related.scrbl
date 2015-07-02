@@ -52,7 +52,7 @@ not support @racket[except/e]. It has fair binary pairing
 and alternation combinators, but no n-ary fair combinators.
 Its combinators use the same bijections as the mildly unfair
 combinators discussed in @secref["sec:evaluation"].
-Its paring operation is based on the Cantor pairing
+Its pairing operation is based on the Cantor pairing
 function, meaning that computing the n-ary fair version of
 it is expensive, as discussed in 
 @secref["sec:fair-informal"].

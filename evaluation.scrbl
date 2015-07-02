@@ -52,7 +52,7 @@ new generators to each model and bug pair, as well as a
 built-in ad hoc, random generator. We used the enumeration
 library described in @secref["sec:enum"] to build two
 generators based on enumeration, one that just chooses
-terms in the order induced by the naturals ordering,
+terms in the order induced by the natural numbers,
 and one that selects a random natural and uses that
 to index into the enumeration.
 

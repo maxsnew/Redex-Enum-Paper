@@ -130,13 +130,13 @@ and the first 25 elements of its enumeration:
 The first argument enumeration has been called with
 @racket[3] before the other arguments have been called with @racket[2]
 and the first argument is called with @racket[4] before the others are
-called with @racket[3] this behavior persists for all input indices,
+called with @racket[3]. This behavior persists for all input indices,
 so that no matter how far we go into the enumeration, there will never
 be an equilibrium point after 0.
 
-Okay, so now we know that nesting pairs is not going to be fair
+Once we know that nesting pairs is not going to be fair
 in general, how do we define a fair tupling operation?
-As we saw in @secref["sec:enum"], the fair pair operation
+As we saw in @secref["sec:enum"], the fair pairing operation
 traces out two of the edges of ever-increasing squares in the plane.
 These ever-increasing squares are at the heart of its fairness.
 In particular, the bottom-right-most point in each square is

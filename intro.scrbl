@@ -22,11 +22,11 @@ These libraries are all efficient, generally providing the
 ability to extract the @texmath{2^{100}}-th element of an
 enumeration of a data structure in milliseconds. What they
 lack, however, is a mathematically precise notion of the
-quality of their combinators. To be concrete consider the pairing
+quality of their combinators. To be concrete, consider the pairing
 combinator (which all of the libraries provide).
 It accepts
 two enumerations and returns an enumeration of pairs of the
-elements of the given enumeration. There are many ways one
+elements of the given enumerations. There are many ways one
 might build such an enumeration, based on the many ways that
 one might write a bijection between the natural numbers and
 pairs of natural numbers. One such function is given by 
@@ -52,7 +52,7 @@ combinator is fair if indexing deeply into the result of the
 combinator goes equally deeply into all the arguments to the
 combinator.
 
-The motivation for the developing these enumeration
+The motivation for developing these enumeration
 libraries is bug-finding. Accordingly we tested our concept
 of fairness via an empirical study of the capability of
 enumeration libraries to find bugs in formal models of type
@@ -63,9 +63,9 @@ experience of others mined from git repositories of Redex
 models) and compare the bug/second rate with three different
 generators. Two of the generators are based on a bijection
 between the expressions of the language and the natural
-numbers: one enumerates terms in order and the other that
+numbers: one enumerates terms in order and the other
 selects a random (possibly large) natural number and uses
-that with the bijection between, and the third is an
+that with the bijection. The third is an
 existing, ad hoc random generator that's been tuned for
 bug-finding in Redex models for more than a decade.
 
