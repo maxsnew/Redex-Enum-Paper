@@ -67,24 +67,54 @@
             "Northwestern University"
             "robby@eecs.northwestern.edu"]
 }
-@abstract{
-This paper offers a new property of enumeration combinators
-called @emph{fairness}. Enumeration combinators operate on
-bijections between the natural numbers and elements of some
-given type and have recently garnered interest in property-based testing.
 
+@(define (abstract-text raw-text?)
+
+   (define (def arg)
+     (if raw-text?
+         (format "“~a”" arg)
+         (emph arg)))
+
+   (define (nth-root-of-n n)
+     (if raw-text?
+         (case n
+           [(2) "the square root of n"]
+           [(3) "the cube root of n"]
+           [(4) "the fourth root of n"]
+           [else (error 'nth-root-of-n "unknown root: ~a" n)])
+         @(texmath (format "\\sqrt[~a]{n}" n))))
+
+   (define nth
+     (if raw-text?
+         "n-th"
+         @list{@texmath{n}th}))
+
+   (define n-over-3
+     (if raw-text?
+         "n/3"
+         @texmath{\frac{n}{3}}))
+   
+   @list{
+ Enumerations represented as
+ bijections between the natural numbers and elements of some
+ given type and have recently garnered interest in property-based testing.
+ This paper offers a new property, called @def{fairness}, of combinators
+ that consume and produce such enumerations.
+ 
 Intuitively, the result of fair combinator indexes into its
 argument enumerations roughly equally when constructing its result.
-For example, extracting the @texmath{n}th element from
+For example, extracting the @nth element from
 our enumeration of three-tuples indexes about
-@texmath{\sqrt[3]{n}} elements into each of its
+@nth-root-of-n[3] elements into each of its
 components instead of, say, indexing
-@texmath{\sqrt[2]{n}} into one and
-@texmath{\sqrt[4]{n}} into the other two as you would if
+@nth-root-of-n[2]
+into one and
+@nth-root-of-n[4]
+into the other two as you would if
 you build a three-tuple out of nested pairs. Similarly,
-extracting the @raw-latex{n}th element from our
+extracting the @nth element from our
 enumeration of a union of three enumerators returns an
-element that is @texmath{\frac{n}{3}} into one of the
+element that is @n-over-3 into one of the
 argument enumerators.
 
 The paper presents a semantics of enumeration
@@ -96,15 +126,54 @@ We also report on an evaluation of fairness for the purpose
 of finding bugs in operational semantics and type systems.
 More precisely, we implemented a general-purpose enumeration
 library for Racket and used it to build generators for
-arbitrary Redex grammars. We then used an existing
-benchmark suite of buggy programs to compare the bug finding capabilities of
-the original, ad hoc random generator to generators based on
-fair and unfair enumeration combinators. The enumeration
-using the fair combinators has complementary strengths to
-the ad hoc generator (better on short time scales and worse
-on long time scales) and using unfair combinators is worse
-across the board.
-}
+arbitrary Redex grammars. We then used an existing benchmark
+suite of buggy Redex models to compare the bug finding
+capabilities of the original, ad hoc random generator to
+generators based on fair and unfair enumeration combinators.
+The enumeration using the fair combinators has complementary
+strengths to the ad hoc generator (better on short time
+scales and worse on long time scales) and using unfair
+combinators is worse across the board.
+})
+
+@(define (show-abstract)
+   (define sp (open-output-string))
+   (define max-width 48)
+   (define paragraphs
+     (for/list ([para (in-list (regexp-split #rx"\n\n" (apply string-append (abstract-text #t))))])
+       (filter (λ (x) (not (regexp-match? #rx"^ *$" x)))
+               (regexp-split #rx"[\n ]+" para))))
+
+   (define word-count 0)
+   
+   (for ([words (in-list paragraphs)])
+     (define line-width 0)
+     (for ([word (in-list words)])
+       (set! word-count (+ word-count 1))
+       (unless (regexp-match #rx"^ *$" word)
+         (display word sp)
+         (display " " sp)
+         (set! line-width (+ (string-length word) line-width))
+         (when (> line-width max-width)
+           (set! line-width 0)
+           (newline sp))))
+     (newline sp)
+     (newline sp))
+
+   (printf "~a words\n" word-count)
+   
+   (display
+    (regexp-replace*
+     #rx"\n\n\n"
+     (regexp-replace*
+      #rx" \n"
+      (get-output-string sp)
+      "\n")
+     "\n\n")))
+   
+   
+
+@(apply abstract (abstract-text #f))
 
 @include-section["intro.scrbl"]
 
