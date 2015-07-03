@@ -327,11 +327,11 @@
 
 (define-lon/e/dup lon2/e-code lon2/e
   (or/e (single/e '())
-        (dep/e natural/e
+        (dep/e (below/e +inf.0)
                (λ (len)
                  (define enums
                    (for/list ([i (in-range (+ len 1))])
-                     natural/e))
+                     (below/e +inf.0)))
                  (apply list/e enums)))))
 
 (module+ main 

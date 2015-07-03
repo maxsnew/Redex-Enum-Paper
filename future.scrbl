@@ -23,10 +23,11 @@ than one way to define an enumeration of lists that seem to
 be either fair or not. For example, the @racket[lon/e]
 enumeration from @secref["sec:enum"] tends to bias towards
 shorter lists that have bigger numbers at the front of the
-list in an unfair way. In contrast, this enumeration:
+list in an unfair way. Instead, consider an enumeration that
+first selects a length of the list and then uses a dependent
+enumeration to build a fair n-tuple of the corresponding
+length, like this code does:
 @lon2/e-code
-uses a dependent pair to first select the length of a list
-and then to generate an enumeration of lists of that length.
 This enumeration balances the length of the list with the
 elements of the list in a way that seems more fair.
 Concretely, here is a histogram of the lengths of the lists
@@ -34,7 +35,7 @@ from the first
 @(add-commas listof/e-limit) elements of the two
 enumerations. The red circles are the lengths of the 
 @racket[lon/e] enumeration and the blue stars are the
-lengths of the enumeration that uses the dependent pair. 
+lengths of the enumeration above that uses the dependent pair. 
 
 @(define (build-length-stats)
    (define (get-points e color sym)
@@ -73,10 +74,9 @@ shapes. And this approach seems like it should be considered
 fair, but we do not yet have a formal characterization of
 fairness that captures this difference.
 
-We hope that someday someone is able to capture this notion;
-its characterization has eluded us for years. One
-other wrinkle worth mentioning: the seemingly fair enumeration is
-significantly slower. Enough that the built-in list combinator
-in our enumeration library does not provide that enumeration
-strategy by default (although it is an option that is easy
-to use).
+We hope that someday someone is able to capture this notion
+but there is one other wrinkle worth mentioning: the
+seemingly fair enumeration is significantly slower. Enough
+that the built-in list combinator in our enumeration library
+does not provide that enumeration strategy by default
+(although it is an option that is easy to use).
