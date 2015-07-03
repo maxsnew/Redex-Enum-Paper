@@ -8,6 +8,7 @@
 
 (provide plot-lines-from-directory
          type-name->description
+         type-name->generic-description
          order)
 
 (module+ main
@@ -157,6 +158,15 @@
     [(enum) "Uniform Random Selection, Fair"]
     [(enum-mildly-unfair) "Uniform Random Selection, Mildly Unfair"]
     [(enum-brutally-unfair) "Uniform Random Selection, Brutally Unfair"]))
+
+(define (type-name->generic-description name)
+  (case name
+    [(grammar) "Ad Hoc Random Generation"]
+    [(ordered) "In-Order Enumeration"]
+    [(enum) "Uniform Random Selection"]
+    [else (error 'type-name->generic-description
+                 "expected either 'grammar 'ordered or 'enum, got ~s"
+                 name)]))
 
 (define (format-time number)
   (cond

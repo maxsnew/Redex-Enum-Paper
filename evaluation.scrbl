@@ -4,6 +4,7 @@
           "util.rkt"
           "results/plot-lines.rkt"
           "results/plot-points.rkt"
+          "results/plot-rates.rkt"
           scribble/manual
           scriblib/figure
           scriblib/footnote
@@ -135,6 +136,12 @@ we re-ran the bug/generator combinations where at least one
 counterexample was found, but where the uncertainty in the
 average will still large. We let each of these combinations
 run for a week of CPU time.
+
+
+@figure*["fig:rates"
+         @list{Rates}
+         (rate-plots)]
+
 
 We used two identical 64 core AMD machines with Opteron
 6274s running at 2,200 MHz with a 2 MB L2 cache to run the
