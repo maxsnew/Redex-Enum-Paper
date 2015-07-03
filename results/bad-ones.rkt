@@ -1,5 +1,13 @@
 #lang racket
 
+#|
+
+This script find the benchmark/generator
+combinations where the ratio of the error
+to the actual value is greater than 1/2.
+
+|#
+
 (require redex/benchmark/private/graph-data
          racket/runtime-path)
 
