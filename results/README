@@ -1,7 +1,8 @@
 all/ contains the combined logs, with log lines for gc and heartbeats
 removed. Also rb-trees-3-enum from the fair run is left out, beacause it
-contains a timeout event that logged a single GIGANTIC counterexample
-that causes the plot script to choke.
+contains a timeout event that logged a single GIGANTIC term
+that causes the plot script to choke. This doesn't affect the results
+because that run contained no counterexamples.
 
 (Look in fair-24/rbtrees-3-enum.rktd to see the huge timeout.)
 
