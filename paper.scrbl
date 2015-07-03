@@ -97,12 +97,16 @@
    @list{
  Enumerations represented as
  bijections between the natural numbers and elements of some
- given type and have recently garnered interest in property-based testing.
- This paper offers a new property, called @def{fairness}, of combinators
- that consume and produce such enumerations.
+ given type and have recently garnered interest in property-based testing
+ because of their efficiency and flexibility as
+ counter-example generators. There are, however, many ways of defining
+ these bijections, some of which are better than others. 
+ This paper offers a new property of enumeration combinators
+ called @def{fairness} that identifies enumeration combinators
+ that are more suited to property-based testing.
  
 Intuitively, the result of fair combinator indexes into its
-argument enumerations roughly equally when constructing its result.
+argument enumerations equally when constructing its result.
 For example, extracting the @nth element from
 our enumeration of three-tuples indexes about
 @nth-root-of-n[3] elements into each of its
@@ -111,9 +115,9 @@ components instead of, say, indexing
 into one and
 @nth-root-of-n[4]
 into the other two as you would if
-you build a three-tuple out of nested pairs. Similarly,
+a three-tuple were built out of nested pairs. Similarly,
 extracting the @nth element from our
-enumeration of a union of three enumerators returns an
+enumeration of a three-way union returns an
 element that is @n-over-3 into one of the
 argument enumerators.
 
@@ -124,9 +128,9 @@ combinations of fair combinators are not fair.
 
 We also report on an evaluation of fairness for the purpose
 of finding bugs in operational semantics and type systems.
-More precisely, we implemented a general-purpose enumeration
+We implemented a general-purpose enumeration
 library for Racket and used it to build generators for
-arbitrary Redex grammars. We then used an existing benchmark
+arbitrary Redex grammars. We used an existing benchmark
 suite of buggy Redex models to compare the bug finding
 capabilities of the original, ad hoc random generator to
 generators based on fair and unfair enumeration combinators.
