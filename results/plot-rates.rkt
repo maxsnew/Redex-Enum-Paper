@@ -2,6 +2,7 @@
 (require plot/pict
          pict
          rackunit
+         racket/gui/base
          "plot-lines.rkt"
          "process-data.rkt")
 
@@ -53,6 +54,7 @@
      #:color color
      #:style style
      #:x-min offset
+     #:line-color 'black
      #:label (and legend? lab)
      #:skip 4
      (for/list ([merged-name (in-list merged-names)])
@@ -63,7 +65,7 @@
     (plot-pict
      #:legend-anchor 'top-right
      #:x-label (type-name->generic-description which)
-     #:y-label (and legend? "Examples per second")
+     #:y-label "Examples Tested per Second"
      #:width 300
      #:height 300
      (list (mk-hist which

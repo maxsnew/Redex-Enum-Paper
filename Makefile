@@ -1,7 +1,7 @@
 all: test admit paper
 
 paper:
-	raco make -v paper.scrbl && scribble --pdf paper.scrbl
+	raco make -v paper.scrbl && scribble ++extra results/dominates.pdf --pdf paper.scrbl
 
 DNE:
 

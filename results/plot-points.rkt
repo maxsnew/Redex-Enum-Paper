@@ -89,6 +89,5 @@
       (hash-set! ans (car best) (cons bug (hash-ref ans (car best) '())))))
 
   ans)
-  
-(module+ main
-  (plot-points-from-directory "points-plot.pdf"))
+
+(module+ main)

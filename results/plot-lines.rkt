@@ -7,8 +7,6 @@
          racket/runtime-path)
 
 (provide plot-lines-from-directory
-         type-name->description
-         type-name->generic-description
          order)
 
 (module+ main
@@ -148,25 +146,6 @@
                     'enum 4
                     'enum-mildly-unfair 5
                     'enum-brutally-unfair 6))
-  
-(define (type-name->description name)
-  (case name
-    [(grammar) "Ad Hoc Random Generation"]
-    [(ordered) "In-Order Enumeration, Fair"]
-    [(ordered-mildly-unfair) "In-Order Enumeration, Mildly Unfair"]
-    [(ordered-brutally-unfair) "In-Order Enumeration, Brutally Unfair"]
-    [(enum) "Uniform Random Selection, Fair"]
-    [(enum-mildly-unfair) "Uniform Random Selection, Mildly Unfair"]
-    [(enum-brutally-unfair) "Uniform Random Selection, Brutally Unfair"]))
-
-(define (type-name->generic-description name)
-  (case name
-    [(grammar) "Ad Hoc Random Generation"]
-    [(ordered) "In-Order Enumeration"]
-    [(enum) "Uniform Random Selection"]
-    [else (error 'type-name->generic-description
-                 "expected either 'grammar 'ordered or 'enum, got ~s"
-                 name)]))
 
 (define (format-time number)
   (cond

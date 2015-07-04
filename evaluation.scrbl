@@ -82,6 +82,10 @@ integer that is between @texmath{2^{i-1}} and
 and then take the largest -- this helps make
 sure that the numbers are not always small.
 
+@figure["fig:dominates"
+        @list{Which methods dominate which methods}
+        @raw-latex{\includegraphics[scale=.6]{dominates.pdf}}]
+
 @figure*["fig:benchmark-lines"
          @list{Overview of random testing performance of ad hoc generation,
                in-order enumeration, and random indexing into an enumeration,
