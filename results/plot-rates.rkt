@@ -49,12 +49,12 @@
   
 (define (mk-plot which legend?)
 
-  (define (mk-hist gen offset color style lab)
+  (define (mk-hist gen offset line-color color style lab)
     (discrete-histogram
      #:color color
      #:style style
      #:x-min offset
-     #:line-color 'black
+     #:line-color line-color
      #:label (and legend? lab)
      #:skip 4
      (for/list ([merged-name (in-list merged-names)])
@@ -69,11 +69,11 @@
      #:width 300
      #:height 300
      (list (mk-hist which
-                    0 "white" 'solid "Fair")
+                    0 "black" "white" 'solid "Fair")
            (mk-hist (string->symbol (format "~a-mildly-unfair" which))
-                    1 "black" 'bdiagonal-hatch "Mildly Unfair")
+                    1 "blue" "navy" 'bdiagonal-hatch "Mildly Unfair")
            (mk-hist (string->symbol (format "~a-brutally-unfair" which))
-                    2 "black" 'solid "Brutally Unfair")))))
+                    2 "red" "firebrick" 'solid "Brutally Unfair")))))
 
 
 (define (rate-plots)
