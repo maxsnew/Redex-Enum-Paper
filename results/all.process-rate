@@ -172,6 +172,7 @@
  ("rbtrees-2" ordered 872.8139904610492)
  ("rbtrees-3" enum-brutally-unfair 83.68344035704904)
  ("rbtrees-3" enum-mildly-unfair 80.15367962785093)
+ ("rbtrees-3" enum 10.44077522127835)
  ("rbtrees-3" grammar 2950.108900874536)
  ("rbtrees-3" ordered-brutally-unfair 1061.851123148176)
  ("rbtrees-3" ordered-mildly-unfair 382.0458752078024)
