@@ -69,12 +69,6 @@ proper games there are some bitstrings that do not
 encode a value. As such, it cannot be used efficiently to enumerate all
 elements of the set being encoded.
 
-@citet[bit-monad-transformers] explicitly discuss fairness in the
-context of logic programming, but talk about it in the specific cases
-of fair disjunction and fair conjunction, and they do not have a
-unification of these two different types of fairness, nor do they have
-a concept of n-ary fair operators for n > 2.
-
 @section{Testing Studies}
 
 Our empirical evaluation is focused on the question of
