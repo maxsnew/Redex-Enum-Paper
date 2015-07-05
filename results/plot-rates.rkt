@@ -60,14 +60,14 @@
      (for/list ([merged-name (in-list merged-names)])
        (vector merged-name (or (name-gen->rate merged-name gen) 0)))))
 
-  (parameterize ([plot-x-tick-label-angle 45]
+  (parameterize ([plot-x-tick-label-angle 25]
                  [plot-x-tick-label-anchor 'right])
     (plot-pict
      #:legend-anchor 'top-right
      #:x-label (type-name->generic-description which)
      #:y-label "Examples Tested per Second"
      #:width 300
-     #:height 300
+     #:height 250
      (list (mk-hist which
                     0 "black" "white" 'solid "Fair")
            (mk-hist (string->symbol (format "~a-mildly-unfair" which))
