@@ -83,7 +83,7 @@ and then take the largest -- this helps make
 sure that the numbers are not always small.
 
 @figure["fig:dominates"
-        @list{Which methods dominate which methods}
+        @list{Partial Order Between Generators Indicating Which Find More Bugs}
         @raw-latex{\includegraphics[scale=.6]{dominates.pdf}}]
 
 @figure*["fig:benchmark-lines"
@@ -143,7 +143,7 @@ run for a week of CPU time.
 
 
 @figure*["fig:rates"
-         @list{Rates}
+         @list{Examples tested per second for each benchmark model and enumeration-based generator}
          (rate-plots)]
 
 
@@ -159,8 +159,22 @@ of which Redex is a part.
 
 @section{Results}
 
-The plots in @figure-ref["fig:benchmark-lines"] show a
-high-level view of our results. Along x-axis is time in
+The graph in @figure-ref["fig:dominates"] gives a high-level
+view of which generators are more effective at finding bugs.
+There is an edge between two generators if the one above
+finds all the bugs that the one below finds and the
+was unable to find at least one bug that the one above
+found. By this metric, the ad hoc random generator is a
+clear winner, the fair enumerators are second and the
+unfair ones are third, with the mildly unfair enumerators
+usually doing better than the brutally unfair ones.
+
+That overview lacks nuance, however, as it does not
+take into account how long it took for each generator to find
+the bugs that it found. 
+The plots in @figure-ref["fig:benchmark-lines"] take time
+into account, showing how well each generator is doing as
+a function of time. Along x-axis is time in
 seconds in a log scale, varying from milliseconds to the
 left to a few hours on the right. Along the y-axis is the
 total number of counterexamples found for each point in
@@ -180,9 +194,12 @@ described above) and uses those to generate candidates.
 No strategy was able to find more than
 @(format "~a" (maximum-bugs-found)) of the 50 bugs in the benchmark.
 
-As the plots show, the mildly unfair combinators are worse
+These plots also show that the mildly unfair combinators are worse
 than the fair ones and the brutally unfair combinators are
-much worse.
+much worse than either. But they also reveal that the ad hoc generator
+is only better than the best enumeration strategy after 22 minutes.
+Before that time, the fair in-order enumeration strategy is the best
+approach.
 
 A more detailed version of our results is shown in 
 @figure-ref["fig:benchmark-overview"]. The x-axis has one
@@ -226,3 +243,22 @@ and the fair in-order enumerator was significantly better on:
 @(betters 'ordered). The unfair enumerators were never significantly
 better on any bug.
 
+We believe that the fair enumerators are better than the unfair
+ones because their more balanced exploration of the space leads
+to a wider variety of interesting examples being explored.
+@Figure-ref["fig:rates"] provides some evidence for this theory.
+It shows the number of examples tested per second for each model
+(our particular bug benchmark does not cause the generators
+to generate different per-bug examples, only different per-model examples)
+under the different generator strategies. The left-hand plot shows
+the in-order generators and the right-hand plot shows the generators
+that selected random natural numbers and used those to generate examples.
+In every case, the fair enumeration strategy generates fewer
+examples per second (except for the list-machine benchmark in
+the random generator, where it is only slightly faster). And yet the
+fair generators find more bugs. This suggests that the unfair generators
+are repeatedly generating simple, similar examples that can be tested
+quickly, but provide little new information about the model.
+We believe this is because the unfair generators spend a lot of time exploring
+programs with similar structure that differ only in the names
+of the variables or other typically uninteresting variations.
