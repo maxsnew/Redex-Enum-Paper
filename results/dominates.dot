@@ -1,12 +1,12 @@
 digraph {
  margin=0
-  "grammar" [label="Ad Hoc Random Generation", shape=box]
-  "ordered" [label="Fair\nIn-Order Enumeration", shape=box]
-  "ordered-brutally-unfair" [label="Brutally Unfair\nIn-Order Enumeration", shape=box]
   "enum-mildly-unfair" [label="Mildly Unfair\nUniform Random Selection", shape=box]
   "enum" [label="Fair\nUniform Random Selection", shape=box]
+  "grammar" [label="Ad Hoc Random Generation", shape=box]
   "ordered-mildly-unfair" [label="Mildly Unfair\nIn-Order Enumeration", shape=box]
+  "ordered" [label="Fair\nIn-Order Enumeration", shape=box]
   "enum-brutally-unfair" [label="Brutally Unfair\nUniform Random Selection", shape=box]
+  "ordered-brutally-unfair" [label="Brutally Unfair\nIn-Order Enumeration", shape=box]
   "enum" -> "enum-mildly-unfair"
   "enum-mildly-unfair" -> "ordered-mildly-unfair"
   "grammar" -> "enum"

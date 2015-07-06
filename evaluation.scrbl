@@ -137,9 +137,10 @@ time it has been running. The script runs until the
 uncertainty in the average becomes acceptably small or until
 24 hours elapses, whichever comes first. In a second pass,
 we re-ran the bug/generator combinations where at least one
-counterexample was found, but where the uncertainty in the
-average will still large. We let each of these combinations
-run for a week of CPU time.
+counterexample was found, but where the 95% confidence
+interval was larger than 50% of the computed average.
+We ran each of these combinations for 8 days of
+additional CPU time.
 
 
 @figure*["fig:rates"
