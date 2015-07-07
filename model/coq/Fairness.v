@@ -517,7 +517,6 @@ Section NaiveTripleUnfair.
       repeat (eapply subset_trans; try eassumption); apply subset_refl.
   Qed.
 End NaiveTripleUnfair.
-Print Assumptions SumFair.
 
 Section Unfair_Unfair.
 
