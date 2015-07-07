@@ -68,7 +68,7 @@ input enumerations is finite, the result enumeration loops through the
 finite enumeration, pairing each with an element from the
 infinite enumeration. If both are finite, it loops through the
 one with lesser cardinality. This corresponds to taking the
-quotient with remainder of the index with the lesser size.
+quotient and remainder of the index with the lesser size.
 
 Pairing infinite enumerations require more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
@@ -100,8 +100,8 @@ This means that a use of
 @racket[delay/e] that is too eager, e.g.:
 @racket[(define e (delay/e e))] will cause @racket[from-nat]
 to fail to terminate.
-Indeed, switching the order of the arguments to @racket[or/e]
-in the above example also produces an enumeration
+Switching the order of the arguments to @racket[or/e]
+above also produces an enumeration
 that fails to terminate.
 
 Our combinators rely on knowing the
@@ -131,13 +131,12 @@ when passed through the two functions.
 
 We exploit the bidirectionality of our enumerations to define
 the @racket[except/e] enumeration. It accepts an element and an
-enumeration, and returns an enumeration that doesn't have the given element. For
+enumeration, and returns an enumeration without the given element. For
 example, the first 9 elements of @racket[(except/e (below/e +inf.0) 4)] are
 @enum-example[(except/e (below/e +inf.0) 4) 9] 
 The @racket[from-nat] function for @racket[except/e] simply
 uses the original enumeration's @racket[to-nat] on the given
-element and then either subtracts one before passing the
-natural number along (if it is above the given exception) or
+element and then either subtracts one (if it is above the given exception) or
 simply passes it along (if it is below). Similarly, the 
 @racket[except/e]'s @racket[to-nat] function calls the input
 enumeration's @racket[to-nat] function.
@@ -157,8 +156,9 @@ For example, we can define an enumeration of ordered pairs
 (where the first position is smaller than the second) like this:
 @racketblock[(cons/de [hd (below/e +inf.0)]
                       [tl (hd) (naturals-above/e hd)])]
-A @racket[cons/de] has two sub-expressions (@racket[(below/e +inf.0)] and @racket[(naturals-above/e i)]
-in this example), each of which is named (@racket[hd] and @racket[tl] in this example).
+A @racket[cons/de] has two sub-expressions (in this example:
+@racket[(below/e +inf.0)] and @racket[(naturals-above/e i)]),
+each of which is named (@racket[hd] and @racket[tl] here).
 And one of the expressions may refer to the other's variable by putting it
 into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd]).
 Here are the first 12 elements of the enumeration:
@@ -175,9 +175,7 @@ independent enumeration is finite and the dependent ones are all
 infinite, then @racket[cons/de] can use quotient and remainder to compute
 the indices to supply to the given enumerations when decoding.
 In both of these cases, @racket[cons/de] preserves the good
-algorithmic properties of the previous combinators, requiring
-only linear time in the number of bits of the representation
-of the number for decoding.
+algorithmic properties of the previous combinators.
 
 The troublesome case is when the dependent
 enumerations are all finite. In that case, we
@@ -192,4 +190,6 @@ magnitude of the number.
 
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
-of enumerations one can build with the library.
+of enumerations in the library. The documentation,
+@url{http://docs.racket-lang.org/data/Enumerations.html}, lists all
+of the combinators.

@@ -123,7 +123,7 @@ argument enumerators.
 
 The paper presents a semantics of enumeration
 combinators, a theory of fairness, proofs establishing
-fairness of our new combinators, and proofs that certain
+fairness of our new combinators and that certain
 combinations of fair combinators are not fair.
 
 We also report on an evaluation of fairness for the purpose

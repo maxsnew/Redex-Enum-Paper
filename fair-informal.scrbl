@@ -32,8 +32,9 @@
                        exact-nonnegative-integer? exact-nonnegative-integer?)))
 
 This section introduces our definition of fairness in a precise
-but informal way. The subsequent section makes it formal and
-gives proofs of various related properties.
+but informal way and explains why we had to generalize pairing and
+alternation in a new way. The subsequent section makes the definitions
+formal and gives proofs of various related properties.
 
 A fair enumeration combinator is one that indexes into its
 argument enumerations roughly equally, instead of indexing
@@ -71,7 +72,7 @@ which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using
 the unfair and the fair four-tuple enumerations. 
-The x-coordinates of the plot correspond to the different
+The x-coordinates of the plots correspond to the different
 values that appear in the tuples and the height of each bar is
 the number of times that particular number appears when enumerating
 the first @(add-commas unfairness-histograms-total-size) tuples. 
@@ -115,7 +116,7 @@ from the beginning of the section. As we saw, at the point @(add-commas one-bill
 it was not at equilibrium. But at @(add-commas (- fair-number-past-one-billion 1)),
 it produces 
 @code{@(format "~v" (from-nat fair-four-tuple (- fair-number-past-one-billion 1)))},
-and indeed it has indexed into each of the four @racket[(below/e +inf.0)] enumerations
+and it has indexed into each of the four @racket[below/e] enumerations
 with each of the first @(add-commas (sqrt (sqrt fair-number-past-one-billion))) natural numbers.
 In general, that fair four-tuple reaches an equilibrium point at every
 @texmath{n^4} and @racket[(cons/e (below/e +inf.0) (below/e +inf.0))]
@@ -132,7 +133,7 @@ The first argument enumeration has been called with
 and the first argument is called with @racket[4] before the others are
 called with @racket[3]. This behavior persists for all input indices,
 so that no matter how far we go into the enumeration, there will never
-be an equilibrium point after 0.
+be an equilibrium point after @racket[0].
 
 Once we know that nesting pairs is not going to be fair
 in general, how do we define a fair tupling operation?
@@ -194,7 +195,7 @@ a maximum of @raw-latex{$m$}.
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
 pairing function, which can be interpreted as a more
-triangular grid walk: @centered{@scale[@cantor-cons-pict[] 0.8]}
+triangular grid walk: @centered{@cantor-cons-pict[]}
 
 The two bijections are quite similar; they are both quadratic
 functions with similar geometric interpretations.

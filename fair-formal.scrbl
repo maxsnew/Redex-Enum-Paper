@@ -30,7 +30,7 @@ of fairness; ignore it for now. The
 @sr[|@|] by treating either the value or
 index argument as given and computing the other one.
 The contents of @Figure-ref["fig:semantics"] are automatically generated
-from a Redex model and we also build a Coq model of this 
+from a Redex model and we also built a Coq model of a subset of this 
 semantics. All of the theorems stated in this section
 are proven with respect to the Coq model. The Redex model,
 Coq model, and our implementation are all tested against each other.
@@ -40,7 +40,7 @@ right; it is just the identity. To its left is the
 @sr[map/e] rule, showing how its bijection is used.
 Below those two is the @sr[cons/e] rule. 
 It defers to the @mf-name{unpair} function, shown at the bottom of
-the figure. It accepts the sizes of the two enumerations (computed
+the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations (computed
 by the size function in the bottom right of the figure) and the index.
 It maps indices in the way discussed in @secref["sec:enum"].
 
@@ -68,8 +68,8 @@ pair comes from the first enumeration and the second position's elements
 come from the enumeration returned by passing the first element of the
 pair to the given funtion. The @sr[dep/e] rule exploits 
 @sr[cons/e] to get two indices when it deals with infinite
-enumerations and uses @mf-name{sum_up_to} for finite enumerations, again
-as discussed in @secref["sec:enum"].
+enumerations and uses @mf-name{sum_up_to} for finite enumerations,
+as in @secref["sec:enum"].
 
 The @sr[fix/e] rule uses substitution (our implementation
 fails to terminate when an ``infinite derivation'' would be
@@ -79,7 +79,7 @@ shortly.
 The Coq model is simpler than the model presented here in three ways.
 The Coq model does not have the @racket[fix/e] combinator or
 the @racket[except/e] combinator and the Coq model does not have
-the finite enumerations. Nevertheless, it
+finite enumerations. Nevertheless, it
 is enough for us to state and prove some results about fairness.
 
 Before we define fairness, however, we first need to prove that

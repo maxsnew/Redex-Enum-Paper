@@ -18,15 +18,18 @@
          lon2/e-code lon2/e)
 
 (define (disj-sum-pict/good)
-  (gen-table or/e 8 24 40 8 #:arrows? #t))
+  (gen-table or/e 8 24 30 8 #:arrows? #t))
 
 (define (disj-sum-pict/bad)
   (define (bad-disj-sum/e a b c)
     (or/e a (or/e b c)))
-  (gen-table bad-disj-sum/e 8 32 40 8 #:arrows? #t #:last-arrow 15))
+  (gen-table bad-disj-sum/e 8 32 30 8 #:arrows? #t #:last-arrow 15))
 
 (define (gen-table or/e y-count num-points size-per-cell arrow-head-size
                    #:arrows? arrows? #:last-arrow [last-arrow +inf.0])
+
+  (define font-size 9)
+  
   (define x-count 3)
   (define width (* size-per-cell x-count))
   (define height (* size-per-cell y-count))
@@ -60,8 +63,8 @@
    (vc-append
     (apply 
      hc-append
-     (for/list ([i (in-list (list "natural" "symbol" "float"))])
-       (define txt (text (format "~a" i) '() 10))
+     (for/list ([i (in-list (list "nat" "sym" "float"))])
+       (define txt (text (format "~a" i) '() font-size))
        (cc-superimpose (blank size-per-cell 0)
                        (refocus
                         (hbl-append
@@ -91,15 +94,12 @@
          (define next (from-nat prs (+ i 1)))
          (define-values (x1 y1) (i->xy this i))
          (define-values (x2 y2) (i->xy next (+ i 1)))
-         (define this-p 
-           (text (~a #:max-width 6 this)))
-         (define index-p (text (format "~a" i)))
-         (define index this-p)
+         (define this-p (text (~a #:max-width 6 this) '() font-size))
          (define pict+index
            (pin-over pict
-                     (- x1 (/ (pict-width index) 2))
-                     (- y1 (/ (pict-height index) 2))
-                     index))
+                     (- x1 (/ (pict-width this-p) 2))
+                     (- y1 (/ (pict-height this-p) 2))
+                     this-p))
          (loop (+ i 1)
                (if (and arrows? (i . < . last-arrow))
                    (pin-arrow-line
@@ -109,15 +109,15 @@
                     arrow-head-size
                     pict+index
                     pict+index
-                    (λ (a b) (values x1 (+ y1 (pict-height index))))
+                    (λ (a b) (values x1 (+ y1 (pict-height this-p))))
                     pict+index
-                    (λ (a b) (values x2 (+ y2 (pict-height index)))))
+                    (λ (a b) (values x2 (+ y2 (pict-height this-p)))))
                    pict+index))])))))
 
 
 (define (pair-pict) (box-cons-pict))
-(define (box-cons-pict) (grid cons/e 5 24 200 12))
-(define (cantor-cons-pict) (grid cantor-cons/e 5 14 200 12))
+(define (box-cons-pict) (grid cons/e 5 24 180 10))
+(define (cantor-cons-pict) (grid cantor-cons/e 5 14 180 10))
 
 (define (cantor-cons/e e1 e2)
   (cons/e e1 e2 #:ordering 'diagonal))
@@ -151,6 +151,7 @@
 
 (define (gen-grid cons/e count num-points size arrow-head-size #:arrows? arrows?)
   (define prs (cons/e natural/e natural/e))
+  (define font-size 9)
   (define base
     (dc (λ (dc dx dy)
           (for ([i (in-range 1 count)])
@@ -170,26 +171,26 @@
    (apply 
     vc-append
     (for/list ([i (in-range count)])
-      (define txt (text (format "~a" i)))
+      (define txt (text (format "~a" i) '() font-size))
       (cc-superimpose 
        (blank 0 (/ size count))
        (refocus (vc-append
                  txt
                  (if (= i (- count 1))
-                     (text "⋮")
+                     (text "⋮" '() font-size)
                      (blank)))
                 txt))))
    (vc-append
     (apply 
      hc-append
      (for/list ([i (in-range count)])
-       (define txt (text (format "~a" i)))
+       (define txt (text (format "~a" i) '() font-size))
        (cc-superimpose (blank (/ size count) 0)
                        (refocus
                         (hbl-append
                          txt
                          (if (= i (- count 1))
-                             (text " ⋯")
+                             (text " ⋯" '() font-size)
                              (blank)))
                         txt))))
     
@@ -205,7 +206,7 @@
          (define next (from-nat prs (+ i 1)))
          (define-values (x1 y1) (ij->xy (car this) (cdr this)))
          (define-values (x2 y2) (ij->xy (car next) (cdr next)))
-         (define index (text (format "~a" i)))
+         (define index (text (format "~a" i) '() font-size))
          (loop (+ i 1)
                (if arrows?
                    (pin-arrow-line

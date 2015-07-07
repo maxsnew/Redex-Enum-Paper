@@ -18,25 +18,25 @@ then SciFe for Scala in
 year.@note{@url{http://docs.racket-lang.org/data/Enumerations.html}}
 (The last library is ours and was written as part of the work in this paper.)
 
-These libraries are all efficient, generally providing the
+These libraries are efficient, providing the
 ability to extract the @texmath{2^{100}}-th element of an
 enumeration of a data structure in milliseconds. What they
 lack, however, is a mathematically precise notion of the
 quality of their combinators. To be concrete, consider the pairing
-combinator (which all of the libraries provide).
+combinator, which all of the libraries provide.
 It accepts
-two enumerations and returns an enumeration of pairs of the
-elements of the given enumerations. There are many ways one
-might build such an enumeration, based on the many ways that
-one might write a bijection between the natural numbers and
+two enumerations and returns an enumeration of pairs of its inputs.
+There are many ways to
+build such an enumeration, based on the many ways
+to write a bijection between the natural numbers and
 pairs of natural numbers. One such function is given by 
 @texmath[bad-nn->n-string]. This is a bijection (the inverse
-simply counts the number of times that two is a factor of the
+simply counts the number of times that 2 is a factor of its
 input to separate the ``x'' and ``y'' parts) that is easy to
-explain and efficient (taking logarithmic time in @texmath{n})
+explain and efficient, taking logarithmic time in the result
 to compute in both directions. It is
-a poor choice for an enumeration library, however, because it will
-explore ``x'' coordinate values much more quickly
+a poor choice for an enumeration library, however, because it
+explores ``x'' coordinate values much more quickly
 than the ``y'' coordinate. Indeed, in the first
 @(add-commas bad-howmany) pairs, the ``x'' coordinate
 has seen @(add-commas bad-max-x) but the biggest ``y'' coordinate
@@ -53,7 +53,7 @@ combinator goes equally deeply into all the arguments to the
 combinator.
 
 The motivation for developing these enumeration
-libraries is bug-finding. Accordingly we tested our concept
+libraries is bug-finding. Accordingly, we tested our concept
 of fairness via an empirical study of the capability of
 enumeration libraries to find bugs in formal models of type
 systems and operational semantics in
@@ -69,10 +69,9 @@ that with the bijection. The third is an
 existing, ad hoc random generator that's been tuned for
 bug-finding in Redex models for more than a decade.
 
-As a baseline comparison, our
-results show that fair in-order enumeration and ad hoc generation
+Our results show that fair in-order enumeration and ad hoc generation
 have complementary strengths, and that selecting a random
-natural and using it with a fair enumeration is almost always
+natural number and using it with a fair enumeration is always
 slightly worse than one of the other two choices. We also replaced
 fair combinators with unfair ones and show that the the bug-finding
 capabilities become significantly worse.
@@ -81,10 +80,10 @@ The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction
 concrete. Then, in @secref["sec:fair-informal"] we give an
 intuition-based definition of fairness and discuss our
-our new n-tuple combinator, whose design is motivated by fairness.
+our new n-ary combinators, whose designs are motivated by fairness.
 We follow up in 
 @secref["sec:fair-formal"] with a formal definition of fairness
-and proofs that our combinators are fair and that a commonly used
+and proofs that our combinators are fair and that a commonly-used
 combinator is unfair. Our
 evaluation of the different random generation strategies is
 discussed in @secref["sec:evaluation"]. The next two
