@@ -116,7 +116,7 @@
                      (loop #t n)
                      (d ")"))]
         [`(min ,ae1 ,ae2)
-         (hbl-append (d "min(") (loop #f ae1) (d ",") (loop #f ae1) (d ")"))]
+         (hbl-append (d "min(") (loop #f ae1) (d ",") (loop #f ae2) (d ")"))]
         [(? number?) (d (format "~a" ae))]
         [(? symbol-with-no-underscores?)
          (it (format "~a" ae))]
