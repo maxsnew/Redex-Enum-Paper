@@ -8,8 +8,5 @@ The model used for typesetting in the paper is in `model/model.rkt`.
 The file `run-coq-redex-tests.rkt` tests the coq model, the
 typesetting model and the actual racket implementation for agreement.
 
-A racket snapshot build will be needed to run the racket code.  For
-Linux and Mac OS X users it should be easy to install from source by
-cloning https://github.com/plt/racket and `make` in that directory.
-Premade builds are available at http://pre.racket-lang.org/installers/
-and this will likely be the easiest method for Windows users.
+Racket version 6.2 is needed to run the racket code. It is available
+from http://www.racket-lang.org/

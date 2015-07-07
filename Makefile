@@ -12,11 +12,8 @@ clean:
 	rm -f supp/Makefile
 	rm -f supp.tar.gz
 
-test: coq
-	raco make -v model/redex-model.rkt model/redex-model-test.rkt \
-                     model/redex-model-typesetting.rkt model/run-coq-redex-tests.rkt
-	raco test model/redex-model-test.rkt
-	raco test model/run-coq-redex-tests.rkt
+test:
+	$(MAKE) -C model/ test
 
 coq:
 	$(MAKE) -C model/ coq
@@ -31,7 +28,7 @@ supp: DNE
 	mkdir -p supp/model
 	cp model/Makefile supp/model/
 	cp model/*.rkt supp/model/
-	mkdir -p supp/model/Enum
-	cp model/Enum/*.v supp/model/Enum
+	mkdir -p supp/model/coq
+	cp model/coq/*.v supp/model/coq
 	cd supp && tar -czf supp.tar.gz * && mv supp.tar.gz .. && cd ..
 	du -s -h supp.tar.gz
