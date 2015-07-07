@@ -300,7 +300,6 @@ Proof.
   destruct m.
   simpl in FACT.
   assert (2^n=1) by nliamega.
-  Type pow_one.
   apply pow_one in H.
   auto.
 
