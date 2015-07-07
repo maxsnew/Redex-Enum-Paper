@@ -185,13 +185,16 @@
   (define sp (open-output-string))
   (parameterize ([current-input-port (open-input-string "")]
                  [current-output-port sp])
-    (system* coqc
-             "-R"
-             (simplify-path
-              (let-values ([(base name dir?) (split-path scratch.v)])
-                              (build-path base 'up "model/coq")))
-             "Enum"
-             scratch.v))
+    (define command-line
+      (list (format "~a" coqc)
+            "-R"
+            (format "~a"
+                    (simplify-path
+                     (let-values ([(base name dir?) (split-path scratch.v)])
+                       (build-path base "coq"))))
+            "Enum"
+            (format "~a" scratch.v)))
+    (apply system* command-line))
   (define resultsp (open-input-string (get-output-string sp)))
   (with-handlers ([exn:fail? (λ (x)
                                (eprintf "failed to convert:\n")

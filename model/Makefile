@@ -3,7 +3,7 @@ VS      := $(MODULES:%=coq/%.v)
 
 .PHONY: coq clean
 
-test: Makefile.coq
+test: Makefile.coq admit
 	$(MAKE) -f Makefile.coq
 	raco make -v redex-model.rkt redex-model-test.rkt \
                      redex-model-typesetting.rkt run-coq-redex-tests.rkt
@@ -14,9 +14,16 @@ test: Makefile.coq
 coq: Makefile.coq
 	$(MAKE) -f Makefile.coq
 
+admit: coq
+	@echo ""
+	@echo ""
+	@ ! grep -i admit coq/*.v
+
 Makefile.coq: Makefile $(VS)
 	coq_makefile -R coq Enum $(VS) -o Makefile.coq
 
 clean:: Makefile.coq
 	$(MAKE) -f Makefile.coq clean
 	rm -f Makefile.coq
+	rm -rf compiled/
+

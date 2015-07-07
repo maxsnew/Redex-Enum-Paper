@@ -1,3 +1,5 @@
+SUPPDIR := fair-enumerations-supplementary-material
+
 all: test admit paper
 
 paper:
@@ -18,17 +20,17 @@ test:
 coq:
 	$(MAKE) -C model/ coq
 
-admit: coq
-	@echo ""
-	@echo ""
-	@ ! grep -i admit model/coq/*.v
+admit:
+	$(MAKE) -C model/ admit
 
 supp: DNE
-	cp Makefile supp/
-	mkdir -p supp/model
-	cp model/Makefile supp/model/
-	cp model/*.rkt supp/model/
-	mkdir -p supp/model/coq
-	cp model/coq/*.v supp/model/coq
-	cd supp && tar -czf supp.tar.gz * && mv supp.tar.gz .. && cd ..
-	du -s -h supp.tar.gz
+	rm -rf supp
+	mkdir supp
+	mkdir -p supp/$(SUPPDIR)
+	cp supp-README.txt supp/$(SUPPDIR)/README.txt
+	cp model/Makefile supp/$(SUPPDIR)
+	cp model/*.rkt supp/$(SUPPDIR)
+	mkdir -p supp/$(SUPPDIR)/coq
+	cp model/coq/*.v supp/$(SUPPDIR)/coq
+	cd supp && tar -czf $(SUPPDIR).tar.gz * && mv $(SUPPDIR).tar.gz .. && cd ..
+	du -s -h $(SUPPDIR).tar.gz
