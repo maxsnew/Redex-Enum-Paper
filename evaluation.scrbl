@@ -112,7 +112,7 @@ than the other two.
 @figure*["fig:benchmark-overview"
          @list{The mean time each generator takes to find the bugs,
                for each bug that some generator found; bars indicate
-               90% confidence intervals}
+               95% confidence intervals}
          (plot-points-from-directory)]
 
 We used three variations on the enumeration combinators. The
@@ -129,19 +129,19 @@ exponentially deep into one argument as compared to the
 other, also unfairly generalized to n-ary alternation.
 The final one we call ``brutally unfair''.
 
-For each of the 350 bug and generator combinations, we
-run a script that repeatedly asks for terms and checks to
-see if they falsify the property. As soon as it finds a
+For each of the 350 bug and generator combinations, we run a
+script that repeatedly asks for terms and checks to see if
+they falsify the property. As soon as it finds a
 counterexample to the property, it reports the amount of
-time it has been running. The script runs until the
-uncertainty in the average becomes acceptably small or until
-24 hours elapses, whichever comes first. In a second pass,
-we re-ran the bug/generator combinations where at least one
-counterexample was found, but where the 95% confidence
-interval was larger than 50% of the computed average.
-We ran each of these combinations for 8 days of
-additional CPU time.
-
+time it has been running. We ran the script in two rounds.
+The first round ran all 350 bug and generator combinations
+until either 24 hours elapsed or the uncertainty in the
+average became less than 10% of the average. At that point,
+we took all of the bugs where the uncertainty was greater
+than 50% of the average and where at least one
+counterexample was found and ran each of those for an
+additional 8 days. At this point, all of the averages have
+an uncertainty that is less than 50% of the average.
 
 @figure*["fig:rates"
          @list{Examples tested per second for each benchmark model and enumeration-based generator}
