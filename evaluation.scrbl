@@ -135,13 +135,13 @@ they falsify the property. As soon as it finds a
 counterexample to the property, it reports the amount of
 time it has been running. We ran the script in two rounds.
 The first round ran all 350 bug and generator combinations
-until either 24 hours elapsed or the uncertainty in the
-average became less than 10% of the average. At that point,
-we took all of the bugs where the uncertainty was greater
-than 50% of the average and where at least one
+until either 24 hours elapsed or the standard error in the
+average became less than 10% of the average. Then
+we took all of the bugs where the 95% confidence interval
+was greater than 50% of the average and where at least one
 counterexample was found and ran each of those for an
-additional 8 days. At this point, all of the averages have
-an uncertainty that is less than 50% of the average.
+additional 8 days. All of the final averages have
+an 95% confidence interval that is less than 50% of the average.
 
 @figure*["fig:rates"
          @list{Examples tested per second for each benchmark model and enumeration-based generator}
