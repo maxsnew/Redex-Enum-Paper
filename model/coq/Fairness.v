@@ -827,7 +827,6 @@ Section Unfair_Unfair.
     rewrite <- fl_log_pow''.
     replace (z_to_n (S (S y))) with (set_add' (S y) (z_to_n (S y)))
       by (unfold z_to_n; fold z_to_n; auto).
-    Type set_add_cons_eq.
     eapply (set_eq_trans _ (cons (S y) (z_to_n (S y)))); auto.
     eapply (set_eq_trans _ (app (cons (S y) nil) (z_to_n (S y)))); auto.
     apply set_union_app_eq.
