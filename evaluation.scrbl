@@ -35,16 +35,15 @@ used to automatically falsify such claims.
 Our evaluation used the Redex benchmark, which consists of
 a number of models, including the Racket virtual machine
 model@~cite[racket-virtual-machine], a polymorphic
-λ-calculus used for random testing in other work 
-@~cite[palka-workshop generating-random-lambda-terms], the
-list machine benchmark@~cite[list-machine], and a delimited
+λ-calculus used for random testing@~cite[palka-workshop generating-random-lambda-terms],
+the list machine benchmark@~cite[list-machine], and a delimited
 continuation contract model@~cite[delim-cont-cont], as well
 as a few models we built ourselves based on our experience
 with random generation and to cover typical Redex
 models.@note{The full benchmark is online:
  @url{http://docs.racket-lang.org/redex/benchmark.html}}
-Each model comes with a number of variations, each with a
-different bug. Each model and bug pair is equipped with a
+Each model comes with a number of buggy variations.
+Each model and bug pair is equipped with a
 property that should hold for every term, but does not, due
 to the bug. There are 8 models and 50 bugs in total.
 
@@ -96,9 +95,9 @@ We chose this distribution because it does not have a fixed
 mean. That is, if you take the mean of some number of
 samples and then add more samples and take the mean again,
 the mean of the new numbers is likely to be larger than from
-the mean of the old sample. We believe this is a good
-property to have when indexing into our enumerations so as
-to avoid biasing our indices towards a small size.
+the mean of the old. We believe this is a good
+property to have when indexing into our enumerations so
+we avoid biasing our indices towards a small size.
 
 The random-selection results are sensitive to the
 probability of picking the zero exponent from the geometric
@@ -163,7 +162,7 @@ of which Redex is a part.
 The graph in @figure-ref["fig:dominates"] gives a high-level
 view of which generators are more effective at finding bugs.
 There is an edge between two generators if the one above
-finds all the bugs that the one below finds and the
+finds all the bugs that the one below finds and the one below
 was unable to find at least one bug that the one above
 found. By this metric, the ad hoc random generator is a
 clear winner, the fair enumerators are second and the
@@ -183,7 +182,7 @@ time. The lines on each plot show how the number of
 counterexamples found changes as time passes.
 
 The thicker, black line is the same on both plots. It shows
-the number of counter examples found by the ad hoc random
+the number of counterexamples found by the ad hoc random
 generator. The upper plot shows how drawing from the
 enumeration in order fares, compared to the random
 generator. The solid red (not thick) line is with fair
@@ -249,8 +248,8 @@ ones because their more balanced exploration of the space leads
 to a wider variety of interesting examples being explored.
 @Figure-ref["fig:rates"] provides some evidence for this theory.
 It shows the number of examples tested per second for each model
-(our particular bug benchmark does not cause the generators
-to generate different per-bug examples, only different per-model examples)
+(the redex bug benchmark does not cause our generators or the ad hoc
+random generator to generate different per-bug examples, only different per-model examples)
 under the different generator strategies. The left-hand plot shows
 the in-order generators and the right-hand plot shows the generators
 that selected random natural numbers and used those to generate examples.
@@ -258,8 +257,8 @@ In every case, the fair enumeration strategy generates fewer
 examples per second (except for the list-machine benchmark in
 the random generator, where it is only slightly faster). And yet the
 fair generators find more bugs. This suggests that the unfair generators
-are repeatedly generating simple, similar examples that can be tested
-quickly, but provide little new information about the model.
+are repeatedly generating simple examples that can be tested
+quickly, but that provide little new information about the model.
 We believe this is because the unfair generators spend a lot of time exploring
-programs with similar structure that differ only in the names
+programs that differ only in the names
 of the variables or other typically uninteresting variations.

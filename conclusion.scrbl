@@ -3,11 +3,11 @@
 
 @title[#:tag "sec:conclusion"]{Conclusion}
 
-This paper presents a new concept for enumeration,
-fairness, backing it up with a theoretical development
+This paper presents a new concept for enumeration libraries that
+we call @emph{fairness}, backing it up with a theoretical development
 of fair combinators, an implementation, and an empirical
 study showing that fair enumeration can support an 
-effective testing tool and that unfair enumerations do not.
+effective testing tool and that unfair enumerations cannot.
 
 Indeed, the results of our empirical study have convinced us
 to modify Redex's default random testing functionality. The new
@@ -20,9 +20,10 @@ complementary benefits of in-order and random enumeration as
 shown in our results, without the need for any
 configuration.
 
-@;{
  @(element (style "paragraph" '()) '("Acknowledgments."))
+Elided for double-blind submission.
 
+@;{
 Thanks to Neil Toronto for helping
 us find a way to select from the natural numbers at random.
 Thanks to Ben Lerner for proving a square root property that gave us

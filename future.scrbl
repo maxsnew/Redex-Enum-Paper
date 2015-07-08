@@ -64,7 +64,7 @@ lengths of the enumeration above that uses the dependent pair.
     #:y-max (+ 10 (max lon-y-max lon2-y-max))
     (list lon-points lon2-points)))
 
-@(scale (build-length-stats) .9)
+@centered{@(scale (build-length-stats) .9)}
 
 The idea of using dependent pairing to first select a
 ``shape'' for the data structure and then to stitch it
@@ -76,7 +76,7 @@ fairness that captures this difference.
 
 We hope that someday someone is able to capture this notion
 but there is one other wrinkle worth mentioning: the
-seemingly fair enumeration is significantly slower. Enough
+seemingly fair enumeration is much slower. Enough
 that the built-in list combinator in our enumeration library
 does not provide that enumeration strategy by default
 (although it is an option that is easy to use).
