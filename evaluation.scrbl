@@ -40,7 +40,7 @@ the list machine benchmark@~cite[list-machine], and a delimited
 continuation contract model@~cite[delim-cont-cont], as well
 as a few models we built ourselves based on our experience
 with random generation and to cover typical Redex
-models.@note{The full benchmark is online:
+models.@note{It is online:
  @url{http://docs.racket-lang.org/redex/benchmark.html}}
 Each model comes with a number of buggy variations.
 Each model and bug pair is equipped with a
@@ -72,8 +72,7 @@ that seemed to be the most successful. This produces terms
 of a similar size to those of the random enumeration method,
 although the distribution is different.
 
-For the random selection from an enumeration, we
-need a mechanism to pick a natural number. To do this, we
+To pick a random natural number to index into the enumeration, we
 first pick an exponent @texmath{i} in base 2 from the
 geometric distribution and then pick uniformly at random an
 integer that is between @texmath{2^{i-1}} and 

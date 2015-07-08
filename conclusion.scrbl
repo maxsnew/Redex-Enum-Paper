@@ -20,10 +20,9 @@ complementary benefits of in-order and random enumeration as
 shown in our results, without the need for any
 configuration.
 
- @(element (style "paragraph" '()) '("Acknowledgments."))
-Elided for double-blind submission.
-
 @;{
+ @(element (style "paragraph" '()) '("Acknowledgments."))
+
 Thanks to Neil Toronto for helping
 us find a way to select from the natural numbers at random.
 Thanks to Ben Lerner for proving a square root property that gave us

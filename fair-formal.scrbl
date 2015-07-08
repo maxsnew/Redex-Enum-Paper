@@ -12,6 +12,7 @@
           scriblib/figure
           redex/reduction-semantics
           redex/pict
+          "model/redex-model.rkt"
           "model/redex-model-typesetting.rkt"
           "model/redex-model-test.rkt"
           "util.rkt")
@@ -51,10 +52,10 @@ Just below the grammar is the simplest rule, the one for @sr[(below/e n+)];
 it is just the identity. To its right is the 
 @sr[map/e] rule, showing how its bijection is used.
 To the right of @sr[map/e] is the @sr[cons/e] rule. 
-It defers to the @mf-name{unpair} function, shown at the bottom of
+It uses the @mf-name{unpair} function, shown at the bottom of
 the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations (computed
 by the size function in the bottom right of the figure) and the index.
-It maps indices in the way discussed in @secref["sec:enum"].
+It maps indices as discussed in @secref["sec:enum"].
 
 The next two rules, reading down the figure, are the @sr[dep/e] rules.
 The @sr[dep/e] combinator is a simplified, functional interface
@@ -76,7 +77,7 @@ one for where it above.
 
 Beside the @sr[except/e] rules is the @sr[fix/e] rule. The
 @sr[fix/e] combinator is like @racket[delay/e], except it
-accepts an explicit thunk argument. The rule
+provides an explicit name for the enumeration. The rule
 uses substitution (our implementation fails to terminate
 when an ``infinite derivation'' would be required).
 The last two rules are an unfair pairing operation using the
@@ -87,17 +88,17 @@ The Coq model is simpler than the model presented here and
 the model presented here is simpler than our implementation.
 The primary simplification is in the kinds of values that
 are enumerated. In our implementation, any value that can be
-captured in a contract in Racket's contract system can be
+captured with a contract in Racket's contract system can be
 enumerated. In the model presented here, we restrict those
 values to the ones captured by @sr[τ], and the in Coq model
-restrict that further by eliminating recursive types and the
+restrict that further by eliminating recursive types and
 finite types. The implementation also has many more
 combinators than the ones presented here, but they are
-either derivable from these or require only simple
-extensions. The Coq model has the combinators from
-@figure-ref["fig:semantics"], except for the @sr[fix/e] combinator and the @sr[except/e]
+either derivable from these or require only straightforward
+extensions. The Coq model has the combinators
+in @figure-ref["fig:semantics"], except for the @sr[fix/e] combinator and the @sr[except/e]
 combinator. In general, the Coq model is designed to be
-enough for us to state and prove some results about
+just enough for us to state and prove some results about
 fairness.
 
 Before we define fairness, however, we first need to prove that
@@ -238,7 +239,7 @@ The full proof is @tt{NaiveSum3Unfair} in the Coq model.
 }
 
 
-@theorem{@sr[cons/e] is @texmath{\lambda n.\ (n+1)^2}-fair}
+@theorem{@sr[cons/e] is @texmath{\lambda n.\ (n+1)^2}-fair.}
 @proof{
 First, we show that tracing from @texmath{n^2} to
 @texmath{(n+1)^2} produces a trace that maps @texmath{0} and
@@ -249,7 +250,7 @@ then holds by induction on @texmath{n}.
 The full proof is @tt{PairFair} in the Coq model.
 }
 
-@theorem{@sr[triple/e] from @secref["sec:fair-informal"] is unfair}
+@theorem{@sr[triple/e] from @secref["sec:fair-informal"] is unfair.}
 @proof{
 For any natural @texmath{n \ge 16}, there exist natural numbers
 @texmath{m, p} such that @texmath{m^2 \le n < p^4} and @texmath{p < m}.

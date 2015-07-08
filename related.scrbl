@@ -139,11 +139,10 @@ Not to focus on a single example
 property (the last @racket[xs] should be @racket[ys]):
 @racketblock[nth (append xs ys) (length xs+n) = nth xs n]
 saying that
-@a-quote{
 “[r]andom testing typically fails to find the counterexample, even 
 with hundreds of iterations, because randomly chosen values for 
 @racket[n] are almost always out of bounds.”
-}
+
 This property is easier for both Quickcheck and Redex,
 taking, on average, 4 attempts for Quickcheck and 5 for Redex
 to find a counterexample.

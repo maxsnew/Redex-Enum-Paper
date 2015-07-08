@@ -250,7 +250,7 @@
              (hbl-append (d ",  ") (left-double-bar))
              f
              (hbl-append (d "(x)") (right-double-bar) (d " < ∞"))))]
-    ['subst-t rewrite-subst]
+    ['subst-τ rewrite-subst]
     ['subst-e rewrite-subst]
     ['∧
      (λ (lws)
