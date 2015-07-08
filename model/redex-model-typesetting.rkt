@@ -67,7 +67,7 @@
                       (loop #f ae2)))]
         [`(integer-sqrt ,(? symbol? n))
          (define var (it (format "~a" n)))
-         (define line (inset (hline (pict-width var)) 0 1 0 0))
+         (define line (hc-append (blank 1 0) (inset (hline (pict-width var)) 0 1 0 0)))
          (define left-side (d "√"))
          (hbl-append (d "⌊")
                      left-side 
