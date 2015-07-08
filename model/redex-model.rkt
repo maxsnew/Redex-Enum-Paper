@@ -5,11 +5,11 @@
          (prefix-in : data/enumerate/private/unfair))
 
 (provide L
-         e? T? v? e/unfair?
+         e? T? v?
          sum-up-to sum-up-to-find-k
          unpair size ae-interp
-         @ @<-
-         to-enum subst to-val)
+         @ @<- ⊢v tye
+         to-enum subst-τ subst-e to-val)
 
 (define-language L
   (e ::= 
@@ -24,9 +24,14 @@
      (trace/e n e)
      x)
   (n+ ::= n ∞)
-  (v ::= (cons v v) n)
+  (τ ::= n+ (∧ τ τ) (∨ τ τ) 
+     (μ x τ) x (- τ v))
+  (v ::=
+     (inl v) (inr v)
+     (cons v v) n)
   (n i j k ::= natural)
   (x ::= variable-not-otherwise-mentioned)
+  (Γ ::= (x ...))
   
   (ae ::=
       (+ ae ae) (/ ae ae) (* ae ae)
@@ -41,8 +46,8 @@
   
   (f ::=
      swap-cons
-     (swap-zero-with natural)
-     nat->map-of-swap-zero-with
+     (swap-zero-with n)
+     (nat->map-of-swap-zero-with n+)
      nat->below/e-of-that-nat)
   (fin-or-inf ::= fin inf))
 
@@ -61,22 +66,22 @@
   [(even n) (side-condition (ae-interp (< n (* (min (size e_1) (size e_2)) 2))))
    (@ e_1 (ae-interp (/ n 2)) v T)
    ---------------------------------------------  "or alt l"
-   (@ (or/e e_1 e_2) n (cons 0 v) T)]
+   (@ (or/e e_1 e_2) n (inl v) T)]
   
   [(odd n) (side-condition (ae-interp (< n (* (min (size e_1) (size e_2)) 2))))
    (@ e_2 (ae-interp (/ (- n 1) 2)) v T)
    -------------------------------------------------- "or alt r"
-   (@ (or/e e_1 e_2) n (cons 1 v) T)]
+   (@ (or/e e_1 e_2) n (inr v) T)]
 
   [(side-condition (ae-interp (>= n (* (min (size e_1) (size e_2)) 2)))) (side-condition (ae-interp (< (size e_2) (size e_1))))
    (@ e_1 (ae-interp (- n (size e_2))) v T)
    -------------------------------------------------- "or big l"
-   (@ (or/e e_1 e_2) n (cons 0 v) T)]
+   (@ (or/e e_1 e_2) n (inl v) T)]
 
   [(side-condition (ae-interp (>= n (* (min (size e_1) (size e_2)) 2)))) (side-condition (ae-interp (< (size e_1) (size e_2))))
    (@ e_2 (ae-interp (- n (size e_1))) v T)
    -------------------------------------------------- "or big r"
-   (@ (or/e e_1 e_2) n (cons 1 v) T)]
+   (@ (or/e e_1 e_2) n (inr v) T)]
 
   [(where (× n_1 n_2) (unpair (size e_1) (size e_2) n))
    (@ e_1 n_1 v_1 T_1) (@ e_2 n_2 v_2 T_2)
@@ -110,7 +115,7 @@
    ---------------------------------------- "ex≥"
    (@ (except/e e v_1) n_2 v_2 T)]
 
-  [(@ (subst e x (fix/e x e)) n v T)
+  [(@ (subst-e e x (fix/e x e)) n v T)
    --------------------------------- "fix"
    (@ (fix/e x e) n v T)]
   
@@ -141,8 +146,6 @@
    ----------------------------------------------------------
    (unfair-n->n*n n n_y n_x)])
 
-(define e/unfair? (redex-match L e))
-
 (define-judgment-form L
   #:mode (sum-up-to-find-k I I I O)
   #:contract (sum-up-to-find-k n f e k)
@@ -161,21 +164,6 @@
            k]
           [else
            (loop (+ k 1) (+ sum ith-size))])))])
-
-(define-metafunction L
-  size : e -> n+
-  [(size (below/e n+)) n+]
-  [(size (or/e e_1 e_2)) (ae-interp (+ (size e_1) (size e_2)))]
-  [(size (cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
-  [(size (unfair-cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
-  [(size (map/e f f e)) (size e)]
-  [(size (dep/e fin-or-inf e f)) ∞ (side-condition (term (inf? fin-or-inf e f)))]
-  [(size (dep/e fin-or-inf e f))
-   (ae-interp (* (size e) (sum-all e f)))
-   (side-condition (term (ae-interp (< (size e) ∞))))]
-  [(size (except/e e v)) (ae-interp (- (size e) 1))]
-  [(size (fix/e x e)) ∞]
-  [(size (trace/e n e)) (size e)])
 
 (define-metafunction L
   sum-all : e f -> n
@@ -220,19 +208,27 @@
    (× (ae-interp (div n j)) (ae-interp (mod n j)))
    (side-condition (term (ae-interp (>= i j))))])
 
-
-;; assumes closed "e"s
+;; assumes closed expressions/types
 (define-metafunction L
-  subst : e x e -> e
-  [(subst e_2 x e_1)
-   ,(let loop ([e (term e_2)])
-      (match e
-        [`(fix/e ,x2 ,e)
-         (if (equal? x2 (term x))
-             `(fix/e ,x2 ,e)
-             `(fix/e ,x2 ,(loop e)))]
-        [(? list?) (map loop e)]
-        [_ (if (equal? e (term x)) (term e_1) e)]))])
+  subst-e : e x e -> e
+  [(subst-e e_2 x e_1)
+   ,(do-subst (term e_2) (term x) (term e_1))])
+
+(define-metafunction L
+  subst-τ : τ x τ -> τ
+  [(subst-τ τ_2 x τ_1)
+   ,(do-subst (term τ_2) (term x) (term τ_1))])
+
+(define (do-subst e2 x e1)
+  (let loop ([e e2])
+    (match e
+      [`(,(or 'fix/e 'μ) ,x2 ,e-body)
+       (define kwd (car e))
+       (if (equal? x2 x)
+           `(,kwd ,x2 ,e-body)
+           `(,kwd ,x2 ,(loop e-body)))]
+      [(? list?) (map loop e)]
+      [_ (if (equal? e x) e1 e)])))
  
 (define-metafunction L
   ⊕ : T T -> T
@@ -260,8 +256,8 @@
 
 (define-metafunction L
   Eval-enum : (f any) -> any
-  [(Eval-enum (nat->map-of-swap-zero-with n))
-   (map/e (swap-zero-with n) (swap-zero-with n) (below/e ∞))]
+  [(Eval-enum ((nat->map-of-swap-zero-with n+) n))
+   (map/e (swap-zero-with n) (swap-zero-with n) (below/e n+))]
   [(Eval-enum (nat->below/e-of-that-nat n)) (below/e n)]
   [(Eval-enum (nat->below/e-of-that-nat any)) (below/e 0)]
   [(Eval-enum (f any)) (below/e ∞)])
@@ -330,6 +326,96 @@
     [else (<= a b)]))
 
 (define-metafunction L
+  size : e -> n+
+  [(size (below/e n+)) n+]
+  [(size (or/e e_1 e_2)) (ae-interp (+ (size e_1) (size e_2)))]
+  [(size (cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
+  [(size (unfair-cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
+  [(size (map/e f f e)) (size e)]
+  [(size (dep/e fin-or-inf e f)) ∞ (side-condition (term (inf? fin-or-inf e f)))]
+  [(size (dep/e fin-or-inf e f))
+   (ae-interp (* (size e) (sum-all e f)))
+   (side-condition (term (ae-interp (< (size e) ∞))))]
+  [(size (except/e e v)) (ae-interp (- (size e) 1))]
+  [(size (fix/e x e))
+   (size e)
+   (side-condition (term (same (subst-e e x (fix/e x e)) e)))]
+  [(size (fix/e x e)) ∞]
+  [(size (trace/e n e)) (size e)])
+
+(define-metafunction L
+  [(tye e) (tye (empty-set) e)]
+  [(tye Γ (below/e n+)) n+]
+  [(tye Γ (or/e e_1 e_2)) (∨ (tye Γ e_1) (tye Γ e_2))]
+  [(tye Γ (cons/e e_1 e_2)) (∧ (tye Γ e_1) (tye Γ e_2))]
+  [(tye Γ (unfair-cons/e e_1 e_2)) (∧ (tye Γ e_1) (tye Γ e_2))]
+  [(tye Γ (map/e f_1 f_2 e))
+   (rng f_1)
+   (side-condition (term (same (tye Γ e) (rng f_2))))]
+  [(tye Γ (dep/e fin-or-inf e f)) (∧ (tye Γ e) (rng f))]
+  [(tye Γ (except/e e v)) (- (tye Γ e) v)]
+  [(tye Γ (fix/e x e)) (μ x (tye (extend Γ x) e))]
+  [(tye Γ (trace/e n e)) (tye Γ e)]
+  [(tye Γ x) x (side-condition (term (contains x Γ)))])
+
+(define-metafunction L
+  rng : f -> τ
+  [(rng swap-cons) (∧ ∞ ∞)]
+  [(rng (swap-zero-with n)) ∞]
+  [(rng (nat->map-of-swap-zero-with n+)) n+])
+
+(define-metafunction L
+  contains : x Γ -> boolean
+  [(contains x_1 (x_2 ... x_1 x_3 ...)) #t]
+  [(contains x_1 (x_2 ...)) #f])
+
+(define-metafunction L
+  extend : Γ x -> Γ
+  [(extend (x_1 ...) x_2) (x_2 x_1 ...)])
+
+(define-metafunction L
+  empty-set : -> Γ
+  [(empty-set) ()])
+
+(define-judgment-form L
+  #:mode (⊢v I I)
+  #:contract (⊢v v τ)
+
+  [(side-condition (ae-interp (< n n+)))
+   --------------------
+   (⊢v n n+)]
+
+  [(⊢v v_1 τ_1) (⊢v v_2 τ_2)
+   -------------------------------
+   (⊢v (cons v_1 v_2) (∧ τ_1 τ_2))]
+
+  [(⊢v v (subst-τ τ x (μ x τ)))
+   --------------------------
+   (⊢v v (μ x τ))]
+
+  [(⊢v v τ_2)
+   ------------------------
+   (⊢v (inr v) (∨ τ_1 τ_2))]
+
+  [(⊢v v τ_1)
+   ------------------------
+   (⊢v (inl v) (∨ τ_1 τ_2))]
+
+  [(⊢v v_1 τ_1) (side-condition (different v_1 v_2))
+   -------------------------------------------------
+   (⊢v v_1 (- τ_1 v_2))])
+
+(define-metafunction L
+  same : any any -> boolean
+  [(same any_1 any_1) #t]
+  [(same any_1 any_2) #f])
+
+(define-metafunction L
+  different : any any -> boolean
+  [(different any_1 any_1) #f]
+  [(different any_1 any_2) #t])
+
+(define-metafunction L
   to-enum : e -> any
   [(to-enum (or/e e_1 e_2))
    ,(let ([e1 (term (to-enum e_1))]
@@ -375,11 +461,11 @@
           [swap (λ (x) (if (pair? x) (cons (cdr x) (car x)) x))])
       (:map/e swap swap e #:contract (:enum-contract e)))]
   [(to-enum (map/e any any e)) (to-enum e)]
-  [(to-enum (dep/e inf e nat->map-of-swap-zero-with))
+  [(to-enum (dep/e inf e (nat->map-of-swap-zero-with n+)))
    ,(:dep/e (term (to-enum e))
             (λ (x)
               (if (exact-nonnegative-integer? x)
-                  (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e ∞))))
+                  (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e n+))))
                   :natural/e)))]
   [(to-enum (dep/e fin e nat->below/e-of-that-nat))
    ,(:dep/e (term (to-enum e))
@@ -407,5 +493,7 @@
 (define-metafunction L
   to-val : v -> any
   [(to-val n) n]
+  [(to-val (inl v)) ,(cons 0 (term (to-val v)))]
+  [(to-val (inr v)) ,(cons 1 (term (to-val v)))]
   [(to-val (cons v_1 v_2)) ,(cons (term (to-val v_1)) (term (to-val v_2)))])
 

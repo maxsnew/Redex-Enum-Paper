@@ -199,11 +199,21 @@
     (cond
       [(symbol? (lw-e lw)) (ae->pict (lw-e lw))]
       [else (error 'ae-sym "non symbol: ~s" (lw-e lw))]))
+
+  (define (rewrite-subst lws)
+    (define replace-inside (list-ref lws 2))
+    (define x (list-ref lws 3))
+    (define new-thing (list-ref lws 4))
+    (list "" replace-inside "{" x " := " new-thing "}"))
   
   (with-compound-rewriters
    (['@ @-rewrite]
-    ['@* @-rewrite]
     ['@<- @-rewrite]
+    ['⊢v 
+     (λ (lws)
+       (define v (list-ref lws 2))
+       (define τ (list-ref lws 3))
+       (list "" v " : " τ ""))]
     ['dep/e
      (λ (lws)
        (list (list-ref lws 0)
@@ -240,12 +250,46 @@
              (hbl-append (d ",  ") (left-double-bar))
              f
              (hbl-append (d "(x)") (right-double-bar) (d " < ∞"))))]
-    ['subst
+    ['subst-t rewrite-subst]
+    ['subst-e rewrite-subst]
+    ['∧
      (λ (lws)
-       (define replace-inside (list-ref lws 2))
+       (define left (list-ref lws 2))
+       (define right (list-ref lws 3))
+       (list "" left " ∧ " right ""))]
+    ['∨
+     (λ (lws)
+       (define left (list-ref lws 2))
+       (define right (list-ref lws 3))
+       (list "" left " ∨ " right ""))]
+    ['μ
+     (λ (lws)
+       (define x (list-ref lws 2))
+       (define τ (list-ref lws 3))
+       (list "μ" x ". " τ ""))]
+    ['same
+     (λ (lws)
+       (define left (list-ref lws 2))
+       (define right (list-ref lws 3))
+       (list "" left " = " right ""))]
+    ['different
+     (λ (lws)
+       (define left (list-ref lws 2))
+       (define right (list-ref lws 3))
+       (list "" left " ≠ " right ""))]
+    ['empty-set
+     (λ (lws)
+       (list "∅"))]
+    ['contains
+     (λ (lws)
+       (define x (list-ref lws 2))
+       (define Γ (list-ref lws 3))
+       (list "" x " ∈ " Γ ""))]
+    ['extend
+     (λ (lws)
+       (define Γ (list-ref lws 2))
        (define x (list-ref lws 3))
-       (define new-thing (list-ref lws 4))
-       (list "" replace-inside "{" x " := " new-thing "}"))]
+       (list "" Γ " ∪ {" x "}"))]
     ['×
      (λ (lws)
        (list "⟨" (list-ref lws 2) ", " (list-ref lws 3) "⟩"))]
@@ -394,21 +438,31 @@
      (vc-append
       (hc-append 
        30
-       (inset (frame (inset (render-language L #:nts '(e n+ v n i j)) 4)) 4)
-       (some-rules linebreaking-with-cases1))
-      (some-rules linebreaking-with-cases2))
+       (inset (frame (inset (render-language L #:nts '(e n+ τ v n i j)) 4)) 4)
+       (some-rules linebreaking-with-cases1 @))
+      (some-rules linebreaking-with-cases2 @))
      (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
                     [where-make-prefix-pict
                      (λ ()
                        (text " if " (default-style)))])
-       (htl-append 30
-                   (vl-append
-                    20
-                    (render-metafunction unpair)
-                    (render-metafunction sum-up-to))
-                   (render-metafunction size)))))))
+       
+       (vc-append
+        20
+        (htl-append 30
+                    (render-metafunction tye)
+                    (render-metafunction size))
+        (hc-append
+         40
+         (render-metafunction unpair)
+         (vl-append
+          20
+          (some-rules '((0 1 2) (3 4 5)) ⊢v) 
+          (render-metafunction sum-up-to)))))))))
 
-(define (some-rules linebreaking)
+(define-syntax-rule
+  (some-rules linebreaking jf)
+  (some-rules/proc linebreaking (λ () (render-judgment-form jf))))
+(define (some-rules/proc linebreaking thunk)
   (apply
    vc-append
    20
@@ -418,7 +472,7 @@
       25
       (for/list ([name (in-list line)])
         (parameterize ([judgment-form-cases (list name)])
-          (render-judgment-form @)))))))
+          (thunk)))))))
 
 (define-syntax-rule 
   (sr e)

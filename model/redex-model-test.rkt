@@ -8,7 +8,7 @@
 (provide
  (contract-out
   [from-nat+trace
-   (-> e/unfair?
+   (-> e?
        exact-nonnegative-integer? 
        (values any/c
                (hash/c exact-nonnegative-integer?
@@ -113,13 +113,49 @@
   (check-equal? (term (size (unfair-cons/e (below/e ∞) (below/e 11)))) (term ∞))
   (check-equal? (term (size (unfair-cons/e (below/e 4) (below/e 11)))) 44)
   (check-equal? (term (size (or/e (below/e 4) (below/e 11)))) 15)
-  (check-equal? (term (size (dep/e inf (below/e ∞) nat->map-of-swap-zero-with))) (term ∞))
-  (check-equal? (term (size (dep/e fin (below/e 10) nat->below/e-of-that-nat)))
-                450)
+  (check-equal? (term (size (dep/e inf (below/e ∞) (nat->map-of-swap-zero-with ∞)))) (term ∞))
+  (check-equal? (term (size (dep/e fin (below/e 10) (nat->map-of-swap-zero-with 11))))
+                1100)
   (check-equal? (term (size (except/e (below/e 10) 3))) 9)
   (check-equal? (term (size (except/e (below/e ∞) 3))) (term ∞))
   (check-equal? (term (size (fix/e x (below/e ∞)))) (term ∞))
-  
+  (check-equal? (term (size (fix/e x (below/e 10)))) 10)
+
+  (check-equal? (term (tye (below/e 2))) 2)
+  (check-equal? (term (tye (below/e ∞))) (term ∞))
+  (check-equal? (term (tye (cons/e (below/e ∞) (below/e 11)))) (term (∧ ∞ 11)))
+  (check-equal? (term (tye (cons/e (below/e 4) (below/e 11)))) (term (∧ 4 11)))
+  (check-equal? (term (tye (unfair-cons/e (below/e ∞) (below/e 11)))) (term (∧ ∞ 11)))
+  (check-equal? (term (tye (unfair-cons/e (below/e 4) (below/e 11)))) (term (∧ 4 11)))
+  (check-equal? (term (tye (or/e (below/e 4) (below/e 11)))) (term (∨ 4 11)))
+  (check-equal? (term (tye (dep/e inf (below/e ∞) (nat->map-of-swap-zero-with ∞)))) (term (∧ ∞ ∞)))
+  (check-equal? (term (tye (dep/e fin (below/e 10) (nat->map-of-swap-zero-with 11))))
+                (term (∧ 10 11)))
+  (check-equal? (term (tye (except/e (below/e 10) 3))) (term (- 10 3)))
+  (check-equal? (term (tye (except/e (below/e ∞) 3))) (term (- ∞ 3)))
+  (check-equal? (term (tye (except/e (cons/e (below/e 10) (below/e 11)) (cons 2 3))))
+                (term (- (∧ 10 11) (cons 2 3))))
+  (check-equal? (term (tye (except/e (or/e (below/e ∞) (cons/e (below/e 10) (below/e 11))) (inl 11))))
+                (term (- (∨ ∞ (∧ 10 11)) (inl 11))))
+  (check-equal? (term (tye (except/e (or/e (below/e ∞) (cons/e (below/e 10) (below/e 11)))
+                                     (inr (cons 1 1)))))
+                (term (- (∨ ∞ (∧ 10 11)) (inr (cons 1 1)))))
+  (check-equal? (term (tye (fix/e x (below/e ∞)))) (term (μ x ∞)))
+  (check-equal? (term (tye (fix/e x (or/e (cons/e (below/e ∞) x) (below/e ∞)))))
+                (term (μ x (∨ (∧ ∞ x) ∞))))
+  (check-equal? (term (tye (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))
+                (term (∧ ∞ ∞)))
+
+  (check-true (judgment-holds (⊢v 0 1)))
+  (check-false (judgment-holds (⊢v 1 0)))
+  (check-true (judgment-holds (⊢v 100 ∞)))
+  (check-true (judgment-holds (⊢v (cons 11 33) (∧ 1012 ∞))))
+  (check-true (judgment-holds (⊢v (inl 1) (∨ ∞ (∧ ∞ ∞)))))
+  (check-true (judgment-holds (⊢v (inr (cons 1 2)) (∨ ∞ (∧ ∞ ∞)))))
+  (check-false (judgment-holds (⊢v 11 (- ∞ 11))))
+  (check-true (judgment-holds (⊢v 12 (- ∞ 11))))
+  (check-true (judgment-holds (⊢v (inr (cons (inl 11) (inr (cons (inl 23) (inl 44)))))
+                                  (μ bt (∨ ∞ (∧ bt bt))))))
   
   (check-equal? 
    (:from-nat (term (to-enum (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))
@@ -163,19 +199,25 @@
                                      (term (below/e ∞))))
   
   
-  (check-equal? (term (subst (cons/e (below/e ∞) (below/e ∞)) x (below/e ∞)))
+  (check-equal? (term (subst-e (cons/e (below/e ∞) (below/e ∞)) x (below/e ∞)))
                 (term (cons/e (below/e ∞) (below/e ∞))))
-  (check-equal? (term (subst (cons/e x x) x (below/e ∞)))
+  (check-equal? (term (subst-e (cons/e x x) x (below/e ∞)))
                 (term (cons/e (below/e ∞) (below/e ∞))))
-  (check-equal? (term (subst (cons/e x (fix/e x x)) x (below/e ∞)))
+  (check-equal? (term (subst-e (cons/e x (fix/e x x)) x (below/e ∞)))
                 (term (cons/e (below/e ∞) (fix/e x x))))
-  (check-equal? (term (subst (cons/e x (fix/e y x)) x (below/e ∞)))
+  (check-equal? (term (subst-e (cons/e x (fix/e y x)) x (below/e ∞)))
                 (term (cons/e (below/e ∞) (fix/e y (below/e ∞)))))
+  (check-equal? (term (subst-τ (∧ x (μ y x)) x ∞)) (term (∧ ∞ (μ y ∞))))
   
   (check-equal? (judgment-holds (@<- (cons/e (below/e ∞) (below/e ∞)) n (cons 0 0) T) n)
                 '(0))
   (check-equal? (judgment-holds (@<- (cons/e (below/e ∞) (below/e ∞)) n (cons 3 4) T) n)
                 (list (:to-nat (:cons/e :natural/e :natural/e) (cons 3 4))))
+
+  (check-equal? (try-one (term (or/e (fix/e x (below/e 10))
+                                     (cons/e (below/e ∞) (below/e ∞))))
+                         100)
+                #t)
   
   (try-many (term (below/e ∞)))
   (try-many (term (or/e (below/e ∞) (cons/e (below/e ∞) (below/e ∞)))))
@@ -183,7 +225,7 @@
   (try-many (term (cons/e (below/e ∞) (below/e ∞))))
   (try-many (term (map/e (swap-zero-with 1) (swap-zero-with 1) (below/e ∞))))
   (try-many (term (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))
-  (try-many (term (dep/e inf (below/e ∞) nat->map-of-swap-zero-with)))
+  (try-many (term (dep/e inf (below/e ∞) (nat->map-of-swap-zero-with ∞))))
   (try-many (term (dep/e fin (below/e 10000) nat->below/e-of-that-nat)))
   (try-many (term (except/e (below/e ∞) 1)))
   (try-many (term (fix/e bt (or/e (below/e ∞) (cons/e bt bt)))))
@@ -227,7 +269,7 @@
   (for ([x (in-range 100)])
     (define l
       (judgment-holds 
-       (@ (dep/e inf (below/e ∞) nat->map-of-swap-zero-with)
+       (@ (dep/e inf (below/e ∞) (nat->map-of-swap-zero-with ∞))
           ,x
           v
           T)

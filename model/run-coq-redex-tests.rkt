@@ -1,7 +1,7 @@
 #lang at-exp racket
 
-(require (prefix-in m: "redex-model.rkt" )
-         (prefix-in m: "redex-model-test.rkt" )
+(require (prefix-in m: "redex-model.rkt")
+         (prefix-in m: "redex-model-test.rkt")
          racket/runtime-path
          redex/reduction-semantics
          rackunit/log
@@ -22,7 +22,7 @@
 
 ;; builds a list of test cases for the nats up to `n'
 (define/contract (build-test-cases e n)
-  (-> m:e/unfair? exact-nonnegative-integer? (listof test-case?))
+  (-> m:e? exact-nonnegative-integer? (listof test-case?))
   (for/list ([i (in-range n)])
     (build-test-case e i)))
 
@@ -104,7 +104,7 @@
             (o "(E_Map SwapConsBij' ")
             (o-enum e)
             (o ")")]
-           [`(dep/e inf ,e nat->map-of-swap-zero-with)
+           [`(dep/e inf ,e (nat->map-of-swap-zero-with ∞))
             (o "(E_Dep ")
             (o-enum e)
             (o " Nat_To_Map_Of_Swap_Zero_With)")]
@@ -131,7 +131,7 @@
             (o ")")]
            [(`(map/e ,f-in ,f-out ,e) v)
             (o-v e v)]
-           [(`(dep/e inf ,e nat->map-of-swap-zero-with) (cons i j))
+           [(`(dep/e inf ,e (nat->map-of-swap-zero-with ∞)) (cons i j))
             (o "(pair ")
             (o-v e i)
             (o " ")
@@ -279,7 +279,7 @@
                    100)
  (build-test-cases '(map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))
                    100)
- (build-test-cases '(dep/e inf (below/e ∞) nat->map-of-swap-zero-with)
+ (build-test-cases '(dep/e inf (below/e ∞) (nat->map-of-swap-zero-with ∞))
                    100))
 
 ;; missing dep/e

@@ -83,17 +83,30 @@ The last two rules are an unfair pairing operation using the
 bijection from the introduction and we
 return to the rule for @sr[trace/e] shortly.
 
-The Coq model is simpler than the model presented here in three ways.
-The Coq model does not have the @sr[fix/e] combinator or
-the @sr[except/e] combinator and the Coq model does not have
-finite enumerations. Nevertheless, it
-is enough for us to state and prove some results about fairness.
+The Coq model is simpler than the model presented here and
+the model presented here is simpler than our implementation.
+The primary simplification is in the kinds of values that
+are enumerated. In our implementation, any value that can be
+captured in a contract in Racket's contract system can be
+enumerated. In the model presented here, we restrict those
+values to the ones captured by @sr[τ], and the in Coq model
+restrict that further by eliminating recursive types and the
+finite types. The implementation also has many more
+combinators than the ones presented here, but they are
+either derivable from these or require only simple
+extensions. The Coq model has the combinators from
+@figure-ref["fig:semantics"], except for the @sr[fix/e] combinator and the @sr[except/e]
+combinator. In general, the Coq model is designed to be
+enough for us to state and prove some results about
+fairness.
 
 Before we define fairness, however, we first need to prove that
 the model actually defines two functions. 
-@theorem{For all @sr[e] (in the Coq model), @sr[n], there exists 
-         a unique @sr[v] and @sr[T] such that @sr[(|@| e n v T)],
-         and we can compute @sr[v] and @sr[T].}
+@theorem{
+ For all @sr[e] (in the Coq model), @sr[n], there exists 
+ a unique @sr[v] and @sr[T] such that @sr[(|@| e n v T)]
+ and @sr[(⊢v v (tye e))], and we can compute @sr[v] and @sr[T].
+}
 @proof{The basic idea is that you can read the value off
        of the rules recursively, computing new values of
        @sr[n]. In some cases there are multiple rules that apply
@@ -104,11 +117,11 @@ the model actually defines two functions.
        The full proof is given as @tt{Enumerates_from_dec_uniq} in the supplementary
        material.}
 
-@theorem{For all @sr[e] (in the Coq model), @sr[v], there exists 
-         a unique @sr[T] and @sr[n] such that @sr[(|@| e n v T)],
-         or there are no @sr[n] or @sr[T] such that @sr[(|@| e n v T)],
-         and we can compute either the existential witness of @sr[n] or
-         its absence.}
+@theorem{
+ For all @sr[e] (in the Coq model), @sr[v],
+ if @sr[(⊢v v (tye e))], then there exists 
+ a unique @sr[T] and @sr[n] such that @sr[(|@| e n v T)].
+}
 @proof{As with the previous theorem, we recursively process
  the rules to compute @sr[n]. This is complicated by the
  fact that we need inverse functions for the formulas in the
@@ -119,10 +132,11 @@ the model actually defines two functions.
  and it includes proofs of the bijective nature of the
  formulas.}
 
-Although we don't prove it formally, the situation when there is no
-@sr[n] in the second theorem corresponds to the situation where the value that 
-we are attempting to convert to a number does not match the contract
-in the enumeration in our implementation.
+Although we don't prove it formally, the situation where
+the @sr[(⊢v v (tye e))] condition does not hold in the
+second theorem corresponds to the situation where the value
+that we are attempting to convert to a number does not match
+the contract in the enumeration in our implementation.
 
 We use these two results to connect the Coq code to our implementation.
 Specifically, we use Coq's @tt{Eval} @tt{compute} facility to print out
