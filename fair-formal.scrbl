@@ -35,16 +35,7 @@ semantics. All of the theorems stated in this section
 are proven with respect to the Coq model. The Redex model,
 Coq model, and our implementation are all tested against each other.
 
-The simplest rule is for @sr[(below/e n+)], in the upper
-right; it is just the identity. To its left is the 
-@sr[map/e] rule, showing how its bijection is used.
-Below those two is the @sr[cons/e] rule. 
-It defers to the @mf-name{unpair} function, shown at the bottom of
-the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations (computed
-by the size function in the bottom right of the figure) and the index.
-It maps indices in the way discussed in @secref["sec:enum"].
-
-The upper middle section of the figure contains four rules
+The upper right section of the figure contains four rules
 that govern the @sr[or/e] combinator. The idea for how these work
 is that they alternate between the two enumerations until
 one runs out and then they just use the other. The two rules on
@@ -56,29 +47,45 @@ produces slightly different results than the one discussed in @secref["sec:enum"
 it forces the results to be disjoint by pairing the value with either
 a @sr[0] or @sr[1] to indicate which enumeration the value comes from.
 
-Below the @sr[or/e] rules are the @sr[except/e] rules and
-the the @sr[dep/e] rules. The rules for @sr[except/e] behave
+Just below the grammar is the simplest rule, the one for @sr[(below/e n+)];
+it is just the identity. To its right is the 
+@sr[map/e] rule, showing how its bijection is used.
+To the right of @sr[map/e] is the @sr[cons/e] rule. 
+It defers to the @mf-name{unpair} function, shown at the bottom of
+the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations (computed
+by the size function in the bottom right of the figure) and the index.
+It maps indices in the way discussed in @secref["sec:enum"].
+
+The next two rules, reading down the figure, are the @sr[dep/e] rules.
+The @sr[dep/e] combinator is a simplified, functional interface
+to the @racket[cons/de] combinator. It accepts an
+enumeration and a function from elements of the first
+enumeration to new enumerations. It produces pairs where the
+first position of the pair comes from the first enumeration
+and the second position's elements come from the enumeration
+returned by passing the first element of the pair to the
+given funtion. The @sr[dep/e] rule exploits @sr[cons/e] to
+get two indices when it deals with infinite enumerations and
+uses @mf-name{sum_up_to} for finite enumerations, as in 
+@secref["sec:enum"].
+
+Below @sr[dep/e] are the rules for @sr[except/e], which behave
 as discussed in @secref["sec:enum"], one rule for the
 situation where the value is below the excepted value and
-one for where it above. The @sr[dep/e] combinator is a simplified,
-functional interface to the @racket[cons/de] combinator. It accepts
-an enumeration and a function from elements of the first enumeration
-to new enumerations. It produces pairs where the first position of the
-pair comes from the first enumeration and the second position's elements
-come from the enumeration returned by passing the first element of the
-pair to the given funtion. The @sr[dep/e] rule exploits 
-@sr[cons/e] to get two indices when it deals with infinite
-enumerations and uses @mf-name{sum_up_to} for finite enumerations,
-as in @secref["sec:enum"].
+one for where it above.
 
-The @sr[fix/e] rule uses substitution (our implementation
-fails to terminate when an ``infinite derivation'' would be
-required) and we return to the rule for @sr[trace/e]
-shortly.
+Beside the @sr[except/e] rules is the @sr[fix/e] rule. The
+@sr[fix/e] combinator is like @racket[delay/e], except it
+accepts an explicit thunk argument. The rule
+uses substitution (our implementation fails to terminate
+when an ``infinite derivation'' would be required).
+The last two rules are an unfair pairing operation using the
+bijection from the introduction and we
+return to the rule for @sr[trace/e] shortly.
 
 The Coq model is simpler than the model presented here in three ways.
-The Coq model does not have the @racket[fix/e] combinator or
-the @racket[except/e] combinator and the Coq model does not have
+The Coq model does not have the @sr[fix/e] combinator or
+the @sr[except/e] combinator and the Coq model does not have
 finite enumerations. Nevertheless, it
 is enough for us to state and prove some results about fairness.
 
@@ -217,7 +224,7 @@ The full proof is @tt{NaiveSum3Unfair} in the Coq model.
 }
 
 
-@theorem{@racket[cons/e] is @texmath{\lambda n.\ (n+1)^2}-fair}
+@theorem{@sr[cons/e] is @texmath{\lambda n.\ (n+1)^2}-fair}
 @proof{
 First, we show that tracing from @texmath{n^2} to
 @texmath{(n+1)^2} produces a trace that maps @texmath{0} and
@@ -228,7 +235,7 @@ then holds by induction on @texmath{n}.
 The full proof is @tt{PairFair} in the Coq model.
 }
 
-@theorem{@racket[triple/e] from @secref["sec:fair-informal"] is unfair}
+@theorem{@sr[triple/e] from @secref["sec:fair-informal"] is unfair}
 @proof{
 For any natural @texmath{n \ge 16}, there exist natural numbers
 @texmath{m, p} such that @texmath{m^2 \le n < p^4} and @texmath{p < m}.
@@ -236,14 +243,13 @@ Then a complete trace from @texmath{0} to @texmath{n} will map
 @texmath{0} to a set that includes everything in
 @texmath{\{0,\ldots,m\}}, but will map @texmath{1} (and @texmath{2})
 to sets that are subsets of @texmath{\{0,\ldots,p\}}. Since @texmath{p < m},
-these sets are different, so @racket[triple/e] is unfair.
+these sets are different, so @sr[triple/e] is unfair.
 The full proof is @tt{NaiveTripleUnfair} in the Coq model.
 }
 
-@theorem{A pairing operator defined using the unfair bijection
- from the introduction, as in this rule:
-@centered{@(unfair-rule)}
-is unfair.}
+@theorem{The pairing operator @sr[unfair-cons/e],
+ defined using the unfair bijection
+ from the introduction, is unfair.}
 @proof{
 A complete trace from @texmath{0} to @texmath{n}
 contains all of the values from @texmath{0} to

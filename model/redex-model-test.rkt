@@ -37,7 +37,7 @@
        (equal? (car ans) (:from-nat enum n))))
 
 (define (from-nat+trace e i)
-  (define trs (judgment-holds (@* ,e ,i v T) (v T)))
+  (define trs (judgment-holds (@ ,e ,i v T) (v T)))
   (unless (and (pair? trs) (= 1 (length trs)))
     (error 'get-trace "got bad judgment-form result ~s" trs))
   (define ht (make-hash))
@@ -110,6 +110,8 @@
   (check-equal? (term (size (below/e ∞))) (term ∞))
   (check-equal? (term (size (cons/e (below/e ∞) (below/e 11)))) (term ∞))
   (check-equal? (term (size (cons/e (below/e 4) (below/e 11)))) 44)
+  (check-equal? (term (size (unfair-cons/e (below/e ∞) (below/e 11)))) (term ∞))
+  (check-equal? (term (size (unfair-cons/e (below/e 4) (below/e 11)))) 44)
   (check-equal? (term (size (or/e (below/e 4) (below/e 11)))) 15)
   (check-equal? (term (size (dep/e inf (below/e ∞) nat->map-of-swap-zero-with))) (term ∞))
   (check-equal? (term (size (dep/e fin (below/e 10) nat->below/e-of-that-nat)))
@@ -117,6 +119,7 @@
   (check-equal? (term (size (except/e (below/e 10) 3))) 9)
   (check-equal? (term (size (except/e (below/e ∞) 3))) (term ∞))
   (check-equal? (term (size (fix/e x (below/e ∞)))) (term ∞))
+  
   
   (check-equal? 
    (:from-nat (term (to-enum (map/e swap-cons swap-cons (cons/e (below/e ∞) (below/e ∞)))))

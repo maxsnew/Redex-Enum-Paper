@@ -3,7 +3,7 @@
          pict
          "redex-model.rkt")
 
-(provide semantics-figure sr unfair-rule
+(provide semantics-figure sr
          mf-name)
 
 (define (w/rewriters/proc thunk)
@@ -363,15 +363,14 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases1
-  '(("map" "below/e")
-    ("cons")))
+  '(("or alt l" "or alt r")
+    ("or big l" "or big r")))
 
 (define linebreaking-with-cases2
-  '(("or alt l" "or alt r")
-    ("or big l" "or big r")
-    ("ex<" "dep inf")
-    ("ex≥" "dep fin")
-    ("fix" "trace")))
+  '(("below/e" "map" "cons")
+    ("dep inf" "dep fin")
+    ("ex<" "ex≥" "fix")
+    ("unfair" "trace")))
 
 (define-syntax-rule
   (w/fonts e)
@@ -392,11 +391,12 @@
    (w/fonts
     (vc-append
      20
-     (ht-append 
-      60
-      (inset (frame (inset (render-language L #:nts '(e n+ v n i j)) 4)) 4)
-      (some-rules linebreaking-with-cases1))
-     (some-rules linebreaking-with-cases2)
+     (vc-append
+      (hc-append 
+       30
+       (inset (frame (inset (render-language L #:nts '(e n+ v n i j)) 4)) 4)
+       (some-rules linebreaking-with-cases1))
+      (some-rules linebreaking-with-cases2))
      (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
                     [where-make-prefix-pict
                      (λ ()
@@ -407,11 +407,6 @@
                     (render-metafunction unpair)
                     (render-metafunction sum-up-to))
                    (render-metafunction size)))))))
-
-(define (unfair-rule)
-  (w/rewriters
-   (w/fonts
-    (render-judgment-form @*))))
 
 (define (some-rules linebreaking)
   (apply
@@ -440,5 +435,4 @@
 (module+ main 
   (define sf (semantics-figure))
   sf
-  (pict-width sf)
-  (unfair-rule))
+  (pict-width sf))

@@ -8,7 +8,7 @@
          e? T? v? e/unfair?
          sum-up-to sum-up-to-find-k
          unpair size ae-interp
-         @ @<- @*
+         @ @<-
          to-enum subst to-val)
 
 (define-language L
@@ -16,6 +16,7 @@
      (below/e n+)
      (or/e e e)
      (cons/e e e)
+     (unfair-cons/e e e)
      (map/e f f e)
      (dep/e fin-or-inf e f)
      (except/e e v)
@@ -115,7 +116,11 @@
   
   [(@ e n_2 v T)
    ----------------------------------------------  "trace"
-   (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))])
+   (@ (trace/e n_1 e) n_2 v (singleton n_1 n_2))]
+
+  [(unfair-n->n*n n i j) (@ e_1 j v_1 T_1) (@ e_2 i v_2 T_2)
+   ----------------------------------------------------------- "unfair"
+   (@ (unfair-cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))])
 
 
 ;; @, but with the other mode -- we don't model this in Redex
@@ -128,17 +133,7 @@
    ---------------------------------------------------------
    (@<- e n v ∅)])
 
-(define-extended-language unfair-L L
-  (e ::= .... (unfair-cons/e e e)))
-
-(define-extended-judgment-form unfair-L @
-  #:mode (@* I I O O)
-  #:contract (@* e natural v T)
-  [(unfair-n->n*n n i j) (@* e_1 j v_1 T_1) (@* e_2 i v_2 T_2)
-   -----------------------------------------------------------
-   (@* (unfair-cons/e e_1 e_2) n (cons v_1 v_2) (⊕ T_1 T_2))])
-
-(define-judgment-form unfair-L
+(define-judgment-form L
   #:mode (unfair-n->n*n I O O)
   [(where (n_x n_y)
           ,(let-values ([(nx ny) (:unfair-n->n*n (term n))])
@@ -146,7 +141,7 @@
    ----------------------------------------------------------
    (unfair-n->n*n n n_y n_x)])
 
-(define e/unfair? (redex-match unfair-L e))
+(define e/unfair? (redex-match L e))
 
 (define-judgment-form L
   #:mode (sum-up-to-find-k I I I O)
@@ -172,6 +167,7 @@
   [(size (below/e n+)) n+]
   [(size (or/e e_1 e_2)) (ae-interp (+ (size e_1) (size e_2)))]
   [(size (cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
+  [(size (unfair-cons/e e_1 e_2)) (ae-interp (* (size e_1) (size e_2)))]
   [(size (map/e f f e)) (size e)]
   [(size (dep/e fin-or-inf e f)) ∞ (side-condition (term (inf? fin-or-inf e f)))]
   [(size (dep/e fin-or-inf e f))
@@ -333,9 +329,7 @@
     [(equal? a (term ∞)) #f]
     [else (<= a b)]))
 
-
-
-(define-metafunction unfair-L
+(define-metafunction L
   to-enum : e -> any
   [(to-enum (or/e e_1 e_2))
    ,(let ([e1 (term (to-enum e_1))]
