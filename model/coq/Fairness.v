@@ -364,31 +364,6 @@ Section PairFair.
     split4; [ | apply trace_lt_Nat | | ]; rewrite trace_lt_Nat_off by discriminate; auto.
   Qed.      
 
-  Lemma Pair_precise
-  : forall n {ty1 ty2} e1 e2,
-      (Trace_lt (@E_Pair ty1 ty2 e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊔ (Trace_lt e2 n)).
-    intros n.
-    induction n as [| n IHn]; [  intros; compute; tauto| ].
-    intros.
-    eapply trace_eq_trans.
-    apply trace_from_to_0_split with (m := n * n) (n := S n * S n); nliamega.
-    eapply trace_eq_trans; [apply sub_trace_plus_eq| apply Pair_layer].
-    eapply sub_trace_trans; [| apply trace_eq_weakenl; apply trace_eq_symm; apply Pair_layer ].
-    eapply sub_trace_trans; [apply trace_eq_weakenl; apply IHn|].
-    apply sub_trace_plus_cong; apply Trace_lt_sub; nliamega.
-  Qed.
-
-  Lemma PairPair_precise
-  : forall {ty1 ty2 ty3} n e1 e2 e3,
-      Trace_lt (@E_Pair ty1 _ e1 (@E_Pair ty2 ty3 e2 e3)) ((n * n) * (n * n))
-               ≡ (Trace_lt e1 (n * n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
-  Proof.
-    intros.
-    eapply trace_eq_trans; [apply Pair_precise|].
-    apply trace_plus_cong; [apply trace_eq_refl| ].
-    apply Pair_precise.
-  Qed.
-
   Lemma Pair_Fair_precise :
     forall n, Trace_lt E_PairNN (n * n) ≡ Tracing (z_to_n n) (z_to_n n) ∅ ∅.
   Proof.
@@ -442,6 +417,31 @@ Section NaiveTripleUnfair.
   Definition traceNP3 := Trace_lt (NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat)).
 
   Definition NP3T := NaiveTriple3 (E_Trace zero E_Nat) (E_Trace one E_Nat) (E_Trace two E_Nat).
+
+  Lemma Pair_precise
+  : forall n {ty1 ty2} e1 e2,
+      (Trace_lt (@E_Pair ty1 ty2 e1 e2) (n * n)) ≡ ((Trace_lt e1 n) ⊔ (Trace_lt e2 n)).
+    intros n.
+    induction n as [| n IHn]; [  intros; compute; tauto| ].
+    intros.
+    eapply trace_eq_trans.
+    apply trace_from_to_0_split with (m := n * n) (n := S n * S n); nliamega.
+    eapply trace_eq_trans; [apply sub_trace_plus_eq| apply Pair_layer].
+    eapply sub_trace_trans; [| apply trace_eq_weakenl; apply trace_eq_symm; apply Pair_layer ].
+    eapply sub_trace_trans; [apply trace_eq_weakenl; apply IHn|].
+    apply sub_trace_plus_cong; apply Trace_lt_sub; nliamega.
+  Qed.
+
+  Lemma PairPair_precise
+  : forall {ty1 ty2 ty3} n e1 e2 e3,
+      Trace_lt (@E_Pair ty1 _ e1 (@E_Pair ty2 ty3 e2 e3)) ((n * n) * (n * n))
+               ≡ (Trace_lt e1 (n * n)) ⊔ ((Trace_lt e2 n) ⊔ (Trace_lt e3 n)).
+  Proof.
+    intros.
+    eapply trace_eq_trans; [apply Pair_precise|].
+    apply trace_plus_cong; [apply trace_eq_refl| ].
+    apply Pair_precise.
+  Qed.
 
   Theorem NaiveTripleUnfair : ~ (Fair3 (@NaiveTriple3)).
   Proof.

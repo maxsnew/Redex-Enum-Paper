@@ -223,7 +223,7 @@ First, we show that tracing from @texmath{n^2} to
 @texmath{(n+1)^2} produces a trace that maps @texmath{0} and
 @texmath{1} to the set @texmath{\{0,\ldots,n\}}. Then we can prove
 that tracing from @texmath{0} to @texmath{n^2} maps @texmath{0} and
-@texmath{1} to @texmath{\bigcup_{m=0}^n\{0,\ldots,n-1\}} and the result
+@texmath{1} to @texmath{\{0,\ldots,n-1\}} and the result
 then holds by induction on @texmath{n}.
 The full proof is @tt{PairFair} in the Coq model.
 }
