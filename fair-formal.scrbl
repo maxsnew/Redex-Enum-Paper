@@ -52,7 +52,7 @@ top cover the case where neither has yet run out and the bottom two
 cover the situation where it has. The rules with ``l'' in the name
 end up producing a value from the left enumeration and the rules with
 an ``r'' produce a value from the right. Note that this enumeration
-is slightly different from the one discussed in @secref["sec:enum"] because
+produces slightly different results than the one discussed in @secref["sec:enum"] because
 it forces the results to be disjoint by pairing the value with either
 a @sr[0] or @sr[1] to indicate which enumeration the value comes from.
 

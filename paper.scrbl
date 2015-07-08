@@ -30,7 +30,7 @@
                  ;; http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/Theorems.html
                  ;; so that the paper at least runs
                  #"\\newtheorem{theorem}{Theorem}\n"
-                 #"\\newenvironment{proof}[1][Proof]{\\begin{trivlist}\n"
+                 #"\\newenvironment{proof}[1][Proof]{\\vspace*{-.2in}\\begin{trivlist}\n"
                  #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
                  #"\\newenvironment{proof_idea}[1][Proof Idea]{\\begin{trivlist}\n"
                  #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
