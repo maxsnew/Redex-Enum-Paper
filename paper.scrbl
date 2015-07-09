@@ -105,7 +105,7 @@
  called @def{fairness} that identifies enumeration combinators
  that are more suited to property-based testing.
  
-Intuitively, the result of fair combinator indexes into its
+Intuitively, the result of a fair combinator indexes into its
 argument enumerations equally when constructing its result.
 For example, extracting the @nth element from
 our enumeration of three-tuples indexes about
