@@ -97,7 +97,7 @@
    @list{
  Enumerations represented as
  bijections between the natural numbers and elements of some
- given type and have recently garnered interest in property-based testing
+ given type have recently garnered interest in property-based testing
  because of their efficiency and flexibility as
  counter-example generators. There are, however, many ways of defining
  these bijections, some of which are better than others. 

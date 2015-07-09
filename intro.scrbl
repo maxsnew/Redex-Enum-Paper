@@ -44,7 +44,7 @@ seen is @(add-commas bad-max-y).
 
 This paper offers a criterion called @emph{fairness}
 that classifies enumeration combinators, rejecting the one
-in the previous paragraph as unfair and accepting accepting
+in the previous paragraph as unfair and accepting
 ones based on the standard Cantor bijection and many others,
 including ones whose inverses are easier to compute in the
 n-tuple case (as explained later). Intuitively, a
@@ -60,7 +60,7 @@ systems and operational semantics in
 Redex@~cite[run-your-research]. We built a benchmark suite of 50
 bugs (based on our experience writing Redex models and the
 experience of others mined from git repositories of Redex
-models) and compare the bug/second rate with three different
+models) and compared the bug/second rate with three different
 generators. Two of the generators are based on a bijection
 between the expressions of the language and the natural
 numbers: one enumerates terms in order and the other
@@ -73,14 +73,14 @@ Our results show that fair in-order enumeration and ad hoc generation
 have complementary strengths, and that selecting a random
 natural number and using it with a fair enumeration is always
 slightly worse than one of the other two choices. We also replaced
-fair combinators with unfair ones and show that the the bug-finding
+fair combinators with unfair ones and show that the bug-finding
 capabilities become significantly worse.
 
 The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction
-concrete. Then, in @secref["sec:fair-informal"] we give an
+concrete. Then, in @secref["sec:fair-informal"], we give an
 intuition-based definition of fairness and discuss our
-our new n-ary combinators, whose designs are motivated by fairness.
+new n-ary combinators, whose designs are motivated by fairness.
 We follow up in 
 @secref["sec:fair-formal"] with a formal definition of fairness
 and proofs that our combinators are fair and that a commonly-used

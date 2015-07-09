@@ -29,7 +29,7 @@ Thanks to Ben Lerner for proving a square root property that gave us
 fits.
 Thanks to Hai Zhou, Li Li, Yuankai Chen, and Peng Kang for
 graciously sharing their compute servers with us. Thanks to
-Matthias Felleisen and Ben Greenman for helpful comments on the writing.
+William H. Temps, Matthias Felleisen, and Ben Greenman for helpful comments on the writing.
 Thanks to one of the anonymous reviewers at ICFP 2015 for suggesting
 that we refine our definition of fairness with a function.
 }
