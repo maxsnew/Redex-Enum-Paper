@@ -448,16 +448,23 @@
        
        (vc-append
         20
-        (htl-append 30
-                    (render-metafunction tye)
-                    (render-metafunction size))
+        (htl-append
+         30
+         (vl-append
+          4
+          (render-metafunction ty)
+          (render-metafunction tye))
+         (render-metafunction size))
         (hc-append
          40
          (render-metafunction unpair)
          (vl-append
           20
-          (some-rules '((0 1 2) (3 4 5)) ⊢v) 
+          (add-a-box (some-rules '((0 1 2) (3 4 5)) ⊢v) 20 10)
           (render-metafunction sum-up-to)))))))))
+
+(define (add-a-box p . amts)
+  (refocus (frame (apply inset p amts)) p))
 
 (define-syntax-rule
   (some-rules linebreaking jf)

@@ -12,11 +12,22 @@
                  #"\\usepackage{savesym}\n"
                  #"\\savesymbol{iint}\n"
                  #"\\savesymbol{iiint}\n"
+                 #"\\savesymbol{dddot}\n"
+                 #"\\savesymbol{dddot}\n"
+                 #"\\savesymbol{ddddot}\n"
+                 #"\\savesymbol{overleftrightarrow}\n"
+                 #"\\savesymbol{underleftarrow}\n"
+                 #"\\savesymbol{underrightarrow}\n"
+                 #"\\savesymbol{underleftrightarrow}\n"
+                 #"\\savesymbol{ulcorner}\n"
+                 #"\\savesymbol{urcorner}\n"
+                 #"\\savesymbol{llcorner}\n"
+                 #"\\savesymbol{lrcorner}\n"
 
-                 ;; removing these causes problems only for the commented out redex
-                 ;; sections below, so get rid of them for now so the paper builds.
-                 ;#"\\usepackage{amsmath}\n"
-                 ;#"\\usepackage{amsfonts}\n"
+                 
+                 #"\\usepackage{amsmath}\n"
+                 #"\\usepackage{amsthm}\n"
+                 #"\\usepackage{amsfonts}\n"
 
                  #"\\usepackage{wrapfig}\n"
                  
@@ -26,19 +37,8 @@
                  #"\\newcommand{\\textquotesingle}{"
                  #"\\fontfamily{cmtt}\\selectfont{}\\origtextquotesingle}\n"
 
-                 ;; theorem, proof, and \qed definitions from
-                 ;; http://www.maths.tcd.ie/~dwilkins/LaTeXPrimer/Theorems.html
-                 ;; so that the paper at least runs
                  #"\\newtheorem{theorem}{Theorem}\n"
-                 #"\\newenvironment{proof}[1][Proof]{\\vspace*{-.2in}\\begin{trivlist}\n"
-                 #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
-                 #"\\newenvironment{proof_idea}[1][Proof Idea]{\\begin{trivlist}\n"
-                 #"\\item[\\hskip \\labelsep {\\bfseries #1}]}{\\end{trivlist}}\n"
-                 #"\\newcommand{\\qed}{\\nobreak \\ifvmode \\relax \\else\n"
-                 #"\\ifdim\\lastskip<1.5em \\hskip-\\lastskip\n"
-                 #"\\hskip1.5em plus0em minus0.5em \\fi \\nobreak\n"
-                 #"\\vrule height0.75em width0.5em depth0.25em\\fi}\n"
-
+                 
                  ;; map the ℕ character
                  #"\\DeclareUnicodeCharacter{2115}{$\\mathbb{N}$}\n"
                  

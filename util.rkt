@@ -85,13 +85,19 @@
   (syntax-case stx ()
     [(_ id)
      (identifier? #'id)
-     #`(define (id . args) (environment/proc 'id args))]))
-(define (environment/proc id args)
+     #'(define-environment id #f)]
+    [(_ id neg-space?)
+     #`(define (id . args) (environment/proc 'id args neg-space?))]))
+(define (environment/proc id args neg-space?)
   (compound-paragraph (style (symbol->string id) '())
-                      (list (decode-compound-paragraph args))))
+                      (list (decode-compound-paragraph
+                             (if neg-space?
+                                 (cons (element (style "vspace" '(exact-chars)) "-.15in")
+                                       args)
+                                 args)))))
 
 (define-environment theorem)
-(define-environment proof)
+(define-environment proof #t)
 (define-environment definition)
 (define qed (element (style "qed" '()) '()))
 

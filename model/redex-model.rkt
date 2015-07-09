@@ -8,7 +8,7 @@
          e? T? v?
          sum-up-to sum-up-to-find-k
          unpair size ae-interp
-         @ @<- ⊢v tye
+         @ @<- ⊢v ty tye
          to-enum subst-τ subst-e to-val)
 
 (define-language L
@@ -344,7 +344,8 @@
   [(size (trace/e n e)) (size e)])
 
 (define-metafunction L
-  [(tye e) (tye (empty-set) e)]
+  [(ty e) (tye (empty-set) e)])
+(define-metafunction L
   [(tye Γ (below/e n+)) n+]
   [(tye Γ (or/e e_1 e_2)) (∨ (tye Γ e_1) (tye Γ e_2))]
   [(tye Γ (cons/e e_1 e_2)) (∧ (tye Γ e_1) (tye Γ e_2))]

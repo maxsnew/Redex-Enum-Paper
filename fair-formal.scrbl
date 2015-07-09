@@ -53,9 +53,10 @@ it is just the identity. To its right is the
 @sr[map/e] rule, showing how its bijection is used.
 To the right of @sr[map/e] is the @sr[cons/e] rule. 
 It uses the @mf-name{unpair} function, shown at the bottom of
-the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations (computed
-by the size function in the bottom right of the figure) and the index.
-It maps indices as discussed in @secref["sec:enum"].
+the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations,
+computed by the function near the bottom on the right of the
+figure (written using double vertical bars), and the index.
+The function maps indices as discussed in @secref["sec:enum"].
 
 The next two rules, reading down the figure, are the @sr[dep/e] rules.
 The @sr[dep/e] combinator is a simplified, functional interface
@@ -67,8 +68,8 @@ and the second position's elements come from the enumeration
 returned by passing the first element of the pair to the
 given funtion. The @sr[dep/e] rule exploits @sr[cons/e] to
 get two indices when it deals with infinite enumerations and
-uses @mf-name{sum_up_to} for finite enumerations, as in 
-@secref["sec:enum"].
+uses @mf-name{sum_up_to} for finite enumerations (defined at
+the bottom of the figure).
 
 Below @sr[dep/e] are the rules for @sr[except/e], which behave
 as discussed in @secref["sec:enum"], one rule for the
@@ -91,22 +92,28 @@ are enumerated. In our implementation, any value that can be
 captured with a contract in Racket's contract system can be
 enumerated. In the model presented here, we restrict those
 values to the ones captured by @sr[τ], and the in Coq model
-restrict that further by eliminating recursive types and
-finite types. The implementation also has many more
-combinators than the ones presented here, but they are
-either derivable from these or require only straightforward
-extensions. The Coq model has the combinators
-in @figure-ref["fig:semantics"], except for the @sr[fix/e] combinator and the @sr[except/e]
-combinator. In general, the Coq model is designed to be
-just enough for us to state and prove some results about
+restrict that further by eliminating recursive types, subtraction
+types, and finite types. The typing rules for values are given in the box
+at the bottom right of @figure-ref["fig:semantics"], and the
+@mf-name{ty} function maps enumerators to the type of values
+that it enumerates. All enumerators enumerate all of the
+values of their types.
+
+The implementation also has many more combinators than the
+ones presented here, but they are either derivable from
+these or require only straightforward extensions. The Coq
+model has the combinators in @figure-ref["fig:semantics"],
+except for the @sr[fix/e] combinator and the @sr[except/e]
+combinator. In general, the Coq model is designed to be just
+enough for us to state and prove some results about
 fairness.
 
 Before we define fairness, however, we first need to prove that
-the model actually defines two functions. 
+the model actually defines two functions.
 @theorem{
- For all @sr[e] (in the Coq model), @sr[n], there exists 
+ For all @sr[e] (in the Coq model), @sr[n], there exists
  a unique @sr[v] and @sr[T] such that @sr[(|@| e n v T)]
- and @sr[(⊢v v (tye e))], and we can compute @sr[v] and @sr[T].
+ and @sr[(⊢v v (ty e))], and we can compute @sr[v] and @sr[T].
 }
 @proof{The basic idea is that you can read the value off
        of the rules recursively, computing new values of
@@ -120,7 +127,7 @@ the model actually defines two functions.
 
 @theorem{
  For all @sr[e] (in the Coq model), @sr[v],
- if @sr[(⊢v v (tye e))], then there exists 
+ if @sr[(⊢v v (ty e))], then there exists 
  a unique @sr[T] and @sr[n] such that @sr[(|@| e n v T)].
 }
 @proof{As with the previous theorem, we recursively process
@@ -134,7 +141,7 @@ the model actually defines two functions.
  formulas.}
 
 Although we don't prove it formally, the situation where
-the @sr[(⊢v v (tye e))] condition does not hold in the
+the @sr[(⊢v v (ty e))] condition does not hold in the
 second theorem corresponds to the situation where the value
 that we are attempting to convert to a number does not match
 the contract in the enumeration in our implementation.
@@ -162,7 +169,7 @@ Furthermore, we also need to be able to collect all of the
 traces for all naturals up to some
 given @sr[n]. We call this the ``complete trace up to @sr[n]''.
 So, for some enumeration expression @sr[e], the complete
-trace up to @sr[n] is the union of all of the @sr[T] components
+trace up to @sr[n] is the pointwise union of all of the @sr[T] components
 for @sr[(|@| e i v T)], for all values @sr[v] and @sr[i] strictly 
 less than @sr[n].
 
@@ -273,6 +280,7 @@ all of the values from @texmath{0} to
 @texmath{\lfloor\log_2(n)\rfloor+1} in the second component.
 For any @texmath{n}
 greater than @texmath{8}, the first component will always
-have more values than the second component.
+have more values than the second component and thus there
+will be no equilibrium points after @texmath{8}.
 The full proof is @tt{UnfairPairUnfair} in the Coq model.
 }
