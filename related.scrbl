@@ -76,7 +76,7 @@ fairness, but it also sheds some light on the relative
 quality of enumeration and random-based generation
 strategies.
 
-Even though enumeration-based testing methods has been
+Even though enumeration-based testing methods have been
 explored in the literature, there are few studies that
 specifically contain empirical studies comparing random
 testing and enumeration. We are aware of only one other,

@@ -22,7 +22,7 @@
 @figure*["fig:semantics" @list{Semantics of Enumeration Combinators} (semantics-figure)]
 
 @Figure-ref["fig:semantics"] shows a formal model of a
-subset of our enumerations. It defines of the relation 
+subset of our enumerations. It defines the relation 
 @sr[|@|], which relates an enumeration and an index to the
 value that the enumeration produces at the index. 
 The @sr[T] that follows the vertical bar is used in the definition
@@ -63,7 +63,7 @@ enumeration to new enumerations. It produces pairs where the
 first position of the pair comes from the first enumeration
 and the second position's elements come from the enumeration
 returned by passing the first element of the pair to the
-given funtion. The @sr[dep/e] rule exploits @sr[cons/e] to
+given function. The @sr[dep/e] rule exploits @sr[cons/e] to
 get two indices when it deals with infinite enumerations and
 uses @mf-name{sum_up_to} for finite enumerations (defined at
 the bottom of the figure).
@@ -71,7 +71,7 @@ the bottom of the figure).
 Below @sr[dep/e] are the rules for @sr[except/e], which behave
 as discussed in @secref["sec:enum"], one rule for the
 situation where the value is below the excepted value and
-one for where it above.
+one for where it is above.
 
 Beside the @sr[except/e] rules is the @sr[fix/e] rule. The
 @sr[fix/e] combinator is like @racket[delay/e], except it
@@ -88,7 +88,7 @@ The primary simplification is in the kinds of values that
 are enumerated. In our implementation, any value that can be
 captured with a contract in Racket's contract system can be
 enumerated. In the model presented here, we restrict those
-values to the ones captured by @sr[τ], and the in Coq model
+values to the ones captured by @sr[τ], and in the Coq model
 restrict that further by eliminating recursive types, subtraction
 types, and finite types. The typing rules for values are given in the box
 at the bottom right of @figure-ref["fig:semantics"], and the
@@ -222,7 +222,7 @@ point is at @texmath{f(n)}.
 The Coq model contains this definition only for @raw-latex{$k\in \{2,3,4\}$},
 called @tt{Fair2}, @tt{Fair3}, and @tt{Fair4}.
 
-@theorem{@racket[or/e] is @texmath{\lambda n.\ 2(n+1)}-fair.}
+@theorem{@sr[or/e] is @texmath{\lambda n.\ 2n+2}-fair.}
 @proof{
 This can be proved by induction on @texmath{n}.
 The full proof is @tt{SumFair} in the Coq model.

@@ -93,10 +93,10 @@ just restrict
 the combinators to work completely in lock-step on their argument
 enumerations, or else we would not admit @emph{any} pairing operation
 as fair. After all, a combinator that builds the pair
-of @racket[(below/e +inf.0)] with itself we must eventually produce the pair
+of @racket[(below/e +inf.0)] with itself must eventually produce the pair
 @racket['(1 . 1000)], and that pair must come either before or
-after the pair @racket['(1000 . 1)]. So if we insist that at
-every point in the enumeration that the combinator's result enumeration
+after the pair @racket['(1000 . 1)]. So if we insist that, at
+every point in the enumeration, the combinator's result enumeration
 has used all of its argument enumerations equally, then pairing would
 be impossible to do fairly.
 
@@ -108,7 +108,7 @@ has used all of the argument enumerations equally.
 We also refine fair combinators, saying that a combinator is
 @texmath{f}-fair if the @texmath{n}th equilibrium point is at
 @texmath{f(n)}. Parameterizing fairness by this function gives us
-a way to say to quantify fair combinators, preferring those that
+a way to quantify fair combinators, preferring those that
 reach equilibrium more often.
 
 As an example, consider the fair nested @racket[cons/e]
@@ -215,7 +215,7 @@ the generalization of the cantor pairing function to length
            @raw-latex{\vspace*{.05in}}
 @raw-latex{${{k-1+n_1+\cdots+n_k}\choose{n}}+\cdots+{{1+n_1+n_2}\choose{2}} +
 {{n_1}\choose{1}}$}}
-We can easily define a inefficient (but correct) way to compute
+We can easily define an inefficient (but correct) way to compute
 the inverse by systematically trying every tuple by using a different untupling function, applying the
 original @raw-latex{\textit{cantor\_tuple}} function to see if it was the
 argument given. @citet[inverting-cantor-n-tupling] gives
