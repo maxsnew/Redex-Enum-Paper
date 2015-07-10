@@ -16,6 +16,9 @@ and running `make` in that directory.  Nightly snapshot builds are
 available at http://pre.racket-lang.org/installers/, which is easiest
 for windows users and for machines without the development tools.
 
+The summary.rktd file contains the data that's shown in figures 5, 6,
+and 7.
+
 Running `make` in the top-level type checks the Coq code, runs the
 Redex tests, and the tests that compare the implementation with the
 redex model and the Coq model.

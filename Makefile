@@ -27,6 +27,8 @@ supp: DNE
 	rm -rf supp
 	mkdir supp
 	mkdir -p supp/$(SUPPDIR)
+	racket results/mk-summary.rkt
+	mv results/summary.rktd supp/$(SUPPDIR)
 	cp supp-README.txt supp/$(SUPPDIR)/README.txt
 	cp model/Makefile supp/$(SUPPDIR)
 	cp model/*.rkt supp/$(SUPPDIR)
