@@ -1,0 +1,37 @@
+Review 138A:
+
+f-fairness is defined in terms of fairness. Fairness uses traces to
+define what the equilibrium points are, namely the capital M points in
+the definition at the bottom of page 7. f-fairness refines that
+definition to talk about how often equilibrium points are reached.
+
+Contracts are used in our implementation because an ordinary type
+system is not strong enough to capture the precise set of values that
+are in the enumerations we use in our implementation. In the formal
+model, the \tau from figure 4 is sufficient, but in our
+implementation, dependent types and refinement types would be
+required. We simply found it more expedient to use contracts instead
+of porting the implementation of Redex to a language like Coq.
+
+Review 138B:
+
+Accounting for the size, as you say, would not distinguish between
+fair and unfair combinators. For example, the unfair pairing
+combinator (that is used in other real systems--not ours, of course)
+and the fair one have similar memory requirements so such a definition
+would not distinguish between them. And yet, as you can see from the
+empirical evaluation, distinguishing between them is important.
+
+We did not find any fundamental flaws in our reasoning via Coq, but we
+did find that the exercise of implementing the semantics (in Redex and
+in Coq) clarified the concepts and helped us improve our work.
+
+Yes, poor choice of benchmarking programs can skew results. Our
+benchmark, however, has been very carefully designed. It was one of
+the products of one of the author's PhD thesis and you can find more
+explanation of it here: http://docs.racket-lang.org/redex/benchmark.html
+
+As for the color, we did our best to use color-blind safe colors and
+to always have some other feature (thickness of lines, dashes, shapes
+etc) to be able to visually distinguish the different parts of the
+plots.
