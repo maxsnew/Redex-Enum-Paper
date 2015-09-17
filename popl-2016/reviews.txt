@@ -4,6 +4,12 @@
                  Paper #138: Fair Enumeration Combinators
 ---------------------------------------------------------------------------
 
+
+                      Overall merit: 3. Weak accept
+Reviewer expertise (shown to authors): 3. 
+                                        Knowledgeable (I have a broad
+                                        understanding of this topic)
+
                          ===== Paper summary =====
 
 Enumerators are bijections between natural numbers and the elements of
@@ -79,6 +85,12 @@ acceptance.
                  Paper #138: Fair Enumeration Combinators
 ---------------------------------------------------------------------------
 
+
+                      Overall merit: 2. Weak reject
+Reviewer expertise (shown to authors): 3. 
+                                        Knowledgeable (I have a broad
+                                        understanding of this topic)
+
                          ===== Paper summary =====
 
 This paper describes the notion of a fair enumeration combinator and proves properties of particular enumeration combinators, focusing on a notion of fiarness. It then empirically evaluates the effectiveness of different enumeration strategies for bug finding.
@@ -123,6 +135,12 @@ not able to differentiation those.
 ---------------------------------------------------------------------------
                  Paper #138: Fair Enumeration Combinators
 ---------------------------------------------------------------------------
+
+
+                      Overall merit: 3. Weak accept
+Reviewer expertise (shown to authors): 2. 
+                                        Some familiarity (I am familiar
+                                        with the topic)
 
                          ===== Paper summary =====
 
