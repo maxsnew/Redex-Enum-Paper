@@ -1,0 +1,162 @@
+===========================================================================
+                          POPL 2016 Review #138A
+---------------------------------------------------------------------------
+                 Paper #138: Fair Enumeration Combinators
+---------------------------------------------------------------------------
+
+                         ===== Paper summary =====
+
+Enumerators are bijections between natural numbers and the elements of
+a type; they provide a practical means for sampling elements of that
+type and have applications, for example, for test-case generation.
+
+The paper reports on a novel enumeration library for Racket.  The core
+technical novelty of this library is that it comes with a notion of
+"fairness", which guarantees that the arguments of enumeration
+combinators are explored evenly. The development is accompanied with
+reasoning principles for fairness and proofs of fairness for some of
+the operators of the library. The paper also contains an experimental
+evaluation that compares the impact of fairness for bug-finding.
+
+===== Comments for authors and suggestions to make this a strong paper =====
+
+Enumerations have interesting applications for testing and
+randomization. An investigation into desirable properties of
+enumerations and corresponding reasoning principles is timely and
+welcome.
+
+The prose of the paper is mostly clear, well structured and good to
+follow.  The paper is accompanied with a Racket library and proofs in
+Coq. The experimental evaluation is convincing, as is the treatment of
+related work. I appreciate that the authors are up-front about the
+limitations of their work, for example, it is always clear which parts
+are implemented in Racket, formalized in Coq, and explained in the
+paper. It is nice to see that the authors used their insights to update the
+random testing facility of Redex.
+
+Unfortunately, the paper has some nontrivial shortcomings in the
+formal part of the presentation (mostly: Section 4), which prevent me from
+giving stronger support.
+
+- The paper introduces, but does not establish a connection between,
+  the concepts of fairness and f-fairness. The first concept is
+  defined in terms of trace expressions while the second is defined in
+  terms of equilibrium points (which btw are never properly
+  defined). The informal part of the paper only refers to the
+  definition based on equilibrium points. The paper only mentions
+  proofs of f-fairness and of unfairness, but not of the fairness of
+  any combinator. This discrepancy needs to be closed.  
+  The introduction of of Section 4 postpones the explanation of the
+  role of T to the definition of fairness, but T does not appear
+  there. The explanation of the use of T right above the definition of
+  are too terse to make sense. This needs to be expanded.
+  Finally, the definition of fairness is hard to spot in the text and should be
+  given more emphasis.
+
+  This central part of the paper deserves a much more careful
+  presentation. Should the paper be accepted I strongly suggest a
+  serious rewrite of Section 4.
+
+- I don't appreciate that core concepts of the paper are explained
+  using Racket syntax. For readers not familiar with Racket this adds
+  an unneccesary level of indirection, especially in the technically
+  more interesting definitions such as the delay or naturals-above
+  combinators. Contracts are mentioned at several points, but I didn't
+  understand what they are needed for (they don't show up in the rules
+  of Figure 4). Also it was not clear to me what the suffixes /e and
+  /de are meant to convey. If you really want to stick with Racket
+  syntax I suggest to weave in some more explanations about it.
+
+
+Overall, this is an interesting paper on a promising topic combining
+theory, implementation, and experimental evaluation. I trust that the
+authors can address the issues I point out, which is why I support
+acceptance.
+
+===========================================================================
+                          POPL 2016 Review #138B
+---------------------------------------------------------------------------
+                 Paper #138: Fair Enumeration Combinators
+---------------------------------------------------------------------------
+
+                         ===== Paper summary =====
+
+This paper describes the notion of a fair enumeration combinator and proves properties of particular enumeration combinators, focusing on a notion of fiarness. It then empirically evaluates the effectiveness of different enumeration strategies for bug finding.
+
+===== Comments for authors and suggestions to make this a strong paper =====
+
+The paper is interesting and this line of development
+worthwhile. At the present state, however, I find that the
+paper does not yet have sufficient results for POPL.
+
+Namely, the notion of fairness is useful, but the Szudzik
+function has been used already in the literature and even
+Szudzik's notes show generalizations to more dimensions.
+Moreover, using a size function that accounts for the total
+size of the structure (approximately an abstraction of its
+memory footprint including the elements) might give a better
+overall solution to the problem. Have the authors considered
+implementing this enumeration order?
+
+The formalization in Coq does not seem particularly
+justified: for the analysis of this type and size, a clear
+mathematical argument seems entirely adequate. Did the
+authors find errors in their informal argument during
+Coq formalization?
+
+Much of the paper is spent on detailed experimental
+analysis, which is interesting empirical evidence and nicely
+presented, though it is not a fundamental result and it
+might be notably influenced by the benchmarks. On the
+practical side, the existing random generation seems to
+perform very well already. Admittedly, fair in-order
+enumeration is close and can be much faster in some cases,
+which is why it is very popular (and sometimes called
+"bounded-exhaustive" testing).
+
+The authors should probably not refer to colors of lines in
+their graphs as some printers and some people's vision are
+not able to differentiation those.
+
+===========================================================================
+                          POPL 2016 Review #138C
+---------------------------------------------------------------------------
+                 Paper #138: Fair Enumeration Combinators
+---------------------------------------------------------------------------
+
+                         ===== Paper summary =====
+
+This paper is about constructing enumerators for elements of a data type,
+which may be finite or infinite.  Their contribution is that they give a
+number of ways of constructing enumerators either from scratch or by
+combining existing enumerators.  Enumerating elements of a data type is not
+hard if there are no fairness requirements but becomes tricky if one wants
+a reasonable fairness property.  Part of what is tricky is defining what it
+means for an enumeration to be fair.  These authors define "fair" to mean
+that infinitely often a multiargument enumerator will access each of its
+arguments equally.  They formalize the properties of fair enumeration
+combinators by a system of rules that resembles a type system and a
+semantics.  They then prove that their fair combinators satisfy a number of
+properties.  Finally they give experimental comparisons of some of the
+different enumerators.
+
+The definition of fairness can be endlessly debated.  For example, I can
+imagine an n-argument enumerator (n > 2) for which every pair of arguments
+reach equilibrium infinitely often but at no point do all n arguments reach
+equilibrium.  Why should this not be fair?  I also felt that this notion of
+fairness does not compose very well: what happens if I cons two enumerators
+with different fairness functions?  I tried to decipher this from the rules
+but I did not get it.  
+
+The problem itself is somewhat interesting and the paper is certainly well
+written but I was not convinced of either the importance or the depth of
+the work.
+
+===== Comments for authors and suggestions to make this a strong paper =====
+
+The intuitive discussion was nice but the rules and semantics were very
+hard to decipher.  (I am used to reading such rules.)  A more in-depth
+exploration and justification of your definition would be helpful.  I am
+sure that the proposal I made above is full of flaws which you will no
+doubt point out, but it would be better if the reader was convinced at the
+outset that this is a compelling definition.
