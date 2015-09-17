@@ -1,3 +1,8 @@
+Thanks to all the reviewers for the time they put into the paper. We
+especially appreciate the explicit and implicit comments that will
+help us improve the presentation and we expect to use them to the
+benefit of the work.
+
 Review 138A:
 
 f-fairness is defined in terms of fairness. Fairness uses traces to
@@ -6,33 +11,26 @@ the definition at the bottom of page 7. The omission of a more
 explicit connection was an oversight and has been corrected in our
 version of the paper.
 
-Contracts are used in our implementation because an ordinary type
-system is not strong enough to capture the precise set of values that
-are in the enumerations we use in our implementation. In the formal
-model, the \tau from figure 4 is sufficient, but in our
-implementation, dependent types and refinement types would be
-required. We simply found it more expedient to use contracts instead
-of porting the implementation of Redex to a language like Coq.
+The reviewer asks why contracts are needed. We use them because they
+can express dependent types. For example, the contracts express that
+the arguments to map/e form a bijection. Given that this is a
+practical, deployed system, we don't have the advantage of using
+dependent types directly like we do in the Coq model.
 
 Review 138B:
 
-Accounting for the size, as you say, would not distinguish between
-fair and unfair combinators. For example, the unfair pairing
-combinator (that is used in other real systems--not ours, of course)
-and the fair one have similar memory requirements so such a definition
-would not distinguish between them. And yet, as you can see from the
-empirical evaluation, distinguishing between them is important.
+The reviewer suggests that accounting only for the size of enumerated
+structures is sufficient. But this would ignore fairness, because
+there our fair pairing combinator and the commonly used unfair pairing
+combinator have the same memory use. Our empirical evaluation proves
+that distinguishing them is essential.
 
 We did not find any fundamental flaws in our reasoning via Coq, but we
 did find that the exercise of implementing the semantics (in Redex and
-in Coq) clarified the concepts and helped us improve our work.
+in Coq) clarified the concepts. We credit that clarity with helping us
+to come up with the idea of using traces.
 
 Yes, poor choice of benchmarking programs can skew results. Our
 benchmark, however, has been very carefully designed. It was one of
 the products of one of the author's PhD thesis and you can find more
 explanation of it here: http://docs.racket-lang.org/redex/benchmark.html
-
-As for the color, we did our best to use color-blind safe colors and
-to always have some other feature (thickness of lines, dashes, shapes
-etc) to be able to visually distinguish the different parts of the
-plots.
