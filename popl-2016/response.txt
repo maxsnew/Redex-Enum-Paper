@@ -5,7 +5,7 @@ to the benefit of the work.
 
 Review 138A:
 
-f-fairness is defined in terms of fairness. Fairness uses traces to
+fairness is defined in terms of f-fairness. Fairness uses traces to
 define what the equilibrium points are, namely the values of "M" in
 the definition at the bottom of page 7. The omission of a more
 explicit connection was an oversight and has been corrected in our
