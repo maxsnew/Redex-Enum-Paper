@@ -5,11 +5,10 @@ to the benefit of the work.
 
 Review 138A:
 
-fairness is defined in terms of f-fairness. Fairness uses traces to
-define what the equilibrium points are, namely the values of "M" in
-the definition at the bottom of page 7. The omission of a more
-explicit connection was an oversight and has been corrected in our
-version of the paper.
+Traces are what we use to define what the equilibrium points, namely
+the values of "M" in the definition at the bottom of page 7. The
+omission of a more explicit connection between fairness and f-fairness
+was an oversight and has been corrected in our version of the paper.
 
 The reviewer asks why contracts are needed. We use them because they
 can express dependent types. For example, the contracts express that
