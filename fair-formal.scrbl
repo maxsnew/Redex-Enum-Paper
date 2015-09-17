@@ -217,6 +217,8 @@ in the complete trace up to @texmath{M} of @texmath{c^k} applied to @sr[(trace/e
 @texmath{\cdots} @sr[(trace/e k enum_k)], for any enumerations @sr[enum_1]
 to @sr[enum_k], is a function that maps each number between @sr[1] and @sr[k]
 to exactly the same set of numbers. Any other combinator is unfair.
+We call the values of @texmath{M} the equilibrium points.
+
 We say that a combinator is @texmath{f}-fair if the @texmath{n}-th equilibrium
 point is at @texmath{f(n)}.
 The Coq model contains this definition only for @raw-latex{$k\in \{2,3,4\}$},
