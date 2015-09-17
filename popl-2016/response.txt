@@ -1,7 +1,7 @@
 Thanks to all the reviewers for the time they put into the paper. We
-especially appreciate the explicit and implicit comments that will
-help us improve the presentation and we expect to use them to the
-benefit of the work.
+especially appreciate the explicit and implicit comments on the
+presentation. They will help us improve it and we expect to use them
+to the benefit of the work.
 
 Review 138A:
 
@@ -30,7 +30,24 @@ did find that the exercise of implementing the semantics (in Redex and
 in Coq) clarified the concepts. We credit that clarity with helping us
 to come up with the idea of using traces.
 
-Yes, poor choice of benchmarking programs can skew results. Our
+Yes, poor choice of benchmark programs can skew results. Our
 benchmark, however, has been very carefully designed. It was one of
 the products of one of the author's PhD thesis and you can find more
 explanation of it here: http://docs.racket-lang.org/redex/benchmark.html
+
+Review 138C:
+
+Your proposed definition of fairness does seem interesting from a
+purely theoretical point of view and we agree that there exist
+combinators that are fair according to your definition but not fair
+according to ours. In practice, however, we are not aware of any
+actually used combinators that are fair according to yours but not our
+definition and we doubt that one such would perform better
+empirically.
+
+Stepping back, this paper is the first one on fair enumeration
+combinators and we give (in our opinion) a convincing theoretical
+justification and a convincing empirical justification for our
+definitions. There may be better ones and once the community has had
+time to absorb ours, perhaps we will find those other definitions. We
+see this paper as a first step, not the final word.
