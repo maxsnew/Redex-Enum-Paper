@@ -21,7 +21,7 @@ Review 138B:
 
 The reviewer suggests that accounting only for the size of enumerated
 structures is sufficient. But this would ignore fairness, because
-there our fair pairing combinator and the commonly used unfair pairing
+our fair pairing combinator and the commonly used unfair pairing
 combinator have the same memory use. Our empirical evaluation proves
 that distinguishing them is essential.
 
