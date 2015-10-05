@@ -80,8 +80,8 @@ capabilities become significantly worse.
 The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction
 concrete. Then, in @secref["sec:fair-informal"], we give an
-intuition-based definition of fairness and discuss our
-new n-ary combinators, whose designs are motivated by fairness.
+intuition-based definition of fairness and in @secref["sec:fair-combinators"] discuss our
+n-ary combinators, whose designs are motivated by fairness.
 We follow up in 
 @secref["sec:fair-formal"] with a formal definition of fairness
 and proofs that our combinators are fair and that a commonly-used

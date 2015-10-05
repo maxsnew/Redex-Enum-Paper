@@ -237,7 +237,7 @@ We show that after a certain point, there are no equilibria. For
 @texmath{n \ge 8}, there exist natural numbers @texmath{m, p} such
 that @texmath{2m \le n < 4p} while @texmath{p < m}. Then a complete
 trace from @texmath{0} to @texmath{n} maps @texmath{0} to a set that
-contains @texmath{\{0,\ldots,m\}}, but on the other hand maps
+contains @texmath{\{0,\ldots,m\}}, but maps
 @texmath{1} (and @texmath{2}) to subset of
 @texmath{\{0,\ldots,p\}}. Since @texmath{p < m}, these sets are
 different. Thus @racket[or-three/e] is unfair.

@@ -185,6 +185,8 @@ combinators is worse across the board.
 
 @include-section["fair-informal.scrbl"]
 
+@include-section["fair-combinators.scrbl"]
+
 @include-section["fair-formal.scrbl"]
 
 @;; comment this out for now because it causes problems at the latex somehow
