@@ -80,6 +80,7 @@ acceptance.
 
 ===========================================================================
                           POPL 2016 Review #138B
+                     Updated 27 Sep 2015 9:42:53am EDT
 ---------------------------------------------------------------------------
                  Paper #138: Fair Enumeration Combinators
 ---------------------------------------------------------------------------
@@ -102,17 +103,43 @@ paper does not yet have sufficient results for POPL.
 Namely, the notion of fairness is useful, but the Szudzik
 function has been used already in the literature and even
 Szudzik's notes show generalizations to more dimensions.
+
 Moreover, using a size function that accounts for the total
-size of the structure (approximately an abstraction of its
+size of the structure (approximately its
 memory footprint including the elements) might give a better
-overall solution to the problem. Have the authors considered
-implementing this enumeration order?
+overall solution to the problem, accounting also for nested
+elements in the structure. One can derive various
+notions of fairness depending on how the size of the structure
+is computed. For example, for elements of an n-tuple the size
+would naturally include the sum of individual tuple projections
+and there is no reason why one would count one component of the
+size with more weight than the other, unless that is the intention.
+Given a reasonable definition of size, ordering elements of smaller
+size before elements of larger size seems like a good baseline
+notion of fair enumeration. (Ordering within elements of equal
+size is likely to be ad-hoc in any case.) As such, ordering by size
+seems like a more reasonable reference point than the historical
+pairing functions such as ones used in number theoretic formalizations
+of computability or ones based on recursive pairing to express
+n-tuples. For example, recursive decomposition based on pairs that the
+authors criticize (perhaps justifiably so) corresponds to putting
+higher weight on one part of the tuple when computing the size. So,
+one question is whether enumeration according some reasonable notions
+of total bit size of the value can be made effective and efficient.
+Note that imposing size bound makes the problem of enumerating all
+solutions finite (under some reasonable assumptions about size
+function). Constraint solving approaches have been used to do
+precisely such enumeration, although with much worse performance than
+the compositional bijective approaches that are the focus of this
+paper.
 
 The formalization in Coq does not seem particularly
 justified: for the analysis of this type and size, a clear
 mathematical argument seems entirely adequate. Did the
 authors find errors in their informal argument during
-Coq formalization?
+Coq formalization? They should perhaps make a closer
+connection between the framework in latex and the one in Coq, or
+simply relegate the formalization into a separate case study in Coq.
 
 Much of the paper is spent on detailed experimental
 analysis, which is interesting empirical evidence and nicely
@@ -127,6 +154,11 @@ which is why it is very popular (and sometimes called
 The authors should probably not refer to colors of lines in
 their graphs as some printers and some people's vision are
 not able to differentiation those.
+
+Overall, this seems to be a promising piece of work. I believe
+that if the authors turn their Future Work into the actual work
+in a principled way, as well as possibly discuss the strategy of size
+stratification, the paper would be viewed as much stronger.
 
 ===========================================================================
                           POPL 2016 Review #138C
