@@ -1,10 +1,8 @@
-For POPL revision:
- - write introduction
- - future work (explain that this definition makes sense only for non-unary
-   combinators (but mention the two different list enumerations) and infinite
-   enumerations)
- - add to model: finite enumerations(?)
- - prove feat combinators(?)
+For ISSTA submission:
+ - adjust supplementary material to include the
+   removed charts
+ - edit to fix up for removed text
+ - double check ISSTA proceedings for random testing studies
 
 * TODO
   1. [X] Model extension for trinary combinators
