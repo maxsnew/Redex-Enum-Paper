@@ -17,12 +17,8 @@
     (plot-one-set-of-lines-from-directory
      (set 'grammar 'ordered 'ordered-mildly-unfair 'ordered-brutally-unfair)
      (and outputs (list-ref outputs 0))))
-  (define snd
-    (plot-one-set-of-lines-from-directory
-     (set 'grammar 'enum 'enum-mildly-unfair 'enum-brutally-unfair)
-     (and outputs (list-ref outputs 1))))
   (unless outputs
-    (vc-append fst snd)))
+    fst))
 
 (define (plot-one-set-of-lines-from-directory types-to-include output)
   (define-values (all-names data-stats name-avgs max-non-f-value-from-list-ref-d2)

@@ -77,9 +77,7 @@ than @raw-latex{$m$} combined with an @raw-latex{$n-1$} tuple that has
 a maximum of @raw-latex{$m$}.
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
-pairing function, which can be interpreted as a more
-triangular grid walk: @centered{@cantor-cons-pict[]}
-
+pairing function.
 The two bijections are quite similar; they are both quadratic
 functions with similar geometric interpretations.
 @citet[elegant-pairing-function]'s traces out the
@@ -113,21 +111,7 @@ The @racket[or/e] enumeration's fairness follows a similar, but much
 simpler pattern. In particular, the binary @racket[or/e] is fair
 because it alternates between its arguments.
 As with pairing, extending @racket[or/e] to an @texmath{n}-ary combinator 
-via nested calls of the binary combinator is unfair. Consider a trinary
-version implemented this way:
-@(define (or-three/e e_1 e_2 e_3)
-   (or/e e_1 (or/e e_2 e_3)))
-@racketblock[(define (or-three/e e_1 e_2 e_3)
-               (or/e e_1 (or/e e_2 e_3)))]
-and consider passing in an enumeration of naturals,
-one of symbols, and one of floats.
-The left side of @figure-ref["fig:disj-sum"] shows the order used by
-the unfair nesting and the right side shows the fair ordering.
-
-@figure["fig:disj-sum" "Unfair (left) and fair (right) disjoint union enumerations"]{
-@centered{@(hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good))}
-}
-
+via nested calls of the binary combinator is unfair.
 Fixing this enumeration is straightforward;
 divide the index by @racket[k] and use the remainder to
 determine which argument enumeration to use and the quotient

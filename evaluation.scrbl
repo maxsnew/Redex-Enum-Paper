@@ -107,12 +107,6 @@ success of the random enumeration method. Even with
 this artificial help, this method was still worse, overall,
 than the other two.
 
-@figure*["fig:benchmark-overview"
-         @list{The mean time each generator takes to find the bugs,
-               for each bug that some generator found; bars indicate
-               95% confidence intervals}
-         (plot-points-from-directory)]
-
 We used three variations on the enumeration combinators. The
 first is the fair combinators described in 
 @secref["sec:fair-informal"]. The second uses fair binary
@@ -180,41 +174,40 @@ total number of counterexamples found for each point in
 time. The lines on each plot show how the number of
 counterexamples found changes as time passes.
 
-The thicker, black line is the same on both plots. It shows
+The thicker, black line shows
 the number of counterexamples found by the ad hoc random
-generator. The upper plot shows how drawing from the
-enumeration in order fares, compared to the random
 generator. The solid red (not thick) line is with fair
 combinators, the dashed line is with the mildly unfair
 combinators and the dotted line is with the brutally unfair
-combinators. Similarly, the bottom plot uses the same set of
-combinators, but randomly picks natural numbers (as
-described above) and uses those to generate candidates.
-No strategy was able to find more than
-@(format "~a" (maximum-bugs-found)) of the 50 bugs in the benchmark.
+combinators, all when running in order.
 
-These plots also show that the mildly unfair combinators are worse
+This plot shows that the mildly unfair combinators are worse
 than the fair ones and the brutally unfair combinators are
-much worse than either. But they also reveal that the ad hoc generator
-is only better than the best enumeration strategy after 22 minutes.
-Before that time, the fair in-order enumeration strategy is the best
-approach.
+much worse than either.
 
-A more detailed version of our results is shown in 
-@figure-ref["fig:benchmark-overview"]. The x-axis has one
+That plot also reveals that the ad hoc generator is only
+better than the best enumeration strategy after 22 minutes.
+Before that time, the fair in-order enumeration strategy is
+the best approach.
+
+The supplementary material has a similar plot that uses the
+same set of combinators, but randomly picks natural numbers
+(as described above) and uses those to generate candidates.
+Those plots show that that approach is worse on all time scales
+than one of the other approaches.
+
+No strategy was able to find more than
+@(format "~a" (maximum-bugs-found)) of the 50 bugs in the
+benchmark. 
+
+Another, more detailed chart is included in 
+the supplementary material. In that chart, x-axis has one
 entry for each different bug, for which a counter-example
-was found. Each point indicates the average number of seconds
-required to find that bug, with the bars indicating a 95%
-confidence interval. The different shapes and colors of the points
-indicate which method was used. The bugs are sorted along
-the x-axis by the average amount of time required to find
-the bug across all strategies.
-
-@Figure-ref["fig:benchmark-overview"]'s chart confirms the
-conclusion from @figure-ref["fig:benchmark-lines"]'s.
-Specifically, the circled points are the ones with unfair
-combinators and they are never significantly below their
-uncircled counterparts and often significantly above.
+was found and the y axis shows the average number of seconds
+required to find that bug. The chart confirms the
+conclusion from @figure-ref["fig:benchmark-lines"] showing that
+the unfair combinators are never significantly below their
+fair counterparts and often significantly above.
 
 @(define wb (way-betters))
 @(assert (equal? (set 'ordered 'grammar)
@@ -226,8 +219,10 @@ uncircled counterparts and often significantly above.
    (define with-and (reverse (list* last-one ", and " (cddr (reverse with-commas)))))
    (assert (= (length with-and) (length with-commas)))
    (apply string-append with-and))
+@(define (better-count who)
+   (format "~a" (length (hash-ref wb who))))
 
-@Figure-ref["fig:benchmark-overview"] also shows that, for
+Our data also shows that, for
 the most part, bugs that were easy (could be found in less
 than a few seconds) for the
 generator that selected at random from the enumerations
@@ -236,10 +231,10 @@ The ad hoc random generator and the fair in-order enumeration
 generator each had a number of bugs where they were at least
 one decimal order of magnitude faster than all of the other
 generators (and multiple generators found the bug).
-The ad hoc random generator was significantly better on:
-@(betters 'grammar),
-and the fair in-order enumerator was significantly better on:
-@(betters 'ordered). The unfair enumerators were never significantly
+The ad hoc random generator was significantly better on
+@(better-count 'grammar) bugs
+and the fair in-order enumerator was significantly better on
+@(better-count 'ordered) bugs. The unfair enumerators were never significantly
 better on any bug.
 
 We believe that the fair enumerators are better than the unfair

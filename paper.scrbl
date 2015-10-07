@@ -196,7 +196,7 @@ combinators is worse across the board.
 
 @include-section["related.scrbl"]
 
-@include-section["future.scrbl"]
+@; @include-section["future.scrbl"] @;; cut for length
 
 @include-section["conclusion.scrbl"]
 
