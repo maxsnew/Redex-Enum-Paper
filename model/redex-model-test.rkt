@@ -214,7 +214,7 @@
   (check-equal? (judgment-holds (@<- (cons/e (below/e ∞) (below/e ∞)) n (cons 3 4) T) n)
                 (list (:to-nat (:cons/e :natural/e :natural/e) (cons 3 4))))
 
-  (check-equal? (try-one (term (or/e (fix/e x (below/e 10))
+  (check-equal? (try-one (term (or/e (fix/e x (below/e ∞))
                                      (cons/e (below/e ∞) (below/e ∞))))
                          100)
                 #t)
