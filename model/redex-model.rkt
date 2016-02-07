@@ -1,7 +1,7 @@
 #lang racket
 (require redex
          pict
-         (prefix-in : data/enumerate/lib)
+         (prefix-in : data/enumerate/lib/unsafe)
          (prefix-in : data/enumerate/private/unfair))
 
 (provide L
@@ -417,79 +417,105 @@
   [(different any_1 any_2) #t])
 
 (define-metafunction L
-  to-enum : e -> any
-  [(to-enum (or/e e_1 e_2))
-   ,(let ([e1 (term (to-enum e_1))]
-          [e2 (term (to-enum e_2))])
-      (:or/e (:map/e (λ (x) (cons 0 x))
-                     cdr
-                     e1
-                     #:contract (cons/c 0 (:enum-contract e1)))
-             (:map/e (λ (x) (cons 1 x))
-                     cdr
-                     e2
-                     #:contract (cons/c 1 (:enum-contract e2)))))]
-  [(to-enum (cons/e e_1 e_2))
-   ,(:cons/e (term (to-enum e_1))
-             (term (to-enum e_2)))]
-  [(to-enum (unfair-cons/e e_1 e_2))
-   ,(let ([:e1 (term (to-enum e_1))]
-          [:e2 (term (to-enum e_2))])
-      (:map/e (λ (n)
-                (define-values (x y) (:unfair-n->n*n n))
-                (cons (:from-nat :e1 x)
-                      (:from-nat :e1 y)))
-              (λ (pr)
-                (:unfair-n*n->n (:to-nat :e1 (car pr))
-                                (:to-nat :e2 (cdr pr))))
-              :natural/e
-              #:contract
-              (cons/c (:enum-contract :e1) (:enum-contract :e2))))]
-  [(to-enum (below/e ∞)) ,:natural/e]
-  [(to-enum (below/e n)) ,(:below/e (term n))]
-  [(to-enum (map/e (swap-zero-with natural) (swap-zero-with natural) e))
-   ,(let ([e (term (to-enum e))]
-          [swapper
-           (λ (x) (if (exact-nonnegative-integer? x)
-                      (cond
-                        [(= x (term natural)) 0]
-                        [(= x 0) (term natural)]
-                        [else x])
-                      x))])
-      (:map/e swapper swapper e #:contract (:enum-contract e)))]
-  [(to-enum (map/e swap-cons swap-cons e)) 
-   ,(let ([e (term (to-enum e))]
-          [swap (λ (x) (if (pair? x) (cons (cdr x) (car x)) x))])
-      (:map/e swap swap e #:contract (:enum-contract e)))]
-  [(to-enum (map/e any any e)) (to-enum e)]
-  [(to-enum (dep/e inf e (nat->map-of-swap-zero-with n+)))
-   ,(:dep/e (term (to-enum e))
-            (λ (x)
-              (if (exact-nonnegative-integer? x)
-                  (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e n+))))
-                  :natural/e)))]
-  [(to-enum (dep/e fin e nat->below/e-of-that-nat))
-   ,(:dep/e (term (to-enum e))
-            (λ (x)
-              (if (exact-nonnegative-integer? x)
-                  (:below/e x)
-                  (:below/e 0)))
-            #:f-range-finite? #t)]
-  [(to-enum (dep/e inf e any)) (to-enum (cons/e e (below/e ∞)))] ;; should this be an error?
-  [(to-enum (except/e e n))
-   ,(let ([e (term (to-enum e))])
-      (:except/e e (:from-nat e (term n))))]
-  [(to-enum (fix/e x e))
-   ,(letrec ([d (:delay/e converted-e)]
-             [converted-e
-              (parameterize ([env (hash-set (env) (term x) d)])
-                (term (to-enum e)))])
-      converted-e)]
-  [(to-enum x)
-   ,(hash-ref (env) (term x))]
-  [(to-enum (trace/e n e)) (to-enum e)])
+  to-enum : e -> (side-condition any_1 (:enum? (term any_1)))
+  [(to-enum e) any_1 (where (any_1 any_2) (to-enum+ctc e))])
 
-(define env (make-parameter (hash)))
+(define-metafunction L
+  to-enum+ctc : e -> ((side-condition any_1 (:enum? (term any_1)))
+                      (side-condition any_2 (contract? (term any_2))))
+  [(to-enum+ctc (or/e e_1 e_2))
+   ,(match-let ([(list :e1 c1) (term (to-enum+ctc e_1))]
+                [(list :e2 c2) (term (to-enum+ctc e_2))])
+      (define a
+        (:map/e (λ (x) (cons 0 x))
+                cdr
+                :e1
+                #:contract (cons/c 0 c1)))
+      (define b
+        (:map/e (λ (x) (cons 1 x))
+                cdr
+                :e2
+                #:contract (cons/c 1 c2)))
+      (list (:or/e a b)
+            (or/c (cons/c 0 c1) (cons/c 1 c2))))]
+  [(to-enum+ctc (cons/e e_1 e_2))
+   ,(match-let ([(list e1 c1) (term (to-enum+ctc e_1))]
+                [(list e2 c2) (term (to-enum+ctc e_2))])
+      (list (:cons/e e1 e2)
+            (cons/c c1 c2)))]
+  [(to-enum+ctc (unfair-cons/e e_1 e_2))
+   ,(match-let ([(list :e1 c1) (term (to-enum+ctc e_1))]
+                [(list :e2 c2) (term (to-enum+ctc e_2))])
+      (list (:map/e (λ (n)
+                      (define-values (x y) (:unfair-n->n*n n))
+                      (cons (:from-nat :e1 x)
+                            (:from-nat :e1 y)))
+                    (λ (pr)
+                      (:unfair-n*n->n (:to-nat :e1 (car pr))
+                                      (:to-nat :e2 (cdr pr))))
+                    :natural/e
+                    #:contract
+                    (cons/c c1 c2))
+            (cons/c c1 c2)))]
+  [(to-enum+ctc (below/e ∞)) ,(let ([:e :natural/e])
+                                (list :e (:enum-contract :e)))]
+  [(to-enum+ctc (below/e n)) ,(let ([:e (:below/e (term n))])
+                                (list :e (:enum-contract :e)))]
+  [(to-enum+ctc (map/e (swap-zero-with natural) (swap-zero-with natural) e))
+   ,(match-let ([(list :e c) (term (to-enum+ctc e))]
+                [swapper
+                 (λ (x) (if (exact-nonnegative-integer? x)
+                            (cond
+                              [(= x (term natural)) 0]
+                              [(= x 0) (term natural)]
+                              [else x])
+                            x))])
+      (list (:map/e swapper swapper :e #:contract c)
+            c))]
+  [(to-enum+ctc (map/e swap-cons swap-cons e))
+   ,(match-let ([(list :e c) (term (to-enum+ctc e))]
+                [swap (λ (x) (if (pair? x) (cons (cdr x) (car x)) x))])
+      (list (:map/e swap swap :e #:contract c) c))]
+  [(to-enum+ctc (map/e any any e)) (to-enum+ctc e)]
+  [(to-enum+ctc (dep/e inf e (nat->map-of-swap-zero-with n+)))
+   ,(match-let ([(list :e c) (term (to-enum+ctc e))])
+      (list (:dep/e :e
+                    (λ (x)
+                      (if (exact-nonnegative-integer? x)
+                          (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e n+))))
+                          :natural/e)))
+            (cons/c exact-nonnegative-integer? exact-nonnegative-integer?)))]
+  [(to-enum+ctc (dep/e fin e nat->below/e-of-that-nat))
+   ,(match-let ([(list :e c) (term (to-enum+ctc e))])
+      (list (:dep/e :e
+                    (λ (x)
+                      (if (exact-nonnegative-integer? x)
+                          (:below/e x)
+                          (:below/e 0)))
+                    #:f-range-finite? #t)
+            (cons/dc [hd exact-nonnegative-integer?]
+                     [tl (hd) (and/c exact-integer? (</c hd))])))]
+  [(to-enum+ctc (dep/e inf e any)) (to-enum+ctc (cons/e e (below/e ∞)))] ;; should this be an error?
+  [(to-enum+ctc (except/e e n))
+   ,(match-let ([(list :e c) (term (to-enum+ctc e))])
+      (list (:except/e :e (:from-nat :e (term n)))
+            (and/c c (λ (x) (not (equal? x (term n)))))))]
+  [(to-enum+ctc (fix/e x e))
+   ,(match-letrec ([:e (:delay/e (list-ref converted-e 0))]
+                   [c (recursive-contract (list-ref converted-e 1) #:flat)]
+                   [converted-e
+                    (begin
+                      (parameterize ([e-env (hash-set (e-env) (term x) :e)]
+                                     [c-env (hash-set (c-env) (term x) c)])
+                        (term (to-enum+ctc e))))])
+      converted-e)]
+  [(to-enum+ctc x)
+   ,(list (hash-ref (e-env) (term x))
+          (hash-ref (c-env) (term x)))]
+  [(to-enum+ctc (trace/e n e)) (to-enum+ctc e)])
+
+(define e-env (make-parameter (hash)))
+(define c-env (make-parameter (hash)))
 
 (define-metafunction L
   to-val : v -> any
@@ -497,4 +523,3 @@
   [(to-val (inl v)) ,(cons 0 (term (to-val v)))]
   [(to-val (inr v)) ,(cons 1 (term (to-val v)))]
   [(to-val (cons v_1 v_2)) ,(cons (term (to-val v_1)) (term (to-val v_2)))])
-
