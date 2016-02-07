@@ -141,7 +141,8 @@ Although we don't prove it formally, the situation where
 the @sr[(⊢v v (ty e))] condition does not hold in the
 second theorem corresponds to the situation where the value
 that we are attempting to convert to a number does not match
-the contract in the enumeration in our implementation.
+the contract in the enumeration in our implementation (i.e.,
+a runtime error).
 
 We use these two results to connect the Coq code to our implementation.
 Specifically, we use Coq's @tt{Eval} @tt{compute} facility to print out

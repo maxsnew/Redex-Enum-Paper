@@ -78,11 +78,11 @@ a maximum of @raw-latex{$m$}.
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
 pairing function.
-The two bijections are quite similar; they are both quadratic
-functions with similar geometric interpretations.
+The two bijections are similar; they are both quadratic
+functions with geometric interpretations.
 @citet[elegant-pairing-function]'s traces out the
-edges of increasingly large squares and Cantor's traces out the bottoms
-of increasingly large triangles. Importantly, they are both fair (although
+edges of squares and Cantor's traces out the bottoms
+of triangles. Importantly, they are both fair (but
 with different equilibrium points).
 
 For enumerations we are primarily concerned with the other

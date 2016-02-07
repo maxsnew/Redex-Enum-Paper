@@ -70,7 +70,7 @@ infinite enumeration. If both are finite, it loops through the
 one with lesser cardinality. This corresponds to taking the
 quotient and remainder of the index with the lesser size.
 
-Pairing infinite enumerations require more care. If we
+Pairing infinite enumerations requires more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening
 squares to enumerate all pairs (using @citet[elegant-pairing-function]'s
@@ -139,7 +139,7 @@ uses the original enumeration's @racket[to-nat] on the given
 element and then either subtracts one (if it is above the given exception) or
 simply passes it along (if it is below). Similarly, the 
 @racket[except/e]'s @racket[to-nat] function calls the input
-enumeration's @racket[to-nat] function.
+enumeration's @racket[from-nat] function.
 
 One important point about the combinators used so far: the
 conversion from a natural to a value takes time that is (a low-order)
@@ -190,6 +190,5 @@ magnitude of the number.
 
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
-of enumerations in the library. The documentation,
-@url{http://docs.racket-lang.org/data/Enumerations.html}, lists all
-of the combinators.
+of enumerations in the library. The documentation (from the link in an earlier
+footnote) lists all of the combinators.

@@ -75,7 +75,7 @@ have complementary strengths, and that selecting a random
 natural number and using it with a fair enumeration is always
 slightly worse than one of the other two choices. We also replaced
 fair combinators with unfair ones and show that the bug-finding
-capabilities become significantly worse.
+capabilities become worse.
 
 The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction

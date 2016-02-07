@@ -14,7 +14,7 @@
           "enum-util.rkt"
           "util.rkt")
 
-@title[#:tag "sec:fair-informal"]{Fairness Informally}
+@title[#:tag "sec:fair-informal"]{Fairness, Informally}
 
 @(define one-billion 1000000000)
 @(define fair-number-past-one-billion (* 1000 one-billion))
