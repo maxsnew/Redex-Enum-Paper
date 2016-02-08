@@ -6,7 +6,7 @@
 The related work divides into two categories: papers about
 enumeration and papers with studies about random testing.
 
-@section{Enumeration Methods}
+@section{Bijective Enumeration Methods}
 
 The SciFe library for Scala@~cite[scife scife2] is most similar to our library,
 but it has only one half of the bijection so it does
@@ -17,7 +17,10 @@ combinators discussed in @secref["sec:evaluation"].
 Its pairing operation is based on the Cantor pairing
 function, meaning that computing the n-ary fair version of
 it is expensive, as discussed in 
-@secref["sec:fair-informal"].
+@secref["sec:fair-informal"]. These differences and the lack
+of fairness aside, the
+technical details of the implementation are very similar and
+our library shares all of the strengths and weakness of their library.
 
 @citet[compact-serialization-of-prolog-terms]'s work on bijective encoding schemes for 
 Prolog terms is also
