@@ -53,8 +53,10 @@
   (for/fold ([ht (make-hash)])
             ([i (in-range n)])
     (define this-one (get-trace e i))
-    (for/hash ([(k v) (in-hash this-one)])
-      (values k (set-union (hash-ref ht k (set)) v)))))
+    (define keys (remove-duplicates (append (hash-keys this-one) (hash-keys ht))))
+    (for/hash ([key (in-list keys)])
+      (values key (set-union (hash-ref ht key (set))
+                             (hash-ref this-one key (set)))))))
 
 (define (n->nn n)
   (define level (integer-sqrt n))
@@ -280,4 +282,10 @@
         (set! num-same (+ num-same 1))
         (set! num-different (+ num-different 1))))
   (check-true (> num-same 20))
-  (check-true (> num-different 10)))
+  (check-true (> num-different 10))
+
+
+  (check-equal? (complete-trace (term (or/e (trace/e 0 (below/e ∞))
+                                            (trace/e 1 (below/e ∞))))
+                                4)
+                (hash 0 (set 0 1) 1 (set 0 1))))
