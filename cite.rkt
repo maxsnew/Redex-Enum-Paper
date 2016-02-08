@@ -55,6 +55,8 @@
   "Theoretical Computer Science")
 (define tplp
   "Theory and Practice of Logic Programming")
+(define oopsla
+  "Object-Oriented Programming, Systems, Languages, and Applications")
 
 (define sfp2009-kf
   (make-bib
@@ -93,6 +95,13 @@
    #:title "SciFe: Scala Framework for Efficient Enumeration of Data Structures with Invariants"
    #:date 2014
    #:location (proceedings-location "Scala Workshop")))
+
+(define scife2
+  (make-bib
+   #:author (authors "Ivan Kuraj" "Viktor Kuncak" "Daniel Jackson")
+   #:title "Programming with Enumerable Sets of Structures"
+   #:date 2015
+   #:location (proceedings-location oopsla)))
 
 (define bit-monad-transformers
   (make-bib

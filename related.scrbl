@@ -8,9 +8,20 @@ enumeration and papers with studies about random testing.
 
 @section{Enumeration Methods}
 
+The SciFe library for Scala@~cite[scife scife2] is most similar to our library,
+but it has only one half of the bijection so it does
+not support @racket[except/e]. It has fair binary pairing
+and alternation combinators, but no n-ary fair combinators.
+Its combinators use the same bijections as the mildly unfair
+combinators discussed in @secref["sec:evaluation"].
+Its pairing operation is based on the Cantor pairing
+function, meaning that computing the n-ary fair version of
+it is expensive, as discussed in 
+@secref["sec:fair-informal"].
+
 @citet[compact-serialization-of-prolog-terms]'s work on bijective encoding schemes for 
-Prolog terms is most
-similar to ours. However, we differ in three main ways. 
+Prolog terms is also
+similar to ours. We differ in three main ways. 
 First, our n-ary enumerations are fair (not just the binary ones).
 Second, our enumerations deal with enumeration of finite sets wherever
 they appear in the larger structure. This is complicated because it
@@ -45,17 +56,6 @@ between consecutive equilibrium points doubles at each step, meaning that
 equilibrium points are exponentially far apart, while ours
 are linearly far apart for alternation combinators or polynomially
 far apart for pairing combinators.
-
-@citet[scife]'s SciFe library is closer to our library than
-Feat, but it has only one half of the bijection so it does
-not support @racket[except/e]. It has fair binary pairing
-and alternation combinators, but no n-ary fair combinators.
-Its combinators use the same bijections as the mildly unfair
-combinators discussed in @secref["sec:evaluation"].
-Its pairing operation is based on the Cantor pairing
-function, meaning that computing the n-ary fair version of
-it is expensive, as discussed in 
-@secref["sec:fair-informal"].
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages

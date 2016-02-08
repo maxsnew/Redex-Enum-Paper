@@ -14,10 +14,8 @@ Feat for Haskell in
 2012@note{@url{https://hackage.haskell.org/package/testing-feat}},
 then SciFe for Scala in
 2014@note{@url{http://kaptoxic.github.io/SciFe/}}, and
-@tt{data/enumerate} for Racket in
-2015.@note{@url{http://docs.racket-lang.org/data/Enumerations.htmlREMOVEME}}
-(The last library is ours and was written as part of the work in this paper.
-Following the link reveals authorship.)
+we released @tt{data/enumerate} as part of Racket in
+2015.@note{@url{http://docs.racket-lang.org/data/Enumerations.html}}
 
 These libraries are efficient, providing the
 ability to extract the @texmath{2^{100}}-th element of an
