@@ -115,7 +115,7 @@ C. @citet[fuzzing-unix-utils] designed a random generator for streams
 of characters with various properties (e.g. including nulls or not, 
 to include newline characters at specific points) and used it
 to find bugs in Unix utilities.
-
+@;{
 In surveying related work, we noticed that despite an early,
 convincing study on the value of random
 testing@~cite[an-evaluation-of-random-testing]
@@ -151,3 +151,4 @@ Of course, the reason Quickcheck and Redex find these bugs
 is because the distribution they use for integers is biased
 towards small integers, which is natural as those integers
 are usually more likely to be interesting during testing.
+}

@@ -207,8 +207,8 @@ whereas the complete trace of
 @centered{@unfair-pair-sr}
 up to @(add-commas trace-size)
 maps @sr[0] to @(show-set (hash-ref unfair-pair-trace 0))
-and @sr[1] to @(show-set (hash-ref unfair-pair-trace 1)).
-(See Theorem 7 for the definition of @sr[unfair-cons/e]).
+and @sr[1] to @(show-set (hash-ref unfair-pair-trace 1)), where
+@sr[unfair-cons/e] is the unfair pairing combinator from the introduction.
 
 We say that an enumeration combinator @texmath{c^k : enum ... \rightarrow enum}
 of arity @texmath{k} is fair if, for every

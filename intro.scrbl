@@ -14,8 +14,8 @@ Feat for Haskell in
 2012@note{@url{https://hackage.haskell.org/package/testing-feat}},
 then SciFe for Scala in
 2014@note{@url{http://kaptoxic.github.io/SciFe/}}, and
-@tt{data/enumerate} for Racket this
-year.@note{@url{http://docs.racket-lang.org/data/Enumerations.htmlREMOVEME}}
+@tt{data/enumerate} for Racket in
+2015.@note{@url{http://docs.racket-lang.org/data/Enumerations.htmlREMOVEME}}
 (The last library is ours and was written as part of the work in this paper.
 Following the link reveals authorship.)
 

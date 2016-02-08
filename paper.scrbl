@@ -50,7 +50,6 @@
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   Fair Enumeration Combinators
 }
-@;{
 @authorinfo["Max New"
             "Northwestern University"
             "max.new@eecs.northwestern.edu"]
@@ -66,7 +65,6 @@
 @authorinfo["Robert Bruce Findler"
             "Northwestern University"
             "robby@eecs.northwestern.edu"]
-}
 
 @(define (abstract-text raw-text?)
 
@@ -98,8 +96,8 @@
  Enumerations represented as
  bijections between the natural numbers and elements of some
  given type have recently garnered interest in property-based testing
- because of their efficiency and flexibility as
- counter-example generators. There are, however, many ways of defining
+ because of their efficiency and flexibility.
+ There are, however, many ways of defining
  these bijections, some of which are better than others. 
  This paper offers a new property of enumeration combinators
  called @def{fairness} that identifies enumeration combinators
@@ -127,15 +125,10 @@ fairness of our new combinators and that certain
 combinations of fair combinators are not fair.
 
 We also report on an evaluation of fairness for the purpose
-of finding bugs in operational semantics and type systems.
-We implemented a general-purpose enumeration
-library for Racket and used it to build generators for
-arbitrary Redex grammars. We used an existing benchmark
-suite of buggy Redex models to compare the bug finding
-capabilities of the original, ad hoc random generator to
-generators based on fair and unfair enumeration combinators.
-The enumeration using the fair combinators has complementary
-strengths to the ad hoc generator (better on short time
+of finding bugs in programming language models.
+We show that fair enumeration combinators have complementary
+strengths to an existing, well-tuned ad hoc random generator
+(better on short time
 scales and worse on long time scales) and using unfair
 combinators is worse across the board.
 })
@@ -202,4 +195,4 @@ combinators is worse across the board.
 
 @generate-bibliography[]
 
-@include-section["appendix.scrbl"]
+@; @include-section["appendix.scrbl"]  @;;not needed, now that this isn't mentioned in related work
