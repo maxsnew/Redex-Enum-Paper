@@ -195,6 +195,17 @@ less than @sr[n].
    (define eles (set->list s))
    (cond
      [(empty? eles) "∅"]
+     [(= (set-count eles) 1)
+      (format "{~a}" (set-first eles))]
+     [(or (= (set-count eles) 2)
+          (= (set-count eles) 3))
+      (apply format
+             (if (= (set-count eles) 2)
+                 "{~a, ~a}"
+                 "{~a, ~a, ~a}")
+             (sort (set->list eles)
+                   string<?
+                   #:key (λ (x) (format "~s" x))))]
      [else
       (define sm (apply min eles))
       (define bg (apply max eles))
@@ -207,13 +218,17 @@ less than @sr[n].
 For example, the complete trace of
 @centered{@fair-pair-sr}
 up to @(add-commas trace-size)
-maps both @sr[0] and @sr[1] to @(show-set (hash-ref fair-pair-trace 0))
-whereas the complete trace of
+maps both @sr[0] and @sr[1] to @(show-set (hash-ref fair-pair-trace 0)),
+meaning that the two arguments were explored exactly the same
+amount, at least for the first @(add-commas trace-size) elements.
+The complete trace of
 @centered{@unfair-pair-sr}
-up to @(add-commas trace-size)
+up to @(add-commas trace-size), however,
 maps @sr[0] to @(show-set (hash-ref unfair-pair-trace 0))
 and @sr[1] to @(show-set (hash-ref unfair-pair-trace 1)), where
 @sr[unfair-cons/e] is the unfair pairing combinator from the introduction.
+This shows that the first argument (traced with the @sr[0]) is explored more
+than the second.
 
 We say that an enumeration combinator @texmath{c^k : enum ... \rightarrow enum}
 of arity @texmath{k} is fair if, for every
@@ -223,18 +238,39 @@ in the complete trace up to @texmath{M} of @texmath{c^k} applied to @sr[(trace/e
 @texmath{\cdots} @sr[(trace/e k enum_k)], for any enumerations @sr[enum_1]
 to @sr[enum_k], is a function that maps each number between @sr[1] and @sr[k]
 to exactly the same set of numbers. Any other combinator is unfair.
-We call the values of @texmath{M} the equilibrium points.
+In other words, a fair combinator is one where the traces
+of its arguments are explored the same amount at an infinite number of points,
+namely the values of @texmath{M}. As such, we call the values of 
+@texmath{M} the equilibrium points.
 
 We say that a combinator is @texmath{f}-fair if the @texmath{n}-th equilibrium
 point is at @texmath{f(n)}.
 The Coq model contains this definition only for @raw-latex{$k\in \{2,3,4\}$},
 called @tt{Fair2}, @tt{Fair3}, and @tt{Fair4}.
 
+@(define (or/e-trace n)
+   (define tr
+     (complete-trace (term (or/e (trace/e 0 (below/e ∞)) (trace/e 1 (below/e ∞))))
+                     n))
+   (unless (equal? (hash-ref tr 0)
+                   (hash-ref tr 1))
+     (error 'fair-formal.scrbl "expected identical traces for or/e up to ~s, got ~s and ~s"
+            n
+            (hash-ref tr 0)
+            (hash-ref tr 1)))
+   (show-set (hash-ref tr 0)))
+
 @theorem{@sr[or/e] is @texmath{\lambda n.\ 2n+2}-fair.}
 @proof{
 This can be proved by induction on @texmath{n}.
 The full proof is @tt{SumFair} in the Coq model.
 }
+Concretely, this means that the equilibrium points of @sr[or/e]
+are @texmath{2}, @texmath{4}, @texmath{6}, etc., and 
+tracing @racket[or/e] up to those points produces the sets
+@(or/e-trace 2),
+@(or/e-trace 4), and 
+@(or/e-trace 6), etc.
 
 @theorem{@racket[or-three/e] from @secref["sec:fair-informal"] is unfair.}
 @proof{
