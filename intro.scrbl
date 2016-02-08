@@ -56,10 +56,8 @@ libraries is bug-finding. Accordingly, we tested our concept
 of fairness via an empirical study of the capability of
 enumeration libraries to find bugs in formal models of type
 systems and operational semantics in
-Redex@~cite[run-your-research]. We built a benchmark suite of 50
-bugs (based on our experience writing Redex models and the
-experience of others mined from git repositories of Redex
-models) and compared the bug/second rate with three different
+Redex@~cite[run-your-research]. We used our existing benchmark suite of 50
+bugs and compared the bug/second rate with three different
 generators. Two of the generators are based on a bijection
 between the expressions of the language and the natural
 numbers: one enumerates terms in order and the other
@@ -73,7 +71,7 @@ have complementary strengths, and that selecting a random
 natural number and using it with a fair enumeration is always
 slightly worse than one of the other two choices. We also replaced
 fair combinators with unfair ones and show that the bug-finding
-capabilities become worse.
+capabilities become significantly worse.
 
 The next section introduces enumeration libraries, focusing
 on the Racket-based library to make the introduction

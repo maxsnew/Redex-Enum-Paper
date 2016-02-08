@@ -21,9 +21,14 @@
 
 @figure*["fig:semantics" @list{Semantics of Enumeration Combinators} (semantics-figure)]
 
-@Figure-ref["fig:semantics"] shows a formal model of a
-subset of our enumerations. It defines the relation 
-@sr[|@|], which relates an enumeration and an index to the
+@Figure-ref["fig:semantics"] shows a formal model of our enumerations.
+The model differs from our implementation in the way it handles
+unions (forcing them to be disjoint via @sr[inl] and @sr[inr])
+and by having a type system instead of using contracts to describe
+the sets of values that an enumeration produces.
+
+The relation 
+@sr[|@|] defines the semantics of the enumerations. It relates an enumeration and an index to the
 value that the enumeration produces at the index. 
 The @sr[T] that follows the vertical bar is used in the definition
 of fairness; ignore it for now. The 

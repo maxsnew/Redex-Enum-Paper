@@ -317,16 +317,20 @@
 (define-syntax-rule
   (define-lon/e/dup x1 x2 expr)
   (begin (define x1 (racketblock expr))
-         (define x2 expr)))
+         (define x2 (let () expr x2))))
 
 (define-lon/e/dup lon/e-code lon/e
-  (letrec ([lon/e
-            (or/e (fin/e null)
-                  (cons/e (below/e +inf.0)
-                          (delay/e lon/e)))])
-    lon/e))
+  (define lon/e
+    (or/e (fin/e null)
+          (cons/e (below/e +inf.0)
+                  (delay/e lon/e)))))
 
-(define-lon/e/dup lon2/e-code lon2/e
+(define-syntax-rule
+  (define-lon/e/dup/2 x1 x2 expr)
+  (begin (define x1 (racketblock expr))
+         (define x2 expr)))
+
+(define-lon/e/dup/2 lon2/e-code lon2/e
   (or/e (single/e '())
         (dep/e (below/e +inf.0)
                (λ (len)
