@@ -162,14 +162,14 @@ clear winner, the fair enumerators are second and the
 unfair ones are third, with the mildly unfair enumerators
 usually doing better than the brutally unfair ones.
 
-That overview lacks nuance, however, as it does not
+That overview lacks nuance; it does not
 take into account how long it took for each generator to find
 the bugs that it found. 
-The plots in @figure-ref["fig:benchmark-lines"] take time
+The plot in @figure-ref["fig:benchmark-lines"] take time
 into account, showing how well each generator is doing as
 a function of time. Along x-axis is time in
-seconds in a log scale, varying from milliseconds to the
-left to a few hours on the right. Along the y-axis is the
+seconds in a log scale, varying from milliseconds to
+a few hours. Along the y-axis is the
 total number of counterexamples found for each point in
 time. The lines on each plot show how the number of
 counterexamples found changes as time passes.
@@ -180,7 +180,6 @@ generator. The solid red (not thick) line is with fair
 combinators, the dashed line is with the mildly unfair
 combinators and the dotted line is with the brutally unfair
 combinators, all when running in order.
-
 This plot shows that the mildly unfair combinators are worse
 than the fair ones and the brutally unfair combinators are
 much worse than either.

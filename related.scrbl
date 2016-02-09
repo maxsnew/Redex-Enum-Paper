@@ -87,12 +87,11 @@ namely in @citet[small-check]'s original paper on
 SmallCheck. SmallCheck is an enumeration-based testing
 library for Haskell and the paper contains a comparison with
 QuickCheck, a Haskell random testing library.
-
-Their study is not as in-depth as ours; the paper does not
+Their study is not as detailed as ours; the paper does not
 say, for example, how many errors were found by each of the
 techniques or in how much time, only that there were two 
-errors that were found by enumeration that were not found
-by random testing. The paper, however, does conclude 
+found by enumeration that were not found
+randomly. The paper, however, does conclude 
 that ``SmallCheck, Lazy SmallCheck and QuickCheck are
 complementary approaches to property-based testing in Haskell,''
 a stance that our experiment also supports (but for Redex).
@@ -101,7 +100,6 @@ a stance that our experiment also supports (but for Redex).
 random testing and enumeration against a tool that reduces
 conjectures to boolean satisfiability and then uses a solver.
 The study concludes that the two techniques complement each other.
-
 Neither study compares selecting randomly from a uniform
 distribution like ours.
 

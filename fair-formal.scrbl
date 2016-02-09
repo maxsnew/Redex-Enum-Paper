@@ -132,7 +132,7 @@ the model actually defines two functions.
  if @sr[(⊢v v (ty e))], then there exists 
  a unique @sr[T] and @sr[n] such that @sr[(|@| e n v T)].
 }
-@proof{As with the previous theorem, we recursively process
+@proof{As before, we recursively process
  the rules to compute @sr[n]. This is complicated by the
  fact that we need inverse functions for the formulas in the
  premises of the rules to go from the given @sr[n] to the
@@ -266,8 +266,8 @@ This can be proved by induction on @texmath{n}.
 The full proof is @tt{SumFair} in the Coq model.
 }
 Concretely, this means that the equilibrium points of @sr[or/e]
-are @texmath{2}, @texmath{4}, @texmath{6}, etc., and 
-tracing @racket[or/e] up to those points produces the sets
+are @texmath{2}, @texmath{4}, @texmath{6}, etc.
+Tracing @racket[or/e] up to those points produces the sets
 @(or/e-trace 2),
 @(or/e-trace 4), and 
 @(or/e-trace 6), etc.
