@@ -53,7 +53,7 @@ beginning of the disjoint union of an enumeration of natural numbers
 and an enumeration of strings:
 
 @enum-example[(or/e (below/e +inf.0) string/e)
-              16]
+              7]
 
 The @racket[or/e] enumeration insists that contracts for its arguments
 be disjoint so that it can compute the reverse direction of the bijection.
@@ -100,7 +100,7 @@ This means that a use of
 to fail to terminate.
 Indeed, switching the order of the arguments to @racket[or/e]
 above also produces an enumeration
-that fails to terminate. Here are the first 12 elements of @racket[lon/e]:
+that fails to terminate. Here are the first 12 elements of the correct @racket[lon/e]:
 @enum-example[lon/e 12]
 
 Our combinators rely on knowing the
@@ -191,6 +191,13 @@ all of the enumerations for the second component as soon
 as a single (sufficiently large) number is passed to @racket[from-nat],
 which can, in the worst case, take time proportional to the
 magnitude of the number.
+
+@; XXX This is not quite accurate. It doesn't need all of them, it just
+@; needs all the ones until the total length of enumeration computed so
+@; far is the length of the index or longer. I feel like we may be able
+@; to say something like "it requires the prefix of the list" (which
+@; isn't exactly true, because we don't need the list itself, just the
+@; lengths of the components)
 
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities

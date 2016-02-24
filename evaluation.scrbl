@@ -184,10 +184,9 @@ This plot shows that the mildly unfair combinators are worse
 than the fair ones and the brutally unfair combinators are
 much worse than either.
 
-That plot also reveals that the ad hoc generator is only
-better than the best enumeration strategy after 22 minutes.
-Before that time, the fair in-order enumeration strategy is
-the best approach.
+That plot also reveals that the ad hoc generator is only better than
+the best enumeration strategy after 3 minutes.  Before that time, the
+fair in-order enumeration strategy is the best approach.
 
 The supplementary material has a similar plot that uses the
 same set of combinators, but randomly picks natural numbers
