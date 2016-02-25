@@ -181,23 +181,17 @@ the indices to supply to the given enumerations when decoding.
 In both of these cases, @racket[cons/de] preserves the good
 algorithmic properties of the previous combinators.
 
-The troublesome case is when the dependent
-enumerations are all finite. In that case, we
-think of the dependent component of the pair being drawn from
-a single enumeration that consists of all of the
-finite enumerations, one after the other. Unfortunately,
-in this case, the @racket[cons/de] enumeration must compute
-all of the enumerations for the second component as soon
-as a single (sufficiently large) number is passed to @racket[from-nat],
-which can, in the worst case, take time proportional to the
-magnitude of the number.
-
-@; XXX This is not quite accurate. It doesn't need all of them, it just
-@; needs all the ones until the total length of enumeration computed so
-@; far is the length of the index or longer. I feel like we may be able
-@; to say something like "it requires the prefix of the list" (which
-@; isn't exactly true, because we don't need the list itself, just the
-@; lengths of the components)
+The troublesome case is when the dependent enumerations are
+all finite. In that case, we think of the dependent
+component of the pair being drawn from a single enumeration
+that consists of all of the finite enumerations, one after
+the other. Unfortunately, in this case, calling
+@racket[from-nat] on the result of @racket[cons/de] can take
+time proportional to the magnitude of the input index (or possibly even worse if
+computing the dependent enumerations themselves are
+costly). We use memoization to avoid repeatedly paying this cost,
+but even with memoization this case for @racket[cons/de] is
+observably worse in practice.
 
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
