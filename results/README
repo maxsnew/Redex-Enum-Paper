@@ -9,3 +9,6 @@ because that run contained no counterexamples.
 The other subdirectories contain the full outputs from the 24 hour runs
 
 run 'racket process-data.rkt' to rebuild all.process-data
+
+The file all-results-plot.pdf contains the result of running plot-points-from-directory
+and is intended for use with the supplementary material

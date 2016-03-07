@@ -32,6 +32,7 @@ supp: DNE
 	cp supp-README.txt supp/$(SUPPDIR)/README.txt
 	cp model/Makefile supp/$(SUPPDIR)
 	cp model/*.rkt supp/$(SUPPDIR)
+	cp results/all-results-plot.pdf supp/$(SUPPDIR)
 	mkdir -p supp/$(SUPPDIR)/coq
 	cp model/coq/*.v supp/$(SUPPDIR)/coq
 	cd supp && tar -czf $(SUPPDIR).tar.gz * && mv $(SUPPDIR).tar.gz .. && cd ..

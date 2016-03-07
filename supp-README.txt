@@ -1,5 +1,8 @@
 Supplementary Material
 
+To check the coq proofs and run the Redex tests, run "make". This 
+code works with Racket v6.4 and coq 8.4pl6.
+
 The coq development is in `coq/`. Start with `Enum.v`. The Inductive
 corresponding to derivations from the rules in figure 4 is
 `Enumerates`. The definitions corresponding to the theorems are given
@@ -9,16 +12,9 @@ coqc version 8.4pl5.
 
 The model used for typesetting in the paper is in `redex-model.rkt`.
 
-A racket snapshot build is needed to run the racket code.  For Linux
-and Mac OS X users it is easy to install from source (if you have
-development tools installed) by cloning https://github.com/plt/racket
-and running `make` in that directory.  Nightly snapshot builds are
-available at http://pre.racket-lang.org/installers/, which is easiest
-for windows users and for machines without the development tools.
+The summary.rktd file contains the data that's shown in figures 5 and
+6.  A plot showing all of that data is in all-results-plot.pdf. More
+details about the benchmark (describing what the benchmark programs
+actually are) is available online:
 
-The summary.rktd file contains the data that's shown in figures 5, 6,
-and 7.
-
-Running `make` in the top-level type checks the Coq code, runs the
-Redex tests, and the tests that compare the implementation with the
-redex model and the Coq model.
+   http://docs.racket-lang.org/redex/benchmark.html
