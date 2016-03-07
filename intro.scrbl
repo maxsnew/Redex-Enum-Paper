@@ -73,15 +73,18 @@ slightly worse than one of the other two choices. We also replaced
 fair combinators with unfair ones and show that the bug-finding
 capabilities become significantly worse.
 
-The next section introduces enumeration libraries, focusing
-on the Racket-based library to make the introduction
-concrete. Then, in @secref["sec:fair-informal"], we give an
-intuition-based definition of fairness and in @secref["sec:fair-combinators"] discuss our
+The next section introduces enumeration libraries, using
+the Racket-based library to make the introduction
+concrete. In @secref["sec:fair-informal"], we give an
+intuition-based definition of fairness and
+in @secref["sec:fair-combinators"] discuss our
 n-ary combinators, whose designs are motivated by fairness.
-We follow up in 
-@secref["sec:fair-formal"] with a formal definition of fairness
-and proofs that our combinators are fair and that a commonly-used
+@Secref["sec:fair-formal"] has a formal definition of fairness
+and proofs showing that our combinators are fair and that a commonly-used
 combinator is unfair. Our
 evaluation of the different random generation strategies is
-discussed in @secref["sec:evaluation"]. The second to last
-section discusses related work and the last section concludes.
+discussed in @secref["sec:evaluation"]. The last two sections
+discuss related work and conclude.
+Several places in the paper mention supplementary material; it
+is available at
+@url["http://www.eecs.northwestern.edu/~robby/tmp/fse2016/"]

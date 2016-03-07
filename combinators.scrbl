@@ -32,13 +32,12 @@ the natural numbers (up to the size) and the values that satisfy
 the contract.@note{Our library also supports one-way enumerations as
                  they can be useful in practice, but we do not talk
                  about them here.}
-
-The most basic enumeration is @racket[below/e] (by convention, the names of
+Our most basic enumeration is @racket[below/e] (by convention, the names of
 our enumeration library functions end with @racket[/e]; the slash is a legal character
-for an identifier in Racket). The @racket[below/e] combinator accepts a
+in Racket identifiers). The @racket[below/e] combinator accepts a
 natural number or @racket[+inf.0] and returns an enumeration
 of that size. Its @racket[to-nat] and @racket[from-nat]
-functions are simply the identity function. 
+functions are both the identity function. 
 
 @figure["fig:pair-pict" "Pairing Order"]{
   @centered{@pair-pict[]}
