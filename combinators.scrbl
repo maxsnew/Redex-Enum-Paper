@@ -194,5 +194,5 @@ observably worse in practice.
 
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
-of enumerations in the library. The documentation (from the link in an earlier
-footnote) lists all of the combinators.
+of enumerations in the library. The rest are here:
+@url{http://docs.racket-lang.org/data/Enumerations.html}

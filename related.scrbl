@@ -82,8 +82,7 @@ strategies.
 Even though enumeration-based testing methods have been
 explored in the literature, there are few studies that
 specifically contain empirical studies comparing random
-testing and enumeration. We are aware of only one other,
-namely in @citet[small-check]'s original paper on
+testing and enumeration. One is in @citet[small-check]'s original paper on
 SmallCheck. SmallCheck is an enumeration-based testing
 library for Haskell and the paper contains a comparison with
 QuickCheck, a Haskell random testing library.

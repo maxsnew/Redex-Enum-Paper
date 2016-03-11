@@ -10,7 +10,13 @@
          order)
 
 (module+ main
-  (plot-lines-from-directory '("line-plot-enum.pdf" "line-plot-ordered.pdf")))
+  ;(plot-lines-from-directory '("line-plot-enum.pdf"))
+  (plot-one-set-of-lines-from-directory
+   (set 'grammar
+        'enum
+        'enum-mildly-unfair
+        'enum-brutally-unfair)
+   "uniform-random-selection.pdf"))
 
 (define (plot-lines-from-directory [outputs #f])
   (define fst

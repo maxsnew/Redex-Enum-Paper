@@ -46,7 +46,7 @@ that govern the @sr[or/e] combinator. The idea for how these work
 is that they alternate between the two enumerations until
 one runs out and then they just use the other. The two rules on
 top cover the case where neither has yet run out and the bottom two
-cover the situation where it has. The rules with ``l'' in the name
+cover the situation where one has. The rules with ``l'' in the name
 end up producing a value from the left enumeration and the rules with
 an ``r'' produce a value from the right. 
 
@@ -139,8 +139,7 @@ the model actually defines two functions.
  one to use in the recursive call, but these inverses
  exist. The full proof is given as
  @tt{Enumerates_to_dec_uniq} in the supplementary material,
- and it includes proofs of the bijective nature of the
- formulas.}
+ and it includes proofs of the formula inverses.}
 
 Although we don't prove it formally, the situation where
 the @sr[(⊢v v (ty e))] condition does not hold in the
@@ -197,12 +196,12 @@ less than @sr[n].
      [(empty? eles) "∅"]
      [(= (set-count eles) 1)
       (format "{~a}" (set-first eles))]
-     [(or (= (set-count eles) 2)
-          (= (set-count eles) 3))
+     [(<= 2 (set-count eles) 4)
       (apply format
-             (if (= (set-count eles) 2)
-                 "{~a, ~a}"
-                 "{~a, ~a, ~a}")
+             (case (set-count eles)
+               [(2) "{~a, ~a}"]
+               [(3) "{~a, ~a, ~a}"]
+               [(4) "{~a, ~a, ~a, ~a}"])
              (sort (set->list eles)
                    string<?
                    #:key (λ (x) (format "~s" x))))]
@@ -266,13 +265,14 @@ This can be proved by induction on @texmath{n}.
 The full proof is @tt{SumFair} in the Coq model.
 }
 Concretely, this means that the equilibrium points of @sr[or/e]
-are @texmath{2}, @texmath{4}, @texmath{6}, etc.
+are @texmath{2}, @texmath{4}, @texmath{6}, @texmath{8}, etc.
 Tracing @racket[or/e] up to those points produces the sets
 @(or/e-trace 2),
-@(or/e-trace 4), and 
-@(or/e-trace 6), etc.
+@(or/e-trace 4), 
+@(or/e-trace 6), and
+@(or/e-trace 8), etc.
 
-@theorem{@racket[or-three/e] from @secref["sec:fair-informal"] is unfair.}
+@theorem{Using nested @racket[or/e] to construct a three-way enumeration is unfair.}
 @proof{
 
 We show that after a certain point, there are no equilibria. For
@@ -298,7 +298,7 @@ then holds by induction on @texmath{n}.
 The full proof is @tt{PairFair} in the Coq model.
 }
 
-@theorem{@sr[triple/e] from @secref["sec:fair-informal"] is unfair.}
+@theorem{@racket[triple/e] from @secref["sec:fair-informal"] is unfair.}
 @proof{
 For any natural @texmath{n \ge 16}, there exist natural numbers
 @texmath{m, p} such that @texmath{m^2 \le n < p^4} and @texmath{p < m}.

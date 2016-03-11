@@ -14,18 +14,18 @@
 
 @title[#:tag "sec:evaluation"]{Empirical Evaluation}
 
-As the primary motivation for studying enumerations is test
+As our motivation for studying enumerations is test
 case generation, we performed an empirical evaluation of
 fair and unfair enumerations to try to understand the impact
 of using unfair combinators on test case generation. We also
 used a mature ad hoc random generator as a baseline for the
 comparison, to give our results some context. This section
-describes the setup of our evaluation and its results.
+describes our evaluation and its results.
 
 @section{Setup}
 
 We conducted the evaluation in the context of
-Redex@~cite[redex-rta redex-book], a domain-specific programming language
+Redex@~cite[redex-rta redex-book], a domain-specific language
 for operational semantics, type systems, and their
 associated machinery. Redex gives semantics engineers the
 ability to formulate and check claims about their semantics
@@ -67,8 +67,8 @@ before we started studying enumeration.
 The ad hoc random generator, which is based on the method of
 recursively unfolding non-terminals, is parameterized over
 the depth at which it attempts to stop unfolding
-non-terminals. We chose a value of 5 for this depth since
-that seemed to be the most successful. This produces terms
+non-terminals. We use the default value of 5 for this depth since
+that is what Redex users see without customization. This produces terms
 of a similar size to those of the random enumeration method,
 although the distribution is different.
 
@@ -93,7 +93,7 @@ sure that the numbers are not always small.
 We chose this distribution because it does not have a fixed
 mean. That is, if you take the mean of some number of
 samples and then add more samples and take the mean again,
-the mean of the new numbers is likely to be larger than from
+the mean of the new numbers is likely to be larger than
 the mean of the old. We believe this is a good
 property to have when indexing into our enumerations so
 we avoid biasing our indices towards a small size.
@@ -105,7 +105,7 @@ worst performing method, we empirically chose
 benchmark-specific numbers in an attempt to maximize the
 success of the random enumeration method. Even with
 this artificial help, this method was still worse, overall,
-than the other two.
+than the others.
 
 We used three variations on the enumeration combinators. The
 first is the fair combinators described in 
@@ -191,8 +191,8 @@ fair in-order enumeration strategy is the best approach.
 The supplementary material has a similar plot that uses the
 same set of combinators, but randomly picks natural numbers
 (as described above) and uses those to generate candidates.
-Those plots show that that approach is worse on all time scales
-than one of the other approaches.
+That plots shows that that approach never the best approach, on
+any time scale.
 
 No strategy was able to find more than
 @(format "~a" (maximum-bugs-found)) of the 50 bugs in the
@@ -232,12 +232,15 @@ generators (and multiple generators found the bug).
 The ad hoc random generator was significantly better on
 @(better-count 'grammar) bugs
 and the fair in-order enumerator was significantly better on
+@(if (equal? (better-count 'ordered) (better-count 'grammar))
+     "(a different)"
+     "")
 @(better-count 'ordered) bugs. The unfair enumerators were never significantly
 better on any bug.
 
 We believe that the fair enumerators are better than the unfair
 ones because their more balanced exploration of the space leads
-to a wider variety of interesting examples being explored.
+to a wider variety of interesting examples being tested.
 @Figure-ref["fig:rates"] provides some evidence for this theory.
 It shows the number of examples tested per second for each model
 (the redex bug benchmark does not cause our generators or the ad hoc
@@ -253,4 +256,4 @@ are repeatedly generating simple examples that can be tested
 quickly, but that provide little new information about the model.
 We believe this is because the unfair generators spend a lot of time exploring
 programs that differ only in the names
-of the variables or other typically uninteresting variations.
+of the variables or other such uninteresting variations.

@@ -33,6 +33,7 @@ supp: DNE
 	cp model/Makefile supp/$(SUPPDIR)
 	cp model/*.rkt supp/$(SUPPDIR)
 	cp results/all-results-plot.pdf supp/$(SUPPDIR)
+	cp results/uniform-random-selection.pdf supp/$(SUPPDIR)
 	mkdir -p supp/$(SUPPDIR)/coq
 	cp model/coq/*.v supp/$(SUPPDIR)/coq
 	cd supp && tar -czf $(SUPPDIR).tar.gz * && mv $(SUPPDIR).tar.gz .. && cd ..
