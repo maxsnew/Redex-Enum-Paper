@@ -10,28 +10,28 @@ The supplementary material is here:
 
  http://www.eecs.northwestern.edu/~robby/tmp/fse2016/
 
-Our evaluation shows that our approach is significanly better than
+Our evaluation shows that our approach is significantly better than
 fuzz testing on short timescales (imagine running in the background of
 an IDE while you develop the code).
 
 Thank you for your presentation comments; they will be helpful as we
-improve our writeup.
+improve our write up.
 
 Reviewer 2:
 
 We aim to more quickly find bugs in the spirit of fuzz testing, but
 without using a source of randomness. We start with a property of the
 system that holds for all inputs. The programmer supplies this (a
-commonly used one is "for all inputs, this function doesn't crash") We
-then generate inputs to test the property.
+commonly used one is "for all inputs, this function doesn't
+crash"). We then generate inputs to test the property.
 
 Reviewer 3:
 
 The difficulty with fairness (and why it took us 2 years to work out
 the formal definition of it) is that the intuitive notion is hard to
-pin down in a formally setting without being complex and subtle. We
+pin down in a formal setting without being complex and subtle. We
 attempted to compensate for this problem with an informal discussion
-in the paper (to try to bring across our informal intuition) and Coq
+in the paper to try to bring across our informal intuition and Coq
 proofs to make sure we didn't mess up the complex parts.
 
 We have not yet worked out a notion of fairness for anything with
@@ -41,14 +41,14 @@ some additional complexity). This is an interesting thought, thank
 you.
 
 The bug corpus was built as part of one of the author team's
-dissertation (separately from this work) and is described with much
-more care here:
+dissertation (otherwise separately from this work) and is described
+with much more care here:
   http://docs.racket-lang.org/redex/benchmark.html.
 Short version: the corpus has many bugs that were from real users of
 Redex making bugs (not the authors here) and also bugs that we
-(experts in Redex) believe are characteristic of common kinds of bugs
-(based on our own bug-making experience and helping others on mailing
-lists and at Redex workshops).
+(experts in Redex) believe are characteristic of common kinds of bugs,
+based on our own bug-making experience and helping others on mailing
+lists and at the Redex workshop.
 
 Our hypothesis about the crossover is that the random generator has
 more diversity in larger terms and the enumeration-based generator,
