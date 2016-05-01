@@ -1,20 +1,25 @@
 Reviewer 1:
 
 Our connection to software engineering is via testing. We are
-interested in improving property-based testing (e.g. fuzzing, as you
-say), and especially focused on making smarter generators (that don't
-necessarily use randomness) so that software engineers can benefit
-from push-button techniques.
+interested in improving property-based testing (fuzzing is one
+instance of it, as you say), and are especially focused on making
+smarter generators so that software engineers can benefit from
+push-button techniques.
 
 The supplementary material is here:
-
  http://www.eecs.northwestern.edu/~robby/tmp/fse2016/
 
 Our evaluation shows that our approach is significantly better than
-fuzz testing on short timescales (imagine running in the background of
-an IDE while you develop the code).
+fuzz testing on interactive timescales (e.g. in the background in an
+IDE). Figure 6 is addressing a question one might have about the main
+part of our evaluation; it is discussed at the start of page
+10. Figure 5 is the high-level takeaway; it shows that our new
+combinators are better than the (known to be good) ones presented at
+OOPSLA 2015 by Kuraj, Kuncak, and Jackson, at least on our
+benchmark. (Their combinators implement the strategy we call "mildly
+unfair".)
 
-Thank you for your presentation comments; they will be helpful as we
+Thank you for your presentation comments; they be helpful as we
 improve our write up.
 
 Reviewer 2:
@@ -37,18 +42,17 @@ proofs to make sure we didn't mess up the complex parts.
 We have not yet worked out a notion of fairness for anything with
 finiteness. Combining a finite and infinite enumeration seems like it
 should be possible in the spirit of the current definition, tho (with
-some additional complexity). This is an interesting thought, thank
-you.
+some additional complexity). This is an interesting thought, thank you.
 
-The bug corpus was built as part of one of the author team's
+The evaluation corpus was built as part of one of the author team's
 dissertation (otherwise separately from this work) and is described
 with much more care here:
   http://docs.racket-lang.org/redex/benchmark.html.
-Short version: the corpus has many bugs that were from real users of
-Redex making bugs (not the authors here) and also bugs that we
-(experts in Redex) believe are characteristic of common kinds of bugs,
-based on our own bug-making experience and helping others on mailing
-lists and at the Redex workshop.
+Short version: it has many bugs that were from real users of Redex
+(not the authors here) making errors and also bugs that we (experts in
+Redex) believe are characteristic of common kinds of bugs, based on
+our own bug-making experience and helping others on mailing lists and
+at the Redex workshop.
 
 Our guess about the crossover is that the random generator has more
 diversity in larger terms and the enumeration-based generator, after
