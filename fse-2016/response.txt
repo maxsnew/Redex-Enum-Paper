@@ -9,7 +9,7 @@ instance of it, as you say), and are especially focused on making
 smarter generators so that software engineers can benefit from
 push-button techniques.
 
-The supplementary material is here:
+The supplementary material (linked in the paper) is here:
  http://www.eecs.northwestern.edu/~robby/tmp/fse2016/
 
 Re figure 6: the left-side is the in-order enumeration. The right side
