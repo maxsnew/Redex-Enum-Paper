@@ -1,5 +1,5 @@
-To all: thank you for the presentation comments. They are very
-helpful.
+To all: these reviews are a gold mine for ways to improve the
+presentation. Thank you!
 
 Reviewer 1:
 
@@ -19,14 +19,14 @@ different way than the ad hoc random generator (which predates this
 paper by about a decade). The goal of this figure was to test a very
 specific question we had after thinking about the results in figure 5:
 what if the fair enumerators aren't generating better terms, but are
-somehow more efficient and so we just get more tests per second? These
-graphs show that this isn't the case. Indeed, it shows that the fair
-combinators are much SLOWER than the unfair ones, thus the terms must
-be much much better for finding bugs.
+faster, so we just get more tests per second instead of better ones?
+These graphs show that this isn't the case. Indeed, it shows that the
+fair combinators are slower than the unfair ones, thus the terms
+must be much much better for finding bugs.
 
-We believe our results show that enumeration is better than random, on
-interactive time scales (thus effective), and we believe no one else
-has thought about anything close to fairness for enumeration
+We believe our results show that enumeration is better than ad hoc
+random on interactive time scales (thus effective), and we believe no
+one else has thought about anything close to fairness for enumeration
 combinators (thus novel).
 
 Reviewer 2:
@@ -40,8 +40,9 @@ The difficulty with fairness (and why it took us 2 years to work out
 the formal definition of it) is that the intuitive notion is hard to
 pin down in a formal setting without being complex and subtle. We
 attempted to compensate for this problem with an informal discussion
-in the paper to try to bring across our informal intuition and Coq
-proofs to make sure we didn't mess up the complex parts.
+in the paper to try to bring across our intuition and Coq proofs (in
+supplementary material) to make sure we didn't mess up the complex
+parts.
 
 We have not yet worked out a notion of fairness for anything with
 finiteness. Combining a finite and infinite enumeration seems like it
@@ -53,10 +54,10 @@ dissertation (otherwise separately from this work) and is described
 with much more care here:
   http://docs.racket-lang.org/redex/benchmark.html
 Short version: it has many bugs that were from real users of Redex
-(not the authors here) making errors and also bugs that we (experts in
+(not the authors) making errors and also bugs that we (experts in
 Redex) believe are characteristic of common kinds of bugs, based on
-our own bug-making experience and helping others on mailing lists and
-at the Redex workshop.
+our own bug-making experience and experience helping others on mailing
+lists and at the Redex workshop.
 
 Our guess about the crossover is that the random generator has more
 diversity in larger terms and the enumeration-based generator, after
@@ -71,4 +72,4 @@ evaluation shows that fair combinators are a significant
 improvement. (We included the random testing baseline since we know it
 to be good (in an absolute sense) on Redex programs in the wild.)
 
-re: figure 6; please see above.
+re: figure 6; please see the reviewer 1 section.
