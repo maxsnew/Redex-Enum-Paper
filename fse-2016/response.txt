@@ -3,31 +3,32 @@ presentation. Thank you!
 
 Reviewer 1:
 
-Our connection to software engineering is via testing. We are
-interested in improving property-based testing (fuzzing is one
-instance of it, as you say), and are especially focused on making
-smarter generators so that software engineers can benefit from
-push-button techniques.
-
 The supplementary material (linked in the paper) is here:
  http://www.eecs.northwestern.edu/~robby/tmp/fse2016/
 
 Re figure 6: the left-side is the in-order enumeration. The right side
-is still using the enumeration, but picking a (large) natural number
-and using that as an index. It generates a random term, but in a
-different way than the ad hoc random generator (which predates this
-paper by about a decade). The goal of this figure was to test a very
-specific question we had after thinking about the results in figure 5:
-what if the fair enumerators aren't generating better terms, but are
-faster, so we just get more tests per second instead of better ones?
-These graphs show that this isn't the case. Indeed, it shows that the
-fair combinators are slower than the unfair ones, thus the terms
-must be much much better for finding bugs.
+is still using the enumeration, but picking a (large) random number
+and using that as an index. It generates random terms, but with a
+different distribution than the ad hoc random generator. The goal of
+this figure was to test a specific question we had after thinking
+about the results in figure 5: what if the fair enumerators aren't
+generating better terms, but are faster, so we just get more tests per
+second instead of better ones?  These graphs show that this isn't the
+case. Indeed, it shows that the fair combinators are slower than the
+unfair ones, thus the terms must be much better for finding bugs.
 
-We believe our results show that enumeration is better than ad hoc
-random on interactive time scales (thus effective), and we believe no
-one else has thought about anything close to fairness for enumeration
-combinators (thus novel).
+We have implemented the cantor pairing-based bijection and it is
+much slower (looking at the algorithm makes it obvious why).
+
+Our bug-finding approach is property-based testing, of which fuzz
+testing is one instance. Consider googling "property-based testing"
+for more information.
+
+Our results show that fair enumeration is better than the (very good)
+state of the art in enumeration (see Kuraj, Kuncak, and Jackson
+(OOPSLA 2015)) and, in useful cases, better than ad hoc random (thus
+effective), and we believe no one else has thought about anything
+close to fairness for enumeration combinators (thus novel).
 
 Reviewer 2:
 
@@ -36,13 +37,12 @@ the extreme difficulty you had reading the paper.
 
 Reviewer 3:
 
-The difficulty with fairness (and why it took us 2 years to work out
-the formal definition of it) is that the intuitive notion is hard to
-pin down in a formal setting without being complex and subtle. We
-attempted to compensate for this problem with an informal discussion
-in the paper to try to bring across our intuition and Coq proofs (in
-supplementary material) to make sure we didn't mess up the complex
-parts.
+The difficulty with fairness (and why it took us 2 years to work out a
+formal definition of it) is that the intuitive notion is hard to pin
+down in a formal setting without being complex and subtle. We
+compensate for this problem with an informal discussion in the paper
+to bring across our intuition and Coq proofs (in the supplementary
+material) to make sure we didn't mess up the complex parts.
 
 We have not yet worked out a notion of fairness for anything with
 finiteness. Combining a finite and infinite enumeration seems like it
@@ -62,14 +62,16 @@ lists and at the Redex workshop.
 Our guess about the crossover is that the random generator has more
 diversity in larger terms and the enumeration-based generator, after
 an initial productive exploration of small terms, gets bogged down
-with very similar terms as the scope gets larger. It would be
-interesting to study this question more deeply, we agree; thank you
-for suggesting it. That said, this paper is focused on enumerations
-and fairness and the comparison of fair and unfair combinators. As
-Kuraj, Kuncak, and Jackson (OOPSLA 2015) show, the mildly unfair
-combinators are already quite good. Compared to that baseline, our
-evaluation shows that fair combinators are a significant
-improvement. (We included the random testing baseline since we know it
-to be good (in an absolute sense) on Redex programs in the wild.)
+with similar terms as the scope widens. It would be interesting to
+study this question more deeply, we agree.
 
-re: figure 6; please see the reviewer 1 section.
+That said, this paper is focused on enumerations and fairness and the
+comparison of fair and unfair combinators. As Kuraj, Kuncak, and
+Jackson (OOPSLA 2015) show, the mildly unfair combinators are already
+quite good. Compared to that baseline, our evaluation shows that fair
+combinators are a significant improvement. (We included the random
+testing baseline since we know it to be good (in an absolute sense) on
+Redex programs in the wild.)
+
+re: figure 6; please see above.
+
