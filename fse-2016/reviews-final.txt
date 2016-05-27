@@ -1,0 +1,281 @@
+---------- Forwarded message ----------
+From: FSE 2016 <fse2016@easychair.org>
+Date: Thu, May 26, 2016 at 5:43 PM
+Subject: [FSE 2016] Rejection Notification for Paper Number 22
+To: Robby Findler <robby@eecs.northwestern.edu>
+
+
+Dear Robby,
+
+We regret to inform you that your submission
+
+PAPER ID: 22
+TITLE: Fair Enumeration Combinators
+
+was not accepted for inclusion in the FSE 2016 technical
+program.
+
+The competition was strong. FSE 2016 received 273 high-quality
+submissions. Each submission went through a thorough reviewing
+process, with each paper receiving at least three reviews. The program
+committee met on May 21-22, 2016 in Austin, TX and considered the
+submitted papers.  At the conclusion of the PC meeting, 74 submissions
+were accepted or conditionally accepted.
+
+We enclose below the reviews on your paper, which may have been
+updated to provide additional feedback to you and to reflect the
+program committee discussions. We hope that they will be a source of
+useful feedback and will help you revise the paper for a successful
+future resubmission.
+
+We hope that you consider submitting to the many other tracks
+(deadline: June 15, 2016) and workshops (deadline: July 1, 2016)
+available at FSE 2016. For more information, please visit
+http://www.cs.ucdavis.edu/fse2016/calls/ and
+http://www.cs.ucdavis.edu/fse2016/workshops/.
+
+FSE 2016 is also pleased to announce a new initiative to improve
+mentoring in our research community
+(http://www.cs.ucdavis.edu/fse2016/mentorship-sessions/). The
+Mentorship Sessions program facilitates one-on-one meetings between
+junior and senior researchers. Details will follow soon.
+
+You may also follow FSE 2016 on social media:
+- Facebook: https://www.facebook.com/fseconference
+- Twitter: https://twitter.com/FSEconf (use tag #FSEConf)
+
+Thank you for contributing to the FSE technical program. We hope to
+see you at FSE 2016 in Seattle this November.
+
+Best Regards,
+
+Jane Cleland-Huang and Zhendong Su
+FSE 2016 PC Co-Chairs
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Explanation of the review scores
+================================
+
+OVERALL EVALUATION:
+    4 (A: Good paper. I will champion it at the PC meeting.)
+    3 (B: OK paper, but I will not champion it.)
+    2 (C: Weak paper, though I will not fight strongly against it.)
+    1 (D: Serious problems. I will argue to reject this paper.)
+
+REVIEWER'S CONFIDENCE:
+    5 (expert)
+    4 (high)
+    3 (medium)
+    2 (low)
+    1 (none)
+
+NOVELTY:
+    4 (Extreme)
+    3 (Solid)
+    2 (Incremental)
+    1 (Known)
+
+STRENGTH OF EVIDENCE:
+    4 (Unassailable)
+    3 (Solid)
+    2 (Weak)
+    1 (Inadequate)
+
+CLARITY:
+    4 (Lucid)
+    3 (Well written)
+    2 (Needs improvement)
+    1 (Poorly written)
+
+DISTINGUISHED PAPER:
+    3 (Yes)
+    2 (Maybe)
+    1 (No)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+----------------------- REVIEW 1 ---------------------
+PAPER: 22
+TITLE: Fair Enumeration Combinators
+AUTHORS: Max New, Burke Fetscher, Jay McCarthy and Robby Findler
+
+OVERALL EVALUATION: 2 (C: Weak paper, though I will not fight strongly against it.)
+REVIEWER'S CONFIDENCE: 3 (medium)
+NOVELTY: 2 (Incremental)
+STRENGTH OF EVIDENCE: 2 (Weak)
+CLARITY: 2 (Needs improvement)
+DISTINGUISHED PAPER: 1 (No)
+
+----------- BRIEF SUMMARY -----------
+An enumeration is a bijection between a set of entities and the natural numbers. An enumeration combinator allows one to construct new enumerations from existing ones. This paper addresses the problem of constructing fair enumeration combiners, that is, combiners which index into all their child-enumerations with equal probability. The paper discusses a few such fair combinators (and unfair ones) by example, and formally describes how to create fair combinators for an enumeration library formulated in Racket. The paper then turns to the problem of bug detection, where enumerations are apparently used to create new terms which form inputs to an algorithm to be tested. The hypothesis is that fair enumerations lead to inputs which might cause bugs to be found faster. An empirical evaluation shows that in comparison to unfair enumerations this is indeed the case, but that in comparison to an ad-hoc random generation the fair enumeration finds fewer bugs in the long term.
+
+----------- STRENGTHS AND WEAKNESSES -----------
++ Interesting combinatorial problem whose challenges are relatively well described
++ Useful formalization
+
+- Paper quite disorganized, motivation not clear from the beginning
+- Weak connection to the topics of FSE
+- Doubtful that research has high novelty
+- Unclear presentation of empirical results
+
+----------- DETAILED EVALUATION -----------
+When I started reading this paper, I first thought the authors had accidentally submitted to the wrong conference, because from the abstract the connection to software engineering does not become very clear. How do fair enumeration combinators or enumerations in general help us build better software or help us build software better? Fortunately, the second half of the intro then enlightens the reader that fair enumeration combinators may actually have an application in bug finding. So that made me curious and kept me going...
+
+In general, though, this paper is relatively disorganized. As explained, the motivation for an FSE crowd is quite unclear. The paper immediately jumps into enumerations and combinators as if this was a thing that every software engineer always wondered about just over breakfast. I think that this paper could benefit a lot from a more careful introduction to the problem space, motivated by a real-world problem.
+
+Sections 2, 3 and 4 are quite enlightening, although I had trouble understanding the concepts due to the very informal description. At this stage, the concepts of enumeration, combinator and fairness have not yet been formally described, and I often found their use in the text to be rather ambiguous and confusing. Also, for instance, there are multiple definitions of "cons" but at places the paper refers to "the" definition of "cons" - which one?
+
+The paper addresses the reader with "you" which is considered bad style. Maybe revise using "one"?
+
+Section 4 dives into a strange comparison with a "Cantor pairing function", without much introduction or explanation, again as if this was the most familiar concept to any software engineer. I got from the paper that they are somehow different and have different properties but not much more than that. The authors argue that this function is too slow but do not give any empirical evidence for this.
+
+Section 6 presents the empirical evaluation. This section also seems to anticipate that the reader have some familiarity with the "bug-finding approach" described here. To me it did not become clear how this approach actually works. Is the idea similar to fuzz-based testing where one generates inputs in order to trigger erroneous behavior? I believe that to be the case but the paper is not quite clear about it.
+
+The explanation of the different enumeration strategies, in comparison to the ad-hoc random tester, could be improved as well. To me it did not become 100% clear what different approaches were evaluated.
+
+Section 6.2 refers to supplemental material, which is not part of the paper, not even an appendix. I hence had to ignore the arguments made there.
+
+While I think I did understand Figure 5, I had trouble understanding Figure 6. It seems that, per second, all enumeration strategies test an order of magnitude more "examples" than the random selection. Why is that so? Why is a random selection so slow? And is the uniform random selection the same as the ad-hoc random generation?
+
+All in all I found the results not to be very motivating. I understood that if one wants to use enumerations for this particular problem of generating terms as test inputs, then doing it in a fair way might bring advantages. But then the results also seem to suggest that maybe one would better go entirely without enumerations and do things randomly. If that is so then why bother in the first place?
+
+So all in all I think there might be a good paper in this work but it's not the current one. The paper would benefit from a significant rewrite stating the application scenario and motivation much more clearly, and generally taking much more care about describing all required concepts precisely.
+
+----------- QUESTIONS TO THE AUTHORS -----------
+- What exactly is the bug-finding scenario you describe?
+
+- How do I have to interpret Figure 6? What do the results mean?
+
+
+----------------------- REVIEW 2 ---------------------
+PAPER: 22
+TITLE: Fair Enumeration Combinators
+AUTHORS: Max New, Burke Fetscher, Jay McCarthy and Robby Findler
+
+OVERALL EVALUATION: 2 (C: Weak paper, though I will not fight strongly against it.)
+REVIEWER'S CONFIDENCE: 2 (low)
+NOVELTY: 2 (Incremental)
+STRENGTH OF EVIDENCE: 1 (Inadequate)
+CLARITY: 2 (Needs improvement)
+DISTINGUISHED PAPER: 1 (No)
+
+----------- BRIEF SUMMARY -----------
+This paper developed and implemented a new property of enumeration combinators — fairness to help property-based testing. Besides, they conducted an empirical study showing that fair enumeration can indeed support effective testing tools, while unfair enumerations cannot.
+
+----------- STRENGTHS AND WEAKNESSES -----------
++ offering a criterion called fairness that classifies enumeration combinators to find bugs more efficiently and precisely.
++ introducing enumeration libraries with their Racket-based library in detail.
++ providing a formal model of their fair enumerations.
+
+- the paper is hard to read, so it is difficult to assess the paper's contributions.
+
+----------- DETAILED EVALUATION -----------
+The authors may have done something really good and useful here, but the paper is just too difficult to read for outsiders.
+
+In addition, it is difficult to appreciate the paper's contributions without knowing the following:
+
+1. The paper doesn't explain clearly why the unfair problem is difficult and why it can't be solved by existing methods. What are the previous solutions and why they are inadequate?
+
+2. The proposed solution is not well illustrated. I didn't see how the solution was used to find bugs, nor what kind of bugs it found.
+
+----------- QUESTIONS TO THE AUTHORS -----------
+NONE
+
+
+----------------------- REVIEW 3 ---------------------
+PAPER: 22
+TITLE: Fair Enumeration Combinators
+AUTHORS: Max New, Burke Fetscher, Jay McCarthy and Robby Findler
+
+OVERALL EVALUATION: 3 (B: OK paper, but I will not champion it.)
+REVIEWER'S CONFIDENCE: 4 (high)
+NOVELTY: 3 (Solid)
+STRENGTH OF EVIDENCE: 3 (Solid)
+CLARITY: 2 (Needs improvement)
+DISTINGUISHED PAPER: 1 (No)
+
+----------- BRIEF SUMMARY -----------
+Property-based testing selects test inputs that meet some property;  it
+mitigates against the problem of generating redundant or irrelevant test
+inputs, which bedevil uniformly sampling a program's input domain.
+Enumerating test inputs that meet some property can be an efficient way to
+sample them.  An enumeration is a bijection from the naturals to a set.
+Intuitively, an aggregation of k enumerations is fair if the same set of
+naturals is used to index all of the constituent enumerations infinitely often.
+This paper defines a theory of fair enumeration and a semantics for enumeration
+combinators.  It presents some enumeration combinators and proves their
+fairness and that their combinations may not be.  It closes with an
+evaluation of the utility of fair enumeration.
+
+----------- STRENGTHS AND WEAKNESSES -----------
++ Fair enumeration is a novel theory with immediate relevance to
+property-based testing.
+
+- Uneven presentation, varying from lucid to opaque.
+
+- The evaluation is preliminary
+
+----------- DETAILED EVALUATION -----------
+# Meta-review
+
+After discussing your response to our initial reviews, we agreed to reject your
+paper.  The two main concerns were venue-fit and clarity of the exposition.
+The work is interesting and we encourage you to continue to pursue it.
+
+This is a interesting paper that I enjoyed reading.  Improving the efficiency
+of sampling inputs for property based testing is an important problem.  This
+paper tackles it elegantly.  Nonetheless, the current draft has two main
+challenges:  the unevenness of its presentation and the rigor of its
+evaluation.
+
+The presentation problem strikes immediately in the abstract, where the example
+of indexing into a 3-tuple using a cube root is unclear until Section 4 when
+Szudzik's bijection is lucidly, if informally, explained.  Figure 1
+should move to Section 4 where it is implicitly explained, not left in Section
+2, where only a terse citation in a parenthetical mentions it.  After the first
+example enumeration in Section 2, the following examples are also opaque until
+the reader reaches Section 4.
+
+The discussion of semantics of enumerators in Figure 3 at the start of Section
+5 is clear.
+
+The key conceptual contribution of this work is the definition of fair
+enumeration.  Thus, it is curious that the authors choose hide its definition
+in a paragraph, rather than typeset it as a named definition.  The definition
+of the trace function on which fairness depends is also buried, wordy, and
+unclear.
+
+Consider an aggregate enumeration that combines a finite and an infinite
+enumeration.  How can this aggregate enumeration meet the definition of
+fairness?  Eventually, the finite enumeration cannot be "explored the same
+amount" as the infinite one.  Adding a special value to the finite enumeration
+which it returns on all queries beyond its finite size and extending it to
+infinity might solve this problem.
+
+The evaluation corpus is poorly described.  What generated the 50 bugs?  Are
+they field bugs or manually injected?  What are their features?  How diverse
+are they?  Lacking answers to these questions makes it difficult to assess
+the generality of the results.
+
+The central result is a cross over from fair enumeration to Redex' existing ad
+hoc random generator after 3m.  The central scientific question "Why does this
+cross over occur?" is not addressed.  One possible approach on this question is
+to ask "How do the bugs fair enumeration finds before cross over differ from
+those after it?"  Instead, only the less interesting question is of why fair
+enumeration outperforms unfair enumeration is briefly discussed and attributed
+to the fact that unfair enumerators generate "simple examples that can be
+tested quickly".  The authors do not substantiate this assertion.
+
+How was the "Uniform Random Selection" barchart on the right-hand side of
+Figure 6 generated?  Is it another use of the ad hoc model?  If so, its
+description implies it is not uniform.
+
+#Minor
+
+Captions and footnotes should end with periods.
+
+----------- QUESTIONS TO THE AUTHORS -----------
+NONE
