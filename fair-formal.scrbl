@@ -19,7 +19,10 @@
 
 @title[#:tag "sec:fair-formal"]{Enumeration Semantics}
 
-@figure*["fig:semantics" @list{Semantics of Enumeration Combinators} (semantics-figure)]
+@figure*["fig:semantics" @list{Semantics of Enumeration Combinators} (semantics-figure1)]
+
+@figure*["fig:semantics-helpers" @list{Semantics of Enumeration Combinators, Continued}
+         (semantics-figure2)]
 
 @Figure-ref["fig:semantics"] shows a formal model of our enumerations.
 The model differs from our implementation in the way it handles

@@ -77,7 +77,7 @@
 
 
 (define (rate-plots)
-  (hc-append 20
+  (vc-append 20
              (mk-plot 'ordered #t)
              (mk-plot 'enum #f)))
 

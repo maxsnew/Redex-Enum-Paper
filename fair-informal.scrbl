@@ -83,8 +83,8 @@ unfair combination.
 @figure*["fig:unfairness"
          @list{Histograms of the occurrences of each natural number
                in fair and unfair tuples}
-         (parameterize ([plot-width 135]
-                        [plot-height 135])
+         (parameterize ([plot-width 101 #;135]
+                        [plot-height 101 #;135])
            (unfairness-histograms))]
 
 

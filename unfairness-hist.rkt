@@ -16,7 +16,7 @@
   (define main
     (vc-append 
      (build-plots fair-hashes max-x max-y #f #t)
-     (build-plots unfair-hashes max-x max-y #t #f)))
+     (build-plots unfair-hashes max-x max-y #f #f)))
   (cc-superimpose
    (colorize (frame (inset (launder (ghost main)) 1)) "white")
    main))
@@ -72,7 +72,7 @@
      (list
       (parameterize ([plot-font-size 7])
         (x-ticks (for/list ([x (in-range (+ max-x 1))]
-                            #:when (zero? (modulo x 4)))
+                            #:when (zero? (modulo x 8)))
                    (tick (+ x .5) #t (format "~a" x)))))
       (discrete-histogram
        #:add-ticks? #f

@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/jfp
 
 @(require "cite.rkt" 
           "util.rkt"
@@ -24,11 +24,6 @@
                  #"\\savesymbol{llcorner}\n"
                  #"\\savesymbol{lrcorner}\n"
 
-                 
-                 #"\\usepackage{amsmath}\n"
-                 #"\\usepackage{amsthm}\n"
-                 #"\\usepackage{amsfonts}\n"
-
                  #"\\usepackage{wrapfig}\n"
                  
                  ;; horrible hack to work around the fact that inconsolata in texlive 2013
@@ -50,21 +45,20 @@
 @title[#:style (style #f (list (tex-addition extra-tex-code)))]{
   Fair Enumeration Combinators
 }
-@authorinfo["Max New"
-            "Northwestern University"
-            "max.new@eecs.northwestern.edu"]
 
-@authorinfo["Burke Fetscher"
-            "Northwestern University"
-            "burke.fetscher@eecs.northwestern.edu"]
-
-@authorinfo["Jay McCarthy"
-            "UMass Lowell"
-            "jay.mccarthy@gmail.com"]
-
-@authorinfo["Robert Bruce Findler"
-            "Northwestern University"
-            "robby@eecs.northwestern.edu"]
+@((author/short "New, Fetscher, McCarthy, Findler")
+  "Max New" (affiliation-mark "1")
+  (affiliation-sep)
+  "Burke Fetscher" (affiliation-mark "2")
+  (affiliation-sep)
+  "Jay McCarthy" (affiliation-mark "3")
+  (affiliation-sep)
+  "Robert Bruce Findler" (affiliation-mark "2")
+  (affiliation (affiliation-mark "1") "Northeastern University"
+               (affiliation-sep)
+               (affiliation-mark "2") "Northwestern University"
+               (affiliation-sep)
+               (affiliation-mark "3") "UMass Lowell"))
 
 @(define (abstract-text raw-text?)
 

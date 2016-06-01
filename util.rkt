@@ -97,7 +97,7 @@
                                  args)))))
 
 (define-environment theorem)
-(define-environment proof #t)
+(define-environment proof)
 (define-environment definition)
 (define qed (element (style "qed" '()) '()))
 

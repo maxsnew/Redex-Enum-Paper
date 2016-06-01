@@ -3,7 +3,9 @@
          pict
          "redex-model.rkt")
 
-(provide semantics-figure sr
+(provide semantics-figure1
+         semantics-figure2
+         sr
          mf-name)
 
 (define (w/rewriters/proc thunk)
@@ -407,14 +409,17 @@
 (define-syntax-rule (w/rewriters e) (w/rewriters/proc (λ () e)))
 
 (define linebreaking-with-cases1
-  '(("or alt l" "or alt r")
-    ("or big l" "or big r")))
+  '(("below/e")
+    ("fix")
+    ("dep inf")))
 
 (define linebreaking-with-cases2
-  '(("below/e" "map" "cons")
-    ("dep inf" "dep fin")
-    ("ex<" "ex≥" "fix")
-    ("unfair" "trace")))
+  '(("map" "dep fin")
+    ("or alt l" "or alt r")
+    ("or big l" "or big r")
+    ("cons" "ex<")
+    ("trace" "ex≥")
+    ("unfair")))
 
 (define-syntax-rule
   (w/fonts e)
@@ -430,38 +435,34 @@
                  [grammar-style helv-font])
     (thunk)))
 
-(define (semantics-figure)
+(define (semantics-figure1)
   (w/rewriters
    (w/fonts
     (vc-append
-     20
-     (vc-append
-      (hc-append 
-       30
-       (inset (frame (inset (render-language L #:nts '(e n+ τ v n i j)) 4)) 4)
-       (some-rules linebreaking-with-cases1 @))
-      (some-rules linebreaking-with-cases2 @))
-     (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
-                    [where-make-prefix-pict
-                     (λ ()
-                       (text " if " (default-style)))])
-       
-       (vc-append
-        20
-        (htl-append
-         30
-         (vl-append
-          4
-          (render-metafunction ty)
-          (render-metafunction tye))
-         (render-metafunction size))
-        (hc-append
-         40
-         (render-metafunction unpair)
-         (vl-append
-          20
-          (add-a-box (some-rules '((0 1 2) (3 4 5)) ⊢v) 20 10)
-          (render-metafunction sum-up-to)))))))))
+     (hc-append 
+      30
+      (inset (frame (inset (render-language L #:nts '(e n+ τ v n i j)) 4)) 4)
+      (some-rules linebreaking-with-cases1 @))
+     (some-rules linebreaking-with-cases2 @)))))
+
+(define (semantics-figure2)
+  (w/rewriters
+   (w/fonts
+    (parameterize ([metafunction-pict-style 'left-right/beside-side-conditions]
+                   [where-make-prefix-pict
+                    (λ ()
+                      (text " if " (default-style)))])
+      
+      (inset (vl-append
+              20
+              (render-metafunction ty)
+              (render-metafunction tye)
+              (render-metafunction size)
+              (render-metafunction unpair)
+              (add-a-box (some-rules '((0 1 2) (3 4 5)) ⊢v) 20 10)
+              (render-metafunction sum-up-to))
+             20 ;; to compensate for the 'add-a-box'
+             0)))))
 
 (define (add-a-box p . amts)
   (refocus (frame (apply inset p amts)) p))
@@ -494,6 +495,9 @@
    ((current-text) mf (metafunction-style) (metafunction-font-size))))
 
 (module+ main 
-  (define sf (semantics-figure))
-  sf
-  (pict-width sf))
+  (define sf1 (semantics-figure1))
+  (define sf2 (semantics-figure2))
+  sf1
+  sf2
+  (pict-width sf1)
+  (pict-width sf2))
