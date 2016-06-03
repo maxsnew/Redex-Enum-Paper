@@ -168,6 +168,8 @@ combinators is worse across the board.
 
 @include-section["intro.scrbl"]
 
+@include-section["testing.scrbl"]
+
 @include-section["combinators.scrbl"]
 
 @include-section["fair-informal.scrbl"]

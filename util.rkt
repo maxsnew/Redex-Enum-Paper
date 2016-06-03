@@ -36,11 +36,11 @@
   (nested-flow (style 'inset '()) (list (paragraph (style #f '()) args))))
 
 (define-syntax-rule
-  (racketblock/define exp)
-  (begin (racketblock exp)
-         exp))
+  (racketblock/define exp ...)
+  (begin (racketblock exp ...)
+         exp ...))
 
-(define (add-commas n)
+(define (add-commas n #:hyphens? [hyphens? #f])
   (define s (format "~a" n))
   (define comma-every 3)
   (define cs
@@ -49,7 +49,9 @@
         [(<= (length chars) comma-every) chars]
         [else 
          (append (take chars comma-every)
-                 '(#\,)
+                 (if hyphens?
+                     '(#\- #\\ #\,)
+                     '(#\,))
                  (loop (drop chars comma-every)))])))
   (apply string (reverse cs)))
 
@@ -59,6 +61,7 @@
 (check-equal? (add-commas 1234) "1,234")
 (check-equal? (add-commas 12345) "12,345")
 (check-equal? (add-commas 123456789) "123,456,789")
+(check-equal? (add-commas 123456789 #:hyphens? #t) "123,\\-456,\\-789")
 (check-equal? (add-commas 1234567890) "1,234,567,890")
 
 (define (extract-pick-an-index)

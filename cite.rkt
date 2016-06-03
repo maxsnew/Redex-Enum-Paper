@@ -287,3 +287,11 @@
    #:author (authors "Patrick Cegielski" "Denis Richard")
    #:location (journal-location tcs #:volume 222 #:number "1-2")
    #:date 1999))
+
+(define plt-tr1
+  (make-bib #:title    "Reference: Racket"
+            #:author   (authors "Matthew Flatt" "PLT")
+            #:date     "2010"
+            #:location (techrpt-location #:institution "PLT Design Inc."
+                                         #:number "PLT-TR-2010-1")
+            #:url      "https://racket-lang.org/tr1/"))
