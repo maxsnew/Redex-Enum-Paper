@@ -1,4 +1,4 @@
-#lang scribble/sigplan
+#lang scribble/base
 
 @(require scribble/manual
           scribble/eval
