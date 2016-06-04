@@ -88,13 +88,14 @@ We can easily write this (incorrect) code, too:
                         [#f #f]
                         [(node n l r) n]))]
 
-To use property-based testing to uncover the difference between these two functions,
-we need a source of binary trees and then we can simply compare the results
-of the two functions. This is where enumerations come in. They allow to describe a mapping
-between the natural numbers and arbitrary data-structures. Then we can simply choose
-some natural numbers, map them to binary trees and see if we can find a difference
-between the two predicates.
-
+To use property-based testing to uncover the difference
+between these two functions, we need a source of binary
+trees and then we can simply compare the results of the two
+functions. This is where enumerations come in. They allow us
+to describe a mapping between the natural numbers and
+arbitrary data-structures. Then we can simply choose some
+natural numbers, map them to binary trees and see if we can
+find a difference between the two predicates.
 
 @(define (unfair-cons/e e1 e2)
    (map/e #:contract (λ (x)
@@ -195,11 +196,13 @@ between the two predicates.
                        #:pict (p:cc-superimpose bkg (p:text (~a n)))
                        (loop l) (loop r))]))))
 
-If we use fair combinators, we find that the smallest natural that demonstrates the
-difference is @(add-commas (to-nat bt/e smallest-bt/e-example-t)). If we unfair combinators,
-then that same tree appears at a position with
+One effective approach to generating natural numbers is to simply count, starting
+at 0. If we use fair combinators, we find that the smallest natural that demonstrates the
+difference is @(add-commas (to-nat bt/e smallest-bt/e-example-t)). If we
+swap out the fair pairing combinator for an unfair one based on the bijection discussed
+in the introductino, then that same tree appears at a position with
 @(add-commas (string-length (~a (to-nat un-bt/e smallest-bt/e-example-t))))
-digits and the smallest index that we know has a counter exmaple is this
+digits. The smallest index that we know has a counter exmaple is this
 @(add-commas (string-length (~a (to-nat un-bt/e smallest-known-un-bt/e-example-t))))
 digit number:
 @;; trick to get latex to break the line in a reasonable way
@@ -207,12 +210,14 @@ digit number:
           (regexp-replace*
            #rx","
            (add-commas (to-nat un-bt/e smallest-known-un-bt/e-example-t))
-           ",\\\\hskip 0pt{}"))
-We also know that there are no counterexamples in the first ??? naturals.
-These are the two trees; the one of the left is the counterexample
+           ",\\\\hskip 0pt{}")).
+That might not be the first counterexample,
+but we do know that there are no counterexamples in the first ??? naturals.
+These are the two trees; the one on the left is the counterexample
 at position @(add-commas (to-nat bt/e smallest-bt/e-example-t)) in the
 fair enumerator and the one of the right is the smallest known counterexample
 when using the unfair combinators.
-@centered{@(p:ht-append 100
+@centered{@(p:ht-append 60
                         (render-t smallest-bt/e-example-t)
                         (render-t smallest-known-un-bt/e-example-t))}
+

@@ -73,9 +73,14 @@ slightly worse than one of the other two choices. We also replaced
 fair combinators with unfair ones and show that the bug-finding
 capabilities become significantly worse.
 
-The next section introduces enumeration libraries, using
+In the next two sections, we discuss how testing
+and enumeration fit together and then
+introduces enumeration libraries, using
 the Racket-based library to make the introduction
-concrete. In @secref["sec:fair-informal"], we give an
+concrete.
+In @secref["sec:intro-testing"], we discuss how testing
+and enumeration fit together. 
+In @secref["sec:fair-informal"], we give an
 intuition-based definition of fairness and
 in @secref["sec:fair-combinators"] discuss our
 n-ary combinators, whose designs are motivated by fairness.
