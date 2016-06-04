@@ -2,8 +2,7 @@
 (require data/enumerate/lib
          pict
          redex/pict
-         scribble/manual
-         rackunit)
+         scribble/manual)
 
 (provide pair-pict cantor-cons-pict
          disj-sum-pict/good disj-sum-pict/bad

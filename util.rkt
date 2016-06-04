@@ -8,7 +8,7 @@
          (for-syntax racket/base))
 (provide raw-latex a-quote
          texmath
-         racketblock/define
+         racketblock/define racketblock/define/name
          add-commas
          extract-pick-an-index
          theorem
@@ -37,8 +37,13 @@
 
 (define-syntax-rule
   (racketblock/define exp ...)
-  (begin (racketblock exp ...)
-         exp ...))
+  (begin exp ...
+         (racketblock exp ...)))
+
+(define-syntax-rule
+  (racketblock/define/name n exp ...)
+  (begin exp ...
+         (define n (racketblock exp ...))))
 
 (define (add-commas n #:hyphens? [hyphens? #f])
   (define s (format "~a" n))

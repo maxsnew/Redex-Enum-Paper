@@ -16,7 +16,14 @@
           "cite.rkt"
           pict/tree-layout
           (prefix-in p: pict)
-          (prefix-in 2: 2htdp/image))
+          (prefix-in 2: 2htdp/image)
+          rackunit)
+
+
+@(provide bt/e un-bt/e (struct-out node)
+          bst? not-quite-bst?
+          smallest-known-un-bt/e-example-t
+          render-t)
 
 @title[#:tag "sec:intro-testing"]{Enumeration in Property-based Testing}
 
@@ -30,16 +37,18 @@ that property.
 
 To see how bijective enumerations can help with property-based
 testing, consider this snippet of Racket@~cite[plt-tr1] code
-that checks to see if a binary tree is a binary search tree:
-@racketblock/define[(struct node (n l r))
+that checks to see if a given binary tree is a binary search tree:
+@racketblock/define[(struct node (n l r) #:transparent)
+
                     (define (bst? t)
                       (match t
-                        [#f #f]
+                        [#f #t]
                         [(node n l r)
                          (and (check-all l (λ (i) (<= i n)))
                               (check-all r (λ (i) (>= i n)))
                               (bst? l)
                               (bst? r))]))
+                    
                     (define (check-all t p?)
                       (match t
                         [#f #t]
@@ -63,7 +72,7 @@ that, for each node, if the root of the left subtree is smaller than the
 value in the node and the root of the right subtree is larger, then the tree is
 a binary search tree.
 
-We can easily code this up, too:
+We can easily write this (incorrect) code, too:
 @racketblock/define[(define (not-quite-bst? t)
                       (match t
                         [#f #t]
@@ -73,6 +82,7 @@ We can easily code this up, too:
                                   (or (root-n r) +inf.0))
                               (not-quite-bst? l)
                               (not-quite-bst? r))]))
+                    
                     (define (root-n t)
                       (match t
                         [#f #f]
@@ -99,38 +109,73 @@ between the two predicates.
                            (to-nat e2 (cdr pr))))
           natural/e))
 
+@(define bt?
+   (λ (l)
+     (match l
+       [#f #t]
+       [(node n l r) (and (exact-nonnegative-integer? n)
+                          (bt? l)
+                          (bt? r))]
+       [_ #f])))
+
 @(define bt/e
-   (or/e (fin/e #f)
-         (list/e natural/e
-                 (delay/e bt/e)
-                 (delay/e bt/e))))
+   (map/e
+    (λ (l-t)
+      (let loop ([l-t l-t])
+        (match l-t
+          [#f #f]
+          [(list n l r) (node n (loop l) (loop r))])))
+    (λ (n-t)
+      (let loop ([n-t n-t])
+        (match n-t
+          [#f #f]
+          [(node n l r) (list n (loop l) (loop r))])))
+    (letrec ([bt/e
+              (or/e (fin/e #f)
+                    (list/e natural/e
+                            (delay/e bt/e)
+                            (delay/e bt/e)))])
+      bt/e)
+    #:contract bt?))
 
 @(define un-bt/e
    (or/e (fin/e #f)
-         (unfair-cons/e
-          natural/e
+         (map/e
+          (λ (l) (match l [(cons n (cons l r)) (node n l r)]))
+          (λ (n) (match n [(node n l r) (cons n (cons l r))]))
           (unfair-cons/e
-           (delay/e un-bt/e)
-           (delay/e un-bt/e)))))
+           natural/e
+           (unfair-cons/e
+            (delay/e un-bt/e)
+            (delay/e un-bt/e)))
+          #:contract node?)))
 
-@(define (to-pair-bst t)
-   (match t
-     [#f #f]
-     [(node n t1 t2) (cons n (cons (to-pair-bst t1) (to-pair-bst t2)))]))
+@(define smallest-known-un-bt/e-example-t
+   (node 0
+         (node 0 #f (node 1 #f #f))
+         #f))
 
-@(define (to-list-bst t)
-   (match t
-     [#f #f]
-     [(node n t1 t2) (list n (to-list-bst t1) (to-list-bst t2))]))
-
-@(define t (node 0
-                 (node 0 #f (node 1 #f #f))
-                 #f))
+@(define smallest-bt/e-example-t
+   (let/ec k
+     (let/ec k
+       (for ([i (in-naturals)])
+         (define t (from-nat bt/e i))
+         (when (and (not (bst? t)) (not-quite-bst? t))
+           (k t))))))
 
 @(begin
    ;; check that the example really is what we want it to be
-   (when (bst? t) (error 'testing.scrbl "t is not a bst"))
-   (unless (not-quite-bst? t) (error 'testing.scrbl "t is a wrong-bst")))
+   (when (bst? smallest-known-un-bt/e-example-t)
+     (error 'testing.scrbl "t is not a bst"))
+   (unless (not-quite-bst? smallest-known-un-bt/e-example-t)
+     (error 'testing.scrbl "t is a wrong-bst")))
+
+@(begin
+   (check-true (bst? #f))
+   (check-true (bst? (node 0 #f #f)))
+   (check-true (bst? (node 1 (node 0 #f #f) (node 2 #f #f))))
+   (check-false (bst? (node 1 (node 2 #f #f) (node 2 #f #f))))
+   (check-false (bst? (node 1 (node 0 #f #f) (node 0 #f #f)))))
 
 @(define (render-t t)
    (define biggest -inf.0)
@@ -151,15 +196,23 @@ between the two predicates.
                        (loop l) (loop r))]))))
 
 If we use fair combinators, we find that the smallest natural that demonstrates the
-difference is @(add-commas (to-nat bt/e (to-list-bst t))). If we unfair combinators,
-then that same tree appears only at position
+difference is @(add-commas (to-nat bt/e smallest-bt/e-example-t)). If we unfair combinators,
+then that same tree appears at a position with
+@(add-commas (string-length (~a (to-nat un-bt/e smallest-bt/e-example-t))))
+digits and the smallest index that we know has a counter exmaple is this
+@(add-commas (string-length (~a (to-nat un-bt/e smallest-known-un-bt/e-example-t))))
+digit number:
 @;; trick to get latex to break the line in a reasonable way
 @(element (style "relax" '(exact-chars))
           (regexp-replace*
            #rx","
-           (add-commas (to-nat un-bt/e (to-pair-bst t)))
+           (add-commas (to-nat un-bt/e smallest-known-un-bt/e-example-t))
            ",\\\\hskip 0pt{}"))
-and, as far as we know, there are no counterexamples that appear at smaller indicies.
-This is the tree in question:
-
-@centered{@render-t[t]}
+We also know that there are no counterexamples in the first billion naturals.
+These are the two trees; the one of the left is the counterexample
+at position @(add-commas (to-nat bt/e smallest-bt/e-example-t)) in the
+fair enumerator and the one of the right is the smallest known counterexample
+when using the unfair combinators.
+@centered{@(p:ht-append 100
+                        (render-t smallest-bt/e-example-t)
+                        (render-t smallest-known-un-bt/e-example-t))}
