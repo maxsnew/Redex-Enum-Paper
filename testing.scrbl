@@ -208,7 +208,7 @@ digit number:
            #rx","
            (add-commas (to-nat un-bt/e smallest-known-un-bt/e-example-t))
            ",\\\\hskip 0pt{}"))
-We also know that there are no counterexamples in the first billion naturals.
+We also know that there are no counterexamples in the first ??? naturals.
 These are the two trees; the one of the left is the counterexample
 at position @(add-commas (to-nat bt/e smallest-bt/e-example-t)) in the
 fair enumerator and the one of the right is the smallest known counterexample
