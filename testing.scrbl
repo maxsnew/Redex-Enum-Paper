@@ -212,7 +212,7 @@ digit number:
            (add-commas (to-nat un-bt/e smallest-known-un-bt/e-example-t))
            ",\\\\hskip 0pt{}")).
 That might not be the first counterexample,
-but we do know that there are no counterexamples in the first 100 million naturals.
+but we do know that there are no counterexamples in the first 10 billion naturals.
 These are the two trees; the one on the left is the counterexample
 at position @(add-commas (to-nat bt/e smallest-bt/e-example-t)) in the
 fair enumerator and the one of the right is the smallest known counterexample
