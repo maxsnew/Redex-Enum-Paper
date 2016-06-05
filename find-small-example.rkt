@@ -72,4 +72,4 @@ ala the discussion in section 2
       
 
 (spawn-places 'bt/e 2 50)
-(spawn-places 'un-bt/e 10 1000000)
+(spawn-places 'un-bt/e 10 100000)
