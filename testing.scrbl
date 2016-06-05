@@ -196,13 +196,19 @@ find a difference between the two predicates.
                        #:pict (p:cc-superimpose bkg (p:text (~a n)))
                        (loop l) (loop r))]))))
 
-One effective approach to generating natural numbers is to simply count, starting
-at 0. If we use fair combinators, we find that the smallest natural that demonstrates the
+Our library allows us to describe binary trees using combinators,
+in the usual way, namely that a binary tree is either a leaf or
+a triple of a natural number and two more binary tress.
+With that description in hand, we can simply count, supplying
+each natural number in turn and checking to see if the corresponding
+tree differentiates the two predicates.
+
+If we use fair combinators, we find that the smallest natural that demonstrates the
 difference is @(add-commas (to-nat bt/e smallest-bt/e-example-t)). If we
 swap out the fair pairing combinator for an unfair one based on the bijection discussed
-in the introductino, then that same tree appears at a position with
+in the introduction, then that same tree appears at a position with
 @(add-commas (string-length (~a (to-nat un-bt/e smallest-bt/e-example-t))))
-digits. The smallest index that we know has a counter exmaple is this
+digits. The smallest index that we know has a counter example is this
 @(add-commas (string-length (~a (to-nat un-bt/e smallest-known-un-bt/e-example-t))))
 digit number:
 @;; trick to get latex to break the line in a reasonable way
