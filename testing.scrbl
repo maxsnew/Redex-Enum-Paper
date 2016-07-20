@@ -196,14 +196,14 @@ find a difference between the two predicates.
                        #:pict (p:cc-superimpose bkg (p:text (~a n)))
                        (loop l) (loop r))]))))
 
-Our library allows us to describe binary trees using combinators,
+Our library allows us to describe binary trees using combinators
 in the usual way, namely that a binary tree is either a leaf or
-a triple of a natural number and two more binary tress.
+a triple of a natural number and two more binary trees.
 With that description in hand, we can simply count, supplying
 each natural number in turn and checking to see if the corresponding
 tree differentiates the two predicates.
 
-If we use fair combinators, we find that the smallest natural that demonstrates the
+If we use our fair combinators, we find that the smallest natural that demonstrates the
 difference is @(add-commas (to-nat bt/e smallest-bt/e-example-t)). If we
 swap out the fair pairing combinator for an unfair one based on the bijection discussed
 in the introduction, then that same tree appears at a position with

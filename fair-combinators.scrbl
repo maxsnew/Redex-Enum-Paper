@@ -43,8 +43,8 @@ integer square root, 6, and then compute the remainder (i.e.
 44-6@raw-latex{$^2$}), 8. The 6 tells us that we are in the sixth layer,
 where all pairs have a 6 and there are no elements larger
 than 6. The remainder 8 tells us that we are at the 8th
-such pair, which is @racket['(6 . 2)] (since we (arbitrarily)
-decided to put pairs with a 6 in the second point first).
+such pair, which is @racket['(6 . 2)], since we (arbitrarily)
+decided to put pairs with a 6 in the second point first.
 
 To perform the inverse, we take @racket['(6 . 2)] and note that
 its max is 6. Then we need to determine which position @racket['(6 . 2)]

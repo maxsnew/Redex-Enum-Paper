@@ -44,26 +44,15 @@ semantics. All of the theorems stated in this section
 are proven with respect to the Coq model. The Redex model,
 Coq model, and our implementation are all tested against each other.
 
-The upper right section of the figure contains four rules
-that govern the @sr[or/e] combinator. The idea for how these work
-is that they alternate between the two enumerations until
-one runs out and then they just use the other. The two rules on
-top cover the case where neither has yet run out and the bottom two
-cover the situation where one has. The rules with ``l'' in the name
-end up producing a value from the left enumeration and the rules with
-an ``r'' produce a value from the right. 
+The upper right of the figure has the simplest rule,
+the one for @sr[(below/e n+)]; it is just the identity.
+Below the @sr[below/e] rule is the @sr[fix/e] rule. The
+@sr[fix/e] combinator is like @racket[delay/e], except it
+provides an explicit name for the enumeration. The rule
+uses substitution (our implementation fails to terminate
+when an ``infinite derivation'' would be required).
 
-Just below the grammar is the simplest rule, the one for @sr[(below/e n+)];
-it is just the identity. To its right is the 
-@sr[map/e] rule, showing how its bijection is used.
-To the right of @sr[map/e] is the @sr[cons/e] rule. 
-It uses the @mf-name{unpair} function, shown at the bottom of
-the figure. The @mf-name{unpair} function accepts the sizes of the two enumerations,
-computed by the function near the bottom on the right of the
-figure (written using double vertical bars), and the index.
-The function maps indices as discussed in @secref["sec:enum"].
-
-The next two rules, reading down the figure, are the @sr[dep/e] rules.
+The next two rules, reading straight down the figure, are the @sr[dep/e] rules.
 The @sr[dep/e] combinator is a simplified, functional interface
 to the @racket[cons/de] combinator. It accepts an
 enumeration and a function from elements of the first
@@ -73,22 +62,34 @@ and the second position's elements come from the enumeration
 returned by passing the first element of the pair to the
 given function. The @sr[dep/e] rule exploits @sr[cons/e] to
 get two indices when it deals with infinite enumerations and
-uses @mf-name{sum_up_to} for finite enumerations (defined at
-the bottom of the figure).
+uses @mf-name{sum_up_to} for finite enumerations (defined
+at the bottom of @figure-ref["fig:semantics-helpers"]).
 
-Below @sr[dep/e] are the rules for @sr[except/e], which behave
-as discussed in @secref["sec:enum"], one rule for the
+The first rule underneath the boxed grammar is the @sr[map/e] rule,
+showing how its bijection is used.
+The next four rules govern the @sr[or/e] combinator. These rules work
+by alternating between the two enumerations until
+one runs out and then they just use the other enumeration. The upper two @sr[or/e] rules
+cover the case where neither has yet run out and the lower two
+cover the situation where one has. The rules with ``l'' in the name
+end up producing a value from the left enumeration and the rules with
+an ``r'' produce a value from the right.
+
+The @sr[cons/e] rule uses the @mf-name{unpair} function, shown
+in @figure-ref["fig:semantics-helpers"].
+The @mf-name{unpair} function accepts the sizes of the two enumerations,
+computed by the size function in the middle of @figure-ref["fig:semantics-helpers"]
+(written using double vertical bars), and the index.
+The function maps indices as discussed in @secref["sec:enum"].
+
+To the right of the @sr[cons/e] rule are the rules for the @sr[except/e]
+combinator, which behaves as discussed in @secref["sec:enum"], one rule for the
 situation where the value is below the excepted value and
 one for where it is above.
 
-Beside the @sr[except/e] rules is the @sr[fix/e] rule. The
-@sr[fix/e] combinator is like @racket[delay/e], except it
-provides an explicit name for the enumeration. The rule
-uses substitution (our implementation fails to terminate
-when an ``infinite derivation'' would be required).
-The last two rules are an unfair pairing operation using the
-bijection from the introduction and we
-return to the rule for @sr[trace/e] shortly.
+We return to the rule for @sr[trace/e] shortly, and the 
+last rule is an unfair pairing operation using the
+bijection from the introduction.
 
 The Coq model is simpler than the model presented here and
 the model presented here is simpler than our implementation.

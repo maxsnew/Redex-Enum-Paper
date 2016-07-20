@@ -12,7 +12,7 @@
           "enum-util.rkt"
           "cite.rkt")
 
-@title[#:tag "sec:enum"]{Introduction to Enumeration}
+@title[#:tag "sec:enum"]{Enumeration Combinators}
 
 This section introduces the basics of enumeration
 via a tour of our Racket-based enumeration library.
@@ -24,14 +24,14 @@ of the enumeration, which can be either a natural number or positive infinity
 and a contract that captures exactly the values in the enumeration. For the
 purposes of this paper, it is sufficient to think of the contracts
 as predicates on values; they are more general, but that generality
-is not needed to understand the our enumeration library.
+is not needed to understand our enumeration library.
 
 Each enumeration has the invariant that
 the @racket[to-nat] and @racket[from-nat] functions form a bijection between
 the natural numbers (up to the size) and the values that satisfy
 the contract.@note{Our library also supports one-way enumerations as
-                 they can be useful in practice, but we do not talk
-                 about them here.}
+                 they can be useful in practice, but we do not discuss
+                 them here.}
 Our most basic enumeration is @racket[below/e] (by convention, the names of
 our enumeration library functions end with @racket[/e]; the slash is a legal character
 in Racket identifiers). The @racket[below/e] combinator accepts a
@@ -52,7 +52,7 @@ beginning of the disjoint union of an enumeration of natural numbers
 and an enumeration of strings:
 
 @enum-example[(or/e (below/e +inf.0) string/e)
-              7]
+              8]
 
 The @racket[or/e] enumeration insists that contracts for its arguments
 be disjoint so that it can compute the reverse direction of the bijection.
@@ -112,10 +112,10 @@ correct size, defaulting to infinite if not specified.
 To build up more complex enumerations, it is useful to be able to 
 adjust the elements of an existing enumeration. We use @racket[map/e] 
 which composes a bijection between elements of the contract of
-a given enumeration and a new contract. Using this we can, for example, construct 
-enumerations of natural numbers that start at some natural @racket[i] beyond zero
-by using this function @racket[naturals-above/e], that accepts
-a natural @racket[i] and returns an enumeration.
+a given enumeration and a new contract. Using @racket[map/e] we can, for example, construct 
+enumerations of natural numbers that start at some natural @racket[i] beyond zero.
+The function @racket[naturals-above/e] accepts
+a natural @racket[i] and returns such an enumeration.
 @racketblock/define[(define (naturals-above/e i)
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
@@ -124,8 +124,8 @@ a natural @racket[i] and returns an enumeration.
 The first two arguments to @racket[map/e] are functions that
 form a bijection between the values in the enumeration argument
 and the contract given as the final argument (@racket[#:contract]
-is a keyword argument specifier in this case saying that
-the contract is integers larger than or equal to @racket[i]).
+is a keyword argument specifier, in this case saying that
+the contract accepts integers larger than or equal to @racket[i]).
 As it is easy to make simple mistakes
 when building the bijection, @racket[map/e]'s contract randomly checks
 a few values of the enumeration to make sure they map back to themselves
@@ -163,7 +163,9 @@ combinators). It is a special expression form with two sub-expressions (in this 
 @racket[(below/e +inf.0)] and @racket[(naturals-above/e i)]),
 each of which is named (@racket[hd] and @racket[tl] here).
 And one of the expressions may refer to the other's variable by putting it
-into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd]).
+into parentheses (in this case, the @racket[tl] expression can refer to @racket[hd];
+putting the identifiers the other way around would allow the head position to depend
+on the tail instead).
 Here are the first 12 elements of the enumeration:
 @enum-example[(cons/de [hd (below/e +inf.0)] 
                        [tl (hd) (naturals-above/e hd)])
