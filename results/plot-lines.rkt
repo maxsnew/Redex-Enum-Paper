@@ -6,7 +6,8 @@
          "process-data.rkt"
          racket/runtime-path)
 
-(provide plot-lines-from-directory
+(provide plot-ordered-lines-from-directory
+         plot-enum-lines-from-directory
          order)
 
 (module+ main
@@ -18,7 +19,18 @@
         'enum-brutally-unfair)
    "uniform-random-selection.pdf"))
 
-(define (plot-lines-from-directory [outputs #f])
+(define (plot-enum-lines-from-directory [outputs #f])
+  (define fst
+    (plot-one-set-of-lines-from-directory
+     (set 'grammar
+          'enum
+          'enum-mildly-unfair
+          'enum-brutally-unfair)
+     (and outputs (list-ref outputs 0))))
+  (unless outputs
+    fst))
+
+(define (plot-ordered-lines-from-directory [outputs #f])
   (define fst
     (plot-one-set-of-lines-from-directory
      (set 'grammar 'ordered 'ordered-mildly-unfair 'ordered-brutally-unfair)

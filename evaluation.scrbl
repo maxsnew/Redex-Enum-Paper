@@ -84,11 +84,19 @@ sure that the numbers are not always small.
         @list{Partial Order Between Generators Indicating Which Find More Bugs}
         @raw-latex{\includegraphics[scale=.6]{dominates.pdf}}]
 
-@figure*["fig:benchmark-lines"
-         @list{Overview of random testing performance of ad hoc generation,
-               in-order enumeration, and random indexing into an enumeration,
-               on a benchmark of Redex models.}
-         (plot-lines-from-directory)]
+@figure*["fig:benchmark-ordered-lines"
+         @list{Overview of random testing performance of ad hoc generation
+               and in-order enumeration}
+         (plot-ordered-lines-from-directory)]
+
+@figure*["fig:benchmark-enum-lines"
+         @list{Overview of random testing performance of ad hoc generation
+               and random indexing into an enumeration}
+         (plot-enum-lines-from-directory)]
+
+@figure*["fig:benchmark-points"
+         @list{Time taken to find each bug for each generator}
+         (plot-points-from-directory)]
 
 We chose this distribution because it does not have a fixed
 mean. That is, if you take the mean of some number of
@@ -165,11 +173,11 @@ usually doing better than the brutally unfair ones.
 That overview lacks nuance; it does not
 take into account how long it took for each generator to find
 the bugs that it found. 
-The plot in @figure-ref["fig:benchmark-lines"] take time
+The plot in @figure-ref["fig:benchmark-ordered-lines"] take time
 into account, showing how well each generator is doing as
-a function of time. Along x-axis is time in
+a function of time. Along x axis is time in
 seconds in a log scale, varying from milliseconds to
-a few hours. Along the y-axis is the
+a few hours. Along the y axis is the
 total number of counterexamples found for each point in
 time. The lines on each plot show how the number of
 counterexamples found changes as time passes.
@@ -188,19 +196,20 @@ That plot also reveals that the ad hoc generator is only better than
 the best enumeration strategy after 3 minutes.  Before that time, the
 fair in-order enumeration strategy is the best approach.
 
-The supplementary material has a similar plot that uses the
+@Figure-ref["fig:benchmark-enum-lines"]
+has a similar plot that uses the
 same set of combinators, but randomly picks natural numbers
 (as described above) and uses those to generate candidates.
-That plots shows that that approach never the best approach, on
+This plots shows that that approach never the best approach, on
 any time scale.
 
 No strategy was able to find more than
 @(format "~a" (maximum-bugs-found)) of the 50 bugs in the
 benchmark. 
 
-Another, more detailed chart is included in 
-the supplementary material. In that chart, x-axis has one
-entry for each different bug, for which a counter-example
+@Figure-ref["fig:benchmark-points"] shows a plot of every
+generator's performance on each bug (unless the generator never found
+that bug). The x axis has one entry for each different bug, for which a counter-example
 was found and the y axis shows the average number of seconds
 required to find that bug. The chart confirms the
 conclusion from @figure-ref["fig:benchmark-lines"] showing that

@@ -29,8 +29,8 @@
   (set! data-stats (sort data-stats <
                          #:key (λ (x) (hash-ref order (list-ref x 1)))))
   (parameterize ([type-names type-name->description]
-                 [plot-width 600]
-                 [plot-height 500]
+                 [plot-width 450]
+                 [plot-height 650]
                  [plot-x-label #f]
                  [type-symbols (λ (x) (hash-ref type-syms x))]
                  [plot-y-label "Average Number of Seconds to Find Bug"])

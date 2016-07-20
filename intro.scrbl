@@ -6,7 +6,6 @@
 
 @title{Introduction}
 
-
 In the past few years a number of different libraries have
 appeared that provide generic ways to build bijections
 between data structures and the natural numbers. First was
@@ -92,4 +91,4 @@ discussed in @secref["sec:evaluation"]. The last two sections
 discuss related work and conclude.
 Several places in the paper mention supplementary material; it
 is available at
-@url["http://www.eecs.northwestern.edu/~robby/tmp/fse2016/"]
+@url["http://www.eecs.northwestern.edu/~robby/tmp/jfp-enum/"]
