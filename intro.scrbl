@@ -90,5 +90,5 @@ evaluation of the different random generation strategies is
 discussed in @secref["sec:evaluation"]. The last two sections
 discuss related work and conclude.
 Several places in the paper mention supplementary material; it
-is available at
+is included in our submission and also available at
 @url["http://www.eecs.northwestern.edu/~robby/tmp/jfp-enum/"]
