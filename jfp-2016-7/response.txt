@@ -6,14 +6,14 @@ Referee: 1
 > The paper proposes a new framework of enumerations,
 > i.e. bijections between natural numbers and elements of some
 > given type, with an application to property-based software
-> testing. A no- tion of fairness is introduced, meant to capture
+> testing. A notion of fairness is introduced, meant to capture
 > the intuitive balance in compound enumeration exploration,
 > supported with a few natural examples of fair and unfair
-> enumerations. The sup- plementary material includes a Coq model
+> enumerations. The supplementary material includes a Coq model
 > for a limited subset of the core library combinators, along
 > with additional tests and proofs of correctness. Finally, the
 > developed implementation is compared with several other
-> enumeration techniques on a Redex automated testing bench- mark
+> enumeration techniques on a Redex automated testing benchmark
 > [*]. Fair enumerations are argued to constitute effective
 > testing tools, contrary to their unfair counterparts.
 
@@ -22,7 +22,7 @@ Referee: 1
 > The article starts with a brief introduction to the subject of
 > property-based software testing with an emphasis on
 > enumeration-based techniques. The main object of interest,
-> i.e. enumera- tions, is introduces on an informal,
+> i.e. enumerations, is introduces on an informal,
 > programmer-like level. This informal narration of the paper
 > continues unfortunately to explaining the main components of
 > the framework, including below/e, or/e and other key
@@ -71,8 +71,8 @@ Referee: 1
 > of the assumed semantics, in particular Szudzik’s pairing
 > function and the alternating or/e combinator.  In the reminder
 > of the paper, some empirical facts are reported, comparing
-> different ap- proaches and techniques of enumeration-based
-> testing. Assumed methods of different enumer- ation tactics are
+> different approaches and techniques of enumeration-based
+> testing. Assumed methods of different enumeration tactics are
 > tested against a specific automated testing benchmark. A
 > partial ordering involving the subsets of detected bugs is
 > introduced, creating a final ranking of approaches. According
@@ -155,7 +155,6 @@ Referee: 2
 
 > Minor comments
 > --------------
-
 > p1. My initial reaction to the introduction was that it was missing
 >   motivation; p2 states that enumerations are used for bug finding,
 >   but it might be a good idea to have that up-front at the beginning
