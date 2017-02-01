@@ -1,0 +1,173 @@
+
+
+
+---------- Forwarded message ----------
+From: Journal of Functional Programming <onbehalfof+laurie+tratt.net@manuscriptcentral.com>
+Date: Tue, Jan 31, 2017 at 7:34 AM
+Subject: JFP-2016-0028 - Decision on Manuscript
+To: robby@eecs.northwestern.edu
+Cc: MatthiasFelleisen <matthias@ccs.neu.edu>, JeremyGibbons <jeremy.gibbons@cs.ox.ac.uk>, jfp-ed@cambridge.org, laurie@tratt.net
+
+
+Dear Dr. Findler:
+
+Thank you for your submission of manuscript ID JFP-2016-0028 entitled "Fair Enumeration Combinators" to the Journal of Functional Programming, which has been reviewed.  The comments of the referees are included at the bottom of this letter. Two factors seem common in the reviews. First, the authors need to more carefully consider and/or motivate their particular definition of fairness (Reviewers 1 and 3). Second, Reviewer 1 has substantial misgivings about the presentation, feeling that it does not enable as many readers as desirable to get to grips with the paper; Reviewers 2 and 3 also have some suggestions along these lines. The authors may wish to consider how, with a bit of extra explanation (either in one place or scattered around) they can widen the audience that this paper will appeal to.
+
+I do not believe that either of these issues is likely to be hugely onerous, and am thus recommending minor revisions. Therefore, I invite you to respond to the comments and revise your manuscript.
+
+To revise your manuscript, log into https://mc.manuscriptcentral.com/jfp_submit and enter your Author Center, where you will find your manuscript title listed under "Manuscripts with Decisions."  Under "Actions," click on "Create a Revision."  Your manuscript number has been appended to denote a revision.
+
+You will be unable to make your revisions on the originally submitted version of the manuscript.  Instead, please upload your revised manuscript through your Author Center.
+
+When submitting your revised manuscript, you will be able to respond to the comments made by the referees in the space provided.  You can use this space to document any changes you make to the original manuscript.  In order to expedite the processing of the revised manuscript, please be as specific as possible in your response to the referees. Please also provide a separate diff of your original and new submission (e.g. created by latexdiff, though you may use whatever tool you wish).
+
+IMPORTANT:  Your original files are available to you when you upload your revised manuscript.  Please delete any redundant files before completing the submission.
+
+Because we are trying to facilitate timely publication of manuscripts submitted to the Journal of Functional Programming, your revised manuscript should be uploaded as soon as possible.  If it is not possible for you to submit your revision in a reasonable amount of time, say six weeks, we may have to consider your paper as a new submission. Please let me know if this timescale is not feasible.
+
+Once again, thank you for submitting your manuscript to the Journal of Functional Programming and I look forward to receiving your revision.
+
+Sincerely,
+Dr. Laurence Tratt
+Journal of Functional Programming
+laurie@tratt.net
+
+Referees' Comments to Author:
+Referee: 1
+
+Comments to the Author
+See attached PDF.
+
+Referee: 2
+
+Comments to the Author
+Fair Enumeration Combinators
+============================
+
+This paper describes a technique for generating enumerators by composing them,
+introduces "fairness" as a property that can measure how well the composition is
+defined, and assesses the value of fairness for detecting bugs in the context of
+property-based testing.
+
+The paper is interesting; the authors argue that fair enumeration combinators
+are useful in property-based testing, they give a criterion for
+fairness, and they demonstrate that their implementation is practical.
+
+The material is well presented, and even though I am not familiar with
+racket, I was able to understand the technical material. The paper is
+well structured, the motivation is clear from the beginning, with the
+first three sections providing plenty of background.
+
+I do have some minor comments about how the figures that introduce the
+semantics of the combinators might be improved, but this does not
+remove from the overall contribution of this paper. On the whole, I
+think that the required revisions are minor, after which this should
+be accepted.
+
+Minor comments
+--------------
+
+p1. My initial reaction to the introduction was that it was missing
+  motivation; p2 states that enumerations are used for bug finding, but
+  it might be a good idea to have that up-front at the beginning of the
+  paper.
+
+p2. The text uses double quoted letters as in `"x" coordinate values`
+  in the main text. I think the quoting looks a bit odd; it would be
+  better to just use the math font for these names as in $x$
+  coordinate.
+
+p2. n-ary combinators ~> $n$-ary combinators [to be consistent with
+  what is in the abstract]
+
+p3. For the non-racketeers, it would be nice to have a description of
+  what `[#f #t]` does. (I think this is the only point where I didn't
+  have a good intuition for what this did: this is a good place for me
+  to say that notes like the one on p5 about legal character
+  identifiers was great; thanks!).
+
+p4. The detailed discussion that shows "the smallest natural that
+  demonstrates the difference is 345" seems a bit too specific given
+  that we don't know in detail what the library is doing. Being this
+  specific doesn't seem to convey much meaning.
+
+p8. "This section introduces our definition of fairness in a precise
+  but informal way" ... "roughly equally" in the next sentence didn't
+  read as that precise to me.
+
+p11. I found it odd that the formal model is well-typed but that the
+  implementation has no types.
+
+p11. Inconsistency in fonts for `fix/e` and `delay/e`, which I
+  couldn't explain.
+
+p11. "our implementation fails to terminate when [...]" seems a bit
+  too sparse a description of what is going on. I think more detail here
+  is needed.
+
+p23. At the end of the section I felt like I hadn't understood the
+  ad-hoc random generator enough to make the comparison meaningful.
+  Could something more be said about it?
+
+
+Referee: 3
+
+Comments to the Author
+Paper overview:
+
+The paper describes a combinator library for enumerating sets of values
+by a bijection to/from the natural numbers. It deals with the issue of
+finding suitable bijections from a single index to n-tuples of indexes
+for sub-enumerations, particularly for a product operator.
+Suitability ultimately means ability to discover bugs using property
+based testing, but this is approximated by a property called fairness,
+that is claimed to correlate with bug-finding capacity.
+
+The authors first show a really bad bijection, that enumerates an
+astounding number of similar and highly unbalanced binary trees before
+backtracking to some very small balanced ones. The authors then
+show how fast a good bijection finds the same simple tree, and argue
+that this difference can be attributed to the fairness property of the
+good bijection.
+
+A bijection from indexes to tuples is fair if none of the elements of
+the tuple has a consistently larger range of used values. Particularly
+the enumeration sequence produced by the bijection needs to have
+reoccurring equilibrium points, where the set of values used for all
+component are equal.
+
+The enumeration approach is quite appealing. At first it seems like it
+is just a bijective function and the "splitting function" (the
+bijection between tuples and single indexes) does all the work, but it
+is made more complicated by the presence of finite enumerations and the
+need to keep track of the cardinality for enumerations and add special
+cases for when one or more of them are finite. There are also some
+pitfalls with termination of recursive enumerations.
+
+--
+Comments:
+
+There are two important issues I would like the paper to address:
+* I would like a stronger argument for why the presence/absence of fairness is the property that result in the differences in bug-finding capacity that you demonstrate. It seems easy to turn a fair enumeration into an unfair one with the same quality (just "delay" all equilibrium points by one position in the enumeration?). It also seems possible to take a bad enumeration and make it fair, although that is probably a lot more contrived. Maybe fairness works pragmatically for bijections that "occur naturally" but then I would like this to be stated.
+Another example: If I take (almost) any enumeration and interleave it with an incomplete enumeration that takes the (n-dimensional) diagonal (0 0 .. 0) (1 1 .. 1) (2 2 .. 2) so every other value is taken from this diagonal and every other from the complete enumeration (modified where needed to avoid repeating the diagonal values). The diagonal will do all the "exploration", and thus every other value (or every value?) will be an equilibrium point - meaning it would be an extremely fair enumeration?
+* You provide a recursive definition of an enumerator for lists of natural numbers (p. 6), but the definition seems to suffer from the same kind of unfair distribution as the 4-tuples on p. 8. Worse, this seems to fall outside your definition of fairness, since a list combinator would only take a single argument. Is there any way to solve this?
+
+
+Minor issues:
+* How does or/e handle mixes of finite/infinite? This is not specified on page 5 and the description on page 11 is rather confusing since it seems to assume all arguments are infinite.
+
+* On page 5, you write "If one of the input enumerations is finite, the result enumeration loops through the finite enumeration, pairing each with an element from the infinite enumeration."
+This sentence is a bit unclear. I take this to mean that you do not do any "diagonalization" of these products. But what about large finite enumerations, like an enumeration of the 32-bit integers or an enumeration of ASCII characters?
+
+* Page 5: I would expect an enumeration of strings to start with "". Is it an enumeration of characters? Maybe this is also related to the issue above?
+
+Page 6: "Since it is not possible to statically know whether a recursive enumeration uses its parameter, we leave it to the caller to determine the correct size, defaulting to infinite if not specified."
+
+Page 7: "The troublesome case is when the dependent enumerations are all finite". Isn't the mixed case just as problematic?
+
+Page 9: The diagrams in figure 2 are hard to understand. Maybe the figure label should clarify what the axes are and what distinguishes the different diagrams in each row.
+
+Page 15: This is the first time I understood precisely what you meant by fairness. Maybe you should clarify in the informal definition that you look independently at the set of used indexes for each parameter. This definition is also easy to miss in the "Enumeration Semantics" section.
+
+Page 24: You write "Unfortunately, the distance between equilibrium points double at each step"
+I fail to see how you calculate this, or why it is unfortunate. It seems Feat does what you describe as tempting on page 8 and uses size as a measure of fairness (small values before large values), and the definition of size is the extra information you mention.
