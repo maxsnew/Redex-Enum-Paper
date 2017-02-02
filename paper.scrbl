@@ -176,7 +176,7 @@ combinators is worse across the board.
 
 @include-section["fair-combinators.scrbl"]
 
-@include-section["fair-formal.scrbl"]
+@include-section["enumeration-semantics.scrbl"]
 
 @;; comment this out for now because it causes problems at the latex somehow
 @;@include-section["redex-enumeration.scrbl"]
