@@ -8,6 +8,7 @@
           data/enumerate/lib
           plot
           scriblib/figure
+          (only-in scribble/core element style)
           redex/pict
           "unfairness-hist.rkt"
           "cite.rkt"
@@ -16,7 +17,7 @@
 
 @title[#:tag "sec:fair-combinators"]{Fair Combinators}
 
-
+@(element (style "Pairmn" '()) '())
 
 Once we know that nesting pairs is not going to be fair
 in general, how do we define a fair tupling operation?

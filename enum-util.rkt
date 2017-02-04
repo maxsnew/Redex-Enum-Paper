@@ -1,8 +1,9 @@
-#lang racket
+#lang at-exp racket
 (require data/enumerate/lib
          pict
          redex/pict
-         scribble/manual)
+         scribble/manual
+         math/number-theory)
 
 (provide pair-pict cantor-cons-pict
          disj-sum-pict/good disj-sum-pict/bad
@@ -14,7 +15,9 @@
          except/e*
          fin/e
          lon/e-code lon/e
-         lon2/e-code lon2/e)
+         lon2/e-code lon2/e
+
+         pair-1/1-tex pair-m/n-tex)
 
 (define (disj-sum-pict/good)
   (gen-table or/e 8 24 30 8 #:arrows? #t))
@@ -340,3 +343,112 @@
 
 (module+ main 
   (hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good)))
+
+(define-syntax-rule
+  (define/txt id1 (id2 args ...) body ...)
+  (begin
+    (define id1 (to-tex 'body ...))
+    (define (id2 args ...) body ...)))
+
+(define (to-tex . defs+sexps)
+  (define defs (reverse (cdr (reverse defs+sexps))))
+  (define body (last defs+sexps))
+  (define (def-to-tex def include-where?)
+    (match def
+      [`(define ,id ,expr)
+       @~a{\multicolumn{2}{r}{
+         @(if include-where? @~a{\mbox{\textrm{where~}}} "")
+         @id = @(expr-to-tex expr)} \\}]))
+  (define (cond-expr-to-tex expr)
+    (match expr
+      [`(cond [,Q1 ,A1] [,Q2 ,A2])
+       @~a{@(expr-to-tex A1) & \mbox{\textrm{if~}} @(expr-to-tex Q1) \\
+           @(expr-to-tex A2) & \mbox{\textrm{if~}} @(expr-to-tex Q2) \\}]))
+  (define (expr-to-tex expr)
+    (let loop ([expr expr])
+      (match expr
+        [`(,(? infix-op? op) ,a ,b) @~a{@(loop a) @(convert-op op) @(loop b)}]
+        [`(,(? infix-op? op) ,a ,b ,more ...) (loop `(,op ,a (,op ,b ,@more)))]
+        [`(expt ,a ,b) @~a{{@(loop a)}^{@(loop b)}}]
+        [`(cons ,a ,b) @~a{\left\langle @(loop a), @(loop b) \right\rangle}]
+        [`(integer-sqrt ,a) (loop `(integer-root ,a 2))]
+        [`(integer-root ,a ,b)
+         @~a{\left\lfloor
+          @(if (equal? b 2)
+               @~a{\sqrt{@(loop a)}}
+               @~a{\sqrt[@(loop b)]{@(loop a)}})
+          \right\rfloor}]
+        [`(remainder ,a ,b)
+         @~a{{@(loop a)} \bmod {@(loop b)}}]
+        [`(quotient ,a ,b)
+         @~a{\left\lfloor\frac{@(loop a)}{@(loop b)} \right\rfloor}]
+        [`(with-parens ,x) @~a{(@(loop x))}]
+        [(? symbol?) (~a expr)]
+        [(? real?) (~a expr)])))
+  (define (infix-op? x) (member x '(+ - * < >=)))
+  (define (convert-op op)
+    (cond
+      [(equal? op '>=) @~a{\geq}]
+      [(equal? op '<=) @~a{\leq}]
+      [(equal? op '*) ""]
+      [else (~a op)]))
+  (string->bytes/utf-8
+   @~a{\[\begin{array}{ll}
+       @(cond-expr-to-tex body) \\
+       @(apply string-append
+               (for/list ([def (in-list defs)]
+                          [i (in-naturals)])
+                 (def-to-tex def (= i 0))))
+       \end{array}\]}))
+
+(define/txt pair-m/n-tex (pair-m/n m n z)
+  (define l (integer-root z (+ m n)))
+  (define r (- z (expt l (with-parens (+ m n)))))
+  (define s (* (with-parens (- (expt (with-parens (+ l 1)) n) (expt l n)))
+               (expt l m)))
+  (cond
+    [(r . < . s)
+     (cons (remainder r (expt l m))
+           (+ (expt l n)
+              (quotient r (expt l m))))]
+    [(r . >= . s)
+     (cons (+ (expt l m)
+              (remainder (with-parens (r . - . s))
+                         (with-parens
+                          (- (expt (with-parens (l . + . 1)) m)
+                             (expt l m)))))
+           (quotient (r . - . s)
+                     (- (expt (with-parens (l . + . 1)) m)
+                        (expt l m))))]))
+
+(define/txt pair-1/1-tex (pair-1/1 z)
+  (cond
+    [((- z (expt (integer-sqrt z) 2)) . < . (integer-sqrt z))
+     (cons (- z (expt (integer-sqrt z) 2)) (integer-sqrt z))]
+    [((- z (expt (integer-sqrt z) 2)) . >= . (integer-sqrt z))
+     (cons (integer-sqrt z) (- z (expt (integer-sqrt z) 2) (integer-sqrt z)))]))
+
+(define (with-parens x) x)
+
+(module+ test
+  (require (only-in data/enumerate/private/core binary-biased-cons/e))
+  (define tests 0)
+  (time
+   (for* ([m (in-range 1 6)]
+          [n (in-range 1 6)]
+          [z (in-range 3000)])
+     (set! tests (+ tests 1))
+     (define correct (from-nat (binary-biased-cons/e natural/e m natural/e n) z))
+     (define presented (pair-m/n m n z))
+     (unless (equal? correct presented)
+       (error 'enum-util.rkt "correct ≠ presented, ~s vs ~s; ~s"
+              correct presented
+              (list m n z)))
+     (when (and (= m 1) (= n 1))
+       (set! tests (+ tests 1))
+       (define presented-1-1 (pair-1/1 z))
+       (unless (equal? correct presented-1-1)
+         (error 'enum-util.rkt "correct ≠ presented-1-1, ~s vs ~s; ~s"
+                correct presented-1-1
+                z)))))
+  (printf "~a tests passed\n" tests))

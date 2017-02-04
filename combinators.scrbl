@@ -69,6 +69,8 @@ infinite enumeration. If both are finite, it loops through the
 one with lesser cardinality. This corresponds to taking the
 quotient and remainder of the index with the lesser size.
 
+@(element (style "Paironeone" '()) '())
+
 Pairing infinite enumerations requires more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening

@@ -2,6 +2,7 @@
 
 @(require "cite.rkt" 
           "util.rkt"
+          "enum-util.rkt"
           scribble/core
           scribble/latex-properties
           (except-in scribble/manual author))
@@ -36,6 +37,10 @@
                  
                  ;; map the ℕ character
                  #"\\DeclareUnicodeCharacter{2115}{$\\mathbb{N}$}\n"
+
+                 ;; formulas for paring
+                 #"\\newcommand{\\Pairmn}{" pair-m/n-tex #"}\n"
+                 #"\\newcommand{\\Paironeone}{" pair-1/1-tex #"}\n"
                  
                  ;; used for the table of the bugs
                  #"\\newenvironment{IntroWrapFigure}"

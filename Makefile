@@ -15,6 +15,7 @@ clean:
 	rm -f supp.tar.gz
 
 test:
+	raco test enum-util.rkt
 	$(MAKE) -C model/ test
 
 coq:
