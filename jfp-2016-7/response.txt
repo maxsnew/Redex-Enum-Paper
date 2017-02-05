@@ -121,11 +121,10 @@ differences.
 The experiment was conducted with the fair (and unfair) enumerations
 described earlier in the paper. We have clarified this point.
 
-Our definition of fairness already includes the precise functions,
-which is more information than their asymptotic class. We do not offer
-a way to characterize the relative unfairness beyond the informal
-notions discussed in the paper. Figuring out such a definition would
-be interesting, but seems beyond the scope of the present paper.
+Unfortunately, We do not have a mathematically precise way to
+characterize the relative unfairness to offer. Figuring out such a
+definition would be interesting, but seems beyond the scope of the
+present paper.
 
 > Conclusions
 
@@ -144,8 +143,9 @@ be interesting, but seems beyond the scope of the present paper.
 > nice library for enumeration-based testing, but unfortunately
 > little beyond that.
 
-We plan to maintain the coupling between the supplementary material
-and the paper as long as is humanly possible.
+We agree that the supplementary material is crucial and we plan to
+maintain the coupling between the supplementary material and the paper
+as long as is humanly possible.
 
 > [*] http://docs.racket-lang.org/redex/benchmark.html
 
