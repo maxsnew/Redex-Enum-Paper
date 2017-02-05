@@ -3,10 +3,12 @@
          pict
          redex/pict
          scribble/manual
-         math/number-theory)
+         math/number-theory
+         (only-in data/enumerate/private/core binary-biased-cons/e))
 
 (provide pair-pict cantor-cons-pict
          disj-sum-pict/good disj-sum-pict/bad
+         biased-cons-pict
          grid gen-grid
          unfair-exp fair-exp num-enumerated
          max-unfair min-unfair max-fair min-fair
@@ -116,10 +118,11 @@
                     (λ (a b) (values x2 (+ y2 (pict-height this-p)))))
                    pict+index))])))))
 
-
 (define (pair-pict) (box-cons-pict))
 (define (box-cons-pict) (grid cons/e 5 24 180 10))
 (define (cantor-cons-pict) (grid cantor-cons/e 5 14 180 10))
+(define (biased-cons-pict)
+  (gen-grid (λ (x y) (binary-biased-cons/e x 2 y 1)) 25 6 149 420 6 #:arrows? #t))
 
 (define (cantor-cons/e e1 e2)
   (cons/e e1 e2 #:ordering 'diagonal))
@@ -149,49 +152,51 @@
          exp-pair
          natural/e))
 (define (grid cons/e count num-points size arrow-head-size)
-  (gen-grid cons/e count num-points size arrow-head-size #:arrows? #t))
+  (gen-grid cons/e count count num-points size arrow-head-size #:arrows? #t))
 
-(define (gen-grid cons/e count num-points size arrow-head-size #:arrows? arrows?)
+(define (gen-grid cons/e count-x count-y num-points size-x arrow-head-size #:arrows? arrows?)
+  (define size-y (* count-y (/ size-x count-x)))
   (define prs (cons/e natural/e natural/e))
   (define font-size 9)
   (define base
     (dc (λ (dc dx dy)
-          (for ([i (in-range 1 count)])
+          (for ([i (in-range 1 count-x)])
             (send dc draw-line 
-                  (+ dx (* i (/ size count)))
+                  (+ dx (* i (/ size-x count-x)))
                   dy
-                  (+ dx (* i (/ size count)))
-                  (+ dy size))
+                  (+ dx (* i (/ size-x count-x)))
+                  (+ dy size-y)))
+          (for ([i (in-range 1 count-y)])
             (send dc draw-line 
                   dx
-                  (+ dy (* i (/ size count)))
-                  (+ dx size)
-                  (+ dy (* i (/ size count))))))
-        size
-        size))
+                  (+ dy (* i (/ size-y count-y)))
+                  (+ dx size-x)
+                  (+ dy (* i (/ size-y count-y))))))
+        size-x
+        size-y))
   (hb-append
-   (apply 
+   (apply
     vc-append
-    (for/list ([i (in-range count)])
+    (for/list ([i (in-range count-y)])
       (define txt (text (format "~a" i) '() font-size))
       (cc-superimpose 
-       (blank 0 (/ size count))
+       (blank 0 (/ size-y count-y))
        (refocus (vc-append
                  txt
-                 (if (= i (- count 1))
+                 (if (= i (- count-y 1))
                      (text "⋮" '() font-size)
                      (blank)))
                 txt))))
    (vc-append
     (apply 
      hc-append
-     (for/list ([i (in-range count)])
+     (for/list ([i (in-range count-x)])
        (define txt (text (format "~a" i) '() font-size))
-       (cc-superimpose (blank (/ size count) 0)
+       (cc-superimpose (blank (/ size-x count-x) 0)
                        (refocus
                         (hbl-append
                          txt
-                         (if (= i (- count 1))
+                         (if (= i (- count-x 1))
                              (text " ⋯" '() font-size)
                              (blank)))
                         txt))))
@@ -202,8 +207,8 @@
         [(= i num-points) pict]
         [else
          (define (ij->xy i j)
-           (values (* (+ i .5) (/ size count))
-                   (* (+ j .5) (/ size count))))
+           (values (* (+ i .5) (/ size-x count-x))
+                   (* (+ j .5) (/ size-y count-y))))
          (define this (from-nat prs i))
          (define next (from-nat prs (+ i 1)))
          (define-values (x1 y1) (ij->xy (car this) (cdr this)))
@@ -431,7 +436,6 @@
 (define (with-parens x) x)
 
 (module+ test
-  (require (only-in data/enumerate/private/core binary-biased-cons/e))
   (define tests 0)
   (time
    (for* ([m (in-range 1 6)]

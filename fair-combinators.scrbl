@@ -19,6 +19,11 @@
 
 @(element (style "Pairmn" '()) '())
 
+@figure["fig:biased-pair-pict" "Biased Pair Order"]{
+  @centered{@biased-cons-pict[]}
+}
+
+
 Once we know that nesting pairs is not going to be fair
 in general, how do we define a fair tupling operation?
 As we saw in @secref["sec:enum"], the fair pairing operation
