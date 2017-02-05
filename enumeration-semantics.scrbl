@@ -34,7 +34,7 @@ The relation
 @sr[|@|] defines the semantics of the enumerations. It relates an enumeration and an index to the
 value that the enumeration produces at the index. 
 The @sr[T] that follows the vertical bar is used in the definition
-of fairness; ignore it for now. The 
+of fairness; we explain it after introducing the basics of the model. The 
 @sr[from-nat] and @sr[to-nat] functions are derived from 
 @sr[|@|] by treating either the value or
 index argument as given and computing the other one.
@@ -49,8 +49,9 @@ the one for @sr[(below/e n+)]; it is just the identity.
 Below the @sr[below/e] rule is the @sr[fix/e] rule. The
 @sr[fix/e] combinator is like @racket[delay/e], except it
 provides an explicit name for the enumeration. The rule
-uses substitution (our implementation fails to terminate
-when an ``infinite derivation'' would be required).
+uses substitution (the definition of substitution is standard
+and is omitted for brevity). Our implementation fails to terminate
+when an ``infinite derivation'' would be required.
 
 The next two rules, reading straight down the figure, are the @sr[dep/e] rules.
 The @sr[dep/e] combinator is a simplified, functional interface
@@ -93,26 +94,30 @@ bijection from the introduction.
 
 The Coq model is simpler than the model presented here and
 the model presented here is simpler than our implementation.
-The primary simplification is in the kinds of values that
+The primary difference between the three is in the kinds of values that
 are enumerated. In our implementation, any value that can be
 captured with a contract in Racket's contract system can be
 enumerated. In the model presented here, we restrict those
 values to the ones captured by @sr[τ], and in the Coq model
 restrict that further by eliminating recursive types, subtraction
-types, and finite types. The typing rules for values are given in the box
-at the bottom right of @figure-ref["fig:semantics"], and the
-@mf-name{ty} function maps enumerators to the type of values
-that it enumerates. All enumerators enumerate all of the
-values of their types.
+types, and finite types.
 
 The implementation also has many more combinators than the
 ones presented here, but they are either derivable from
 these or require only straightforward extensions. The Coq
 model has the combinators in @figure-ref["fig:semantics"],
 except for the @sr[fix/e] combinator and the @sr[except/e]
-combinator. In general, the Coq model is designed to be just
-enough for us to state and prove some results about
-fairness.
+combinator. There are no other differences between the Coq
+model and the model in the paper. In general, the Coq model
+is designed to be just enough for us to state and prove some
+results about fairness whereas the model presented in the paper
+is designed to provide a precise explanation of our enumerations.
+
+The typing rules for values are given in the box at the
+bottom right of @figure-ref["fig:semantics"], and the
+@mf-name{ty} function maps enumerators to the type of values
+that it enumerates. All enumerators enumerate all of the
+values of their types.
 
 Before we define fairness, however, we first need to prove that
 the model actually defines two functions.

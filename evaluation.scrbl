@@ -14,13 +14,14 @@
 
 @title[#:tag "sec:evaluation"]{Empirical Evaluation}
 
-As our motivation for studying enumerations is test
-case generation, we performed an empirical evaluation of
-fair and unfair enumerations to try to understand the impact
-of using unfair combinators on test case generation. We also
-used a mature ad hoc random generator as a baseline for the
-comparison, to give our results some context. This section
-describes our evaluation and its results.
+As our motivation for studying enumerations is test case
+generation, we performed an empirical evaluation of fair and
+unfair enumerations described earlier in the paper to try to
+understand the impact of using unfair combinators on test
+case generation. We also used a mature ad hoc random
+generator as a baseline for the comparison, to give our
+results some context. This section describes our evaluation
+and its results.
 
 @section{Setup}
 

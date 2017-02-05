@@ -55,6 +55,10 @@ We have added the precise formulas.
 > meaning (semantic) of a substitution applied to an
 > enumeration (see rule fix/e).
 
+We removed the "ignore it for now" comment, replacing it with a
+comment that hopefully is better style. We added a comment about
+substitution to the explanation of the fix/e rule.
+
 > Paragraph 9 in the same section, starts with an explanation
 > that the actual Coq model is simpler than the model presented
 > in the paper. A detailed difference between the two is not
@@ -65,6 +69,10 @@ We have added the precise formulas.
 > results themselves are a rather simple and intuitive
 > exercise. The supplied Coq code does indeed compile although,
 > interestingly, not with the newest 8.5pl2 Coq version.
+
+We expanded the discussion that compares the implementation to the
+presented model to the Coq model. It now details the exact
+differences.
 
 > On page 15, the anticipated definition of fairness is given in
 > terms of the trace combinator. The definition depends on the
@@ -110,6 +118,15 @@ We have added the precise formulas.
 > add precise meaning to the informal notions of ‘mildly’ or
 > ‘brutally’ (un)fair functions.
 
+The experiment was conducted with the fair (and unfair) enumerations
+described earlier in the paper. We have clarified this point.
+
+Our definition of fairness already includes the precise functions,
+which is more information than their asymptotic class. We do not offer
+a way to characterize the relative unfairness beyond the informal
+notions discussed in the paper. Figuring out such a definition would
+be interesting, but seems beyond the scope of the present paper.
+
 > Conclusions
 
 > The paper presents a new library for enumeration-based
@@ -126,6 +143,9 @@ We have added the precise formulas.
 > developed library. In conclusion, the submission presents a
 > nice library for enumeration-based testing, but unfortunately
 > little beyond that.
+
+We plan to maintain the coupling between the supplementary material
+and the paper as long as is humanly possible.
 
 > [*] http://docs.racket-lang.org/redex/benchmark.html
 
