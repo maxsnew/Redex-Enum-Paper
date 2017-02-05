@@ -69,13 +69,15 @@ infinite enumeration. If both are finite, it loops through the
 one with lesser cardinality. This corresponds to taking the
 quotient and remainder of the index with the lesser size.
 
-@(element (style "Paironeone" '()) '())
-
 Pairing infinite enumerations requires more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
 @racket[cons/e] walks along the edge of ever-widening
 squares to enumerate all pairs (using @citet[elegant-pairing-function]'s
 bijection), as shown in @figure-ref["fig:pair-pict"].
+Here is the formula showing the coordinates for the @texmath{z}th
+element of the enumeration.
+@(element (style "Paironeone" '()) '())
+
 The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
 @texmath{n}-dimensional grid.

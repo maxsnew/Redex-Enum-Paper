@@ -36,6 +36,8 @@ Referee: 1
 > intuition behind the generalisation idea (see page 10, section
 > 5, paragraphs 5 and 6).
 
+We have added the precise formulas.
+
 > The following section 6, contains a formal model of the
 > enumeration framework. The model occupies two full pages and
 > stands in contrast to the previous exposition. Readers
