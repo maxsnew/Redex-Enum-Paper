@@ -395,7 +395,7 @@
     (cond
       [(equal? op '>=) @~a{\geq}]
       [(equal? op '<=) @~a{\leq}]
-      [(equal? op '*) ""]
+      [(equal? op '*) @~a{\cdot}]
       [else (~a op)]))
   (string->bytes/utf-8
    @~a{\[\begin{array}{ll}
@@ -406,25 +406,18 @@
                  (def-to-tex def (= i 0))))
        \end{array}\]}))
 
-(define/txt pair-m/n-tex (pair-m/n m n z)
-  (define l (integer-root z (+ m n)))
-  (define r (- z (expt l (with-parens (+ m n)))))
-  (define s (* (with-parens (- (expt (with-parens (+ l 1)) n) (expt l n)))
-               (expt l m)))
+(define/txt pair-m/n-tex (pair-1/n n z)
+  (define r (- z (expt (integer-root z (+ n 1)) (+ n 1))))
+  (define s (* (with-parens (- (expt (with-parens (+ (integer-root z (+ n 1)) 1)) n)
+                               (expt (integer-root z (+ n 1)) n)))
+               (integer-root z (+ n 1))))
   (cond
     [(r . < . s)
-     (cons (remainder r (expt l m))
-           (+ (expt l n)
-              (quotient r (expt l m))))]
+     (cons (remainder r (integer-root z (+ n 1)))
+           (+ (expt (integer-root z (+ n 1)) n)
+              (quotient r (integer-root z (+ n 1)))))]
     [(r . >= . s)
-     (cons (+ (expt l m)
-              (remainder (with-parens (r . - . s))
-                         (with-parens
-                          (- (expt (with-parens (l . + . 1)) m)
-                             (expt l m)))))
-           (quotient (r . - . s)
-                     (- (expt (with-parens (l . + . 1)) m)
-                        (expt l m))))]))
+     (cons (integer-root z (+ n 1)) (r . - . s))]))
 
 (define/txt pair-1/1-tex (pair-1/1 z)
   (cond
@@ -438,17 +431,16 @@
 (module+ test
   (define tests 0)
   (time
-   (for* ([m (in-range 1 6)]
-          [n (in-range 1 6)]
-          [z (in-range 3000)])
+   (for* ([n (in-range 1 10)]
+          [z (in-range 10000)])
      (set! tests (+ tests 1))
-     (define correct (from-nat (binary-biased-cons/e natural/e m natural/e n) z))
-     (define presented (pair-m/n m n z))
+     (define correct (from-nat (binary-biased-cons/e natural/e 1 natural/e n) z))
+     (define presented (pair-1/n n z))
      (unless (equal? correct presented)
        (error 'enum-util.rkt "correct ≠ presented, ~s vs ~s; ~s"
               correct presented
-              (list m n z)))
-     (when (and (= m 1) (= n 1))
+              (list n z)))
+     (when (= n 1)
        (set! tests (+ tests 1))
        (define presented-1-1 (pair-1/1 z))
        (unless (equal? correct presented-1-1)
