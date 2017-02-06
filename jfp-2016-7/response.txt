@@ -300,14 +300,46 @@ Referee: 3
 >   contrived. Maybe fairness works pragmatically for bijections that
 >   "occur naturally" but then I would like this to be stated.
 >
-> Another example: If I take (almost) any enumeration and interleave
-> it with an incomplete enumeration that takes the (n-dimensional)
-> diagonal (0 0 .. 0) (1 1 .. 1) (2 2 .. 2) so every other value is
-> taken from this diagonal and every other from the complete
-> enumeration (modified where needed to avoid repeating the diagonal
-> values). The diagonal will do all the "exploration", and thus every
-> other value (or every value?) will be an equilibrium point - meaning
-> it would be an extremely fair enumeration?
+>   Another example: If I take (almost) any enumeration and interleave
+>   it with an incomplete enumeration that takes the (n-dimensional)
+>   diagonal (0 0 .. 0) (1 1 .. 1) (2 2 .. 2) so every other value is
+>   taken from this diagonal and every other from the complete
+>   enumeration (modified where needed to avoid repeating the diagonal
+>   values). The diagonal will do all the "exploration", and thus
+>   every other value (or every value?) will be an equilibrium point -
+>   meaning it would be an extremely fair enumeration?
+
+Fairness is not just that we see the pair <i,i> at some regular
+interval; the i-th equilibrium point needs to come after all of the
+possible pairs of numbers that are less than i.
+
+Indeed, the process described above, in some intuitive sense, makes an
+enumeration less fair, not more fair.
+
+Concretely, consider the brutally unfair enumeration:
+
+  <x,y> -> 2^y * (2x+1) - 1
+
+and consider the pairs that have one of the components in the interval
+[0,3]. The maximum index of those is 55, where the pair <3,3>
+occurs.
+
+Now consider that we apply the transformation above to the
+enumeration. In the first 55 tuples, we have seen <0,0> <1,1>, <2,2>,
+and <3,3>, but no other tuples of the form <i,i>. So if we remove
+them, we're left with 51 tuples that we are now going to interleave
+with tuples of the form <i,i>.
+
+Lets consider what position that moves the tuple <2,3> to. Before we
+did the interleaving, it was at position 39. Removing the <i,i> tuples
+before it moves it to position 36 (as <3,3> comes after). Interleaving
+with the tuples of the form <i,i> moves it out to position 71 or 72
+(depending on which order the interleaving is done).
+
+In other words, in the enumeration we get by following the above
+process, it takes us 72 elements to see all of the tuples that have a
+component in the interval [0,3], where as it took us only 55 tuples in
+the original enumeration which is, in some intuitive sense, less fair.
 
 > * You provide a recursive definition of an enumerator for lists of
 >   natural numbers (p. 6), but the definition seems to suffer from
