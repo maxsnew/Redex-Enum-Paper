@@ -46,7 +46,7 @@ that classifies enumeration combinators, rejecting the one
 in the previous paragraph as unfair and accepting
 ones based on the standard Cantor bijection and many others,
 including ones whose inverses are easier to compute in the
-n-tuple case (as explained later). Intuitively, a
+@texmath{n}-tuple case (as explained later). Intuitively, a
 combinator is fair if indexing deeply into the result of the
 combinator goes equally deeply into all the arguments to the
 combinator.
@@ -78,8 +78,6 @@ and enumeration fit together and then
 introduces enumeration libraries, using
 the Racket-based library to make the introduction
 concrete.
-In @secref["sec:intro-testing"], we discuss how testing
-and enumeration fit together. 
 In @secref["sec:fair-informal"], we give an
 intuition-based definition of fairness and
 in @secref["sec:fair-combinators"] discuss our

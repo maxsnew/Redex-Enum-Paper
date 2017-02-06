@@ -127,8 +127,8 @@ We used three variations on the enumeration combinators. The
 first is the fair combinators described in 
 @secref["sec:fair-informal"]. The second uses fair binary
 pairing and binary alternation combinators, but that are
-unfairly generalized via nesting (to create n-tuples or
-n-way alternations), which we call ``mildly unfair''.
+unfairly generalized via nesting (to create @texmath{n}-tuples or
+@texmath{n}-way alternations), which we call ``mildly unfair''.
 The third variation uses the unfair binary pairing
 combinator based on the bijection described in the
 introduction, also unfairly generalized to @texmath{n}-ary pairing. It

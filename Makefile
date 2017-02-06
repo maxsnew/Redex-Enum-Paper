@@ -2,7 +2,7 @@ SUPPDIR := fair-enumerations-supplementary-material
 
 all: test admit paper
 
-paper:
+paper: DNE
 	raco make -v paper.scrbl && scribble ++extra results/dominates.pdf --pdf paper.scrbl
 
 DNE:

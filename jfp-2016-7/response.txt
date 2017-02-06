@@ -299,7 +299,16 @@ Referee: 3
 >   and make it fair, although that is probably a lot more
 >   contrived. Maybe fairness works pragmatically for bijections that
 >   "occur naturally" but then I would like this to be stated.
->
+
+We agree that the submitted version of the paper takes too strong of a
+"unfair = bad" stance on enumerations. To be sure, we do believe that
+fairness is important as a default (and our evaluation shows that the
+unfair combinators used in other implementations are worse than our
+fair ones, at least on our benchmarks). That said, we have added a
+discussion (in a new "Future Work" section) that softens the paper's
+stance on this point and explains more accurately what we believe vis
+a vis unfairness.
+
 >   Another example: If I take (almost) any enumeration and interleave
 >   it with an incomplete enumeration that takes the (n-dimensional)
 >   diagonal (0 0 .. 0) (1 1 .. 1) (2 2 .. 2) so every other value is
@@ -309,9 +318,10 @@ Referee: 3
 >   every other value (or every value?) will be an equilibrium point -
 >   meaning it would be an extremely fair enumeration?
 
-Fairness is not just that we see the pair <i,i> at some regular
-interval; the i-th equilibrium point needs to come after all of the
-possible pairs of numbers that are less than i.
+We disagree with this comment. Fairness is not just that we see the
+pair <i,i> at some regular interval; the i-th equilibrium point needs
+to come after all of the possible pairs of numbers that are involve
+numbers than i.
 
 Indeed, the process described above, in some intuitive sense, makes an
 enumeration less fair, not more fair.
@@ -332,14 +342,16 @@ with tuples of the form <i,i>.
 
 Lets consider what position that moves the tuple <2,3> to. Before we
 did the interleaving, it was at position 39. Removing the <i,i> tuples
-before it moves it to position 36 (as <3,3> comes after). Interleaving
-with the tuples of the form <i,i> moves it out to position 71 or 72
-(depending on which order the interleaving is done).
+before it means that it moves back three spots to position 36 (as
+<3,3> comes after). Interleaving with the tuples of the form <i,i>
+moves it out to position 71 or 72 (depending on which order the
+interleaving is done).
 
 In other words, in the enumeration we get by following the above
 process, it takes us 72 elements to see all of the tuples that have a
 component in the interval [0,3], where as it took us only 55 tuples in
-the original enumeration which is, in some intuitive sense, less fair.
+the original enumeration. This is, in some intuitive sense, more
+unfair.
 
 > * You provide a recursive definition of an enumerator for lists of
 >   natural numbers (p. 6), but the definition seems to suffer from
@@ -347,6 +359,14 @@ the original enumeration which is, in some intuitive sense, less fair.
 >   p. 8. Worse, this seems to fall outside your definition of
 >   fairness, since a list combinator would only take a single
 >   argument. Is there any way to solve this?
+
+This is a great observation. We too have thought along these lines. We
+have extended the "Future Work" section to summarizes our current
+thinking on this point. The short version: we have an alternative
+definition of lists that seems to be more fair and seems to suggest a
+different way to look at building recursive enumerations. We have not
+developed the theory of fairness to be able to separates the two
+different approaches to building recursive enumerations.
 
 > Minor issues:
 
