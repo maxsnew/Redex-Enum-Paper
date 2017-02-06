@@ -36,7 +36,7 @@ but informal way, giving a rationale for our definitions
 and some examples to clarify them.
 
 A fair enumeration combinator is one that indexes into its
-argument enumerations roughly equally, instead of indexing
+argument enumerations in equal proportions, instead of indexing
 deeply into one and shallowly into another one. For
 example, imagine we wanted to build an enumeration for lists
 of length 4. This enumeration is one way to build it:

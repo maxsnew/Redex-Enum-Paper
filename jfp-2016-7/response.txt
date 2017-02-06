@@ -182,13 +182,19 @@ Referee: 2
 >   but it might be a good idea to have that up-front at the beginning
 >   of the paper.
 
+We have added that to the first sentence.
+
 > p2. The text uses double quoted letters as in `"x" coordinate
 >   values` in the main text. I think the quoting looks a bit odd; it
 >   would be better to just use the math font for these names as in
 >   $x$ coordinate.
 
+Fixed, thanks.
+
 > p2. n-ary combinators ~> $n$-ary combinators [to be consistent with
 >   what is in the abstract]
+
+Fixed, thanks.
 
 > p3. For the non-racketeers, it would be nice to have a description
 >   of what `[#f #t]` does. (I think this is the only point where I
@@ -196,28 +202,52 @@ Referee: 2
 >   place for me to say that notes like the one on p5 about legal
 >   character identifiers was great; thanks!).
 
+We changed the representation of trees to use a (nullary) structure to
+represent leaves instead of using #f. Hopefully this makes the code
+self-explanatory now.
+
 > p4. The detailed discussion that shows "the smallest natural that
 >   demonstrates the difference is 345" seems a bit too specific given
 >   that we don't know in detail what the library is doing. Being this
 >   specific doesn't seem to convey much meaning.
 
+Revised, thanks.
+
 > p8. "This section introduces our definition of fairness in a precise
 >   but informal way" ... "roughly equally" in the next sentence
 >   didn't read as that precise to me.
 
+Indeed! Revised.
+
 > p11. I found it odd that the formal model is well-typed but that the
 >   implementation has no types.
 
+We've added a comment to the formal section where the three variants
+(Redex model, Coq model, implementation) are discussed together.
+
+In short, contracts give us flexibility to have precise specs of the
+values for all enumerations, even ones that arise as a complex
+enumeration is built up (e.g., non-empty lists, positive numbers,
+rational numbers with a specific denominator, etc.)
+
 > p11. Inconsistency in fonts for `fix/e` and `delay/e`, which I
 >   couldn't explain.
+
+Clarified in that sentence. (The typography is intended to indicate the
+model vs the implementation. Fixed width font with colors is code; the
+sans-serif black indicates keywords from the model.)
 
 > p11. "our implementation fails to terminate when [...]" seems a bit
 >   too sparse a description of what is going on. I think more detail
 >   here is needed.
 
+We deleted this sentence. It was not a helpful comment, overall.
+
 > p23. At the end of the section I felt like I hadn't understood the
 >   ad-hoc random generator enough to make the comparison meaningful.
 >   Could something more be said about it?
+
+We've added a brief explanation of the algorithm it uses.
 
 ============================================================
 Referee: 3

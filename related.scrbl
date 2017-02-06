@@ -11,11 +11,11 @@ enumeration and papers with studies about random testing.
 The SciFe library for Scala@~cite[scife scife2] is most similar to our library,
 but it has only one half of the bijection so it does
 not support @racket[except/e]. It has fair binary pairing
-and alternation combinators, but no n-ary fair combinators.
+and alternation combinators, but no @texmath{n}-ary fair combinators.
 Its combinators use the same bijections as the mildly unfair
 combinators discussed in @secref["sec:evaluation"].
 Its pairing operation is based on the Cantor pairing
-function, meaning that computing the n-ary fair version of
+function, meaning that computing the @texmath{n}-ary fair version of
 it is expensive, as discussed in 
 @secref["sec:fair-informal"]. These differences and the lack
 of fairness aside, the
@@ -25,7 +25,7 @@ our library shares all of the strengths and weakness of their library.
 @citet[compact-serialization-of-prolog-terms]'s work on bijective encoding schemes for 
 Prolog terms is also
 similar to ours. We differ in three main ways. 
-First, our n-ary enumerations are fair (not just the binary ones).
+First, our @texmath{n}-ary enumerations are fair (not just the binary ones).
 Second, our enumerations deal with enumeration of finite sets wherever
 they appear in the larger structure. This is complicated because it
 forces our system to deal with mismatches between the cardinalities of

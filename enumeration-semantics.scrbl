@@ -47,11 +47,11 @@ Coq model, and our implementation are all tested against each other.
 The upper right of the figure has the simplest rule,
 the one for @sr[(below/e n+)]; it is just the identity.
 Below the @sr[below/e] rule is the @sr[fix/e] rule. The
-@sr[fix/e] combinator is like @racket[delay/e], except it
+@sr[fix/e] combinator in the model is like @racket[delay/e]
+from the implementation, except it
 provides an explicit name for the enumeration. The rule
 uses substitution (the definition of substitution is standard
-and is omitted for brevity). Our implementation fails to terminate
-when an ``infinite derivation'' would be required.
+and is omitted for brevity).
 
 The next two rules, reading straight down the figure, are the @sr[dep/e] rules.
 The @sr[dep/e] combinator is a simplified, functional interface
@@ -100,7 +100,12 @@ captured with a contract in Racket's contract system can be
 enumerated. In the model presented here, we restrict those
 values to the ones captured by @sr[τ], and in the Coq model
 restrict that further by eliminating recursive types, subtraction
-types, and finite types.
+types, and finite types. The implementation does not have
+a type system; the role of types played by the contract system instead.
+Contracts give us additional flexibility that ordinary type systems
+do not support, allowing us to maintain the invariant that the
+contract describes the precise set of values that can be enumerated,
+even for enumerations of only positive numbers, or non-empty lists, etc.
 
 The implementation also has many more combinators than the
 ones presented here, but they are either derivable from

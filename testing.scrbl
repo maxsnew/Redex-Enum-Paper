@@ -39,10 +39,11 @@ To see how bijective enumerations can help with property-based
 testing, consider this snippet of Racket@~cite[plt-tr1] code
 that checks to see if a given binary tree is a binary search tree:
 @racketblock/define[(struct node (n l r) #:transparent)
-
+                    (struct leaf () #:transparent)
+                    
                     (define (bst? t)
                       (match t
-                        [#f #t]
+                        [(leaf) #true]
                         [(node n l r)
                          (and (check-all l (λ (i) (<= i n)))
                               (check-all r (λ (i) (>= i n)))
@@ -51,7 +52,7 @@ that checks to see if a given binary tree is a binary search tree:
                     
                     (define (check-all t p?)
                       (match t
-                        [#f #t]
+                        [(leaf) #true]
                         [(node n l r)
                          (and (p? n)
                               (check-all l p?)
@@ -75,7 +76,7 @@ a binary search tree.
 We can easily write this (incorrect) code, too:
 @racketblock/define[(define (not-quite-bst? t)
                       (match t
-                        [#f #t]
+                        [(leaf) #true]
                         [(node n l r)
                          (and (<= (or (root-n l) -inf.0)
                                   n
@@ -85,7 +86,7 @@ We can easily write this (incorrect) code, too:
                     
                     (define (root-n t)
                       (match t
-                        [#f #f]
+                        [(leaf) #false]
                         [(node n l r) n]))]
 
 To use property-based testing to uncover the difference
@@ -113,23 +114,23 @@ find a difference between the two predicates.
 @(define bt?
    (λ (l)
      (match l
-       [#f #t]
+       [(leaf) #true]
        [(node n l r) (and (exact-nonnegative-integer? n)
                           (bt? l)
                           (bt? r))]
-       [_ #f])))
+       [_ #false])))
 
 @(define bt/e
    (map/e
     (λ (l-t)
       (let loop ([l-t l-t])
         (match l-t
-          [#f #f]
+          [#f (leaf)]
           [(list n l r) (node n (loop l) (loop r))])))
     (λ (n-t)
       (let loop ([n-t n-t])
         (match n-t
-          [#f #f]
+          [(leaf) #false]
           [(node n l r) (list n (loop l) (loop r))])))
     (letrec ([bt/e
               (or/e (fin/e #f)
@@ -140,7 +141,7 @@ find a difference between the two predicates.
     #:contract bt?))
 
 @(define un-bt/e
-   (or/e (fin/e #f)
+   (or/e (map/e (λ (_) (leaf)) (λ (_) 0) (below/e 1) #:contract leaf?)
          (map/e
           (λ (l) (match l [(cons n (cons l r)) (node n l r)]))
           (λ (n) (match n [(node n l r) (cons n (cons l r))]))
@@ -153,8 +154,8 @@ find a difference between the two predicates.
 
 @(define smallest-known-un-bt/e-example-t
    (node 0
-         (node 0 #f (node 1 #f #f))
-         #f))
+         (node 0 (leaf) (node 1 (leaf) (leaf)))
+         (leaf)))
 
 @(define smallest-bt/e-example-t
    (let/ec k
@@ -172,11 +173,11 @@ find a difference between the two predicates.
      (error 'testing.scrbl "t is a wrong-bst")))
 
 @(begin
-   (check-true (bst? #f))
-   (check-true (bst? (node 0 #f #f)))
-   (check-true (bst? (node 1 (node 0 #f #f) (node 2 #f #f))))
-   (check-false (bst? (node 1 (node 2 #f #f) (node 2 #f #f))))
-   (check-false (bst? (node 1 (node 0 #f #f) (node 0 #f #f)))))
+   (check-true (bst? (leaf)))
+   (check-true (bst? (node 0 (leaf) (leaf))))
+   (check-true (bst? (node 1 (node 0 (leaf) (leaf)) (node 2 (leaf) (leaf)))))
+   (check-false (bst? (node 1 (node 2 (leaf) (leaf)) (node 2 (leaf) (leaf)))))
+   (check-false (bst? (node 1 (node 0 (leaf) (leaf)) (node 0 (leaf) (leaf))))))
 
 @(define (render-t t)
    (define biggest -inf.0)
@@ -191,7 +192,7 @@ find a difference between the two predicates.
    (binary-tidier
     (let loop ([t t])
       (match t
-        [#f #f]
+        [(leaf) #false]
         [(node n l r) (tree-layout
                        #:pict (p:cc-superimpose bkg (p:text (~a n)))
                        (loop l) (loop r))]))))
@@ -204,7 +205,8 @@ each natural number in turn and checking to see if the corresponding
 tree differentiates the two predicates.
 
 If we use our fair combinators, we find that the smallest natural that demonstrates the
-difference is @(add-commas (to-nat bt/e smallest-bt/e-example-t)). If we
+difference is tiny, namely @(add-commas (to-nat bt/e smallest-bt/e-example-t)), and it
+takes only about 1/100th of a second to search from 0 to the counterexample. If we
 swap out the fair pairing combinator for an unfair one based on the bijection discussed
 in the introduction, then that same tree appears at a position with
 @(add-commas (string-length (~a (to-nat un-bt/e smallest-bt/e-example-t))))

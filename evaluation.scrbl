@@ -58,20 +58,27 @@ and one that selects a random natural and uses that
 to index into the enumeration.
 
 The ad hoc random generation is Redex's existing random
-generator@~cite[sfp2009-kf]. It has been tuned based on
-experience programming in Redex, but not recently. From the
-git logs, the most recent change to it was a bug fix in
-April of 2011 and the most recent change that affected the
-generation of random terms was in January of 2011, both well
-before we started studying enumeration.
+generator@~cite[sfp2009-kf]. It generates expressions
+matching a particular non-terminal by randomly choosing
+a production, expanding the non-terminal based on the production
+chosen, and then repeating the process until a depth bound
+is reached. At that point, it limits the random choice to
+productions that do not require recursive unfoldings (such
+productions are guaranteed to exist or else the original Redex
+program would have been syntactically ill-formed).
 
-The ad hoc random generator, which is based on the method of
-recursively unfolding non-terminals, is parameterized over
-the depth at which it attempts to stop unfolding
-non-terminals. We use the default value of 5 for this depth since
-that is what Redex users see without customization. This produces terms
-of a similar size to those of the random enumeration method,
-although the distribution is different.
+It has been tuned based on experience programming in Redex,
+but not recently. From the git logs, the most recent change
+to it was a bug fix in April of 2011 and the most recent
+change that affected the generation of random terms was in
+January of 2011, both well before we started studying
+enumeration.
+
+For our evaluation, we use the default value of 5 for this
+depth since that is what Redex users see without
+customization. This produces terms of a similar size to
+those of the random enumeration method (although the
+distribution is different).
 
 To pick a random natural number to index into the enumeration, we
 first pick an exponent @texmath{i} in base 2 from the
@@ -124,10 +131,10 @@ unfairly generalized via nesting (to create n-tuples or
 n-way alternations), which we call ``mildly unfair''.
 The third variation uses the unfair binary pairing
 combinator based on the bijection described in the
-introduction, also unfairly generalized to n-ary pairing. It
+introduction, also unfairly generalized to @texmath{n}-ary pairing. It
 uses an analogous unfair alternation combinator that goes
 exponentially deep into one argument as compared to the
-other, also unfairly generalized to n-ary alternation.
+other, also unfairly generalized to @texmath{n}-ary alternation.
 The final one we call ``brutally unfair''.
 
 For each of the 350 bug and generator combinations, we run a

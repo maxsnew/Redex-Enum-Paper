@@ -78,7 +78,7 @@ Here is the formula showing the coordinates for the @texmath{z}th
 element of the enumeration.
 @(element (style "Paironeone" '()) '())
 
-The n-ary @racket[list/e] generalizes the binary @racket[cons/e]
+The @texmath{n}-ary @racket[list/e] generalizes the binary @racket[cons/e]
 that can be interpreted as a similar walk in an
 @texmath{n}-dimensional grid.
 We discuss this in detail in @secref["sec:fair-informal"].

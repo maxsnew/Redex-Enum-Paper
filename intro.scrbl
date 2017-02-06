@@ -8,7 +8,8 @@
 
 In the past few years a number of different libraries have
 appeared that provide generic ways to build bijections
-between data structures and the natural numbers. First was
+between data structures and the natural numbers to support
+property-based testing. First was
 Feat for Haskell in
 2012@note{@url{https://hackage.haskell.org/package/testing-feat}},
 then SciFe for Scala in
@@ -30,14 +31,14 @@ to write a bijection between the natural numbers and
 pairs of natural numbers. One such function is given by 
 @texmath[bad-nn->n-string]. This is a bijection (the inverse
 simply counts the number of times that 2 is a factor of its
-input to separate the ``x'' and ``y'' parts) that is easy to
+input to separate the @texmath{x} and @texmath{y} parts) that is easy to
 explain and efficient, taking logarithmic time in the result
 to compute in both directions. It is
 a poor choice for an enumeration library, however, because it
-explores ``x'' coordinate values much more quickly
-than the ``y'' coordinate. Indeed, in the first
-@(add-commas bad-howmany) pairs, the ``x'' coordinate
-has seen @(add-commas bad-max-x) but the biggest ``y'' coordinate
+explores @texmath{x} coordinate values much more quickly
+than the @texmath{y} coordinate. Indeed, in the first
+@(add-commas bad-howmany) pairs, the @texmath{x} coordinate
+has seen @(add-commas bad-max-x) but the biggest @texmath{y} coordinate
 seen is @(add-commas bad-max-y).
 
 This paper offers a criterion called @emph{fairness}
@@ -82,7 +83,7 @@ and enumeration fit together.
 In @secref["sec:fair-informal"], we give an
 intuition-based definition of fairness and
 in @secref["sec:fair-combinators"] discuss our
-n-ary combinators, whose designs are motivated by fairness.
+@texmath{n}-ary combinators, whose designs are motivated by fairness.
 @Secref["sec:fair-formal"] has a formal definition of fairness
 and proofs showing that our combinators are fair and that a commonly-used
 combinator is unfair. Our
