@@ -103,9 +103,11 @@ restrict that further by eliminating recursive types, subtraction
 types, and finite types. The implementation does not have
 a type system; the role of types played by the contract system instead.
 Contracts give us additional flexibility that ordinary type systems
-do not support, allowing us to maintain the invariant that the
+do not have, allowing us to maintain the invariant that the
 contract describes the precise set of values that can be enumerated,
 even for enumerations of only positive numbers, or non-empty lists, etc.
+Having these precise contracts has proven helpful in practice as we
+debug programs that use the enumeration library.
 
 The implementation also has many more combinators than the
 ones presented here, but they are either derivable from
