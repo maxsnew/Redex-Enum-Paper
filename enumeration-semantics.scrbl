@@ -66,15 +66,18 @@ get two indices when it deals with infinite enumerations and
 uses @mf-name{sum_up_to} for finite enumerations (defined
 at the bottom of @figure-ref["fig:semantics-helpers"]).
 
-The first rule underneath the boxed grammar is the @sr[map/e] rule,
-showing how its bijection is used.
-The next four rules govern the @sr[or/e] combinator. These rules work
-by alternating between the two enumerations until
-one runs out and then they just use the other enumeration. The upper two @sr[or/e] rules
-cover the case where neither has yet run out and the lower two
-cover the situation where one has. The rules with ``l'' in the name
-end up producing a value from the left enumeration and the rules with
-an ``r'' produce a value from the right.
+The first rule underneath the boxed grammar is the
+@sr[map/e] rule, showing how its bijection is used. The next
+four rules govern the @sr[or/e] combinator. These rules work
+by alternating between the two enumerations until one runs
+out (in the case that it is finite), and then they just use
+the other enumeration. The upper two @sr[or/e] rules cover
+the case where neither has yet run out. The lower two cover
+the situation where of the arguments was finite and the
+enumeration has already produced all of those elements. The
+rules with ``l'' in the name end up producing a value from
+the left enumeration and the rules with an ``r'' produce a
+value from the right.
 
 The @sr[cons/e] rule uses the @mf-name{unpair} function, shown
 in @figure-ref["fig:semantics-helpers"].

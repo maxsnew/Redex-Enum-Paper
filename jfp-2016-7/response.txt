@@ -374,13 +374,42 @@ different approaches to building recursive enumerations.
 >  specified on page 5 and the description on page 11 is rather
 >  confusing since it seems to assume all arguments are infinite.
 
+This was explained on page 14 in the submission (in the formal
+semantics explanation of or/e), but in a terse way. We've expanded it.
+
 >  * On page 5, you write "If one of the input enumerations is finite,
 >  the result enumeration loops through the finite enumeration,
 >  pairing each with an element from the infinite enumeration." This
->  sentence is a bit unclear. I take this to mean that you do not do
+>  sentence is a bit unclear.
+
+We've edited it for clarity.
+
+>  I take this to mean that you do not do
 >  any "diagonalization" of these products. But what about large
 >  finite enumerations, like an enumeration of the 32-bit integers or
 >  an enumeration of ASCII characters?
+
+Yes, you are right. For example, this code:
+
+  #lang racket
+  (require data/enumerate/lib)
+  (for/list ([i (in-range 500)])
+    (from-nat (cons/e natural/e
+                      char/e)
+              i))
+
+produces a list of pairs where the first element is always 0 because
+char/e is an enumeration of all Racket characters (i.e. most of the
+unicode code points (1.1 million of them)).
+
+We would like to improve this part of our library eventually, along
+the lines you suggest. Intuitively, for binary pairs we could think of
+the enumeration as an infinite series of squares (of size 1.1 million
+by 1.1 million in the above example) and enumerate each square
+individually, using the strategy we use for infinite
+enumerations. That approach seems daunting when considering $n$-ary
+enumerations, however, and we have not yet found an application that
+needs this particular enhancement to our library.
 
 >  * Page 5: I would expect an enumeration of strings to start with
 >  "". Is it an enumeration of characters? Maybe this is also related

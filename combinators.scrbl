@@ -60,14 +60,18 @@ Specifically, given a value, it tests the value to see which argument
 enumeration it comes from, and then it finds the position in that enumeration
 in order to find the position in the union enumeration.
 
-The next combinator is the pairing operator 
-@racket[cons/e]. It takes two enumerations and returns an
-enumeration of pairs of those values. If one of the
-input enumerations is finite, the result enumeration loops through the
-finite enumeration, pairing each with an element from the
-infinite enumeration. If both are finite, it loops through the
-one with lesser cardinality. This corresponds to taking the
-quotient and remainder of the index with the lesser size.
+The next combinator is the pairing operator @racket[cons/e].
+It takes two enumerations and returns an enumeration of
+pairs of those values. If one of the input enumerations is
+finite, the result enumeration loops through the finite
+enumeration, first pairing all of the elements of the finite
+enumeration with the first element from the infinite
+enumeration. Then it continues by pairing the second element
+of the infinite enumeration with each of the elements of the
+finite one, etc. If both are finite, it loops through the
+one with lesser cardinality. This process corresponds to
+taking the quotient and remainder of the index with the
+size of the smaller enumeration.
 
 Pairing infinite enumerations requires more care. If we
 imagine our sets as being laid out in an infinite two dimensional table,
