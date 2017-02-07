@@ -190,8 +190,10 @@ the indices to supply to the given enumerations when decoding.
 In both of these cases, @racket[cons/de] preserves the good
 algorithmic properties of the previous combinators.
 
-The troublesome case is when the dependent enumerations are
-all finite. In that case, we think of the dependent
+The remaining case is when the dependent enumerations are all finite
+(our @racket[cons/de] enumeration does not support mixed finite and infinite
+dependent enumerations), and it is troublesome.
+In that case, we think of the dependent
 component of the pair being drawn from a single enumeration
 that consists of all of the finite enumerations, one after
 the other. Unfortunately, in this case, calling

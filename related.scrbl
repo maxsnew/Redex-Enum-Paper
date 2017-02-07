@@ -54,9 +54,9 @@ means that our precise, technical definition of fairness
 does not apply directly to Feat's combinators. The intuition
 of fairness, however, does apply and Feat's pairing
 and alternation combinators are fair in the sense that they
-reach equilibrium infinitely often. Unfortunately, the distance
-between consecutive equilibrium points doubles at each step, meaning that
-equilibrium points are exponentially far apart, while ours
+reach equilibrium infinitely often. The distance between consecutive equilibrium
+points doubles at each step, however, meaning that
+equilibrium points are exponentially far apart. Ours
 are linearly far apart for alternation combinators or polynomially
 far apart for pairing combinators.
 

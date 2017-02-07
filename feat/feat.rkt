@@ -103,27 +103,34 @@
   (let loop ([i 0]
              [num-points num-points])
     (cond
-      [(zero? num-points) '()]
+      [(equal? num-points 0) '()]
       [else
        (define pr (index nat-pairs i))
        (hash-inc! arg1 (car pr))
        (hash-inc! arg2 (cdr pr))
        (cond
          [(equilibrium?)
-          (if (zero? num-points)
-              (list i)
-              (cons i (loop (+ i 1) (- num-points 1))))]
+          (cond
+            [(number? num-points)
+             (if (zero? num-points)
+                 (list i)
+                 (cons i (loop (+ i 1) (- num-points 1))))]
+            [else
+             (printf "~a\n" i)
+             (loop (+ i 1) num-points)])]
          [else
           (loop (+ i 1) num-points)])])))
 
 (define (unary-nat-equilibria-points)
   (for/list ([i (in-range num-points)])
-    (/ (* i (+ i 3)) 2)))
+    (/ (+ (* i i) (* i 3)) 2)))
 
-;(find-pair-equilibria nat-pairs)
-;(unary-nat-equilibria-points)
+(find-pair-equilibria nat-pairs 20)
+(unary-nat-equilibria-points)
 
-;(find-pair-equilibria (⊗ binat-enum binat-enum) 7)
+(find-pair-equilibria (⊗ binat-enum binat-enum) 10)
+(for/list ([i (in-range 10)])
+  (- (* (+ i 2) (expt 2 (- i 1))) 1))
 
 (define (check-same . enums)
   (for ([enum1 (in-list enums)]

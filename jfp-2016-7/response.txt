@@ -90,6 +90,8 @@ differences.
 > bugs than other, unfair ones. The experiment is supported with
 > detailed figures and suitable statistical data.
 
+We have added a better explanation of fairness to section 4.
+
 > It is debatable whether fairness, as formally defined, is a
 > suitable measure of the intuitive fairness as discussed
 > throughout the paper. An enumeration e is said to be f-fair, if
@@ -103,6 +105,8 @@ differences.
 > is precisely the case for enumerations explicitly given in the
 > paper, where each of them is f-fair for some low degree
 > polynomial f.
+
+We agree that f-fairness is an important concept.
 
 > It is not discussed in the paper what kind of restrictions were
 > actually imposed on the fair enumerations in the conducted
@@ -415,6 +419,10 @@ needs this particular enhancement to our library.
 >  "". Is it an enumeration of characters? Maybe this is also related
 >  to the issue above?
 
+This is simply to make counterexamples slightly nicer. They often have
+the first variable from the enumeration in them and the empty string
+does make a legal variable name, but "a" is much easier to read.
+
 >  Page 6: "Since it is not possible to statically know whether a
 >  recursive enumeration uses its parameter, we leave it to the caller
 >  to determine the correct size, defaulting to infinite if not
@@ -424,9 +432,14 @@ needs this particular enhancement to our library.
 >  enumerations are all finite". Isn't the mixed case just as
 > problematic?
 
+Our implementation does not support mixed finite and infinite
+dependent enumerations. We've clarified the text at that point.
+
 >  Page 9: The diagrams in figure 2 are hard to understand.  Maybe the
 >  figure label should clarify what the axes are and what
 >  distinguishes the different diagrams in each row.
+
+We've added more explanatory text into the description of the histograms.
 
 >  Page 15: This is the first time I understood precisely what you
 >  meant by fairness. Maybe you should clarify in the informal
@@ -434,9 +447,27 @@ needs this particular enhancement to our library.
 >  for each parameter. This definition is also easy to miss in the
 >  "Enumeration Semantics" section.
 
+Thank you. We have added a better explanation to section 4.
+
 >  Page 24: You write "Unfortunately, the distance between equilibrium
 >  points double at each step" I fail to see how you calculate this,
 >  or why it is unfortunate. It seems Feat does what you describe as
 >  tempting on page 8 and uses size as a measure of fairness (small
 >  values before large values), and the definition of size is the
 >  extra information you mention.
+
+Unfortunate is a poor choice of words and we have removed it.
+
+Using the combinators presented in the feat paper, we believe the
+equilibrium points for the pair-of-nats enumeration are indeed
+polynomially spaced, and they seem to appear at the points
+(i^2+3i)/2. The Feat implementation, however, does not use a unary
+representation of nats in its implementation. It uses a binary
+representation and we believe this causes the equilibrium points to be
+exponentially spaced (and they seem to appear at the points
+(i+2)*2^(i-1)-1).
+
+These results are based on our study of the Feat paper, the Feat
+Haskell code and our experimentation with it. We do not have a proof
+that these are correct, however, and we have not verified this with
+the authors of that paper.

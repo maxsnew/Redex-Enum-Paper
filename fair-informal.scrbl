@@ -70,24 +70,35 @@ the enumeration to be lists), then the element at position
 which is much more balanced. This balance is not specific to
 just that index in the enumeration, either. @Figure-ref["fig:unfairness"]
 shows histograms for each of the components when using
-the unfair and the fair four-tuple enumerations. 
-The x-coordinates of the plots correspond to the different
+the unfair and the fair four-tuple enumerations.
+The upper row of histograms correspond to the fair enumerators and
+the lower row corresponds to the unfair enumerators. Each of the four
+columns of histograms corresponds to a particular position in the four-tuple.
+The @texmath{x}-coordinates of each plot corresponds to the different
 values that appear in the tuples and the height of each bar is
 the number of times that particular number appears when enumerating
-the first @(add-commas unfairness-histograms-total-size) tuples. 
-As you can see, all four components have roughly the
+the first @(add-commas unfairness-histograms-total-size) tuples.
+
+For example, the relative height of the leftmost bar in the
+two leftmost histograms says that zero appears much less
+frequently in the first component of the four tuples when
+using the unfair enumerator than using the fair one.
+Similarly, the relative height of the leftmost bar in the
+two rightmost histograms says that zero appears much more
+frequently in the fourth component of the four tuples when using
+the unfair enumerator than it when using the fair one.
+
+More generally, all four components have roughly the
 same set of values for the fair tupling operation, but the first tuple
 element is considerably different from the other three when using the
 unfair combination.
 
 @figure*["fig:unfairness"
          @list{Histograms of the occurrences of each natural number
-               in fair and unfair tuples}
+          in fair and unfair tuples.}
          (parameterize ([plot-width 101 #;135]
                         [plot-height 101 #;135])
            (unfairness-histograms))]
-
-
 
 It is tempting to think of fairness as simply a notion
 of size, perhaps the number of bits required to represent
@@ -110,39 +121,48 @@ every point in the enumeration, the combinator's result enumeration
 has used all of its argument enumerations equally, then pairing would
 be impossible to do fairly.
 
-Instead, we insist that there are infinitely many places in
-the enumeration where the combinators reach an equilibrium.
-That is, there are infinitely many points where the result
-of the combinator has used all of the argument enumerations
-equally.
+We can take that basic idea and weaken a little bit, however.
+Instead of insisting they use their arguments completely in lock-step,
+we insist that there are infinitely many places in the result enumeration
+where they have used their input enumerators equally. We call these
+special places @emph{equilibrium points}. For example, consider
+the @racket[(list/e (below/e +inf.0) (below/e +inf.0))] enumeration;
+here are the its first 9 elements:
+@enum-example[(list/e (below/e +inf.0) (below/e +inf.0)) 9]
+At this point in the enumeration, we have seen all of the numbers
+in the interval @texmath{[0,2]} in both elements of the pair and
+we have not seen anything outside that interval. That makes
+9 an equilibrium point. The 10th element of the enumeration
+is @code{@(format "~v" (from-nat (list/e (below/e +inf.0) (below/e +inf.0)) 10))},
+and thus 10 is not an equilibrium point because we have seen
+the number 3 in one component of the pair, but not in the other
+component. In general, @racket[(list/e (below/e +inf.0) (below/e +inf.0))]
+has an equilibrium point at every perfect square.
+Similarly, here are the first 8 elements of
+@racket[(list/e (below/e +inf.0) (below/e +inf.0) (below/e +inf.0)) 8]:
+@enum-example[(list/e (below/e +inf.0) (below/e +inf.0) (below/e +inf.0)) 8]
+This is an equilibrium point because we have seen 0 and 1
+in every component of the pair, but no numbers larger than that.
+In general that enumeration has equilibrium points at every perfect cube.
+
+An unfair combinator is one where there are only a finite number of
+equilibrium points (or, equivalently, there is a point in the result
+enumeration after which there are no more equilibrium points).
+As an example consider
+@racket[triple/e]:
+@racketblock[(define (triple/e e_1 e_2 e_3)
+               (list/e e_1 (list/e e_2 e_3)))]
+and the first 25 elements of its enumeration:
+@enum-example[(list/e (below/e +inf.0) (list/e (below/e +inf.0) (below/e +inf.0))) 24]
+The first argument enumeration has been called with
+@racket[3] before the other arguments have been called with @racket[2]
+and the first argument is called with @racket[4] before the others are
+called with @racket[3]. This behavior persists for all input indices,
+so that no matter how far we go into the enumeration, there will never
+be another equilibrium point after @racket[0].
 
 We also refine fair combinators, saying that a combinator is
 @texmath{f}-fair if the @texmath{n}th equilibrium point is at
 @texmath{f(n)}. Parameterizing fairness by this function gives us
 a way to quantify fair combinators, preferring those that
 reach equilibrium more often.
-
-As an example, consider the fair nested @racket[cons/e]
-from the beginning of the section. As we saw, at the point @(add-commas one-billion),
-it was not at equilibrium. But at @(add-commas (- fair-number-past-one-billion 1)),
-it produces 
-@code{@(format "~v" (from-nat fair-four-tuple (- fair-number-past-one-billion 1)))},
-and it has indexed into each of the four @racket[below/e] enumerations
-with each of the first @(add-commas (sqrt (sqrt fair-number-past-one-billion))) natural numbers.
-In general, that fair four-tuple reaches an equilibrium point at every
-@texmath{n^4} and @racket[(cons/e (below/e +inf.0) (below/e +inf.0))]
-reaches an equilibrium point at every perfect square.
-
-As an example of an unfair combinator consider
-@racket[triple/e]:
-@racketblock[(define (triple/e e_1 e_2 e_3)
-               (cons/e e_1 (cons/e e_2 e_3)))]
-and the first 25 elements of its enumeration:
-@enum-example[(cons/e (below/e +inf.0) (cons/e (below/e +inf.0) (below/e +inf.0))) 24]
-The first argument enumeration has been called with
-@racket[3] before the other arguments have been called with @racket[2]
-and the first argument is called with @racket[4] before the others are
-called with @racket[3]. This behavior persists for all input indices,
-so that no matter how far we go into the enumeration, there will never
-be an equilibrium point after @racket[0].
-
