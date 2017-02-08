@@ -473,9 +473,10 @@ Regardless, we have revised the discussion in the related work section
 to clarify this. We did not include the formulas in the revised paper,
 as they are based on a reimplementation of Feat where we
 experimentally verified the formulas for a prefix of the
-enumeration. We are confident in the formulas, but the sizes of the
-parts seem to be uncontroversial and the important point.
+enumeration. We are confident in the formulas (and in our
+reimplementation covers both the paper's version and the Haskell
+version of the Nat enumerations), but the sizes of the finite parts
+seem to be uncontroversial and the important issue.
 
 All that said, we do not have a proof that our claims are correct and
 we have not verified these facts with the authors of that paper.
-

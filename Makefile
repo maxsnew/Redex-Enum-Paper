@@ -16,6 +16,7 @@ clean:
 
 test:
 	raco test enum-util.rkt
+	raco test feat/feat.rkt
 	$(MAKE) -C model/ test
 
 coq:

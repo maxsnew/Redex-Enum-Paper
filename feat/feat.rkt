@@ -1,5 +1,6 @@
 #lang racket
-(require data/enumerate racket/promise)
+(require data/enumerate racket/promise file/gunzip
+         racket/runtime-path)
 (module+ test (require rackunit))
 
 (struct Finite (size enc))
@@ -125,12 +126,95 @@
   (for/list ([i (in-range num-points)])
     (/ (+ (* i i) (* i 3)) 2)))
 
-(find-pair-equilibria nat-pairs 20)
-(unary-nat-equilibria-points)
+(module+ test
+  (check-equal? (find-pair-equilibria nat-pairs 20)
+                (unary-nat-equilibria-points))
+  (check-equal? (find-pair-equilibria (⊗ binat-enum binat-enum) 10)
+                (for/list ([i (in-range 10)])
+                  (- (* (+ i 2) (expt 2 (- i 1))) 1))))
 
-(find-pair-equilibria (⊗ binat-enum binat-enum) 10)
-(for/list ([i (in-range 10)])
-  (- (* (+ i 2) (expt 2 (- i 1))) 1))
+(define (verify-feat-pairs file)
+  (call-with-input-file file
+    (λ (gzip-in)
+      (define-values (port normal-out) (make-pipe))
+      (thread (λ ()
+                (dynamic-wind
+                 void
+                 (λ () (gunzip-through-ports gzip-in normal-out))
+                 (λ () (close-output-port normal-out)))))
+      (read-line port) ;; skip the expression that generated the trace
+      (check-it "[" port)
+      (verify-pair file 0 (fetch-feat-pair port))
+      (let loop ([i 1])
+        (define pc (peek-a-char port))
+        (cond
+          [(equal? pc #\,)
+           (read-a-char port)
+           (verify-pair file i (fetch-feat-pair port))
+           (loop (+ i 1))]
+          [(equal? pc #\]) (void)]
+          [else (error 'fetch-feat-list "unexpected ~s" pc)])))))
+
+(define (verify-pair fn i logged-pair)
+  (unless (equal? (index (⊗ binat-enum binat-enum) i) logged-pair)
+    (error 'verify-pair "file ~a, index ~a is ~s, but (⊗ binat-enum binat-enum) has ~s"
+           fn i (index (⊗ binat-enum binat-enum) i) logged-pair)))
+
+(define (fetch-feat-pair port)
+  (check-it "(" port)
+  (define n1 (fetch-feat-nat port))
+  (check-it "," port)
+  (define n2 (fetch-feat-nat port))
+  (check-it ")" port)
+  (cons n1 n2))
+
+(define (fetch-feat-nat port)
+  (check-it "Nat{nat=" port)
+  (let loop ([n 0])
+    (define c (read-a-char port))
+    (cond
+      [(char<=? #\0 c #\9)
+       (loop (+ (* n 10)
+                (- (char->integer c)
+                   (char->integer #\0))))]
+      [(equal? c #\}) n]
+      [else (error 'fetch-feat-pair "unexpected ~s" c)])))
+
+;; these two functions drop all whitespace but are otherwise read-char and peek-char
+(define (read-a-char port)
+  (let loop ()
+    (define c (read-char port))
+    (when (eof-object? c)
+      (error 'read-a-char "unexpected eof"))
+    (cond
+      [(char-whitespace? c) (loop)]
+      [else c])))
+
+(define (peek-a-char port)
+  (let loop ()
+    (define c (peek-char port))
+    (when (eof-object? c)
+      (error 'read-a-char "unexpected eof"))
+    (cond
+      [(char-whitespace? c)
+       (read-char port)
+       (loop)]
+      [else c])))
+
+(define (check-it str port)
+  (for ([c1 (in-string str)])
+    (define c2 (read-a-char port))
+    (unless (equal? c1 c2)
+      (error 'check-it "expected ~s, got ~s, entire: ~s"
+             c1 c2 str))))
+
+(define-runtime-path first-10k-nat-cross-nat.txt.gz "first-10k-nat-cross-nat.txt.gz")
+(define-runtime-path first-1k-nat-cross-nat.txt.gz "first-1k-nat-cross-nat.txt.gz")
+(module+ test
+  (printf "1k: ") (flush-output)
+  (time (verify-feat-pairs first-1k-nat-cross-nat.txt.gz))
+  (printf "10k: ") (flush-output)
+  (time (verify-feat-pairs first-10k-nat-cross-nat.txt.gz)))
 
 (define (check-same . enums)
   (for ([enum1 (in-list enums)]
