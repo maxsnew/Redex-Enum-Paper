@@ -53,12 +53,17 @@ into consecutive finite subsets. This additional information
 means that our precise, technical definition of fairness
 does not apply directly to Feat's combinators. The intuition
 of fairness, however, does apply and Feat's pairing
-and alternation combinators are fair in the sense that they
-reach equilibrium infinitely often. The distance between consecutive equilibrium
-points doubles at each step, however, meaning that
-equilibrium points are exponentially far apart. Ours
-are linearly far apart for alternation combinators or polynomially
-far apart for pairing combinators.
+combinator is fair in the sense that its output reaches
+equilibrium infinitely often. Indeed, it reaches equilibrium
+at the end of each of the parts in the result. The code
+given in the paper for the pairing and alternation
+combinators are @texmath{f}-fair with equilibrium points
+that have the same asympototic complexity as our binary pair
+combinator. In the implementation, however, they use a
+binary representation, not a unary representation of
+naturals, which makes the distance between consecutive
+equilibrium points double at each step, making the
+equilibrium points exponentially far apart.
 
 @citet[every-bit-counts] take a different approach to something like
 enumeration, viewing the bits of an encoding as a sequence of messages

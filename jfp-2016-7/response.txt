@@ -464,10 +464,18 @@ polynomially spaced, and they seem to appear at the points
 (i^2+3i)/2. The Feat implementation, however, does not use a unary
 representation of nats in its implementation. It uses a binary
 representation and we believe this causes the equilibrium points to be
-exponentially spaced (and they seem to appear at the points
-(i+2)*2^(i-1)-1).
+exponentially spaced (they seem to appear at the points
+(i+2)*2^(i-1)-1). The Feat also code contains a comment suggesting
+that the exponentially growing size of the parts (the "Finite a" type)
+is important.
 
-These results are based on our study of the Feat paper, the Feat
-Haskell code and our experimentation with it. We do not have a proof
-that these are correct, however, and we have not verified this with
-the authors of that paper.
+Regardless, we have revised the discussion in the related work section
+to clarify this. We did not include the formulas in the revised paper,
+as they are based on a reimplementation of Feat where we
+experimentally verified the formulas for a prefix of the
+enumeration. We are confident in the formulas, but the sizes of the
+parts seem to be uncontroversial and the important point.
+
+All that said, we do not have a proof that our claims are correct and
+we have not verified these facts with the authors of that paper.
+
