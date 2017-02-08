@@ -20,7 +20,6 @@ complementary benefits of in-order and random enumeration as
 shown in our results, without the need for any
 configuration.
 
-@;{
  @(element (style "paragraph" '()) '("Acknowledgments."))
 
 Thanks to Neil Toronto for helping
@@ -32,6 +31,5 @@ graciously sharing their compute servers with us. Thanks to
 William H. Temps, Matthias Felleisen, and Ben Greenman for helpful comments on the writing.
 Thanks to one of the anonymous reviewers at ICFP 2015 for suggesting
 that we refine our definition of fairness with a function.
-}
 
 @(element (style "newpage" '()) '())
