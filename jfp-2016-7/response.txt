@@ -355,7 +355,7 @@ In other words, in the enumeration we get by following the above
 process, it takes us 72 elements to see all of the tuples that have a
 component in the interval [0,3], where as it took us only 55 tuples in
 the original enumeration. This is, in some intuitive sense, more
-unfair, in addition to be not fair (by our definition.)
+unfair, in addition to not being fair (by our definition.)
 
 > * You provide a recursive definition of an enumerator for lists of
 >   natural numbers (p. 6), but the definition seems to suffer from
