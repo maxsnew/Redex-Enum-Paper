@@ -324,8 +324,8 @@ a vis unfairness.
 
 We disagree with this comment. Fairness is not just that we see the
 pair <i,i> at some regular interval; the i-th equilibrium point needs
-to come after all of the possible pairs of numbers that are involve
-numbers than i.
+to come after all of the possible pairs of numbers that involve
+numbers less than i.
 
 Indeed, the process described above, in some intuitive sense, makes an
 enumeration less fair, not more fair.
@@ -355,7 +355,7 @@ In other words, in the enumeration we get by following the above
 process, it takes us 72 elements to see all of the tuples that have a
 component in the interval [0,3], where as it took us only 55 tuples in
 the original enumeration. This is, in some intuitive sense, more
-unfair.
+unfair, in addition to be not fair (by our definition.)
 
 > * You provide a recursive definition of an enumerator for lists of
 >   natural numbers (p. 6), but the definition seems to suffer from

@@ -104,7 +104,7 @@ enumerated. In the model presented here, we restrict those
 values to the ones captured by @sr[τ], and in the Coq model
 restrict that further by eliminating recursive types, subtraction
 types, and finite types. The implementation does not have
-a type system; the role of types played by the contract system instead.
+a type system; the role of types is played by the contract system instead.
 Contracts give us additional flexibility that ordinary type systems
 do not have, allowing us to maintain the invariant that the
 contract describes the precise set of values that can be enumerated,
