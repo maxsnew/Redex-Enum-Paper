@@ -43,6 +43,8 @@ right-hand side of the pair:
 @(element (style "Pairmn" '()) '())
 @Figure-ref["fig:biased-pair-pict"] shows the first few entries
 of the pair that has a @texmath{1:2} bias.
+While that is clearly unfair, when the second component is an unbiased
+pair, then the overall result is a fair three tuple.
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
 pairing function.

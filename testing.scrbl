@@ -59,7 +59,8 @@ that checks to see if a given binary tree is a binary search tree:
                               (check-all r p?))]))]
 The first line defines a node struct with three fields (@racket[n] for
 the value in the node, @racket[l] for the left subtree, and @racket[r]
-for the right subtree). The @racket[bst?] function recursively
+for the right subtree). The second line defines a nullary struct
+to represent leaf nodes. The @racket[bst?] function recursively
 checks the tree, ensuring that the value in each node is larger
 than all of the values in the left subtree and smaller than all of the
 values in the right subtree.

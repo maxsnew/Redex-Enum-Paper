@@ -75,7 +75,7 @@ capabilities become significantly worse.
 
 In the next two sections, we discuss how testing
 and enumeration fit together and then
-introduces enumeration libraries, using
+introduce enumeration libraries, using
 the Racket-based library to make the introduction
 concrete.
 In @secref["sec:fair-informal"], we give an
@@ -86,8 +86,9 @@ in @secref["sec:fair-combinators"] discuss our
 and proofs showing that our combinators are fair and that a commonly-used
 combinator is unfair. Our
 evaluation of the different random generation strategies is
-discussed in @secref["sec:evaluation"]. The last two sections
-discuss related work and conclude.
+discussed in @secref["sec:evaluation"]. The next two sections
+discuss related work and future work;
+section @secref["sec:conclusion"] concludes.
 Several places in the paper mention supplementary material; it
 is included in our submission and also available at
 @url["http://www.eecs.northwestern.edu/~robby/tmp/jfp-enum/"]
