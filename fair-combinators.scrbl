@@ -45,10 +45,10 @@ argument by @texmath{n}, we can enumerate all @texmath{(i,j)} where
 @texmath{\max(i,\lfloor j^{1/n}\rfloor) = 0} then 1, then 2, etc.
 
 Then instead of equilibrium points, we have "weighted equilibria", for
-a \texmath{1:n} pairing function we get that the \texmath{k}th
-weighted equilibrium is at index \texmath{k^{n+1}} and the enumerated
-pairs from \texmath{0} to \texmath{k^{n+1}} are all pairs
-\texmath{(i,j)} where \texmath{i < k} and \texmath{j < k^n}.
+a @texmath{1:n} pairing function we get that the @texmath{k}th
+weighted equilibrium is at index @texmath{k^{n+1}} and the enumerated
+pairs from @texmath{0} to @texmath{k^{n+1}} are all pairs
+@texmath{(i,j)} where @texmath{i < k} and @texmath{j < k^n}.
 
 This is an explicit formula for the tuple at position @texmath{z} in
 the enumeration of pairs with bias of @texmath{n} on the
@@ -59,23 +59,23 @@ of the pair that has a @texmath{1:2} bias.
 While that is clearly unfair, when the second component is an unbiased
 pair, then the overall result is a fair three tuple.
 
-We can then define a fair \texmath{n}-dimensional tupling function
-inductively using biased pairing by defining \texmath{1}-dimensional
+We can then define a fair @texmath{n}-dimensional tupling function
+inductively using biased pairing by defining @texmath{1}-dimensional
 tupling to be the appropriate wrapping of the identity and
-\texmath{n+1}-dimensional tupling to be the biased \texmath{1:n}
+@texmath{n+1}-dimensional tupling to be the biased @texmath{1:n}
 pairing of the first enumaration and the recursive
-\texmath{n}-dimensional tupling.
+@texmath{n}-dimensional tupling.
 
 @theorem{
-\texmath{n}-dimensional tupling as defined above is \texmath{\lambda
-k. k^n - 1} fair and for every k, the set enumerated by (list/e e_1
-... e_n) from 0 to \texmath{k^n - 1} is the set of all lists (x_1
-... x_n) where x_i is drawn from e_i at some index \texmath{j_i < k}
+@texmath{n}-dimensional tupling as defined above is @texmath{\lambda k. k^n - 1}
+fair and for every k, the set enumerated by (list/e e_1
+... e_n) from 0 to @texmath{k^n - 1} is the set of all lists (x_1
+... x_n) where x_i is drawn from e_i at some index @texmath{j_i < k}
 }
 
 @proof{
-By induction on \texmath{n}.
-The \texmath{1} case is trivial, for \texmath{n+1}, note that the set
+By induction on @texmath{n}.
+The @texmath{1} case is trivial, for @texmath{n+1}, note that the set
 of all possible lists generated from below a fixed index is the same
 as the product of all first elements below a fixed index paired with
 all choices of the rest of the list below that index.
