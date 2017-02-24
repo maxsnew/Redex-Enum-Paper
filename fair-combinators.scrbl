@@ -37,7 +37,20 @@ in expectation that left-hand side of the pair will have
 one sub-enumeration and the right-hand side of the pair
 will have @texmath{n}.
 
-This is the formula for the tuple at position @texmath{z} in
+In other words, we can view @citet[elagant-pairing-function]'s
+enumeration function as enumerating all @texmath{(i,j)} whose maximum
+is @texhmath{0}, then @texmath{1}, then @texmath{2}, etc. This is what
+gives it a square-like pattern. If instead we want to bias the right
+argument by @texmath{n}, we can enumerate all @texmath{(i,j)} where
+@texmath{\max(i,\lfloor j^{1/n}\rfloor) = 0} then 1, then 2, etc.
+
+Then instead of equilibrium points, we have "weighted equilibria", for
+a \texmath{1:n} pairing function we get that the \texmath{k}th
+weighted equilibrium is at index \texmath{k^{n+1}} and the enumerated
+pairs from \texmath{0} to \texmath{k^{n+1}} are all pairs
+\texmath{(i,j)} where \texmath{i < k} and \texmath{j < k^n}.
+
+This is an explicit formula for the tuple at position @texmath{z} in
 the enumeration of pairs with bias of @texmath{n} on the
 right-hand side of the pair:
 @(element (style "Pairmn" '()) '())
@@ -45,6 +58,32 @@ right-hand side of the pair:
 of the pair that has a @texmath{1:2} bias.
 While that is clearly unfair, when the second component is an unbiased
 pair, then the overall result is a fair three tuple.
+
+We can then define a fair \texmath{n}-dimensional tupling function
+inductively using biased pairing by defining \texmath{1}-dimensional
+tupling to be the appropriate wrapping of the identity and
+\texmath{n+1}-dimensional tupling to be the biased \texmath{1:n}
+pairing of the first enumaration and the recursive
+\texmath{n}-dimensional tupling.
+
+@theorem{
+
+\texmath{n}-dimensional tupling as defined above is \texmath{\lambda
+k. k^n - 1} fair and for every k, the set enumerated by (list/e e_1
+... e_n) from 0 to \texmath{k^n - 1} is the set of all lists (x_1
+... x_n) where x_i is drawn from e_i at some index \texmath{j_i < k}
+
+}
+
+@proof{
+By induction on \texmath{n}.
+The \texmath{1} case is trivial, for \texmath{n+1}, note that the set
+of all possible lists generated from below a fixed index is the same
+as the product of all first elements below a fixed index paired with
+all choices of the rest of the list below that index.
+Then combining the inductive hypothesis with the remark about weighted
+equilibria gives the desired result.
+}
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
 pairing function.
