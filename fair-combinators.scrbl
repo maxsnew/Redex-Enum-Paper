@@ -37,9 +37,9 @@ in expectation that left-hand side of the pair will have
 one sub-enumeration and the right-hand side of the pair
 will have @texmath{n}.
 
-In other words, we can view @citet[elagant-pairing-function]'s
+In other words, we can view @citet[elegant-pairing-function]'s
 enumeration function as enumerating all @texmath{(i,j)} whose maximum
-is @texhmath{0}, then @texmath{1}, then @texmath{2}, etc. This is what
+is @texmath{0}, then @texmath{1}, then @texmath{2}, etc. This is what
 gives it a square-like pattern. If instead we want to bias the right
 argument by @texmath{n}, we can enumerate all @texmath{(i,j)} where
 @texmath{\max(i,\lfloor j^{1/n}\rfloor) = 0} then 1, then 2, etc.
@@ -67,12 +67,10 @@ pairing of the first enumaration and the recursive
 \texmath{n}-dimensional tupling.
 
 @theorem{
-
 \texmath{n}-dimensional tupling as defined above is \texmath{\lambda
 k. k^n - 1} fair and for every k, the set enumerated by (list/e e_1
 ... e_n) from 0 to \texmath{k^n - 1} is the set of all lists (x_1
 ... x_n) where x_i is drawn from e_i at some index \texmath{j_i < k}
-
 }
 
 @proof{
