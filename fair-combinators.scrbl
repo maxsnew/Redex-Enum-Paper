@@ -44,24 +44,26 @@ enumerating all @texmath{(i,j)} whose maximum is @texmath{
 gives it a square-like pattern. Since we want to bias the
 right argument by @texmath{n}, we can enumerate the pairs in
 a similar manner, but considering the @texmath{n}-th
-root of the right coordinate, not just its plain value. More
-precisely, we first enumerate all @texmath{(i,j)} where
-@texmath{\max(i+1,\lceil (j+1)^{1/n}\rceil) = 1} then 2,
-then 3, etc.
+root of the right coordinate, not just its plain value.
+We call this the ``biased maximum''; more precisely,
+the biased maximum of the pair @texmath{(i,j)} is
+@texmath{\max(i+1,\lceil (j+1)^{1/n}\rceil)} and we first
+precisely, we first enumerate all pairs where the biased
+maximum is 1, then 2, then 3, etc.
 
 @Figure-ref["fig:biased-pair-pict"] shows the first few
 entries of the enumeration order for pairs that has a
 @texmath{1:2} bias. The diagram is reversed (the
 y-coordinate is horizontal and the x-coordinate is vertical)
 so it fits more easily on the page. The first point
-@texmath{(0,0)} is the only point where the formula in the
-previous paragraph is 1; the next seven points are those
-where the formula is always 2, etc. With a pair
-that has a @texmath{1:2} bias, that formula will have the
-same value in the interval @texmath{[3^k,3^{k+1})}, for any
+@texmath{(0,0)} is the only point where biased maximum is 1; the next seven points are those
+where the biased maximum is always 2, etc. With a pair
+that has a @texmath{1:2} bias, the biased maximum
+will be the same in the interval @texmath{[3^k,3^{k+1})}, for any
 value of @texmath{k}. In general, with a @texmath{1:n} biased
-pair, the formula in the previous paragraph will have the same
-value in the interval @texmath{[(n+1)^k,(n+1)^{k+1})}, for any @texmath{k}.
+pair, the any pair in the interval
+@texmath{[(n+1)^k,(n+1)^{k+1})} (for any @texmath{k}) with
+have the same biased maximum, namely @texmath{k}.
 
 This is an explicit formula for the tuple at position @texmath{z} in
 the enumeration of pairs with bias of @texmath{1:n}:
