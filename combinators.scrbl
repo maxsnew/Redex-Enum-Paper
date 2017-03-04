@@ -82,10 +82,7 @@ bijection), as shown in @figure-ref["fig:pair-pict"].
 Here is the formula showing the coordinates for the @texmath{z}th
 element of the enumeration.
 @(element (style "Paironeone" '()) '())
-
-The @texmath{n}-ary @racket[list/e] generalizes the binary @racket[cons/e]
-that can be interpreted as a similar walk in an
-@texmath{n}-dimensional grid.
+The @texmath{n}-ary @racket[list/e] generalizes the binary @racket[cons/e].
 We discuss this in detail in @secref["sec:fair-informal"].
 
 The combinator
