@@ -46,7 +46,7 @@ right argument by @texmath{n}, we can enumerate the pairs in
 a similar manner, but considering the @texmath{n}-th
 root of the right coordinate, not just its plain value. More
 precisely, we first enumerate all @texmath{(i,j)} where
-@texmath{\max(i+1,\lfloor (j+1)^{1/n}\rfloor) = 1} then 2,
+@texmath{\max(i+1,\lceil (j+1)^{1/n}\rceil) = 1} then 2,
 then 3, etc.
 
 @Figure-ref["fig:biased-pair-pict"] shows the first few
