@@ -37,51 +37,43 @@ in expectation that left-hand side of the pair will have
 one sub-enumeration and the right-hand side of the pair
 will have @texmath{n}.
 
-In other words, we can view @citet[elegant-pairing-function]'s
-enumeration function as enumerating all @texmath{(i,j)} whose maximum
-is @texmath{0}, then @texmath{1}, then @texmath{2}, etc. This is what
-gives it a square-like pattern. If instead we want to bias the right
-argument by @texmath{n}, we can enumerate all @texmath{(i,j)} where
-@texmath{\max(i,\lfloor j^{1/n}\rfloor) = 0} then 1, then 2, etc.
+In other words, we can view
+@citet[elegant-pairing-function]'s enumeration function as
+enumerating all @texmath{(i,j)} whose maximum is @texmath{
+ 0}, then @texmath{1}, then @texmath{2}, etc. This is what
+gives it a square-like pattern. Since we want to bias the
+right argument by @texmath{n}, we can enumerate the pairs in
+a similar manner, but considering the @texmath{n}-th
+root of the right coordinate, not just its plain value. More
+precisely, we first enumerate all @texmath{(i,j)} where
+@texmath{\max(i+1,\lfloor (j+1)^{1/n}\rfloor) = 1} then 2,
+then 3, etc.
 
-Then instead of equilibrium points, we have "weighted equilibria", for
-a @texmath{1:n} pairing function we get that the @texmath{k}th
-weighted equilibrium is at index @texmath{k^{n+1}} and the enumerated
-pairs from @texmath{0} to @texmath{k^{n+1}} are all pairs
-@texmath{(i,j)} where @texmath{i < k} and @texmath{j < k^n}.
+@Figure-ref["fig:biased-pair-pict"] shows the first few
+entries of the enumeration order for pairs that has a
+@texmath{1:2} bias. The diagram is reversed (the
+y-coordinate is horizontal and the x-coordinate is vertical)
+so it fits more easily on the page. The first point
+@texmath{(0,0)} is the only point where the formula in the
+previous paragraph is 1; the next seven points are those
+where the formula is always 2, etc. With a pair
+that has a @texmath{1:2} bias, that formula will have the
+same value in the interval @texmath{[3^k,3^{k+1})}, for any
+value of @texmath{k}. In general, with a @texmath{1:n} biased
+pair, the formula in the previous paragraph will have the same
+value in the interval @texmath{[(n+1)^k,(n+1)^{k+1})}, for any @texmath{k}.
 
 This is an explicit formula for the tuple at position @texmath{z} in
-the enumeration of pairs with bias of @texmath{n} on the
-right-hand side of the pair:
+the enumeration of pairs with bias of @texmath{1:n}:
 @(element (style "Pairmn" '()) '())
-@Figure-ref["fig:biased-pair-pict"] shows the first few entries
-of the pair that has a @texmath{1:2} bias.
-While that is clearly unfair, when the second component is an unbiased
-pair, then the overall result is a fair three tuple.
 
-We can then define a fair @texmath{n}-dimensional tupling function
-inductively using biased pairing by defining @texmath{1}-dimensional
-tupling to be the appropriate wrapping of the identity and
-@texmath{n+1}-dimensional tupling to be the biased @texmath{1:n}
-pairing of the first enumaration and the recursive
-@texmath{n}-dimensional tupling.
-
-@theorem{
-@texmath{n}-dimensional tupling as defined above is @texmath{\lambda k. k^n - 1}
-fair and for every k, the set enumerated by (list/e e_1
-... e_n) from 0 to @texmath{k^n - 1} is the set of all lists (x_1
-... x_n) where x_i is drawn from e_i at some index @texmath{j_i < k}
-}
-
-@proof{
-By induction on @texmath{n}.
-The @texmath{1} case is trivial, for @texmath{n+1}, note that the set
-of all possible lists generated from below a fixed index is the same
-as the product of all first elements below a fixed index paired with
-all choices of the rest of the list below that index.
-Then combining the inductive hypothesis with the remark about weighted
-equilibria gives the desired result.
-}
+To define a fair @texmath{n}-dimensional tupling function, we
+can systematically exploit the bias. Once we have a fair
+@texmath{n}-dimensional tuple enumeration, we can make a
+@texmath{n+1}-dimensional fair tuple enumeration by pairing the
+@texmath{n}-dimensional tuple enumeration with the new
+enumeration for the @texmath{n}th enumeration using a
+biased @texmath{1:n} pairing.
 
 The combinatorially-inclined reader may wonder why we do not use the classic Cantor
 pairing function.

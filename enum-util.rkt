@@ -122,7 +122,16 @@
 (define (box-cons-pict) (grid cons/e 5 24 180 10))
 (define (cantor-cons-pict) (grid cantor-cons/e 5 14 180 10))
 (define (biased-cons-pict)
-  (gen-grid (λ (x y) (binary-biased-cons/e x 2 y 1)) 25 6 149 420 6 #:arrows? #t))
+  (hc-append
+   4
+   (grid-txt "x" #:bold? #t)
+   (vc-append
+    (grid-txt "y" #:bold? #t)
+    (gen-grid (λ (x y)
+                (define (swap-em c) (cons (cdr c) (car c)))
+                (map/e swap-em swap-em (binary-biased-cons/e x 1 y 2)
+                       #:contract (cons/c natural? natural?)))
+              25 5 124 420 6 #:arrows? #t))))
 
 (define (cantor-cons/e e1 e2)
   (cons/e e1 e2 #:ordering 'diagonal))
@@ -130,10 +139,10 @@
 (define (grid cons/e count num-points size arrow-head-size)
   (gen-grid cons/e count count num-points size arrow-head-size #:arrows? #t))
 
+(define (grid-txt str #:bold? [bold? #f]) (text str (if bold? '(bold) '()) 9))
 (define (gen-grid cons/e count-x count-y num-points size-x arrow-head-size #:arrows? arrows?)
   (define size-y (* count-y (/ size-x count-x)))
   (define prs (cons/e natural/e natural/e))
-  (define font-size 9)
   (define base
     (dc (λ (dc dx dy)
           (for ([i (in-range 1 count-x)])
@@ -154,26 +163,26 @@
    (apply
     vc-append
     (for/list ([i (in-range count-y)])
-      (define txt (text (format "~a" i) '() font-size))
+      (define txt (grid-txt (format "~a" i)))
       (cc-superimpose 
        (blank 0 (/ size-y count-y))
        (refocus (vc-append
                  txt
                  (if (= i (- count-y 1))
-                     (text "⋮" '() font-size)
+                     (grid-txt "⋮")
                      (blank)))
                 txt))))
    (vc-append
     (apply 
      hc-append
      (for/list ([i (in-range count-x)])
-       (define txt (text (format "~a" i) '() font-size))
+       (define txt (grid-txt (format "~a" i)))
        (cc-superimpose (blank (/ size-x count-x) 0)
                        (refocus
                         (hbl-append
                          txt
                          (if (= i (- count-x 1))
-                             (text " ⋯" '() font-size)
+                             (grid-txt " ⋯")
                              (blank)))
                         txt))))
     
@@ -189,7 +198,7 @@
          (define next (from-nat prs (+ i 1)))
          (define-values (x1 y1) (ij->xy (car this) (cdr this)))
          (define-values (x2 y2) (ij->xy (car next) (cdr next)))
-         (define index (text (format "~a" i) '() font-size))
+         (define index (grid-txt (format "~a" i)))
          (loop (+ i 1)
                (if arrows?
                    (pin-arrow-line
@@ -323,7 +332,7 @@
                  (apply list/e enums)))))
 
 (module+ main 
-  (hc-append 60 (disj-sum-pict/bad) (disj-sum-pict/good)))
+  (biased-cons-pict))
 
 (define-syntax-rule
   (define/txt id1 (id2 args ...) body ...)
@@ -339,7 +348,7 @@
       [`(define ,id ,expr)
        @~a{\multicolumn{2}{r}{
          @(if include-where? @~a{\mbox{\textrm{where~}}} "")
-         @id = @(expr-to-tex expr)} \\}]))
+         @id = @(expr-to-tex expr)} \\[4pt]}]))
   (define (cond-expr-to-tex expr)
     (match expr
       [`(cond [,Q1 ,A1] [,Q2 ,A2])
@@ -355,9 +364,14 @@
         [`(integer-sqrt ,a) (loop `(integer-root ,a 2))]
         [`(integer-root ,a ,b)
          @~a{\left\lfloor
-          @(if (equal? b 2)
-               @~a{\sqrt{@(loop a)}}
-               @~a{\sqrt[@(loop b)]{@(loop a)}})
+          @(cond
+             [(equal? b 2)
+              @~a{\sqrt{@(loop a)}}]
+             [(symbol? a)
+              ;@~a{\sqrt[@(loop b)]{@(loop a)}}
+              @~a{@(loop a)^{1/(@(loop b))}}
+              ]
+             [else (error 'expr-to-tex "need more cases: ~s ~s" a b)])
           \right\rfloor}]
         [`(remainder ,a ,b)
          @~a{{@(loop a)} \bmod {@(loop b)}}]
