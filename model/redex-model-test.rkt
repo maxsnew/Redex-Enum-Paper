@@ -9,10 +9,10 @@
  (contract-out
   [from-nat+trace
    (-> e?
-       exact-nonnegative-integer? 
+       natural?
        (values any/c
-               (hash/c exact-nonnegative-integer?
-                       (set/c exact-nonnegative-integer?))))])
+               (hash/c natural?
+                       (set/c natural?))))])
  try-one
  get-trace
  complete-trace)

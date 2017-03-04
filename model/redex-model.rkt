@@ -464,7 +464,7 @@
   [(to-enum+ctc (map/e (swap-zero-with natural) (swap-zero-with natural) e))
    ,(match-let ([(list :e c) (term (to-enum+ctc e))]
                 [swapper
-                 (λ (x) (if (exact-nonnegative-integer? x)
+                 (λ (x) (if (natural? x)
                             (cond
                               [(= x (term natural)) 0]
                               [(= x 0) (term natural)]
@@ -481,19 +481,19 @@
    ,(match-let ([(list :e c) (term (to-enum+ctc e))])
       (list (:dep/e :e
                     (λ (x)
-                      (if (exact-nonnegative-integer? x)
+                      (if (natural? x)
                           (term (to-enum (map/e (swap-zero-with ,x) (swap-zero-with ,x) (below/e n+))))
                           :natural/e)))
-            (cons/c exact-nonnegative-integer? exact-nonnegative-integer?)))]
+            (cons/c natural? natural?)))]
   [(to-enum+ctc (dep/e fin e nat->below/e-of-that-nat))
    ,(match-let ([(list :e c) (term (to-enum+ctc e))])
       (list (:dep/e :e
                     (λ (x)
-                      (if (exact-nonnegative-integer? x)
+                      (if (natural? x)
                           (:below/e x)
                           (:below/e 0)))
                     #:f-range-finite? #t)
-            (cons/dc [hd exact-nonnegative-integer?]
+            (cons/dc [hd natural?]
                      [tl (hd) (and/c exact-integer? (</c hd))])))]
   [(to-enum+ctc (dep/e inf e any)) (to-enum+ctc (cons/e e (below/e ∞)))] ;; should this be an error?
   [(to-enum+ctc (except/e e n))

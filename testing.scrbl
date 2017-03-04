@@ -7,6 +7,7 @@
           racket/contract
           racket/format
           racket/match
+          racket/math
           data/enumerate/lib
           data/enumerate/private/unfair
           scriblib/footnote
@@ -116,7 +117,7 @@ find a difference between the two predicates.
    (λ (l)
      (match l
        [(leaf) #true]
-       [(node n l r) (and (exact-nonnegative-integer? n)
+       [(node n l r) (and (natural? n)
                           (bt? l)
                           (bt? r))]
        [_ #false])))

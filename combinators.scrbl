@@ -5,6 +5,7 @@
           scriblib/figure
           racket/list
           racket/contract
+          racket/math
           data/enumerate/lib
           scriblib/footnote
           scribble/core
@@ -128,7 +129,7 @@ a natural @racket[i] and returns such an enumeration.
                       (map/e (λ (x) (+ x i))
                              (λ (x) (- x i))
                              (below/e +inf.0)
-                             #:contract (and/c exact-integer? (>=/c i))))]
+                             #:contract (and/c natural? (>=/c i))))]
 The first two arguments to @racket[map/e] are functions that
 form a bijection between the values in the enumeration argument
 and the contract given as the final argument (@racket[#:contract]

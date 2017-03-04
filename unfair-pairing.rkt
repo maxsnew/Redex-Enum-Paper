@@ -4,7 +4,7 @@
          parser-tools/cfg-parser
          parser-tools/yacc
          rackunit
-         racket/set racket/contract)
+         racket/math racket/set racket/contract)
 
 (provide bad-max-x bad-max-y
          bad-howmany
@@ -125,8 +125,8 @@
     (values (max x max-x) (max y max-y))))
 
 (define/contract (z_to_n n)
-  (-> exact-nonnegative-integer?
-      (set/c exact-nonnegative-integer?))
+  (-> natural?
+      (set/c natural?))
   (cond
     [(zero? n) (set)]
     [else (set-add (z_to_n (- n 1)) (- n 1))]))

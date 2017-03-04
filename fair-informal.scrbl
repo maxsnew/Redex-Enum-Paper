@@ -5,6 +5,7 @@
           racket/draw
           racket/list
           racket/contract
+          racket/math
           data/enumerate/lib
           plot
           scriblib/figure
@@ -28,8 +29,8 @@
     (cons/e
      (cons/e (below/e +inf.0) (below/e +inf.0))
      (cons/e (below/e +inf.0) (below/e +inf.0)))
-    #:contract (list/c exact-nonnegative-integer? exact-nonnegative-integer?
-                       exact-nonnegative-integer? exact-nonnegative-integer?)))
+    #:contract (list/c natural? natural?
+                       natural? natural?)))
 
 This section introduces our definition of fairness in a precise
 but informal way, giving a rationale for our definitions

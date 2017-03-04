@@ -22,7 +22,7 @@
 
 ;; builds a list of test cases for the nats up to `n'
 (define/contract (build-test-cases e n)
-  (-> m:e? exact-nonnegative-integer? (listof test-case?))
+  (-> m:e? natural? (listof test-case?))
   (for/list ([i (in-range n)])
     (build-test-case e i)))
 

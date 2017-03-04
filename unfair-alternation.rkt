@@ -1,7 +1,7 @@
 #lang racket
 
 (define/contract (fllog n)
-  (-> exact-positive-integer? exact-nonnegative-integer?)
+  (-> exact-positive-integer? natural?)
   (let loop ([n n])
     (cond
       [(= n 1) 0]
