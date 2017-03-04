@@ -63,7 +63,7 @@ will be the same in the interval @texmath{[3^k,3^{k+1})}, for any
 value of @texmath{k}. In general, with a @texmath{1:n} biased
 pair, the any pair in the interval
 @texmath{[(n+1)^k,(n+1)^{k+1})} (for any @texmath{k}) with
-have the same biased maximum, namely @texmath{k}.
+have the same biased maximum, namely @texmath{k+1}.
 
 This is an explicit formula for the tuple at position @texmath{z} in
 the enumeration of pairs with bias of @texmath{1:n}:
