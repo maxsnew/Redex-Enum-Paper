@@ -375,7 +375,7 @@
              [(equal? b 2)
               @~a{\sqrt{@(loop a)}}]
              [else
-              @~a{@(loop a)^{1/(@(loop b))}}])
+              @~a{@(loop a)^{1/@(loop b)}}])
           \right\rfloor}]
         [`(ceiling-integer-root ,a ,b)
          @~a{\left\lceil
@@ -383,7 +383,7 @@
              [(equal? b 2)
               @~a{\sqrt{@(loop a)}}]
              [else
-              @~a{@(loop a)^{1/(@(loop b))}}])
+              @~a{@(loop a)^{1/@(loop b)}}])
           \right\rceil}]
         [`(remainder ,a ,b)
          @~a{{@(loop a)} \bmod {@(loop b)}}]
@@ -412,17 +412,17 @@
       \end{array}\]})]))
 
 (define/txt pair-m/n-tex (pair-1/n n z)
-  (define r (- z (expt (integer-root z (+ n 1)) (+ n 1))))
-  (define s (* (with-parens (- (expt (with-parens (+ (integer-root z (+ n 1)) 1)) n)
-                               (expt (integer-root z (+ n 1)) n)))
-               (integer-root z (+ n 1))))
+  (define r (- z (expt (integer-root z (with-parens (+ n 1))) (+ n 1))))
+  (define s (* (with-parens (- (expt (with-parens (+ (integer-root z (with-parens (+ n 1))) 1)) n)
+                               (expt (integer-root z (with-parens (+ n 1))) n)))
+               (integer-root z (with-parens (+ n 1)))))
   (cond
     [(r . < . s)
-     (cons (remainder r (integer-root z (+ n 1)))
-           (+ (expt (integer-root z (+ n 1)) n)
-              (quotient r (integer-root z (+ n 1)))))]
+     (cons (remainder r (integer-root z (with-parens (+ n 1))))
+           (+ (expt (integer-root z (with-parens (+ n 1))) n)
+              (quotient r (integer-root z (with-parens (+ n 1))))))]
     [(r . >= . s)
-     (cons (integer-root z (+ n 1)) (r . - . s))]))
+     (cons (integer-root z (with-parens (+ n 1))) (r . - . s))]))
 
 (define/txt pair-1/1-tex (pair-1/1 z)
   (cond
