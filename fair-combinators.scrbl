@@ -75,8 +75,9 @@ can systematically exploit the bias. Once we have a fair
 enumeration for the @texmath{n}th enumeration using a
 biased @texmath{1:n} pairing.
 
-The combinatorially-inclined reader may wonder why we do not use the classic Cantor
-pairing function.
+The combinatorially-inclined reader may wonder why our tupling is
+based on @citet[elegant-pairing-function]'s pairing function and not
+the classic Cantor pairing function.
 The two bijections are similar; they are both quadratic
 functions with geometric interpretations.
 @citet[elegant-pairing-function]'s traces out the
@@ -105,6 +106,12 @@ too slow to use in practice. That said, our library implements
 @citet[inverting-cantor-n-tupling]'s algorithm (via 
 a keyword argument to @racket[cons/e] and @racket[list/e]), in
 case someone finds it useful.
+
+Furthermore, @citet[elegant-pairing-function]'s pairing function lends
+itself quite easily to a biased formulation, since enumerating
+rectangles is a simple modification from enumerating squares.  We
+leave it to future work to find a similar biased formulation of the
+Cantor pairing function.
 
 The @racket[or/e] enumeration's fairness follows a similar, but much
 simpler pattern. In particular, the binary @racket[or/e] is fair
