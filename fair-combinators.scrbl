@@ -48,8 +48,7 @@ root of the right coordinate, not just its plain value.
 We call this the ``biased maximum''; more precisely,
 the biased maximum of the pair @texmath{(i,j)} is
 @texmath{\max(i+1,\lceil (j+1)^{1/n}\rceil)} and we first
-precisely, we first enumerate all pairs where the biased
-maximum is 1, then 2, then 3, etc.
+enumerate all pairs where the biased maximum is 1, then 2, then 3, etc.
 
 @Figure-ref["fig:biased-pair-pict"] shows the first few
 entries of the enumeration order for pairs that has a
@@ -61,9 +60,8 @@ where the biased maximum is always 2, etc. With a pair
 that has a @texmath{1:2} bias, the biased maximum
 will be the same in the interval @texmath{[3^k,3^{k+1})}, for any
 value of @texmath{k}. In general, with a @texmath{1:n} biased
-pair, the any pair in the interval
-@texmath{[(n+1)^k,(n+1)^{k+1})} (for any @texmath{k}) with
-have the same biased maximum, namely @texmath{k+1}.
+pair enumerator, any pair in the interval
+@texmath{[(n+1)^k,(n+1)^{k+1})} has the same biased maximum, namely @texmath{k+1}.
 
 This is an explicit formula for the tuple at position @texmath{z} in
 the enumeration of pairs with bias of @texmath{1:n}:
