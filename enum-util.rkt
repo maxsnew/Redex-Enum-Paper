@@ -374,13 +374,17 @@
           @(cond
              [(equal? b 2)
               @~a{\sqrt{@(loop a)}}]
-             [(symbol? a)
-              ;@~a{\sqrt[@(loop b)]{@(loop a)}}
-              @~a{@(loop a)^{1/(@(loop b))}}
-              ]
-             [else (error 'expr-to-tex "need more cases: ~s ~s" a b)])
+             [else
+              @~a{@(loop a)^{1/(@(loop b))}}])
           \right\rfloor}]
-        [`(ceiling ,a) @~a{\left\lceil @(loop a) \right\rceil}]
+        [`(ceiling-integer-root ,a ,b)
+         @~a{\left\lceil
+          @(cond
+             [(equal? b 2)
+              @~a{\sqrt{@(loop a)}}]
+             [else
+              @~a{@(loop a)^{1/(@(loop b))}}])
+          \right\rceil}]
         [`(remainder ,a ,b)
          @~a{{@(loop a)} \bmod {@(loop b)}}]
         [`(quotient ,a ,b)
@@ -429,8 +433,24 @@
 
 (define/inline-txt biased-maximum-tex (biased-maximum i j n)
   (max (+ i 1)
-       (ceiling (expt (with-parens (+ j 1))
-                      (/ 1 n)))))
+       (ceiling-integer-root (with-parens (+ j 1))
+                             n)))
+
+(define (ceiling-integer-root n m)
+  (define-values (root remainder) (integer-root/remainder n m))
+  (cond
+    [(= remainder 0) root]
+    [else (+ root 1)]))
+
+(module+ test
+  (require rackunit)
+  (check-equal? (ceiling-integer-root 4 2) 2)
+  (check-equal? (ceiling-integer-root 5 2) 3)
+  (check-equal? (integer-root 5 2) 2)
+  (check-equal? (ceiling-integer-root 8 2) 3)
+  (check-equal? (integer-root 8 2) 2)
+  (check-equal? (ceiling-integer-root 9 2) 3)
+  (check-equal? (integer-root 9 2) 3))
 
 (define (with-parens x) x)
 
@@ -455,8 +475,8 @@
                 z)))))
 
   (time
-   (for ([bias (in-range 2 5)])
-     (for ([k (in-range 9)])
+   (for ([bias (in-range 2 8)])
+     (for ([k (in-range 5)])
        (for ([i (in-range (expt k (+ 1 bias)) (expt (+ k 1) (+ 1 bias)))])
          (define the-pair (from-nat (binary-biased-cons/e natural/e 1 natural/e bias) i))
          (define the-biased-max (biased-maximum (car the-pair) (cdr the-pair) bias))
