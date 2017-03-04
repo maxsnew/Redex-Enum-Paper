@@ -38,9 +38,10 @@
                  ;; map the ℕ character
                  #"\\DeclareUnicodeCharacter{2115}{$\\mathbb{N}$}\n"
 
-                 ;; formulas for paring
+                 ;; formulas from Racket code
                  #"\\newcommand{\\Pairmn}{" pair-m/n-tex #"}\n"
                  #"\\newcommand{\\Paironeone}{" pair-1/1-tex #"}\n"
+                 #"\\newcommand{\\Biasedmax}{" biased-maximum-tex #"}\n"
                  
                  ;; used for the table of the bugs
                  #"\\newenvironment{IntroWrapFigure}"

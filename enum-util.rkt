@@ -19,7 +19,7 @@
          lon/e-code lon/e
          lon2/e-code lon2/e
 
-         pair-1/1-tex pair-m/n-tex)
+         pair-1/1-tex pair-m/n-tex biased-maximum-tex)
 
 (define (disj-sum-pict/good)
   (gen-table or/e 8 24 30 8 #:arrows? #t))
@@ -340,7 +340,13 @@
     (define id1 (to-tex 'body ...))
     (define (id2 args ...) body ...)))
 
-(define (to-tex . defs+sexps)
+(define-syntax-rule
+  (define/inline-txt id1 (id2 args ...) body ...)
+  (begin
+    (define id1 (to-tex #:inline? #t 'body ...))
+    (define (id2 args ...) body ...)))
+
+(define (to-tex #:inline? [inline? #f] . defs+sexps)
   (define defs (reverse (cdr (reverse defs+sexps))))
   (define body (last defs+sexps))
   (define (def-to-tex def include-where?)
@@ -361,6 +367,7 @@
         [`(,(? infix-op? op) ,a ,b ,more ...) (loop `(,op ,a (,op ,b ,@more)))]
         [`(expt ,a ,b) @~a{{@(loop a)}^{@(loop b)}}]
         [`(cons ,a ,b) @~a{\left\langle @(loop a), @(loop b) \right\rangle}]
+        [`(max ,a ,b) @~a{\max(@(loop a),@(loop b))}]
         [`(integer-sqrt ,a) (loop `(integer-root ,a 2))]
         [`(integer-root ,a ,b)
          @~a{\left\lfloor
@@ -373,6 +380,7 @@
               ]
              [else (error 'expr-to-tex "need more cases: ~s ~s" a b)])
           \right\rfloor}]
+        [`(ceiling ,a) @~a{\left\lceil @(loop a) \right\rceil}]
         [`(remainder ,a ,b)
          @~a{{@(loop a)} \bmod {@(loop b)}}]
         [`(quotient ,a ,b)
@@ -380,21 +388,24 @@
         [`(with-parens ,x) @~a{(@(loop x))}]
         [(? symbol?) (~a expr)]
         [(? real?) (~a expr)])))
-  (define (infix-op? x) (member x '(+ - * < >=)))
+  (define (infix-op? x) (member x '(+ - * < >= /)))
   (define (convert-op op)
     (cond
       [(equal? op '>=) @~a{\geq}]
       [(equal? op '<=) @~a{\leq}]
       [(equal? op '*) @~a{\cdot}]
       [else (~a op)]))
-  (string->bytes/utf-8
-   @~a{\[\begin{array}{ll}
-       @(cond-expr-to-tex body) \\
-       @(apply string-append
-               (for/list ([def (in-list defs)]
-                          [i (in-naturals)])
-                 (def-to-tex def (= i 0))))
-       \end{array}\]}))
+  (cond
+    [inline? (string->bytes/utf-8 (~a "\\(" (expr-to-tex body) "\\)"))]
+    [else
+     (string->bytes/utf-8
+      @~a{\[\begin{array}{ll}
+      @(cond-expr-to-tex body) \\
+      @(apply string-append
+              (for/list ([def (in-list defs)]
+                         [i (in-naturals)])
+                (def-to-tex def (= i 0))))
+      \end{array}\]})]))
 
 (define/txt pair-m/n-tex (pair-1/n n z)
   (define r (- z (expt (integer-root z (+ n 1)) (+ n 1))))
@@ -415,6 +426,11 @@
      (cons (- z (expt (integer-sqrt z) 2)) (integer-sqrt z))]
     [((- z (expt (integer-sqrt z) 2)) . >= . (integer-sqrt z))
      (cons (integer-sqrt z) (- z (expt (integer-sqrt z) 2) (integer-sqrt z)))]))
+
+(define/inline-txt biased-maximum-tex (biased-maximum i j n)
+  (max (+ i 1)
+       (ceiling (expt (with-parens (+ j 1))
+                      (/ 1 n)))))
 
 (define (with-parens x) x)
 
@@ -437,4 +453,21 @@
          (error 'enum-util.rkt "correct ≠ presented-1-1, ~s vs ~s; ~s"
                 correct presented-1-1
                 z)))))
+
+  (time
+   (for ([bias (in-range 2 5)])
+     (for ([k (in-range 9)])
+       (for ([i (in-range (expt k (+ 1 bias)) (expt (+ k 1) (+ 1 bias)))])
+         (define the-pair (from-nat (binary-biased-cons/e natural/e 1 natural/e bias) i))
+         (define the-biased-max (biased-maximum (car the-pair) (cdr the-pair) bias))
+         (set! tests (+ tests 1))
+         (unless (= the-biased-max (+ k 1))
+           (error 'biased-maximum
+                  "didn't work out for bias=~a k=~a i=~a the-biased-max=~s, pair is ~s"
+                  bias
+                  k
+                  i
+                  the-biased-max
+                  the-pair))))))
+  
   (printf "~a tests passed\n" tests))

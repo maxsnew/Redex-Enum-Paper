@@ -47,7 +47,8 @@ a similar manner, but considering the @texmath{n}-th
 root of the right coordinate, not just its plain value.
 We call this the ``biased maximum''; more precisely,
 the biased maximum of the pair @texmath{(i,j)} is
-@texmath{\max(i+1,\lceil (j+1)^{1/n}\rceil)} and we first
+@(element (style "Biasedmax" '()) '())
+and we first
 enumerate all pairs where the biased maximum is 1, then 2, then 3, etc.
 
 @Figure-ref["fig:biased-pair-pict"] shows the first few
