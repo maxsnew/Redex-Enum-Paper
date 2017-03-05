@@ -36,7 +36,7 @@ Referee: 1
 > intuition behind the generalisation idea (see page 10, section
 > 5, paragraphs 5 and 6).
 
-We have added the precise formulas.
+We have rewritten section 5 and added the precise formulas.
 
 > The following section 6, contains a formal model of the
 > enumeration framework. The model occupies two full pages and
@@ -56,8 +56,10 @@ We have added the precise formulas.
 > enumeration (see rule fix/e).
 
 We removed the "ignore it for now" comment, replacing it with a
-comment that hopefully is better style. We added a comment about
-substitution to the explanation of the fix/e rule.
+comment that hopefully is better style.
+
+We added a comment about substitution to the explanation of the fix/e
+rule.
 
 > Paragraph 9 in the same section, starts with an explanation
 > that the actual Coq model is simpler than the model presented
@@ -123,7 +125,7 @@ We agree that f-fairness is an important concept.
 > ‘brutally’ (un)fair functions.
 
 The experiment was conducted with the fair (and unfair) enumerations
-described earlier in the paper. We have clarified this point.
+described in the paper. We have clarified this point.
 
 Unfortunately, We do not have a mathematically precise way to
 characterize the relative unfairness to offer. Figuring out such a
@@ -208,7 +210,8 @@ Fixed, thanks.
 
 We changed the representation of trees to use a (nullary) structure to
 represent leaves instead of using #f. Hopefully this makes the code
-self-explanatory now.
+self-explanatory now; it certainly eliminates the confusing `[#f #t]`
+line (which was a case that matched only `#f` and returned `#t`)
 
 > p4. The detailed discussion that shows "the smallest natural that
 >   demonstrates the difference is 345" seems a bit too specific given
@@ -237,15 +240,16 @@ rational numbers with a specific denominator, etc.)
 > p11. Inconsistency in fonts for `fix/e` and `delay/e`, which I
 >   couldn't explain.
 
-Clarified in that sentence. (The typography is intended to indicate the
-model vs the implementation. Fixed width font with colors is code; the
-sans-serif black indicates keywords from the model.)
+Clarified in that sentence. (The typography is intended to indicate
+the model vs the implementation. Fixed width font with colors is code;
+the sans-serif black indicates the model.)
 
 > p11. "our implementation fails to terminate when [...]" seems a bit
 >   too sparse a description of what is going on. I think more detail
 >   here is needed.
 
-We deleted this sentence. It was not a helpful comment, overall.
+We deleted this sentence. It was not a helpful thought, overall, at
+least in our (current) judgment.
 
 > p23. At the end of the section I felt like I hadn't understood the
 >   ad-hoc random generator enough to make the comparison meaningful.
@@ -310,8 +314,8 @@ fairness is important as a default (and our evaluation shows that the
 unfair combinators used in other implementations are worse than our
 fair ones, at least on our benchmarks). That said, we have added a
 discussion (in a new "Future Work" section) that softens the paper's
-stance on this point and explains more accurately what we believe vis
-a vis unfairness.
+overall stance on this point and explains more accurately what we
+believe vis a vis unfairness.
 
 >   Another example: If I take (almost) any enumeration and interleave
 >   it with an incomplete enumeration that takes the (n-dimensional)
@@ -328,15 +332,16 @@ to come after all of the possible pairs of numbers that involve
 numbers less than i.
 
 Indeed, the process described above, in some intuitive sense, makes an
-enumeration less fair, not more fair.
+enumeration less fair, not more fair. Let us try to explain with an
+example.
 
-Concretely, consider the brutally unfair enumeration:
+Consider the brutally unfair enumeration:
 
   <x,y> -> 2^y * (2x+1) - 1
 
 and consider the pairs that have one of the components in the interval
-[0,3]. The maximum index of those is 55, where the pair <3,3>
-occurs.
+[0,3]. The maximum index of those is 55, at the point where the pair
+<3,3> occurs.
 
 Now consider that we apply the transformation above to the
 enumeration. In the first 55 tuples, we have seen <0,0> <1,1>, <2,2>,
@@ -355,7 +360,10 @@ In other words, in the enumeration we get by following the above
 process, it takes us 72 elements to see all of the tuples that have a
 component in the interval [0,3], where as it took us only 55 tuples in
 the original enumeration. This is, in some intuitive sense, more
-unfair, in addition to not being fair (by our definition.)
+unfair.
+
+Also we should note that the result enumeration is, according to our
+definition, not fair.
 
 > * You provide a recursive definition of an enumerator for lists of
 >   natural numbers (p. 6), but the definition seems to suffer from
@@ -379,7 +387,8 @@ different approaches to building recursive enumerations.
 >  confusing since it seems to assume all arguments are infinite.
 
 This was explained on page 14 in the submission (in the formal
-semantics explanation of or/e), but in a terse way. We've expanded it.
+semantics explanation of or/e), but in unclear, overly terse
+way. We've expanded it.
 
 >  * On page 5, you write "If one of the input enumerations is finite,
 >  the result enumeration loops through the finite enumeration,
@@ -411,7 +420,7 @@ the lines you suggest. Intuitively, for binary pairs we could think of
 the enumeration as an infinite series of squares (of size 1.1 million
 by 1.1 million in the above example) and enumerate each square
 individually, using the strategy we use for infinite
-enumerations. That approach seems daunting when considering $n$-ary
+enumerations. That approach seems daunting when considering n-ary
 enumerations, however, and we have not yet found an application that
 needs this particular enhancement to our library.
 
@@ -420,8 +429,11 @@ needs this particular enhancement to our library.
 >  to the issue above?
 
 This is simply to make counterexamples slightly nicer. They often have
-the first variable from the enumeration in them and the empty string
-does make a legal variable name, but "a" is much easier to read.
+the first variable from the enumeration in them and while the empty
+string does make for a legal variable name, the variable whose name is
+"a" is much easier to read. In our string enumeration, the empty
+string comes after the last of the single character strings and just
+before the first two character string.
 
 >  Page 6: "Since it is not possible to statically know whether a
 >  recursive enumeration uses its parameter, we leave it to the caller
@@ -432,14 +444,16 @@ does make a legal variable name, but "a" is much easier to read.
 >  enumerations are all finite". Isn't the mixed case just as
 > problematic?
 
-Our implementation does not support mixed finite and infinite
-dependent enumerations. We've clarified the text at that point.
+Our implementation does not support the case where the dependent
+enumeration might be either finite or infinite. We've clarified the
+text at that point and yes, it would be quite problematic.
 
 >  Page 9: The diagrams in figure 2 are hard to understand.  Maybe the
 >  figure label should clarify what the axes are and what
 >  distinguishes the different diagrams in each row.
 
-We've added more explanatory text into the description of the histograms.
+We've added more explanatory text into the description of the
+histograms and better x labels to the figure.
 
 >  Page 15: This is the first time I understood precisely what you
 >  meant by fairness. Maybe you should clarify in the informal
@@ -447,7 +461,10 @@ We've added more explanatory text into the description of the histograms.
 >  for each parameter. This definition is also easy to miss in the
 >  "Enumeration Semantics" section.
 
-Thank you. We have added a better explanation to section 4.
+Thank you. We have added a better explanation to section 4 and feel
+that this made a significant improvement to the paper. It is like this
+comment wiped the mud from our eyes so we could finally see. Thank you
+again.
 
 >  Page 24: You write "Unfortunately, the distance between equilibrium
 >  points double at each step" I fail to see how you calculate this,
@@ -478,5 +495,5 @@ reimplementation covers both the paper's version and the Haskell
 version of the Nat enumerations), but the sizes of the finite parts
 seem to be uncontroversial and the important issue.
 
-All that said, we do not have a proof that our claims are correct and
-we have not verified these facts with the authors of that paper.
+All that said, we do not have a proof that our claims are correct, nor
+have we verified checked with the authors of that paper.

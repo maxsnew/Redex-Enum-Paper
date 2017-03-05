@@ -87,7 +87,7 @@ using the unfair enumerator than using the fair one.
 Similarly, the relative height of the leftmost bar in the
 two rightmost histograms says that zero appears much more
 frequently in the fourth component of the four tuples when using
-the unfair enumerator than it when using the fair one.
+the unfair enumerator than it does when using the fair one.
 
 More generally, all four components have roughly the
 same set of values for the fair tupling operation, but the first tuple

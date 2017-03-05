@@ -45,7 +45,7 @@ gives it a square-like pattern. Since we want to bias the
 right argument by @texmath{n}, we can enumerate the pairs in
 a similar manner, but considering the @texmath{n}-th
 root of the right coordinate, not just its plain value.
-We call this the ``biased maximum''; more precisely,
+We call this the ``biased maximum''. More precisely,
 the biased maximum of the pair @texmath{(i,j)} is
 @(element (style "Biasedmax" '()) '())
 and we first
@@ -64,7 +64,7 @@ value of @texmath{k}. In general, with a @texmath{1:n} biased
 pair enumerator, any pair in the interval
 @texmath{[(n+1)^k,(n+1)^{k+1})} has the same biased maximum, namely @texmath{k+1}.
 
-This is an explicit formula for the tuple at position @texmath{z} in
+This is the formula for the @texmath{z}-th tuple in
 the enumeration of pairs with bias of @texmath{1:n}:
 @(element (style "Pairmn" '()) '())
 

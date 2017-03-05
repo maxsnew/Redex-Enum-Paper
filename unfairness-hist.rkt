@@ -16,7 +16,7 @@
   (define main
     (vc-append 
      (build-plots fair-hashes max-x max-y #f #t)
-     (build-plots unfair-hashes max-x max-y #f #f)))
+     (build-plots unfair-hashes max-x max-y #t #f)))
   (cc-superimpose
    (colorize (frame (inset (launder (ghost main)) 1)) "white")
    main))
@@ -50,16 +50,27 @@
                (* pi 1/2))
          (for/list ([x (in-vector hashes)]
                     [i (in-naturals)])
-           (plot-one x max-x max-y
-                     (and x-labels?
-                          (format "Value in ~a component"
-                                  (case i
-                                    [(0) "first"]
-                                    [(1) "second"]
-                                    [(2) "third"]
-                                    [(3) "fourth"]
-                                    [else (error 'ack-unfairness)])))
-                     #f))))
+           (vc-append
+            (plot-one x max-x max-y #f #f)
+            (if x-labels?
+                (hc-append
+
+                 ;; fudge to slide label over to be centered under the body
+                 ;; of the plot instead of being centered under the entire
+                 ;; plot (which includes the y-axis labels)
+                 (blank 20 0)
+
+                 (vc-append
+                  (text (format "Value in ~a"
+                                (case i
+                                  [(0) "1st"]
+                                  [(1) "2nd"]
+                                  [(2) "3rd"]
+                                  [(3) "4th"]
+                                  [else (error 'ack-unfairness)]))
+                        'roman 10)
+                  (text "component" 'roman 10)))
+                (blank))))))
 
 (define (plot-one hash max-x max-y x-label y-label)
   (parameterize ([plot-y-far-ticks no-ticks]

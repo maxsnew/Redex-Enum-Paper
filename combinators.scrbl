@@ -131,7 +131,7 @@ The first two arguments to @racket[map/e] are functions that
 form a bijection between the values in the enumeration argument
 and the contract given as the final argument (@racket[#:contract]
 is a keyword argument specifier, in this case saying that
-the contract accepts integers larger than or equal to @racket[i]).
+the contract accepts natural numbers larger than or equal to @racket[i]).
 As it is easy to make simple mistakes
 when building the bijection, @racket[map/e]'s contract randomly checks
 a few values of the enumeration to make sure they map back to themselves
@@ -205,4 +205,4 @@ observably worse in practice.
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
 of enumerations in the library. The rest are here:
-@url{http://docs.racket-lang.org/data/Enumerations.html}
+@url{http://docs.racket-lang.org/data/Enumerations.html}.
