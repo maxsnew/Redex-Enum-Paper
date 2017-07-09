@@ -58,8 +58,8 @@ equilibrium infinitely often. Indeed, it reaches equilibrium
 at the end of each of the parts in the result. The code
 given in the paper for the pairing and alternation
 combinators are @texmath{f}-fair with equilibrium points
-that have the same asympototic complexity as our binary pair
-combinator. In the implementation, however, they use a
+that have the same asympototic complexity as our binary
+combinators. In the implementation, however, they use a
 binary representation, not a unary representation of
 naturals, which makes the distance between consecutive
 equilibrium points double at each step, making the

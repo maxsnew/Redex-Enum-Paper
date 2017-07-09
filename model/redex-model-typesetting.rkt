@@ -360,6 +360,7 @@
                          (single-bar)
                          (d " ")
                          (ae->pict 'T)
+                         (blank 2 0)
                          (d ") and ")
                          (ae->pict 'i)
                          (d " < "))

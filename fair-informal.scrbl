@@ -119,8 +119,8 @@ of @racket[(below/e +inf.0)] with itself must eventually produce the pair
 @racket['(1 . 1000)], and that pair must come either before or
 after the pair @racket['(1000 . 1)]. So if we insist that, at
 every point in the enumeration, the combinator's result enumeration
-has used all of its argument enumerations equally, then pairing would
-be impossible to do fairly.
+has used all of its argument enumerations equally, then fair pairing would
+be impossible.
 
 We can take that basic idea and weaken a little bit, however.
 Instead of insisting they use their arguments completely in lock-step,
@@ -144,7 +144,7 @@ Similarly, here are the first 8 elements of
 @enum-example[(list/e (below/e +inf.0) (below/e +inf.0) (below/e +inf.0)) 8]
 This is an equilibrium point because we have seen 0 and 1
 in every component of the pair, but no numbers larger than that.
-In general that enumeration has equilibrium points at every perfect cube.
+In general the that enumeration has equilibrium points at every perfect cube.
 
 An unfair combinator is one where there are only a finite number of
 equilibrium points (or, equivalently, there is a point in the result

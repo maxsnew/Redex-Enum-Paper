@@ -63,11 +63,10 @@ the value in the node, @racket[l] for the left subtree, and @racket[r]
 for the right subtree). The second line defines a nullary struct
 to represent leaf nodes. The @racket[bst?] function recursively
 checks the tree, ensuring that the value in each node is larger
-than all of the values in the left subtree and smaller than all of the
-values in the right subtree.
+than all of the values to its left and smaller that those to its right.
 
 While this function is correct, the algorithm it uses is inefficient, because
-to repeatedly processes subtrees as it recurs over the structure of the tree,
+it repeatedly processes subtrees as it recurs over the structure of the tree,
 running in @texmath{O(n^2)}.
 A better algorithm would make only a single pass over the tree. The basis for a
 naive and incorrect function that makes such a single pass is the false observation

@@ -114,7 +114,6 @@ We think that, while fairness is a good guide for combinators, it is
 important to be able to selectively bias the enumerations away from
 fairness (much like the bias used to obtain fairness, as discussed in
 @secref["sec:fair-combinators"]).
-
 We have not explored how to specify these biases in Redex nor their
 impact on testing, but believe that a domain-specific language
 for tuning the enumerations is worthy of more study.

@@ -101,7 +101,7 @@
  these bijections, some of which are better than others. 
  This paper offers a new property of enumeration combinators
  called @def{fairness} that identifies enumeration combinators
- that are more suited to property-based testing.
+ that are better suited to property-based testing.
  
 Intuitively, the result of a fair combinator indexes into its
 argument enumerations equally when constructing its result.
@@ -112,7 +112,7 @@ components instead of, say, indexing
 @nth-root-of-n[2]
 into one and
 @nth-root-of-n[4]
-into the other two as you would if
+into the other two, as you would if
 a three-tuple were built out of nested pairs. Similarly,
 extracting the @nth element from our
 enumeration of a three-way union returns an
@@ -121,15 +121,15 @@ argument enumerators.
 
 The paper presents a semantics of enumeration
 combinators, a theory of fairness, proofs establishing
-fairness of our new combinators and that certain
+fairness of our new combinators and that some
 combinations of fair combinators are not fair.
 
 We also report on an evaluation of fairness for the purpose
-of finding bugs in programming language models.
+of finding bugs in programming-language models.
 We show that fair enumeration combinators have complementary
 strengths to an existing, well-tuned ad hoc random generator
 (better on short time
-scales and worse on long time scales) and using unfair
+scales and worse on long time scales) and that using unfair
 combinators is worse across the board.
 })
 

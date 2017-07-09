@@ -90,5 +90,5 @@ discussed in @secref["sec:evaluation"]. The next two sections
 discuss related work and future work;
 section @secref["sec:conclusion"] concludes.
 Several places in the paper mention supplementary material; it
-is included in our submission and also available at
-@url["http://www.eecs.northwestern.edu/~robby/tmp/jfp-enum/"]
+is included available at
+@url["http://www.eecs.northwestern.edu/~robby/jfp-enum/"]

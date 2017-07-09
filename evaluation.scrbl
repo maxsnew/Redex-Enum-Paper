@@ -216,9 +216,9 @@ No strategy was able to find more than
 benchmark. 
 
 @Figure-ref["fig:benchmark-points"] shows a plot of every
-generator's performance on each bug (unless the generator never found
-that bug). The x axis has one entry for each different bug, for which a counter-example
-was found and the y axis shows the average number of seconds
+generator's performance on each bug.
+The x axis has one entry for each different bug (for which a counter-example
+was found) and the y axis shows the average number of seconds
 required to find that bug. The chart confirms the
 conclusion from @figure-ref["fig:benchmark-ordered-lines"] showing that
 the unfair combinators are never significantly below their
@@ -255,12 +255,12 @@ and the fair in-order enumerator was significantly better on
 @(better-count 'ordered) bugs. The unfair enumerators were never significantly
 better on any bug.
 
-We believe that the fair enumerators are better than the unfair
-ones because their more balanced exploration of the space leads
+We believe the reason that the fair enumerators are better than the unfair
+ones is that their more balanced exploration of the space leads
 to a wider variety of interesting examples being tested.
 @Figure-ref["fig:rates"] provides some evidence for this theory.
 It shows the number of examples tested per second for each model
-(the redex bug benchmark does not cause our generators or the ad hoc
+(the Redex bug benchmark does not cause our generators or the ad hoc
 random generator to generate different per-bug examples, only different per-model examples)
 under the different generator strategies. The upper plot shows
 the in-order generators and the lower plot shows the generators
@@ -273,4 +273,4 @@ are repeatedly generating simple examples that can be tested
 quickly, but that provide little new information about the model.
 We believe this is because the unfair generators spend a lot of time exploring
 programs that differ only in the names
-of the variables or other such uninteresting variations.
+of the variables or have other uninteresting variations.

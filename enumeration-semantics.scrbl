@@ -38,6 +38,7 @@ of fairness; we explain it after introducing the basics of the model. The
 @sr[from-nat] and @sr[to-nat] functions are derived from 
 @sr[|@|] by treating either the value or
 index argument as given and computing the other one.
+
 The contents of @Figure-ref["fig:semantics"] are automatically generated
 from a Redex model and we also built a Coq model of a subset of this 
 semantics. All of the theorems stated in this section
@@ -50,8 +51,7 @@ Below the @sr[below/e] rule is the @sr[fix/e] rule. The
 @sr[fix/e] combinator in the model is like @racket[delay/e]
 from the implementation, except it
 provides an explicit name for the enumeration. The rule
-uses substitution (the definition of substitution is standard
-and is omitted for brevity).
+uses substitution (the definition of substitution we use is the standard one).
 
 The next two rules, reading straight down the figure, are the @sr[dep/e] rules.
 The @sr[dep/e] combinator is a simplified, functional interface
@@ -237,7 +237,7 @@ For example, the complete trace of
 @centered{@fair-pair-sr}
 up to @(add-commas trace-size)
 maps both @sr[0] and @sr[1] to @(show-set (hash-ref fair-pair-trace 0)),
-meaning that the two arguments were explored exactly the same
+meaning that the two arguments were explored the same
 amount, at least for the first @(add-commas trace-size) elements.
 The complete trace of
 @centered{@unfair-pair-sr}

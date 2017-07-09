@@ -20,8 +20,7 @@ via a tour of our Racket-based enumeration library.
 Each enumeration in our library consists of four pieces:
 a @racket[to-nat] function that computes the index of any value in the enumeration,
 a @racket[from-nat] function that computes a value from an index, the size
-of the enumeration, which can be either a natural number or positive infinity 
-(written @racket[+inf.0]),
+of the enumeration, which can be either a natural number or positive infinity,
 and a contract that captures exactly the values in the enumeration. For the
 purposes of this paper, it is sufficient to think of the contracts
 as predicates on values; they are more general, but that generality
@@ -149,7 +148,7 @@ simply passes it along (if it is below). Similarly, the
 @racket[except/e]'s @racket[to-nat] function calls the input
 enumeration's @racket[from-nat] function.
 
-One important point about the combinators used so far: the
+One important point about the combinators presented so far: the
 conversion from a natural to a value takes time that is (a low-order)
 polynomial in the number of bits in the
 number it is given. This means, for example, that it takes only
@@ -196,7 +195,7 @@ component of the pair being drawn from a single enumeration
 that consists of all of the finite enumerations, one after
 the other. Unfortunately, in this case, calling
 @racket[from-nat] on the result of @racket[cons/de] can take
-time proportional to the magnitude of the input index (or possibly even worse if
+time proportional to the input index (or possibly even worse if
 computing the dependent enumerations themselves are
 costly). We use memoization to avoid repeatedly paying this cost,
 but even with memoization this case for @racket[cons/de] is
@@ -204,5 +203,5 @@ observably worse in practice.
 
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
-of enumerations in the library. The rest are here:
+of enumerations in the library. The rest are described here:
 @url{http://docs.racket-lang.org/data/Enumerations.html}.

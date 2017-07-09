@@ -17,7 +17,7 @@
 
 @title[#:tag "sec:fair-combinators"]{Fair Combinators}
 
-@figure["fig:biased-pair-pict" "Biased Pair Order"]{
+@figure["fig:biased-pair-pict" "Ordering for Pair with Bias of 1:2"]{
   @centered{@biased-cons-pict[]}
 }
 
@@ -76,7 +76,7 @@ can systematically exploit the bias. Once we have a fair
 enumeration for the @texmath{n}th enumeration using a
 biased @texmath{1:n} pairing.
 
-The combinatorially-inclined reader may wonder why our tupling is
+The combinatorially-inclined reader may wonder why our tupling operation is
 based on @citet[elegant-pairing-function]'s pairing function and not
 the classic Cantor pairing function.
 The two bijections are similar; they are both quadratic
@@ -90,7 +90,7 @@ For enumerations we are primarily concerned with the other
 direction of the bijection, since that is the one used to generate
 terms. In the pairing case, the Cantor function has a fairly
 straightforward inverse, but its generalization does not. This is
-the generalization of the cantor pairing function to length
+the generalization of the Cantor pairing function to length
 @texmath{k} tuples:
 @centered{@raw-latex{\vspace*{-.02in}}
            @raw-latex{\textit{cantor\_tuple}$(n_1,n_2,\ldots,n_k) =$}
@@ -111,8 +111,8 @@ case someone finds it useful.
 Furthermore, @citet[elegant-pairing-function]'s pairing function lends
 itself quite easily to a biased formulation, since enumerating
 rectangles is a simple modification from enumerating squares.  We
-leave it to future work to find a similar biased formulation of the
-Cantor pairing function.
+leave it to future work to find a biased formulation of the
+Cantor bijection.
 
 The @racket[or/e] enumeration's fairness follows a similar, but much
 simpler pattern. In particular, the binary @racket[or/e] is fair

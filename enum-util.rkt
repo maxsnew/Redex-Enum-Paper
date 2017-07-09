@@ -122,16 +122,23 @@
 (define (box-cons-pict) (grid cons/e 5 24 180 10))
 (define (cantor-cons-pict) (grid cantor-cons/e 5 14 180 10))
 (define (biased-cons-pict)
-  (hc-append
-   4
-   (grid-txt "x" #:bold? #t)
-   (vc-append
-    (grid-txt "y" #:bold? #t)
+  (define y-label (grid-txt "y" #:bold? #t))
+  (define x-label (grid-txt "x" #:bold? #t))
+  (define the-grid
     (gen-grid (λ (x y)
                 (define (swap-em c) (cons (cdr c) (car c)))
                 (map/e swap-em swap-em (binary-biased-cons/e x 1 y 2)
                        #:contract (cons/c natural? natural?)))
-              25 5 124 420 6 #:arrows? #t))))
+              25 5 124 420 6 #:arrows? #t))
+  (ht-append
+   4
+   (vc-append (blank 0
+                     (+ (pict-height y-label)
+                        (/ (pict-height the-grid) 2)))
+              x-label)
+   (vc-append
+    y-label
+    the-grid)))
 
 (define (cantor-cons/e e1 e2)
   (cons/e e1 e2 #:ordering 'diagonal))
@@ -352,9 +359,9 @@
   (define (def-to-tex def include-where?)
     (match def
       [`(define ,id ,expr)
-       @~a{\multicolumn{2}{r}{
-         @(if include-where? @~a{\mbox{\textrm{where~}}} "")
-         @id = @(expr-to-tex expr)} \\[4pt]}]))
+       @~a{
+         @(if include-where? @~a{\mbox{\textrm{where~~~}}} "")
+         @id & @(expr-to-tex expr) \\[4pt]}]))
   (define (cond-expr-to-tex expr)
     (match expr
       [`(cond [,Q1 ,A1] [,Q2 ,A2])
@@ -402,27 +409,45 @@
   (cond
     [inline? (string->bytes/utf-8 (~a "\\(" (expr-to-tex body) "\\)"))]
     [else
-     (string->bytes/utf-8
-      @~a{\[\begin{array}{ll}
-      @(cond-expr-to-tex body) \\
+     (define where-clauses
+       (string->bytes/utf-8
+        @~a{\begin{array}[t]{r@"@{~=~}"l}
       @(apply string-append
               (for/list ([def (in-list defs)]
                          [i (in-naturals)])
                 (def-to-tex def (= i 0))))
-      \end{array}\]})]))
+      \end{array}}))
+     
+     (define main-formula
+       @~a{\begin{array}[t]{ll}
+      @(cond-expr-to-tex body)
+      \end{array}})
+       
+       (cond
+         [(null? defs)
+          (string->bytes/utf-8
+           @~a{\[
+                @main-formula
+                \]})]
+         [else
+          (string->bytes/utf-8
+           @~a{\[\begin{array}[t]{l|l}
+                @main-formula & @where-clauses
+                \end{array}\]})])]))
 
 (define/txt pair-m/n-tex (pair-1/n n z)
-  (define r (- z (expt (integer-root z (with-parens (+ n 1))) (+ n 1))))
-  (define s (* (with-parens (- (expt (with-parens (+ (integer-root z (with-parens (+ n 1))) 1)) n)
-                               (expt (integer-root z (with-parens (+ n 1))) n)))
-               (integer-root z (with-parens (+ n 1)))))
+  (define q (integer-root z (with-parens (+ n 1))))
+  (define r (- z (expt q (+ n 1))))
+  (define s (* (with-parens (- (expt (with-parens (+ q 1)) n)
+                               (expt q n)))
+               q))
   (cond
     [(r . < . s)
-     (cons (remainder r (integer-root z (with-parens (+ n 1))))
-           (+ (expt (integer-root z (with-parens (+ n 1))) n)
-              (quotient r (integer-root z (with-parens (+ n 1))))))]
+     (cons (remainder r q)
+           (+ (expt q n)
+              (quotient r q)))]
     [(r . >= . s)
-     (cons (integer-root z (with-parens (+ n 1))) (r . - . s))]))
+     (cons q (r . - . s))]))
 
 (define/txt pair-1/1-tex (pair-1/1 z)
   (cond
