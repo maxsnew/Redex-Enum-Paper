@@ -42,7 +42,7 @@ continuation contract model@~cite[delim-cont-cont], as well
 as a few models we built ourselves based on our experience
 with random generation and to cover typical Redex
 models.@note{It is online:
- @url{http://docs.racket-lang.org/redex/benchmark.html}}
+ @url{https://docs.racket-lang.org/redex/benchmark.html}}
 Each model comes with a number of buggy variations.
 Each model and bug pair is equipped with a
 property that should hold for every term, but does not, due

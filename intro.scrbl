@@ -13,9 +13,9 @@ property-based testing. First was
 Feat for Haskell in
 2012@note{@url{https://hackage.haskell.org/package/testing-feat}},
 then SciFe for Scala in
-2014@note{@url{http://kaptoxic.github.io/SciFe/}}, and
+2014@note{@url{https://kaptoxic.github.io/SciFe/}}, and
 we released @tt{data/enumerate} as part of Racket in
-2015.@note{@url{http://docs.racket-lang.org/data/Enumerations.html}}
+2015.@note{@url{https://docs.racket-lang.org/data/Enumerations.html}}
 
 These libraries are efficient, providing the
 ability to extract the @texmath{2^{100}}-th element of an
@@ -91,4 +91,4 @@ discuss related work and future work;
 section @secref["sec:conclusion"] concludes.
 Several places in the paper mention supplementary material; it
 is included available at
-@url["http://www.eecs.northwestern.edu/~robby/jfp-enum/"]
+@url["https://www.eecs.northwestern.edu/~robby/jfp-enum/"]

@@ -204,4 +204,4 @@ observably worse in practice.
 Our library has a number of other combinators not discussed here, but
 these are the most important ones and give a flavor of the capabilities
 of enumerations in the library. The rest are described here:
-@url{http://docs.racket-lang.org/data/Enumerations.html}.
+@url{https://docs.racket-lang.org/data/Enumerations.html}.
