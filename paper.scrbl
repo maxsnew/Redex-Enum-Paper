@@ -53,7 +53,7 @@
 }
 
 @((author/short "New, Fetscher, McCarthy, Findler")
-  "Max New" (affiliation-mark "1")
+  "Max S. New" (affiliation-mark "1")
   (affiliation-sep)
   "Burke Fetscher" (affiliation-mark "2")
   (affiliation-sep)

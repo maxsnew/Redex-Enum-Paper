@@ -17,7 +17,7 @@
 
 @title[#:tag "sec:fair-combinators"]{Fair Combinators}
 
-@figure["fig:biased-pair-pict" "Ordering for Pair with Bias of 1:2"]{
+@figure["fig:biased-pair-pict" "Ordering for Pairs with a Bias of 1:2"]{
   @centered{@biased-cons-pict[]}
 }
 
